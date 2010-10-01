@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /*.txt$
+Disallow: /*.srt$
+Disallow: /*.ass$
+Disallow: /*.ssa$
+Disallow: /*.avi$
+Disallow: /*.mkv$
+Disallow: /*.mp4$
+Disallow: /*.VOB$
+Disallow: /*.ogm$
+Disallow: /*.pl$
+Disallow: /*.pm$
