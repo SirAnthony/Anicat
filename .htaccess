@@ -1,0 +1,22 @@
+RewriteEngine on
+#RewriteRule ^.htaccess$ - [F]
+RewriteBase /
+Options -MultiViews
+#Order Deny,Allow
+#Allow from 192.168.
+#Deny from All
+
+RewriteRule ^stat/?$ /cgi-bin/anicat.py?stat=0 [L]
+RewriteRule ^stat/([0-9]*)/?$ /cgi-bin/anicat.py?stat=$1 [L]
+
+RewriteRule ^card/?$ /cgi-bin/anicat.py?card=0 [L]
+RewriteRule ^card/([0-9]*)/?$ /cgi-bin/anicat.py?card=$1 [L]
+
+RewriteCond %{REQUEST_URI} !^/cgi-bin/
+RewriteCond %{REQUEST_URI} !\.(css|js)$
+RewriteCond %{REQUEST_URI} !\.(xsl)$
+RewriteCond %{REQUEST_URI} !\.(list|ico)$
+RewriteCond %{REQUEST_URI} !\.(gif)$
+RewriteCond %{REQUEST_URI} !\.(jpg)$
+RewriteCond %{REQUEST_URI} !\.(png)$
+RewriteRule ^ /cgi-bin/anicat.py?%{REQUEST_URI} [L,QSA]
