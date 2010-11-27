@@ -125,7 +125,7 @@ class Out:
         include('main', 'head', 1)
         include('main', 'header',  1);
         include('main', 'forms', 1);
-        #include("usr", "add", 1) if $Catfunct::edt;
+        include('usr', 'add', 1)
         if user.session and user.session['data'].has_key('userid'):
             include('usr', 'logged', 1, username=user.session['data']['user'])
             include('usr', 'show', 1)

@@ -13,6 +13,7 @@
 	<script type="text/javascript" src="/templates/app.js"></script>
 	<script type="text/javascript" src="/templates/ajax.js"></script>
 	<script type="text/javascript" src="/templates/user.js"></script>
+	<script type="text/javascript" src="/templates/ae.js"></script>
 	$add.
 </head>
 <body>

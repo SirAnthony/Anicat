@@ -215,19 +215,22 @@ left: 30px;
 font-size: 12pt;
 width: 480px !important;
 }
-.frmdv{
+.frmdv {    
 margin: 0px 7px !important;
 }
-.ac1{
-margin: 0px 6px 0px 1px;
-float: left;
-clear: left;
+.frmdv div {
+    clear: both;
 }
-.ac2{
-margin: 0px 1px 0px 6px;
-float: left;
+.ac1 {
+    margin: 0px 6px 0px 1px;
+    float: left;
+    clear: left;
 }
-#addfrm input, #addfrm select, #addfrm textarea, #addfrm label{
+.ac2 {
+    margin: 0px 1px 0px 6px;
+    float: left;
+}
+#addfrm input, #addfrm select, #addfrm textarea{
 width: 220px;
 height: 18px;
 }
@@ -235,10 +238,11 @@ height: 18px;
 float: right;
 height: 120px;
 }
-#addfrm label{
-margin-top: 4px;
-margin-bottom: 2px;
-padding-left: 5px;
+#addfrm label {
+    width: 220px;
+    margin-top: 4px;
+    margin-bottom: 2px;
+    padding-left: 5px;
 }
 #addfrm select, #addfrm input[type=button]{
 height: 25px !important;

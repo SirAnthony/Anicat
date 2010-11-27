@@ -68,7 +68,7 @@ var element = new ( function(){
         ar = eval(arr);
         var l = ar.length;
         if(!l) l = 0;
-        for(var i=0; i < l; i++){            
+        for(var i=0; i < l; i++){
             if(!ar[i] || (!isElement(ar[i]) && !isArray(ar[i]) && !isHash(ar[i]))) continue;
             if(isHash(ar[i])){
                 var el = ar[i];
@@ -330,7 +330,8 @@ if (! isIE) {
 window.onload = function(){
 
     user.init();
-    searcher.init();    
+    searcher.init();
+    add.init();
     mv();
     //document.getElementById('srch').style.display = 'none';
     showFN();
@@ -449,9 +450,6 @@ function rsemicolon(prm){
     astr = astr.replace(/,/g, "0x2C");
     return astr;
 }
-
-
-
 
 
 //доп. функция

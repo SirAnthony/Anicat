@@ -22,7 +22,7 @@
 #!add
 #####
 <div class="leftmenu">
-	|&nbsp;<a class="nurl" onclick="add.show();">Add</a>&nbsp;
+	|&nbsp;<a class="nurl" onclick="add.toggle();">Add</a>
 </div>
 #!show
 ######
