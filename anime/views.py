@@ -19,19 +19,19 @@ def info(request, anime_slug=''):
 
 def add(request):
     form = AnimeForm()
-    if request.method == 'POST': 
-        form = AnimeForm(request.POST, request.FILES) 
-        if form.is_valid(): 
-            form.save(commit=False)
-            slugt = re.sub(r'[^a-z0-9\s-]', ' ', form.title)
+    if request.method == 'POST':
+        form = AnimeForm(request.POST, request.FILES)
+        if form.is_valid():
+            model = form.save(commit=False)
+            slugt = re.sub(r'[^a-z0-9\s-]', ' ', model.title)
             slugt = re.sub(r'\s+', ' ', slugt)
-            form.slug = re.sub(r'\s', '-', slugt)
-            form.save()
+            model.slug = re.sub(r'\s', '-', slugt)
+            model.save()
             return HttpResponseRedirect('/thanks/')
-        
+
     ctx = {'form': form}
     ctx.update(csrf(request))
     return render_to_response(
-        'anime/add.html', 
+        'anime/add.html',
         ctx, context_instance = RequestContext(request))
-    
+
