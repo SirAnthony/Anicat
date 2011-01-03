@@ -1,4 +1,8 @@
-<form action="/contact/" method="post">
-{{ form.as_p }}
-<input type="submit" value="Submit" />
-</form>
+{% for error in form.field.errors %}
+  <p>{{ error|escape }}</p>    
+{% endfor %}
+  <form action="" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Add" />
+  </form>

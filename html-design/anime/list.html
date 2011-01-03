@@ -1,0 +1,4 @@
+{% for  anime in list %}
+  <li><img height="{{anime.anipic.height_field}}" width="{{anime.anipic.width_field}}" src="{{MEDIA_ROOT}}{{anime.anipic.upload_to}}">
+  {{anime.title}}</li>
+{% endfor %}
