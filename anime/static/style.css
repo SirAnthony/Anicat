@@ -1,0 +1,438 @@
+/*Помойка*/
+
+body {
+font-size: 12pt;
+padding: 0px;
+font-family: "times new roman",serif;
+margin-top: 0px;
+}
+#dvid{
+margin-top: 0px;
+padding-top: 0px;
+clear: both;
+overflow: auto;
+}
+#header{
+width: 100%;
+height: 24px;
+border: solid black 1px;
+border-top: none;
+margin-top: 0px;
+}
+#header a{
+margin-left: 2px;
+margin-right: 3px;
+}
+.tbl{ 
+margin: 0px;
+line-height: 23px;
+border-right: black dotted 1px;
+border-top: black dotted 1px;
+border-bottom: none;
+}
+.thdtbl{
+background-color: #339966;
+border: none;
+}
+
+#srchtbl {
+    margin-bottom: 5px;
+}
+
+#tbl td, #tbl th, #srchtbl td{
+position: relative;
+margin: 0px;
+/*height: 22px;*/
+margin: 0px;
+border: black dotted 1px;
+border-right: none;
+text-align: center;
+border-top: none;
+width: 180px;
+z-index: 0;
+overflow: hidden;
+padding: 1px;
+}
+.link, .plus{
+width: 20px !important;
+margin: 0px !important;
+padding: 0px !important;
+}
+.name{
+float: left ;
+height: 25px;
+}
+.id{
+width: 30px !important;
+background-color: #339966 !important;
+text-align: right !important;
+}
+.numberofep{
+width: 80px !important;
+}
+.type, .ann{
+width: 55px !important;
+}
+.translation{
+width: 200px !important;
+}
+.footer{
+/*margin: 10px 0px 5px 10px;*/
+clear: both;
+}
+
+/* контент для меню */
+.cont_men { 
+padding: 7px 10px;
+border:1px solid;
+border-color: #FFFFFF #FFFFFF #808080 #808080;
+background-color: #D4D0C8;
+position:absolute;
+top:100px; /* начальные координаты */
+left:100px; /* для наглядности */
+z-index: 5;
+display: none;
+}
+
+/*Спан в менюшке*/
+.mnspan{
+font: normal 14pt "times new roman",serif;
+white-space: nowrap;
+}
+#mspan p{
+margin: 0px;
+padding: 0px;
+}
+
+/*Спан, и шрифт для ссылок*/
+#spanl, a:link, a:visited, a:active, a:hover{
+font: bold 14pt "verdana",sans-serif;
+text-decoration: none;
+color: #0068ef;
+}
+
+.edtl{
+/*float: right;*/
+}
+
+#spanl{
+color: #000;
+}
+
+.link a:link, .link a:visited, .link a:active, .link a:hover{
+margin: 0px;
+margin-top: 1px;
+padding: 0px;
+}
+.link a img{
+border: none;
+}
+
+
+/* Ссылки*/
+.leftmenu, #login a:link, .nurl,  
+.thdtbl a:link, .thdtbl a:visited, .thdtbl a:active, .thdtbl a:hover{
+font: bold 12pt "times new roman",serif;
+text-decoration: none;
+color: #000081;
+}
+.nurl{
+cursor: pointer;
+}
+
+/*Редактор(инпут), менюшки, etc.*/
+#edtbox{
+width: 200px;
+height: 22px;
+font: normal 12pt "times new roman",serif;
+margin: 0px;
+padding: 0px;
+}
+#edit{
+position: fixed;
+left: 220px;
+top: 40px;
+padding: 5px 10px;
+z-index: 15;
+}
+#edit>div{
+margin: 0px;
+padding: 5px;
+clear: both;
+border: 1px #808080 solid;
+border-top: none; 
+}
+#edit>div input[type=button]{
+margin: 5px 5px 0px 5px;
+}
+#edit fieldset{
+padding: 6px 8px;
+}
+#edit legend{
+display: block !important;
+}
+#edit *{
+background-color: #D4D0C8;
+}
+#edit ul{
+font: normal 12pt "times new roman", serif !important;
+list-style-type: none;
+background-color: transparent;
+padding: 0px;
+margin: 0px;
+}
+#edit>ul li{
+float:left;
+margin: 0px;
+padding: 2px 5px;
+border: 1px solid;
+border-color: #808080 #808080 #808080 #808080;
+cursor: pointer;
+}
+#edit>ul li.nosel{
+background-color:#c0c0c0;
+}
+#edit>ul li.nosel *:hover{
+background-color:#bfe0fe;
+}
+#edit>ul li.sel{
+background-color:#D4D0C8;
+border-color: #808080 #808080 #D4D0C8 #808080;
+cursor: default;
+} 
+#edtcont p{
+margin: 0px;
+padding: 0px;
+}
+#edtcont div{
+max-height: 500px;
+overflow: auto;
+}
+
+#addfrm{
+top: 30px;
+left: 30px;
+font-size: 12pt;
+width: 480px !important;
+}
+.frmdv {    
+margin: 0px 7px !important;
+}
+.frmdv div {
+    clear: both;
+}
+.ac1 {
+    margin: 0px 6px 0px 1px;
+    float: left;
+    clear: left;
+}
+.ac2 {
+    margin: 0px 1px 0px 6px;
+    float: left;
+}
+#addfrm input, #addfrm select, #addfrm textarea{
+width: 220px;
+height: 18px;
+}
+#addfrm textarea{
+float: right;
+height: 120px;
+}
+#addfrm label {
+    width: 220px;
+    margin-top: 4px;
+    margin-bottom: 2px;
+    padding-left: 5px;
+}
+#addfrm select, #addfrm input[type=button]{
+height: 25px !important;
+}
+.adddiv select{
+margin: 1px 9px !important;
+}
+.adddiv input{
+margin: 1px 7px !important;
+}
+#addfrm input[type=button]{
+margin: 8px 7px 8px 6px;
+}
+
+.leftmenu{
+float: left;
+margin: 2px 3px 10px 3px;
+padding: 0px;
+}
+
+/*Форма входа*/
+#login, .rightmenu{
+float: right;
+margin-bottom: 10px;
+margin-top: 2px;
+margin-right: 10px;
+padding: 0px;
+}
+
+#login{
+background-color: #fff;
+}
+#logdv{
+display: none;
+float: right;
+clear: right;
+}
+#show{
+height: 20px;
+margin-top: 0px; 
+}
+#lname, #lpasswd{
+width: 150px;
+}
+#logininfo{
+margin: 0px;
+padding: 0px;
+color: #dd0000;
+display: none; 
+}
+
+#register label{
+float:left; 
+clear: left;
+width:100px;
+margin: 0px;
+padding: 0px;
+}
+#register input{
+float: left;
+margin: 0px;
+padding: 0px;
+}
+#registerinfo{
+color: red;
+width: 290px !important;
+white-space: normal !important;
+}
+#register input[type=button]{
+float: right;
+clear: left;
+margin: 5px 3px;
+padding: 0px;
+}
+
+#lngs{
+font-size: 10pt;
+}
+
+/*Поиск и все с ним связанное.*/
+#srch, .advsrch{
+display: none;
+}
+#srch{
+margin-top: 5px;
+margin-bottom: 10px;
+}
+.advsrch{
+width: 200px;
+}
+#srchpg{
+margin: 3px;
+width: 1000px;
+font-size: 15pt;
+}
+
+#srchpg a{
+    cursor: pointer;
+}
+
+#srchpg a, #srchpg span{
+    padding: 0px 3px;
+}
+
+#srchp, .advsrch{
+margin-top: 2px;
+margin-bottom: 5px;
+}
+#chtext{
+margin-top: 8px;
+margin-bottom: 5px;
+}
+#ids{
+position: fixed;
+left: 600px;
+top: 200px;
+background-color: #c0c0c0;
+padding: 5px 10px;
+}
+/*Автодополнение*/
+.app_div{
+position: absolute; /*fixed !important;*/
+background-color: transparent;
+padding: 0px;
+margin: 0px;
+z-index: 20;
+border: 1px solid black;
+background-color: Window;
+overflow: hidden;
+}
+.app_div ul {
+width: 100%;
+/*list-style-position: outside;
+list-style: none;*/
+padding: 0;
+margin: 0;
+}
+.app_div li {
+min-width: 211px;
+margin: 0px;
+padding: 2px 5px;
+cursor: pointer;
+display: block;
+width: 100%;
+font: menu;
+font-size: 16px;
+overflow: hidden;
+}
+/*.app_div span {
+font-weight: bold;	
+}*/
+.app_over {
+background-color: Highlight;
+color: HighlightText;
+}
+
+/*Cards*/
+.cardelem{
+margin: 0px 0px 0px 5px;
+}
+.cardcol{
+float: left;
+margin: 0px 10px !important;
+}
+.cardcol div{
+margin: 10px 0px 0px 0px; 
+}
+#staff.cardcol{ 
+clear: left; 
+}
+#main.cardcol{ 
+max-width: 600px;  
+}
+#imagebun.cardcol{
+max-width: 400px;
+margin-bottom: 30px !important; 
+}
+#imagebun img{
+max-width: 400px; 
+}
+#imagebun.cardcol a{
+font: normal 12pt "times new roman", serif !important;
+}
+.elemlbl{
+font-weight: bold; 
+}
+
+/*Some ie hacks */
+<!--[if lt IE 8]>
+#edit{position: absolute;}
+#ids{position: absolute;}
+.app_div{position: absolute;}
+<![endif]-->

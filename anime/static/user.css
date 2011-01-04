@@ -1,0 +1,76 @@
+.snone, .s0, .s {
+    font: normal 14pt "times new roman",serif !important;
+    color: #000 !important;
+}
+
+.s1 {
+    font: normal 14pt "times new roman",serif !important;
+    color: MediumBlue !important;
+}
+
+.s2 {
+    font: normal 14pt "times new roman",serif !important;
+    color: DarkTurquoise !important;
+}
+
+.s3 {
+    font: normal 14pt "times new roman",serif !important;
+    color: SeaGreen !important;
+}
+
+.s4 {
+    font: normal 14pt "times new roman",serif !important;
+    color: red !important;
+}
+
+.s5 {
+    font: normal 14pt "times new roman",serif !important;
+    color: #F0F0F0 !important;
+}
+
+.rnone, .r0, .r {
+    background-color: white;
+}
+.r1 {
+    background-color: DeepSkyBlue;
+}
+
+.r2 {
+    background-color: cyan;
+}
+
+.r3 {
+    background-color: #ccffcc;
+}
+
+.r4 {
+    background-color: red;
+}
+
+.r5 {
+    background-color: #F0F0F0;
+}
+
+.rnoneon, .r0on, .ron {
+    background-color: yellow;
+}
+
+.r1on {
+    background-color: #FF69B4;
+}
+
+.r2on {
+    background-color: #FFD700;
+}
+
+.r3on {
+    background-color: #f2f696;
+}
+
+.r4on {
+    background-color: #ffb300;
+}
+
+.r5on {
+    background-color: #FFFFCC;
+}
