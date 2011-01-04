@@ -56,11 +56,11 @@ MEDIA_URL = ''
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/static/"
-STATICFILES_ROOT = ''
+STATIC_ROOT = ''
 
 # URL that handles the static files served from STATICFILES_ROOT.
 # Example: "http://static.lawrence.com/", "http://example.com/static/"
-STATICFILES_URL = '/static/'
+STATIC_URL = '/templates/'
 
 # URL prefix for admin media -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
@@ -68,7 +68,8 @@ STATICFILES_URL = '/static/'
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # A list of locations of additional static files
-STATICFILES_DIRS = ()
+STATICFILES_DIRS = (
+ )
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -94,11 +95,12 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
 
-
+INTERNAL_IPS = ('127.0.0.1',)
 
 TEMPLATE_DIRS = (
     os.path.join(os.getcwd(), 'html-design')
@@ -113,7 +115,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
-    'anime', 
+    'anime',
+    'debug_toolbar',
 )
 
 # A sample logging configuration. The only tangible logging

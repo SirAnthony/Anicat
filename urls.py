@@ -12,7 +12,7 @@ admin.site.register(AnimeStudio)
 
 urlpatterns = patterns('',
     # Example:
-    (r'^anime/', include('anime.urls')),
+    (r'^', include('anime.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),

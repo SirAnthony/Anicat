@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.conf.urls.defaults import *
 
 urlpatterns = patterns(
@@ -5,5 +6,5 @@ urlpatterns = patterns(
     (r'^$', 'index'),
     (r'^add/$', 'add'),
     (r'^(?P<anime_slug>.+)/$', 'info'),
-    )
+)
 #

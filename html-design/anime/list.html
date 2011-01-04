@@ -1,4 +1,99 @@
-{% for  anime in list %}
-  <li><img height="{{anime.anipic.height_field}}" width="{{anime.anipic.width_field}}" src="{{MEDIA_ROOT}}{{anime.anipic.upload_to}}">
-  {{anime.title}}</li>
-{% endfor %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <title>Anime catalog</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <link rel="icon" href="/templates/favicon.ico" type="image/x-icon" />
+    <link rel="search" type="application/opensearchdescription+xml" title="Anime catalog" href="/templates/srch.xml" />
+    <link href="/templates/style.css" type="text/css" rel="stylesheet" />
+    <link href="/templates/user.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="/templates/script.js"></script>
+    <script type="text/javascript" src="/templates/app.js"></script>
+    <script type="text/javascript" src="/templates/ajax.js"></script>
+    <script type="text/javascript" src="/templates/user.js"></script>
+    <script type="text/javascript" src="/templates/ae.js"></script>
+</head>
+<body>
+    <div id="header" class="thdtbl">
+        <div class="leftmenu">
+            <a class="nurl" onclick="searcher.toggle();">&nbsp;Search</a>
+            <input type="button" style="height: 22px;" onclick="corovan++; alert('Корованов ограблено:'+corovan);" value="Грабить корованы" />
+            <a class="nurl" href="/card/">&nbsp;Random</a>
+        </div>
+        <div class="leftmenu">
+	       |&nbsp;<a class="nurl" onclick="add.toggle();">Add</a>
+        </div>
+        {% if userlogined %}
+        <div id="logdiv" class="rightmenu">	
+            <span><a href="/" title="User settings">{{ username }}</a></span>	
+            <a class="nurl" onclick="user.logout();">Logout</a>	
+        </div>
+        <div class="rightmenu" style="margin-top: 1px;">
+            <a href="/stat/" class="nurl">Statistics</a>	
+            <select id="show" onChange="setshow();">
+            {# Это можно в какой-нибудь лист ужать, значения цифровые сделать #}
+                <option value="null" selected>Display Mode</option>
+                <option value="all">All</option>
+                <option value="want">Want</option>
+                <option value="now">Now</option>
+                <option value="ok">Watched</option>
+                <option value="dropped">Dropped</option>
+            </select>
+        </div>
+        {% else %}
+        <div id="logdiv" class="rightmenu">
+            <a onclick="user.toggle();" class="nurl">Account</a>	
+        </div>
+        <div id="logdv">	
+            <form id="login" class="thdtbl">	
+                <a onclick="user.quickreg();" class="nurl">Registration</a>
+                <input id="lname"  type="text" />
+                <input id="lpasswd"  type="password" />
+                <input type="button" onclick="user.login();" value="Login" />
+                <label id="lngs"><input type="checkbox" id="long"/>Remember</label>	
+                <p id="logininfo"></p>
+            </form>
+        </div>
+        {% endif %}
+        <div id="ie" style="color: #FFFF00;"></div>
+    </div>
+    <br />
+    <div id="srch">
+    {# Когда-нибудь потом #}
+    {# <!--<p id="chtext"><input type="checkbox" id="chsrch" onClick="searcher.showAdvance();" />Advanced Search</p>--> #}
+        <p id="srchp">
+        {% comment %}
+            <!--<select id="advsrch" class="advsrch">
+                <option value="null" selected="selected">Find by:</option>
+                <option value="genre">Genre</option>
+                $opts.
+            </select>
+            <select id="sortsrch" class="advsrch">
+                <option value="null" selected="selected">Sort by:</option>
+                <option value="genre">Genre</option>
+                $opts.
+            </select>
+            -->
+            <!--<input type="text" onkeyup="app.acomp(this, 'catalog', event);" /><br/>-->
+        {% endcomment %}
+            <input id="sin"  type="text" ondblclick="document.getElementById('sin').value='';" onkeydown="if(event.keyCode==13){searcher.send();} " />
+            <input type="button" onclick="searcher.send();" value="Искать" />
+        </p>
+        <div id="srchres"></div>	
+    </div>
+    <div id="dvid" style="width: $w.px;">
+        <table id="tbl" cellspacing="0" class="tbl">
+            <thead class="thdtbl">
+                <tr id="wtr">
+                    {# $hd. #}
+                </tr>
+            </thead>
+            <tbody id="tbdid">
+                {# $body. #}
+            </tbody>
+        </table>		
+    </div>
+    <div id="pg">
+        {# $pg. #}
+    </div>        
+</body>
