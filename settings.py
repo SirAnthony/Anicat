@@ -60,7 +60,7 @@ STATIC_ROOT = ''
 
 # URL that handles the static files served from STATICFILES_ROOT.
 # Example: "http://static.lawrence.com/", "http://example.com/static/"
-STATIC_URL = '/templates/'
+STATIC_URL = '/static/'
 
 # URL prefix for admin media -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.

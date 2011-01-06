@@ -4,11 +4,9 @@ from django.conf.urls.defaults import *
 from django.contrib import admin
 admin.autodiscover()
 
-from anime.models import AnimeGenre, AnimeItem, AnimeStudio
+from anime.models import AnimeItem
 
-admin.site.register(AnimeGenre)
 admin.site.register(AnimeItem)
-admin.site.register(AnimeStudio)
 
 urlpatterns = patterns('',
     # Example:

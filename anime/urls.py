@@ -5,6 +5,6 @@ urlpatterns = patterns(
     'anime.views',
     (r'^$', 'index'),
     (r'^add/$', 'add'),
-    (r'^(?P<anime_slug>.+)/$', 'info'),
+    (r'^(?P<anime_id>\d+)/$', 'info'),
 )
 #

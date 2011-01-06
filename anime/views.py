@@ -12,25 +12,25 @@ def index(request):
             'list':AnimeItem.objects.all()
             }, context_instance = RequestContext(request))
 
-def info(request, anime_slug=''):
+def info(request, anime_id=0):
     return render_to_response('anime/view.html', {
-            'list':AnimeItem.objects.get(slug=anime_slug)
+            'list':AnimeItem.objects.get(id=int(anime_id))
             }, context_instance = RequestContext(request))
 
 def add(request):
     form = AnimeForm()
-    if request.method == 'POST':
-        form = AnimeForm(request.POST, request.FILES)
-        if form.is_valid():
-            model = form.save(commit=False)
-            slugt = re.sub(r'[^a-z0-9\s-]', ' ', model.title)
-            slugt = re.sub(r'\s+', ' ', slugt)
-            model.slug = re.sub(r'\s', '-', slugt)
-            model.save()
-            return HttpResponseRedirect('/thanks/')
+    #if request.method == 'POST':
+        #form = AnimeForm(request.POST, request.FILES)
+        #if form.is_valid():
+            #model = form.save(commit=False)
+            #slugt = re.sub(r'[^a-z0-9\s-]', ' ', model.title)
+            #slugt = re.sub(r'\s+', ' ', slugt)
+            #model.slug = re.sub(r'\s', '-', slugt)
+            #model.save()
+            #return HttpResponseRedirect('/thanks/')
 
-    ctx = {'form': form}
-    ctx.update(csrf(request))
+    #ctx = {'form': form}
+    #ctx.update(csrf(request))
     return render_to_response(
         'anime/add.html',
         ctx, context_instance = RequestContext(request))
