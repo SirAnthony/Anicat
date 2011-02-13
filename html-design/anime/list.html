@@ -24,7 +24,7 @@
 	       |&nbsp;<a class="nurl" onclick="add.toggle();">Add</a>
         </div>
         {% if userlogined %}
-        <div id="logdiv" class="rightmenu">	
+        <div id="logdiv" class="rightmenu">
             <span><a href="/" title="User settings">{{ username }}</a></span>	
             <a class="nurl" onclick="user.logout();">Logout</a>	
         </div>
@@ -45,7 +45,8 @@
             <a onclick="user.toggle();" class="nurl">Account</a>	
         </div>
         <div id="logdv">	
-            <form id="login" class="thdtbl">	
+            <form id="login" class="thdtbl">
+                {% csrf_token %}
                 <a onclick="user.quickreg();" class="nurl">Registration</a>
                 <input id="lname"  type="text" />
                 <input id="lpasswd"  type="password" />

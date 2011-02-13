@@ -6,7 +6,7 @@ var xmlHttp;
 var mfl = 0;    // 0 - никаких действий. 1 - меню открыто, заболкирован инпут под ним.
          // 2 - заблокировано инпутом, закрыто.
 var elm; //
-var url = '/cgi-bin/anicat.py';
+var url = '/ajax/';
 var edtdv = 0; // эта переменная определяет редактируется ли менюшка или нет
 var timer;
 var ua = navigator.userAgent.toLowerCase();
@@ -19,6 +19,7 @@ var corovan = 0;
 var element = new ( function(){
     
     this.downTree = function(funct, obj, er){
+        if(!funct || !obj) return;
         for(var i=0; i < obj.childNodes.length; i++){
             var e = funct(obj.childNodes[i]);
             if(e) return e;
@@ -270,7 +271,7 @@ var searcher = new ( function(){
         document.getElementById('menu').style.display='none';        
     }
         
-})(); 
+})();
 
 //########################
 
@@ -423,6 +424,7 @@ function getElementsByClassName(searchClass,node,tag) {
     }
     return classElements;
 }
+
 //################# Преобразование переменных
 
 function encd(string){
@@ -523,13 +525,18 @@ function hideDiv(e){
 
 function mv(){    
     document.onmousemove = function(e){
-        mCur = mousePageXY(e);    
-        if(document.getElementById('popup').style.display == "block"){
-            document.getElementById('popup').style.top = mCur.y + 10 +'px';
-              document.getElementById('popup').style.left = mCur.x + 10 +'px';
+        
+        mCur = mousePageXY(e);
+        if(document.getElementById('popup')){    
+            if(document.getElementById('popup').style.display == "block"){
+                document.getElementById('popup').style.top = mCur.y + 10 +'px';
+                document.getElementById('popup').style.left = mCur.x + 10 +'px';
+            }
         }
-        if(document.getElementById('menu').style.display == "block" && !edtdv){    
-            document.onclick = hideDiv;        // Прятание меню
+        if(document.getElementById('menu')){ 
+            if(document.getElementById('menu').style.display == "block" && !edtdv){    
+                document.onclick = hideDiv;        // Прятание меню
+            }
         }
     }
 }

@@ -1,5 +1,7 @@
 //################# Работа с аккуантом
 
+//FIXME: как-то здесь плохо все
+
 var user = new( function(){
        
     var info = null;
@@ -37,12 +39,11 @@ var user = new( function(){
         var cb = document.getElementById('long').checked;    
         nick = nick.value;
         pass = pass.value;
-        cb ? cb = '&long=yse' : cb = '';
         if(!nick || !pass){
             inform('Not all fields are filled');
         }else{
-            var qw = "login=true&name="+nick+"&pass="+pass+cb;        
-            ajax.loadXMLDoc(url, qw);
+            var qw = {'name': nick, 'pass': pass, 'long': cb};        
+            ajax.loadXMLDoc(url+'login/', qw);
         }
     }
     

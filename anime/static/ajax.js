@@ -8,34 +8,51 @@ var ajax = new (function(){
     var cookie = cookies; 
    
     //################# Вызов аяксового обьекта.
-    this.loadXMLDoc = function(url,qry){
+    this.loadXMLDoc = function(url, qry){
+        var request = '';
+        if(!isHash(qry)){
+            alert('Input is old');
+            return;
+        }
+        
+        for(item in qry){
+            if(!qry[item]) continue;
+            if(request)
+                request += '&';
+            request += item + '=' + qry[item];
+        } 
+        
         xmlHttp = null;
         if(window.XMLHttpRequest){
             try{
                 xmlHttp = new XMLHttpRequest();
-            }catch (e){}
-        }else if (window.ActiveXObject){
+            }catch(e){}
+        }else if(window.ActiveXObject){
             try{
                 xmlHttp = new ActiveXObject('Msxml2.XMLHTTP');            
-            }catch (e){
+            }catch(e){
                 try{
                     xmlHttp = new ActiveXObject('Microsoft.XMLHTTP');
-                }catch (e){}
+                }catch(e){}
             }
         }
         
-        var cookies = cookie.get('SESSION');
+        //var cookies = cookie.get('SESSION');
         if (qry){
             if (xmlHttp){
                 xmlHttp.open("POST", url, true);
                 xmlHttp.onreadystatechange = handleRequestStateChange;
+                if(!(/^http:.*/.test(url) || /^https:.*/.test(url)))
+                    xmlHttp.setRequestHeader("X-CSRFToken", cookie.get('csrftoken'));
+                //if(csrf)
+                //    xmlHttp.setRequestHeader("X-CSRFToken", csrf);
                 xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
                 /*xmlHttp.setRequestHeader("Connection", "close");                
                 if (cookie){
                     cookies = 'SESSION=' + cookies+ ';';
                     xmlHttp.setRequestHeader("Cookie", cookies);
                 }*/
-                xmlHttp.send(qry);
+                xmlHttp.send(request);
             }    
         }
     }
@@ -95,7 +112,7 @@ var ajax = new (function(){
         var mspn = document.getElementById('mspan');
         var resp = response;
         try{      
-            switch (resp['response']){
+            switch(resp['response']){
             
                 case 'app':                
                     app.retfunct(resp['text']);

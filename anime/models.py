@@ -1,5 +1,6 @@
 from django.db import models
 from django.forms import ModelForm
+from django.contrib.auth.models import User
 
 ANIME_TYPES = [
     (0, u'TV'),
@@ -49,6 +50,15 @@ ANIME_GENRE = [
     (34, u'war'),
     (35, u'yaoi'),
     (36, u'yuri'),
+]
+
+USER_STATUS = [
+    (0, 'none'),
+    (1, 'want'),
+    (2, 'now'),
+    (3, 'ok'),
+    (4, 'dropped'),
+    (5, 'partially watched'),
 ]
 
 class AnimeStudio(models.Model):
@@ -121,3 +131,9 @@ class PeopleBundle(models.Model):
     role = models.CharField(max_length=30)
     comment = models.CharField(max_length=100)
 
+class UserStatusBundle(models.Model):
+    anime = models.ForeignKey(AnimeItem)
+    user = models.ForeignKey(User)
+    status = models.IntegerField(choices=USER_STATUS)
+    count = models.IntegerField()
+    changed = models.DateTimeField(auto_now=True)
