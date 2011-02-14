@@ -64,6 +64,12 @@ var element = new ( function(){
         return elm;
     }
     
+    this.remove = function(elem){
+        this.removeAllChilds(elem);
+        if(elem.parentNode)
+            elem.parentNode.removeChild(elem);
+    }      
+    
     this.appendChild = function(obj, arr){
         var ar = new Array();
         ar = eval(arr);
@@ -272,6 +278,82 @@ var searcher = new ( function(){
     }
         
 })();
+
+//######################## Messages process
+
+function message(str, timeout){
+    
+    this.strobj = new Array();
+    
+    this.timeout = timeout;
+    
+    this.getSpan = function(){
+        if(!this.span)
+            this.span = document.getElementById('mspan');
+        return this.span;
+    }
+    
+    //Adds new p element.
+    this.add = function(str){
+        if(!str) return;
+        this.strobj.push(element.create('p', {innerText: str}));
+    }
+    
+    //Adds element tree.
+    this.addTree = function(elem){
+        if(!elem) return;
+        var p = element.create('p');
+        element.appendChild(p, elem)
+        this.strobj.push(p);
+    }
+    
+    //Add html string to message.
+    //FIXME: innerHTML is bad. 
+    this.addHTML = function(str){
+        if(!str) return;
+        var p = element.create('p', {innerHTML: str});
+        var styles = p.getElementsByTagName('style');
+        for(style in styles){
+            var st = styles[style];
+            if(!isElement(st)) continue;
+            //st.innerText = st.innerText.replace('/html.*}/gi', '');
+        } 
+        this.strobj.push(p);
+    }
+    
+    //Adds string to last string.
+    this.addToLast = function(str){
+        if(!str) return;
+        this.strobj[this.strobj.length].innerText += str;
+    }
+    
+    //Remove all elements.
+    this.clear = function(){
+        while(this.strobj.length)
+            element.remove(this.strobj.shift());
+    }
+    
+    //Show message. 
+    this.show = function(){
+        if(!this.getSpan())
+            return;
+        element.removeAllChilds(this.span);
+        element.appendChild(this.span, this.strobj);
+        this.span.parentNode.style.display = 'block';
+        if(this.timeout)
+            timer = setTimeout("document.getElementById('menu').style.display='none';", this.timeout);
+    }
+    
+    this.hide = function(){
+        if(!this.getSpan())
+            return;
+        this.span.parentNode.style.display = 'none';
+    }
+    
+
+    this.add(str);
+
+};
 
 //########################
 

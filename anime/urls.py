@@ -6,6 +6,7 @@ urlpatterns = patterns(
     (r'^$', 'index'),
     (r'^add/$', 'add'),
     (r'^ajax/login/$', 'ajaxlogin'),
+    (r'^logout/$', 'logout'),
     (r'^(?P<anime_id>\d+)/$', 'info'),
 )
 #

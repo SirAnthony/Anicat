@@ -117,7 +117,13 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'anime',
     'debug_toolbar',
+    'django_extensions',
 )
+
+DEBUG_TOOLBAR_CONFIG = {
+    'INTERCEPT_REDIRECTS': False,
+    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG and not request.path.startswith('/admin/'),
+}
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

@@ -1,40 +1,51 @@
 import re
 
 from models import AnimeForm, AnimeItem
-from django.http import HttpResponseRedirect
-from django.template import RequestContext
-from django.core.context_processors import csrf
+from django.http import HttpResponse, HttpResponseRedirect
+#from django.core.context_processors import csrf
 from django.shortcuts import render_to_response
 from django.utils import simplejson
-from django.views.decorators.csrf import csrf_protect
+from annoying.decorators import render_to
+from django.contrib import auth
 
-
-def ajax(fn):
-    ret = {'text': 'Not processed error', 'response': 'error'}
+def ajaxResponse(fn):
+    ret = {'text': 'Unprocessed error', 'response': 'error'}
     def new(*args):
         ret.update(fn(*args)) #FIXME: no type check
         return HttpResponse(simplejson.dumps(ret), mimetype='application/javascript')
     return new
 
 # TODO: Pager here
+@render_to('anime/list.html')
 def index(request):
-    return render_to_response('anime/list.html', {
-            'list':AnimeItem.objects.all()
-            }, context_instance = RequestContext(request))
+    return {'list': AnimeItem.objects.all(), 'user': request.user}
 
+@render_to('anime/view.html')
 def info(request, anime_id=0):
-    return render_to_response('anime/view.html', {
-            'list':AnimeItem.objects.get(id=int(anime_id))
-            }, context_instance = RequestContext(request))
+    return {'list': AnimeItem.objects.get(id=int(anime_id))}
 
-@ajax
+@ajaxResponse
 def ajaxlogin(request):
     response = {}
     if not request.POST:
         response['text'] = 'Only POST method allowed.'
     else:
-        pass
+        username = request.POST['name']
+        password = request.POST['pass']
+        user = auth.authenticate(username=username, password=password)
+        if user is not None and user.is_active:
+            auth.login(request, user)
+            response.update({'response': 'logok', 'text': {'name': user.username}})
+        else:
+            response.update({'response': 'logfail', 'text': 'Bad username or password'})
+    return response
 
+def logout(request):
+    auth.logout(request)
+    return HttpResponseRedirect('/')
+
+
+@render_to('anime/add.html')
 def add(request):
     form = AnimeForm()
     #if request.method == 'POST':
@@ -49,7 +60,5 @@ def add(request):
 
     #ctx = {'form': form}
     #ctx.update(csrf(request))
-    return render_to_response(
-        'anime/add.html',
-        ctx, context_instance = RequestContext(request))
+    return ctx
 

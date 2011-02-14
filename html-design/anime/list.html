@@ -23,9 +23,9 @@
         <div class="leftmenu">
 	       |&nbsp;<a class="nurl" onclick="add.toggle();">Add</a>
         </div>
-        {% if userlogined %}
+        {% if user.is_authenticated %}
         <div id="logdiv" class="rightmenu">
-            <span><a href="/" title="User settings">{{ username }}</a></span>	
+            <span><a href="/" title="User settings">{{ user.username }}</a></span>	
             <a class="nurl" onclick="user.logout();">Logout</a>	
         </div>
         <div class="rightmenu" style="margin-top: 1px;">
@@ -45,13 +45,12 @@
             <a onclick="user.toggle();" class="nurl">Account</a>	
         </div>
         <div id="logdv">	
-            <form id="login" class="thdtbl">
+            <form method="POST" action="/login/" id="login" class="thdtbl">
                 {% csrf_token %}
                 <a onclick="user.quickreg();" class="nurl">Registration</a>
-                <input id="lname"  type="text" />
-                <input id="lpasswd"  type="password" />
+                <input id="lname" name="name"  type="text" />
+                <input id="lpasswd" name="pass" type="password" />
                 <input type="button" onclick="user.login();" value="Login" />
-                <label id="lngs"><input type="checkbox" id="long"/>Remember</label>	
                 <p id="logininfo"></p>
             </form>
         </div>
@@ -96,5 +95,9 @@
     </div>
     <div id="pg">
         {# $pg. #}
-    </div>        
+    </div>
+    <div class="cont_men" id="menu">
+	   <span id="mspan" class="mnspan"></span>
+	</div>
+</div>
 </body>

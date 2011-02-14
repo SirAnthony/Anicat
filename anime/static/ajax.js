@@ -5,7 +5,8 @@
 var ajax = new (function(){
     
     var xmlHttp = null;
-    var cookie = cookies; 
+    var cookie = cookies;
+    var msg = new message();
    
     //################# Вызов аяксового обьекта.
     this.loadXMLDoc = function(url, qry){
@@ -14,6 +15,9 @@ var ajax = new (function(){
             alert('Input is old');
             return;
         }
+        
+        if(!(/^http:.*/.test(url) || /^https:.*/.test(url)))
+            qry['csrfmiddlewaretoken'] = cookie.get('csrftoken');
         
         for(item in qry){
             if(!qry[item]) continue;
@@ -42,10 +46,6 @@ var ajax = new (function(){
             if (xmlHttp){
                 xmlHttp.open("POST", url, true);
                 xmlHttp.onreadystatechange = handleRequestStateChange;
-                if(!(/^http:.*/.test(url) || /^https:.*/.test(url)))
-                    xmlHttp.setRequestHeader("X-CSRFToken", cookie.get('csrftoken'));
-                //if(csrf)
-                //    xmlHttp.setRequestHeader("X-CSRFToken", csrf);
                 xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
                 /*xmlHttp.setRequestHeader("Connection", "close");                
                 if (cookie){
@@ -58,12 +58,17 @@ var ajax = new (function(){
     }
     
     var setRequest = function(){
-        var mspan = document.getElementById('mspan');
+        msg.clear();
+        msg.add('Processing Request');
+        msg.addTree(element.create('img', {src: '/static/loader.gif'}));
+        msg.show();
+        /*var mspan = document.getElementById('mspan');
         var menu = document.getElementById('menu');
         element.removeAllChilds(mspan)
         element.appendChild(mspan, [element.create('p', {innerText: 'Processing Request'}),
                                 element.create('img', {src: '/templates/loader.gif'})]);
         menu.style.display = 'block';
+        */
     }
     
     //################# обработка результатов
@@ -97,15 +102,21 @@ var ajax = new (function(){
                     }
                     mfl = 1; //Сыграем на том, что это возьмет немного времени;                 
                 }else{
-                    alert(xmlHttp.status);
+                    msg.clear();
+                    msg.add('Status: '+xmlHttp.status);
+                    msg.add('Не удалось получить данные: \u000A'+xmlHttp.statusText);
+                    msg.addHTML(xmlHttp.responseText);
+                    msg.show();
+                    /*alert(xmlHttp.status);
                     alert("Не удалось получить данные: \u000A"+xmlHttp.statusText);
+                    */
                 }
             }
         }catch(e){
             alert('Caught Exception: ' + e);        
             mfl = 1;
-            document.getElementById('menu').style.display = 'none';
-        }
+            //msg.hide();
+        }        
     }
     
     var processingResult = function(response){    
@@ -141,8 +152,8 @@ var ajax = new (function(){
                 
                 case 'error':
                     if(elm && elm.firstChild.defaultValue){elm.innerHTML = elm.firstChild.defaultValue;}
-                    if(resp.descripion){
-                        throw new Error(resp.descripion);
+                    if(resp.text){
+                        throw new Error(resp.text);
                     }else{
                         throw new Error('Unknown error.');
                     }
@@ -279,7 +290,8 @@ var ajax = new (function(){
                 break;
                 
                 case 'logok':
-                    user.loginSuccess(resp.text)
+                    msg.hide();
+                    user.loginSuccess(resp.text);
                     window.location.reload();
                 break;
                 
@@ -288,15 +300,20 @@ var ajax = new (function(){
                 break;
             }
         }catch(e){
-            if(elm && elm.firstChild.defaultValue){elm.innerText = elm.firstChild.defaultValue;}
-            var mspan = document.getElementById('mspan');
-            element.removeAllChilds(mspan);
-            element.appendChild(mspan, [element.create('p', {innerText: e})]);
-            document.getElementById('menu').style.display = 'block';
+            //if(elm && elm.firstChild.defaultValue){elm.innerText = elm.firstChild.defaultValue;}
+            msg.clear();
+            msg.add(e);            
+            //var mspan = document.getElementById('mspan');
+            //element.removeAllChilds(mspan);
+            //element.appendChild(mspan, [element.create('p', {innerText: e})]);
+            //document.getElementById('menu').style.display = 'block';
             if(resp.text.text != 'notext'){
-                element.appendChild(mspn, [element.create('p', {innerText: 'Server response:'}),
-                                                                      element.create('p', {innerText: resp.text})]);
+                msg.add('Server response:');
+                msg.add(resp.text);
+                //element.appendChild(mspn, [element.create('p', {innerText: 'Server response:'}),
+                //                                                      element.create('p', {innerText: resp.text})]);
             }
+            msg.show();
             //timer = setTimeout("document.getElementById('menu').style.display='none';", 8000);
         }
     }
