@@ -53,12 +53,12 @@ ANIME_GENRE = [
 ]
 
 USER_STATUS = [
-    (0, 'none'),
-    (1, 'want'),
-    (2, 'now'),
-    (3, 'ok'),
-    (4, 'dropped'),
-    (5, 'partially watched'),
+    (0, u'none'),
+    (1, u'want'),
+    (2, u'now'),
+    (3, u'ok'),
+    (4, u'dropped'),
+    (5, u'partially watched'),
 ]
 
 class AnimeStudio(models.Model):
@@ -74,7 +74,7 @@ class AnimeItem(models.Model):
     episodesCount = models.IntegerField()
     duration = models.IntegerField()
     releasedAt = models.DateTimeField()
-    endedAt = models.DateTimeField()
+    endedAt = models.DateTimeField(blank=True, null=True)
     air = models.BooleanField()
     
     def __unicode__(self):
