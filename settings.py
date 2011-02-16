@@ -95,8 +95,11 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.cache.CacheMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
+
+CACHE_MIDDLEWARE_SECONDS = 10
 
 ROOT_URLCONF = 'urls'
 

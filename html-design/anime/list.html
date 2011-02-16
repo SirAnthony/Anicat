@@ -1,86 +1,7 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-    <title>Anime catalog</title>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
-    <link rel="search" type="application/opensearchdescription+xml" title="Anime catalog" href="/static/srch.xml" />
-    <link href="/static/style.css" type="text/css" rel="stylesheet" />
-    <link href="/static/user.css" type="text/css" rel="stylesheet" />
-    <script type="text/javascript" src="/static/script.js"></script>
-    <script type="text/javascript" src="/static/app.js"></script>
-    <script type="text/javascript" src="/static/ajax.js"></script>
-    <script type="text/javascript" src="/static/user.js"></script>
-    <script type="text/javascript" src="/static/ae.js"></script>
-</head>
-<body>
-    <div id="header" class="thdtbl">
-        <div class="leftmenu">
-            <a class="nurl" onclick="searcher.toggle();">&nbsp;Search</a>
-            <input type="button" style="height: 22px;" onclick="corovan++; alert('Корованов ограблено:'+corovan);" value="Грабить корованы" />
-            <a class="nurl" href="/card/">&nbsp;Random</a>
-        </div>
-        <div class="leftmenu">
-	       |&nbsp;<a class="nurl" onclick="add.toggle();">Add</a>
-        </div>
-        {% if user.is_authenticated %}
-        <div id="logdiv" class="rightmenu">
-            <span><a href="/" title="User settings">{{ user.username }}</a></span>	
-            <a class="nurl" onclick="user.logout();">Logout</a>	
-        </div>
-        <div class="rightmenu" style="margin-top: 1px;">
-            <a href="/stat/" class="nurl">Statistics</a>	
-            <select id="show" onChange="setshow();">
-            {# Это можно в какой-нибудь лист ужать, значения цифровые сделать #}
-                <option value="null" selected>Display Mode</option>
-                <option value="all">All</option>
-                <option value="want">Want</option>
-                <option value="now">Now</option>
-                <option value="ok">Watched</option>
-                <option value="dropped">Dropped</option>
-            </select>
-        </div>
-        {% else %}
-        <div id="logdiv" class="rightmenu">
-            <a onclick="user.toggle();" class="nurl">Account</a>	
-        </div>
-        <div id="logdv">	
-            <form method="POST" action="/login/" id="login" class="thdtbl">
-                {% csrf_token %}
-                <a onclick="user.quickreg();" class="nurl">Registration</a>
-                <input id="lname" name="name"  type="text" />
-                <input id="lpasswd" name="pass" type="password" />
-                <input type="button" onclick="user.login();" value="Login" />
-                <p id="logininfo"></p>
-            </form>
-        </div>
-        {% endif %}
-        <div id="ie" style="color: #FFFF00;"></div>
-    </div>
-    <br />
-    <div id="srch">
-    {# Когда-нибудь потом #}
-    {# <!--<p id="chtext"><input type="checkbox" id="chsrch" onClick="searcher.showAdvance();" />Advanced Search</p>--> #}
-        <p id="srchp">
-        {% comment %}
-            <!--<select id="advsrch" class="advsrch">
-                <option value="null" selected="selected">Find by:</option>
-                <option value="genre">Genre</option>
-                $opts.
-            </select>
-            <select id="sortsrch" class="advsrch">
-                <option value="null" selected="selected">Sort by:</option>
-                <option value="genre">Genre</option>
-                $opts.
-            </select>
-            -->
-            <!--<input type="text" onkeyup="app.acomp(this, 'catalog', event);" /><br/>-->
-        {% endcomment %}
-            <input id="sin"  type="text" ondblclick="document.getElementById('sin').value='';" onkeydown="if(event.keyCode==13){searcher.send();} " />
-            <input type="button" onclick="searcher.send();" value="Искать" />
-        </p>
-        <div id="srchres"></div>	
-    </div>
+{% extends "anime/base.html" %}
+
+{% block main %}
+    {# if user.is_authenticated #}
     <div id="dvid" style="width: $w.px;">
         <table id="tbl" cellspacing="0" class="tbl">
             <thead class="thdtbl">
@@ -89,15 +10,50 @@
                 </tr>
             </thead>
             <tbody id="tbdid">
+            {% for title in list %}
                 {# $body. #}
+                <tr class="{# title.userstatus #}">
+                    <td id="link{{ title.id }}" class="link">
+                        <a target="_blank" class="cardurl" href="/card/{{ title.id }}/">
+                            <img alt="Go" src="/static/arrow.gif">
+                        </a>
+                    </td>
+                    <td onclick="cnt('id', '{{ title.id }}');" id="id{{ title.id }}" class="id">
+                        {{ forloop.counter|add:page.start }}
+                    </td>
+                    <td onclick="cnt('name', '{{ title.id }}');" id="name{{ title.id }}" class="name">
+                        {{ title.title }}
+                    </td>
+                    <td onclick="cnt('numberofep', '{{ title.id }}');" id="numberofep{{ title.id }}" class="numberofep">
+                        {{ title.episodesCount }}
+                    </td>
+                    <td onclick="cnt('translation', '{{ title.id }}');" id="translation{{ title.id }}" class="translation">
+                        {{ title.releasedAt|date:"d.m.Y" }}
+                        {%if title.endedAt %} - {{ title.endedAt|date:"d.m.Y" }} {% endif %} 
+                    </td>
+                    <td onclick="cnt('type', '{{ title.id }}');" id="type{{ title.id }}" class="type">
+                        {{ title.releaseTypeS }}
+                    </td>
+                    {# custom fields #}
+                </tr>
+            {% endfor %}
             </tbody>
         </table>		
     </div>
     <div id="pg">
-        {# $pg. #}
+        {% for pname in pages %}
+            {% ifequal page.number forloop.counter0 %}
+                <span id="spanl">[
+            {% else %}
+                <a href="/{% ifnotequal forloop.counter0 0 %}{{forloop.counter0}}/{% endifnotequal %}">
+            {% endifequal %}
+                {{ pname }}
+            {% ifequal page.number forloop.counter0 %}
+                ]</span>
+            {% else %}
+                </a>
+            {% endifequal %}
+        {% endfor %}
     </div>
-    <div class="cont_men" id="menu">
-	   <span id="mspan" class="mnspan"></span>
-	</div>
-</div>
-</body>
+    {# endif #}
+{% endblock %}

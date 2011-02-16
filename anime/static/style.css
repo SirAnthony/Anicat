@@ -258,9 +258,9 @@ margin: 8px 7px 8px 6px;
 }
 
 .leftmenu{
-float: left;
-margin: 2px 3px 10px 3px;
-padding: 0px;
+    float: left;
+    margin: 2px 3px 10px 3px;
+    padding: 0px;
 }
 
 /*Форма входа*/

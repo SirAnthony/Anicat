@@ -61,12 +61,6 @@ USER_STATUS = [
     (5, u'partially watched'),
 ]
 
-class AnimeStudio(models.Model):
-    title = models.CharField(max_length=200)
-
-    def __unicode__(self):
-        return self.title
-
 class AnimeItem(models.Model):
     title = models.CharField(max_length=200, db_index=True, unique_for_date='releasedAt')
     genre = models.CommaSeparatedIntegerField(max_length=50, choices=ANIME_GENRE, blank=True)
@@ -78,7 +72,10 @@ class AnimeItem(models.Model):
     air = models.BooleanField()
     
     def __unicode__(self):
-        return '%s [%s]' % (self.title, dict(ANIME_TYPES)[self.releaseType])
+        return '%s [%s]' % (self.title, ANIME_TYPES[self.releaseType][1])
+
+    def releaseTypeS(self):
+        return ANIME_TYPES[self.releaseType][1]
     
     class Meta:
         ordering = ["title"]
@@ -89,10 +86,17 @@ class AnimeEpisode(models.Model):
     
     def __unicode__(self):
         return '%s [%s]' % (self.title, self.anime.title)
+    
+    class Meta:
+        unique_together = ("title", "anime")
+
 
 class AnimeName(models.Model):
     title = models.CharField(max_length=200)
     anime = models.ForeignKey(AnimeItem)
+    
+    class Meta:
+        unique_together = ("title", "anime")
 
 class AnimeForm(ModelForm):
     class Meta():
@@ -100,40 +104,49 @@ class AnimeForm(ModelForm):
         exclude = ('air',)
 
 class Credit(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, unique=True)
     
     def __unicode__(self):
         return '%s' % self.title
     
 class Organisation(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     
     def __unicode__(self):
-        return '%s' % self.title
+        return self.name
 
 class OrganisationBundle(models.Model):
     anime = models.ForeignKey(AnimeItem)
     organisation = models.ForeignKey(Organisation)
     job = models.ForeignKey(Credit)
-    role = models.CharField(max_length=30)
-    comment = models.CharField(max_length=100)
+    role = models.CharField(max_length=30, blank=True)
+    comment = models.CharField(max_length=100, blank=True)
+
+    class Meta:
+        unique_together = ("anime", "organisation", "job", "role")
 
 class People(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     
     def __unicode__(self):
-        return '%s' % self.title
+        return self.name
 
 class PeopleBundle(models.Model):
     anime = models.ForeignKey(AnimeItem)
     person = models.ForeignKey(People)
     job = models.ForeignKey(Credit)
-    role = models.CharField(max_length=30)
-    comment = models.CharField(max_length=100)
+    role = models.CharField(max_length=30, blank=True)
+    comment = models.CharField(max_length=100, blank=True)
+
+    class Meta:
+        unique_together = ("anime", "person", "job", "role")
 
 class UserStatusBundle(models.Model):
     anime = models.ForeignKey(AnimeItem)
     user = models.ForeignKey(User)
     status = models.IntegerField(choices=USER_STATUS)
-    count = models.IntegerField()
+    count = models.IntegerField(blank=True)
     changed = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("anime", "user")

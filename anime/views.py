@@ -1,4 +1,4 @@
-import re
+#import re
 
 from models import AnimeForm, AnimeItem
 from django.http import HttpResponse, HttpResponseRedirect
@@ -7,6 +7,7 @@ from django.shortcuts import render_to_response
 from django.utils import simplejson
 from annoying.decorators import render_to
 from django.contrib import auth
+from functions import getVal
 
 def ajaxResponse(fn):
     ret = {'text': 'Unprocessed error', 'response': 'error'}
@@ -17,8 +18,18 @@ def ajaxResponse(fn):
 
 # TODO: Pager here
 @render_to('anime/list.html')
-def index(request):
-    return {'list': AnimeItem.objects.all(), 'user': request.user}
+def index(request, page=0):
+    page = int(getVal('page', int(page), request.REQUEST))
+    limit = 100
+    pages = []
+    for i in range(0, AnimeItem.objects.count(), 100):
+        s = AnimeItem.objects.only('title')[i:i+2]
+        pages.extend(map(lambda x: x.title.strip()[:3], s))
+    pages.append(AnimeItem.objects.order_by('-title').only('title')[0].title.strip()[:3])
+    pages = pages[1:]
+    pages = [a+' - '+b for a,b in zip(pages[::2], pages[1::2])]
+    return {'list': AnimeItem.objects.all()[page*limit:(page+1)*limit], 'user': request.user,
+            'pages': pages, 'page': {'number': page, 'start': page*limit}}
 
 @render_to('anime/view.html')
 def info(request, anime_id=0):
@@ -44,6 +55,9 @@ def logout(request):
     auth.logout(request)
     return HttpResponseRedirect('/')
 
+@render_to('anime/changes.html')
+def changes(request):
+    return {}
 
 @render_to('anime/add.html')
 def add(request):
