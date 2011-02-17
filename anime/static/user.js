@@ -105,17 +105,17 @@ var user = new( function(){
                 element.appendChild(div, [
                                 {'elemType': 'label', 'for': 'register', innerText: 'Quick registration'},
                                 {'elemType': 'form', 'id': 'register'}, [
-                                    {'elemType':'label', 'id': 'registerinfo', value: 'Some Fail'},
-                                    {'elemType': 'label','for': 'rname', innerText: 'Login:'},
-                                    {'elemType':'input', 'id': 'rname', type: 'text'},
-                                    {'elemType':'label', 'for': 'rpass', innerText: 'Password:'},
-                                    {'elemType':'input', 'id': 'rpass', type: 'password'},
-                                    {'elemType':'label', 'for': 'rpasschk', innerText: 'Confirm:'},
-                                    {'elemType':'input', 'id': 'rpasschk', type: 'password'},
-                                    {'elemType':'label', 'for': 'rmail', innerText: 'E-Mail:'},
-                                    {'elemType':'input', 'id': 'rmail', type: 'text'},
-                                    {'elemType':'input', type: 'button', onclick: function(){user.register();}, value: 'Ok'},
-                                    {'elemType':'input', type: 'button', onclick: function(){user.register('abort');}, value: 'Cancel'}]
+                                    {'elemType': 'label', 'id': 'registerinfo', value: 'Some Fail'},
+                                    {'elemType': 'label', 'for': 'rname', innerText: 'Login:'},
+                                    {'elemType': 'input', 'id': 'rname', type: 'text'},
+                                    {'elemType': 'label', 'for': 'rmail', innerText: 'E-Mail:'},
+                                    {'elemType': 'input', 'id': 'rmail', type: 'text'},
+                                    {'elemType': 'label', 'for': 'rpass', innerText: 'Password:'},
+                                    {'elemType': 'input', 'id': 'rpass', type: 'password'},
+                                    {'elemType': 'label', 'for': 'rpasschk', innerText: 'Confirm:'},
+                                    {'elemType': 'input', 'id': 'rpasschk', type: 'password'},                                    
+                                    {'elemType': 'input', type: 'button', onclick: function(){user.register();}, value: 'Ok'},
+                                    {'elemType': 'input', type: 'button', onclick: function(){user.register('abort');}, value: 'Cancel'}]
                                 ]);
             }
             dv.style.display = 'block';
@@ -140,7 +140,7 @@ var user = new( function(){
             pass = pass.value;
             passchk = passchk.value;
             mail = mail.value.toLowerCase();
-            if(!nick || !pass || !mail){
+            /*if(!nick || !pass || !mail){
                 inform('Not all fields are filled', infobj);
             }else if(/[\W]/.test(nick) || /[\W]/.test(pass)){
                 inform('Username and password can only consist of letters, digits or underscore characters', infobj);
@@ -152,12 +152,17 @@ var user = new( function(){
                 inform('Name must be at least 4 characters', infobj);
             }else if(pass.length < 4){
                 inform('Password must be at least 4 characters', infobj);
-            }else{
-                var qw = {'name': nick, 'pass': pass, 'mail': mail};                        
-                ajax.loadXMLDoc(url+'/register/', qw);
-                document.getElementById('menu').style.display = 'none';
-            }                
+            }else{*/
+            var qw = {'username': nick, 'password1': pass, 'password2': passchk, 'email': mail};                        
+            ajax.loadXMLDoc(url+'/register/', qw);
+            //    document.getElementById('menu').style.display = 'none';
+            //}                
         }    
+    }
+    
+    this.registerFail = function(error){
+        if(!this.loaded) return;
+        this.inform(text);
     }
     
 })();

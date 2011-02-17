@@ -151,7 +151,7 @@ var ajax = new (function(){
                 break;
                 
                 case 'error':
-                    if(elm && elm.firstChild.defaultValue){elm.innerHTML = elm.firstChild.defaultValue;}
+                    //if(elm && elm.firstChild.defaultValue){elm.innerHTML = elm.firstChild.defaultValue;}
                     if(resp.text){
                         throw new Error(resp.text);
                     }else{
@@ -295,26 +295,22 @@ var ajax = new (function(){
                     window.location.reload();
                 break;
                 
+                case 'regfail':
+                    user.registerFail(resp.text);
+                break;
+                
                 case 'search':
                     searcher.putResult(resp.text);
                 break;
             }
         }catch(e){
-            //if(elm && elm.firstChild.defaultValue){elm.innerText = elm.firstChild.defaultValue;}
             msg.clear();
-            msg.add(e);            
-            //var mspan = document.getElementById('mspan');
-            //element.removeAllChilds(mspan);
-            //element.appendChild(mspan, [element.create('p', {innerText: e})]);
-            //document.getElementById('menu').style.display = 'block';
+            msg.add(e);
             if(resp.text.text != 'notext'){
                 msg.add('Server response:');
                 msg.add(resp.text);
-                //element.appendChild(mspn, [element.create('p', {innerText: 'Server response:'}),
-                //                                                      element.create('p', {innerText: resp.text})]);
             }
             msg.show();
-            //timer = setTimeout("document.getElementById('menu').style.display='none';", 8000);
         }
     }
     

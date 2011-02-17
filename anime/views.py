@@ -1,6 +1,6 @@
 #import re
 
-from models import AnimeForm, AnimeItem
+from models import AnimeForm, AnimeItem, UserCreationFormMail
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.context_processors import csrf
 from django.shortcuts import render_to_response
@@ -28,11 +28,11 @@ def index(request, page=0):
     pages.append(AnimeItem.objects.order_by('-title').only('title')[0].title.strip()[:3])
     pages = pages[1:]
     pages = [a+' - '+b for a,b in zip(pages[::2], pages[1::2])]
-    return {'list': AnimeItem.objects.all()[page*limit:(page+1)*limit], 'user': request.user,
+    return {'list': AnimeItem.objects.all()[page*limit:(page+1)*limit],
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
 
 @render_to('anime/view.html')
-def info(request, anime_id=0):
+def card(request, anime_id=0):
     return {'list': AnimeItem.objects.get(id=int(anime_id))}
 
 @ajaxResponse
@@ -52,8 +52,36 @@ def ajaxlogin(request):
     return response
 
 def logout(request):
-    auth.logout(request)
-    return HttpResponseRedirect('/')
+    auth.logout(request, '/')
+
+@render_to('anime/register.html')
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationFormMail(request.POST)
+        if form.is_valid():
+            user = form.save()
+            user = auth.authenticate(username=user.username, password=form.data['password1'])
+            auth.login(request, user)
+            return HttpResponseRedirect("/")
+    else:
+        form = UserCreationFormMail()
+    return {'form': form}
+
+@ajaxResponse
+def ajaxregister(request):
+    response = {}
+    if not request.POST:
+        response['text'] = 'Only POST method allowed.'
+    else:
+        form = UserCreationFormMail(request.POST)
+        if form.is_valid():
+            user = form.save()
+            user = auth.authenticate(username=user.username, password=form.data['password1'])
+            auth.login(request, user)
+            response.update({'response': 'logok', 'text': {'name': user.username}})
+        else:
+            response.update({'response': 'regfail', 'text': form.errors})
+    return response
 
 @render_to('anime/changes.html')
 def changes(request):
