@@ -83,7 +83,7 @@ class AnimeItem(models.Model):
 
 class AnimeEpisode(models.Model):
     title = models.CharField(max_length=200)
-    anime = models.ForeignKey(AnimeItem)
+    anime = models.ForeignKey(AnimeItem, related_name="animeepisodes")
     
     def __unicode__(self):
         return '%s [%s]' % (self.title, self.anime.title)
@@ -94,7 +94,7 @@ class AnimeEpisode(models.Model):
 
 class AnimeName(models.Model):
     title = models.CharField(max_length=200)
-    anime = models.ForeignKey(AnimeItem)
+    anime = models.ForeignKey(AnimeItem, related_name="animenames")
     
     class Meta:
         unique_together = ("title", "anime")
@@ -108,7 +108,7 @@ class Credit(models.Model):
     title = models.CharField(max_length=200, unique=True)
     
     def __unicode__(self):
-        return '%s' % self.title
+        return self.title
     
 class Organisation(models.Model):
     name = models.CharField(max_length=200, unique=True)
@@ -117,8 +117,8 @@ class Organisation(models.Model):
         return self.name
 
 class OrganisationBundle(models.Model):
-    anime = models.ForeignKey(AnimeItem)
-    organisation = models.ForeignKey(Organisation)
+    anime = models.ForeignKey(AnimeItem, related_name="organisationbundles")
+    organisation = models.ForeignKey(Organisation, related_name="organisationbundles")
     job = models.ForeignKey(Credit)
     role = models.CharField(max_length=30, blank=True)
     comment = models.CharField(max_length=100, blank=True)
@@ -133,8 +133,8 @@ class People(models.Model):
         return self.name
 
 class PeopleBundle(models.Model):
-    anime = models.ForeignKey(AnimeItem)
-    person = models.ForeignKey(People)
+    anime = models.ForeignKey(AnimeItem, related_name="peoplebundles")
+    person = models.ForeignKey(People, related_name="peoplebundles")
     job = models.ForeignKey(Credit)
     role = models.CharField(max_length=30, blank=True)
     comment = models.CharField(max_length=100, blank=True)
@@ -143,7 +143,7 @@ class PeopleBundle(models.Model):
         unique_together = ("anime", "person", "job", "role")
 
 class UserStatusBundle(models.Model):
-    anime = models.ForeignKey(AnimeItem)
+    anime = models.ForeignKey(AnimeItem, related_name="statusbundles")
     user = models.ForeignKey(User)
     status = models.IntegerField(choices=USER_STATUS)
     count = models.IntegerField(blank=True)

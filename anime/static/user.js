@@ -6,6 +6,7 @@ var user = new( function(){
        
     var info = null;
     var loaded = false;
+    var registerForm = null; //Ох, костыли.
     
     this.inform = function(msg, obj){
         if(!this.loaded) return;
@@ -36,7 +37,7 @@ var user = new( function(){
         this.info.style.display = 'none';
         var nick = document.getElementById('lname');
         var pass = document.getElementById('lpasswd');
-        //var cb = document.getElementById('long').checked;    
+        //var cb = document.getElementById('long').checked;
         nick = nick.value;
         pass = pass.value;
         if(!nick || !pass){
@@ -100,23 +101,27 @@ var user = new( function(){
         }else{
             var div = document.getElementById('mspan');
             var register = document.getElementById('register');
-            if(!div.firstChild || !(div.childNodes[1] && div.childNodes[1] == register)){
+            if(!register && this.registerForm){
                 element.removeAllChilds(div);
-                element.appendChild(div, [
-                                {'elemType': 'label', 'for': 'register', innerText: 'Quick registration'},
+                element.appendChild(div, [this.registerForm]);
+            }else{                
+                if(!div.firstChild || !(div.childNodes[1] && div.childNodes[1] == register)){
+                    element.removeAllChilds(div);
+                    element.appendChild(div, [
                                 {'elemType': 'form', 'id': 'register'}, [
-                                    {'elemType': 'label', 'id': 'registerinfo', value: 'Some Fail'},
-                                    {'elemType': 'label', 'for': 'rname', innerText: 'Login:'},
-                                    {'elemType': 'input', 'id': 'rname', type: 'text'},
-                                    {'elemType': 'label', 'for': 'rmail', innerText: 'E-Mail:'},
-                                    {'elemType': 'input', 'id': 'rmail', type: 'text'},
-                                    {'elemType': 'label', 'for': 'rpass', innerText: 'Password:'},
-                                    {'elemType': 'input', 'id': 'rpass', type: 'password'},
-                                    {'elemType': 'label', 'for': 'rpasschk', innerText: 'Confirm:'},
-                                    {'elemType': 'input', 'id': 'rpasschk', type: 'password'},                                    
+                                    {'elemType': 'span', 'className': 'left', innerText: 'Quick registration'},
+                                    {'elemType': 'label', 'for': 'id_username', innerText: 'Login:'},
+                                    {'elemType': 'input', 'id': 'id_username', type: 'text'},
+                                    {'elemType': 'label', 'for': 'id_email', innerText: 'E-Mail:'},
+                                    {'elemType': 'input', 'id': 'id_email', type: 'text'},
+                                    {'elemType': 'label', 'for': 'id_password1', innerText: 'Password:'},
+                                    {'elemType': 'input', 'id': 'id_password1', type: 'password'},
+                                    {'elemType': 'label', 'for': 'id_password2', innerText: 'Confirm:'},
+                                    {'elemType': 'input', 'id': 'id_password2', type: 'password'},                                    
                                     {'elemType': 'input', type: 'button', onclick: function(){user.register();}, value: 'Ok'},
                                     {'elemType': 'input', type: 'button', onclick: function(){user.register('abort');}, value: 'Cancel'}]
                                 ]);
+                }
             }
             dv.style.display = 'block';
             try{
@@ -131,38 +136,38 @@ var user = new( function(){
         if(cncl == 'abort'){
             document.getElementById('menu').style.display = 'none';
         }else{
-            var infobj =  document.getElementById('registerinfo');
-            var nick = document.getElementById('rname');
-            var pass = document.getElementById('rpass');
-            var passchk = document.getElementById('rpasschk');
-            var mail = document.getElementById('rmail')
+            var form = document.getElementById('register');
+            var nick = document.getElementById('id_username');
+            var pass = document.getElementById('id_password1');
+            var passchk = document.getElementById('id_password2');
+            var mail = document.getElementById('id_email');
             nick = nick.value;
             pass = pass.value;
             passchk = passchk.value;
             mail = mail.value.toLowerCase();
-            /*if(!nick || !pass || !mail){
-                inform('Not all fields are filled', infobj);
-            }else if(/[\W]/.test(nick) || /[\W]/.test(pass)){
-                inform('Username and password can only consist of letters, digits or underscore characters', infobj);
-            }else if(pass != passchk){
-                inform('Passwords are different', infobj);
-            }else if(!/^[\w.-]+@([a-z0-9\-]+\.)+[a-z]{2,6}$/i.test(mail)){
-                inform('This e-mail is not valid', infobj);
-            }else if(nick.length < 4){    
-                inform('Name must be at least 4 characters', infobj);
-            }else if(pass.length < 4){
-                inform('Password must be at least 4 characters', infobj);
-            }else{*/
+            errors = getElementsByClassName('error', form);
+            for(var el in errors)
+                element.remove(errors[el]);
+            if(!this.registerForm)
+                this.registerForm = form.parentNode.removeChild(form);
             var qw = {'username': nick, 'password1': pass, 'password2': passchk, 'email': mail};                        
-            ajax.loadXMLDoc(url+'/register/', qw);
-            //    document.getElementById('menu').style.display = 'none';
-            //}                
+            ajax.loadXMLDoc(url+'register/', qw);
         }    
     }
     
     this.registerFail = function(error){
-        if(!this.loaded) return;
-        this.inform(text);
+        if(!this.loaded || !this.registerForm) return;
+        var div = document.getElementById('mspan');
+        element.removeAllChilds(div);
+        element.appendChild(div, [this.registerForm]);
+        for(var target in error){
+            var obj = document.getElementById('id_'+target);
+            if(!obj) continue;
+            for(var e in error[target]){
+                element.insert(obj.nextSibling,
+                        element.create('span', {className: 'error left', innerText: error[target][e]}));
+            }
+        }
     }
     
 })();

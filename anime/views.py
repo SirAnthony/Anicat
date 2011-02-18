@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.context_processors import csrf
 from django.shortcuts import render_to_response
 from django.utils import simplejson
+from django.views.decorators.cache import cache_page
 from annoying.decorators import render_to
 from django.contrib import auth
 from functions import getVal
@@ -28,12 +29,21 @@ def index(request, page=0):
     pages.append(AnimeItem.objects.order_by('-title').only('title')[0].title.strip()[:3])
     pages = pages[1:]
     pages = [a+' - '+b for a,b in zip(pages[::2], pages[1::2])]
-    return {'list': AnimeItem.objects.all()[page*limit:(page+1)*limit],
+    return {'list': 
+            AnimeItem.objects.all().select_related('statusbundles')[page*limit:(page+1)*limit],
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
 
+@cache_page(10)
 @render_to('anime/view.html')
 def card(request, anime_id=0):
     return {'list': AnimeItem.objects.get(id=int(anime_id))}
+
+@ajaxResponse
+def get(request):
+    if not request.POST:
+        return {'text': 'Only POST method allowed.'}
+    response = {}
+    return response
 
 @ajaxResponse
 def ajaxlogin(request):
@@ -52,7 +62,8 @@ def ajaxlogin(request):
     return response
 
 def logout(request):
-    auth.logout(request, '/')
+    auth.logout(request)
+    return HttpResponseRedirect("/")
 
 @render_to('anime/register.html')
 def register(request):

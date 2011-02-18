@@ -11,7 +11,9 @@
     <script type="text/javascript" src="/static/app.js"></script>
     <script type="text/javascript" src="/static/ajax.js"></script>
     <script type="text/javascript" src="/static/user.js"></script>
+    {% if user.is_authenticated %}        
     <script type="text/javascript" src="/static/ae.js"></script>
+    {% endif %}
 </head>
 <body>
     <div id="header" class="thdtbl">
@@ -47,7 +49,7 @@
         <div id="logdiv" class="rightmenu">
             <a onclick="user.toggle();" class="nurl">Account</a>	
         </div>
-        <div id="logdv">	
+        <div id="logdv" class="right">	
             <form method="POST" action="/login/" id="login" class="thdtbl">
                 {% csrf_token %}
                 <a onclick="user.quickreg();" class="nurl">Registration</a>

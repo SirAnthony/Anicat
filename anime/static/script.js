@@ -90,6 +90,10 @@ var element = new ( function(){
             }
         }
     }
+    
+    this.insert = function(obj, elem){        
+        obj.parentNode.insertBefore(elem, obj);
+    }
 })();
 
 //################# Работа с куами.
@@ -134,16 +138,16 @@ var cookies = new ( function(){
 
 var pclass = new ( function(){
 
-    this.hasClass = function(ele,cls){
+    this.hasClass = function(ele, cls){
         return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
     }
 
-    this.add = function(ele,cls){
-        if(!this.hasClass(ele,cls)) 
+    this.add = function(ele, cls){
+        if(!this.hasClass(ele, cls))
             ele.className += ' '+cls;
     }
 
-    this.remove = function(ele,cls){
+    this.remove = function(ele, cls){
         if (this.hasClass(ele,cls)){
             var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
             ele.className=ele.className.replace(reg,'');
@@ -303,7 +307,7 @@ function message(str, timeout){
     this.addTree = function(elem){
         if(!elem) return;
         var p = element.create('p');
-        element.appendChild(p, elem)
+        element.appendChild(p, [elem])
         this.strobj.push(p);
     }
     
@@ -414,7 +418,7 @@ window.onload = function(){
 
     user.init();
     searcher.init();
-    add.init();
+    if(typeof(variableName) != "undefined") add.init();
     mv();
     //document.getElementById('srch').style.display = 'none';
     showFN();
@@ -491,18 +495,17 @@ function numHash(numh){ //for hash with numeric keys only
     return e;
 }
 
-function getElementsByClassName(searchClass,node,tag) {
+function getElementsByClassName(searchClass, node, tag) {
     var classElements = new Array();
-    if (node == null) node = document;
-    if (tag == null) tag = '*';
+    if(node == null)
+        node = document;
+    if(tag == null)
+        tag = '*';
     var els = node.getElementsByTagName(tag);
     var elsLen = els.length;
-    var pattern = new RegExp('(^|\\\\s)'+searchClass+'(\\\\s|$)');
-    for (i = 0, j = 0; i < elsLen; i++) {
-        if(pattern.test(els[i].className)){
-            classElements[j] = els[i];
-            j++;
-        }
+    for(var i = 0; i < elsLen; i++){
+        if(pclass.hasClass(els[i], searchClass))
+            classElements.push(els[i]);
     }
     return classElements;
 }

@@ -6,13 +6,29 @@
         <table id="tbl" cellspacing="0" class="tbl">
             <thead class="thdtbl">
                 <tr id="wtr">
-                    {# $hd. #}
+				    <th class="link" id="link">
+	                   <a rel="nofollow" href=""></a>
+                    </th>
+                    <th class="id" id="id">
+	                   <a rel="nofollow" href="/">№</a>
+                    </th>
+                    <th class="name" id="name">
+	                   <a rel="nofollow" href="">Name</a>
+                    </th>
+                    <th class="numberofep" id="numberofep">
+	                   <a rel="nofollow" href="">Episodes</a>
+                    </th>
+                    <th class="translation" id="translation">
+	                   <a rel="nofollow" href="">Translation</a>
+                    </th>
+                    <th class="type" id="type">
+	                   <a rel="nofollow" href="">Type</a>
+                    </th>                    
                 </tr>
             </thead>
             <tbody id="tbdid">
             {% for title in list %}
-                {# $body. #}
-                <tr class="{# title.userstatus #}">
+                <tr class="r{# { title.statusbundles.get.status } #}">
                     <td id="link{{ title.id }}" class="link">
                         <a target="_blank" class="cardurl" href="/card/{{ title.id }}/">
                             <img alt="Go" src="/static/arrow.gif">
@@ -21,7 +37,7 @@
                     <td onclick="cnt('id', '{{ title.id }}');" id="id{{ title.id }}" class="id">
                         {{ forloop.counter|add:page.start }}
                     </td>
-                    <td onclick="cnt('name', '{{ title.id }}');" id="name{{ title.id }}" class="name">
+                    <td onclick="cnt('name', '{{ title.id }}');" id="name{{ title.id }}" class="name left">
                         {{ title.title }}
                     </td>
                     <td onclick="cnt('numberofep', '{{ title.id }}');" id="numberofep{{ title.id }}" class="numberofep">
@@ -30,7 +46,7 @@
                     <td onclick="cnt('translation', '{{ title.id }}');" id="translation{{ title.id }}" class="translation">
                         {{ title.releasedAt|date:"d.m.Y" }}
                         {%if title.endedAt %} - {{ title.endedAt|date:"d.m.Y" }} {% endif %} 
-                    </td>
+                    </td>                    
                     <td onclick="cnt('type', '{{ title.id }}');" id="type{{ title.id }}" class="type">
                         {{ title.releaseTypeS }}
                     </td>

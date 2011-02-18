@@ -1,14 +1,30 @@
 /*Помойка*/
 
 body {
-font-size: 12pt;
-padding: 0px;
-font-family: "times new roman",serif;
-margin-top: 0px;
+    font-size: 12pt;
+    padding: 0px;
+    font-family: "times new roman", serif;
+    margin-top: 0px;
 }
+
+body * {
+    margin: 0px;
+    padding: 0px;
+}
+
+.error{
+    color: #cc0000;
+}
+
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+}
+
 #dvid{
-margin-top: 0px;
-padding-top: 0px;
 clear: both;
 overflow: auto;
 }
@@ -17,14 +33,12 @@ width: 100%;
 height: 24px;
 border: solid black 1px;
 border-top: none;
-margin-top: 0px;
 }
 #header a{
 margin-left: 2px;
 margin-right: 3px;
 }
 .tbl{ 
-margin: 0px;
 line-height: 23px;
 border-right: black dotted 1px;
 border-top: black dotted 1px;
@@ -41,9 +55,7 @@ border: none;
 
 #tbl td, #tbl th, #srchtbl td{
 position: relative;
-margin: 0px;
 /*height: 22px;*/
-margin: 0px;
 border: black dotted 1px;
 border-right: none;
 text-align: center;
@@ -55,13 +67,12 @@ padding: 1px;
 }
 .link, .plus{
 width: 20px !important;
-margin: 0px !important;
-padding: 0px !important;
 }
+
 .name{
-float: left ;
-height: 25px;
+    height: 25px;
 }
+
 .id{
 width: 30px !important;
 background-color: #339966 !important;
@@ -96,12 +107,7 @@ display: none;
 
 /*Спан в менюшке*/
 .mnspan{
-font: normal 14pt "times new roman",serif;
-white-space: nowrap;
-}
-#mspan p{
-margin: 0px;
-padding: 0px;
+    font: normal 14pt "times new roman",serif;
 }
 
 /*Спан, и шрифт для ссылок*/
@@ -111,18 +117,12 @@ text-decoration: none;
 color: #0068ef;
 }
 
-.edtl{
-/*float: right;*/
-}
-
 #spanl{
 color: #000;
 }
 
 .link a:link, .link a:visited, .link a:active, .link a:hover{
-margin: 0px;
 margin-top: 1px;
-padding: 0px;
 }
 .link a img{
 border: none;
@@ -145,8 +145,6 @@ cursor: pointer;
 width: 200px;
 height: 22px;
 font: normal 12pt "times new roman",serif;
-margin: 0px;
-padding: 0px;
 }
 #edit{
 position: fixed;
@@ -156,7 +154,6 @@ padding: 5px 10px;
 z-index: 15;
 }
 #edit>div{
-margin: 0px;
 padding: 5px;
 clear: both;
 border: 1px #808080 solid;
@@ -178,12 +175,8 @@ background-color: #D4D0C8;
 font: normal 12pt "times new roman", serif !important;
 list-style-type: none;
 background-color: transparent;
-padding: 0px;
-margin: 0px;
 }
 #edit>ul li{
-float:left;
-margin: 0px;
 padding: 2px 5px;
 border: 1px solid;
 border-color: #808080 #808080 #808080 #808080;
@@ -200,10 +193,6 @@ background-color:#D4D0C8;
 border-color: #808080 #808080 #D4D0C8 #808080;
 cursor: default;
 } 
-#edtcont p{
-margin: 0px;
-padding: 0px;
-}
 #edtcont div{
 max-height: 500px;
 overflow: auto;
@@ -221,6 +210,7 @@ margin: 0px 7px !important;
 .frmdv div {
     clear: both;
 }
+
 .ac1 {
     margin: 0px 6px 0px 1px;
     float: left;
@@ -230,6 +220,7 @@ margin: 0px 7px !important;
     margin: 0px 1px 0px 6px;
     float: left;
 }
+
 #addfrm input, #addfrm select, #addfrm textarea{
 width: 220px;
 height: 18px;
@@ -260,62 +251,61 @@ margin: 8px 7px 8px 6px;
 .leftmenu{
     float: left;
     margin: 2px 3px 10px 3px;
-    padding: 0px;
 }
 
 /*Форма входа*/
 #login, .rightmenu{
-float: right;
-margin-bottom: 10px;
-margin-top: 2px;
-margin-right: 10px;
-padding: 0px;
+    float: right;
+    margin-bottom: 10px;
+    margin-top: 2px;
+    margin-right: 10px;
 }
 
 #login{
-background-color: #fff;
+    background-color: #fff;
 }
+
 #logdv{
-display: none;
-float: right;
-clear: right;
+    display: none;
+    clear: right;
 }
+
 #show{
 height: 20px;
-margin-top: 0px; 
 }
 #lname, #lpasswd{
 width: 150px;
 }
-#logininfo{
-margin: 0px;
-padding: 0px;
-color: #dd0000;
-display: none; 
+
+
+
+#login p.error {
+    display: none;
+}
+
+#register {
+    width: 290px;
 }
 
 #register label{
-float:left; 
-clear: left;
-width:100px;
-margin: 0px;
-padding: 0px;
+    float:left; 
+    clear: left;
+    width:100px;
 }
+
 #register input{
-float: left;
-margin: 0px;
-padding: 0px;
+    float: left;
 }
-#registerinfo{
-color: red;
-width: 290px !important;
-white-space: normal !important;
+
+#register span.error{
+    width: 290px !important;
+    white-space: normal !important;
 }
+
 #register input[type=button]{
-float: right;
-clear: left;
-margin: 5px 3px;
-padding: 0px;
+    float: right;
+    clear: left;
+    margin: 5px 3px;
 }
 
 #lngs{
@@ -366,8 +356,6 @@ padding: 5px 10px;
 .app_div{
 position: absolute; /*fixed !important;*/
 background-color: transparent;
-padding: 0px;
-margin: 0px;
 z-index: 20;
 border: 1px solid black;
 background-color: Window;
@@ -377,12 +365,9 @@ overflow: hidden;
 width: 100%;
 /*list-style-position: outside;
 list-style: none;*/
-padding: 0;
-margin: 0;
 }
 .app_div li {
 min-width: 211px;
-margin: 0px;
 padding: 2px 5px;
 cursor: pointer;
 display: block;
@@ -401,14 +386,14 @@ color: HighlightText;
 
 /*Cards*/
 .cardelem{
-margin: 0px 0px 0px 5px;
+    margin-top: 5px;
 }
 .cardcol{
 float: left;
 margin: 0px 10px !important;
 }
 .cardcol div{
-margin: 10px 0px 0px 0px; 
+margin-right: 10px; 
 }
 #staff.cardcol{ 
 clear: left; 
