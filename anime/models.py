@@ -1,3 +1,4 @@
+import collections
 from django.db import models
 from django.forms import ModelForm
 from django.contrib.auth.models import User
@@ -142,12 +143,23 @@ class PeopleBundle(models.Model):
     class Meta:
         unique_together = ("anime", "person", "job", "role")
 
+
+class StatusManager(models.Manager):
+    def get_for_user(self, items, user):
+        statuses = self.filter(anime__in=[anime.id for anime in items], user=user)
+        status_dict = collections.defaultdict(lambda: None)
+        for status in statuses:
+            status_dict[status.anime_id] = status
+        return status_dict
+
 class UserStatusBundle(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="statusbundles")
     user = models.ForeignKey(User)
     status = models.IntegerField(choices=USER_STATUS)
     count = models.IntegerField(blank=True)
     changed = models.DateTimeField(auto_now=True)
+    
+    objects = StatusManager()
 
     class Meta:
         unique_together = ("anime", "user")

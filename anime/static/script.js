@@ -5,7 +5,6 @@ var mCur; // Хранит текущую позицию мыши
 var xmlHttp;
 var mfl = 0;    // 0 - никаких действий. 1 - меню открыто, заболкирован инпут под ним.
          // 2 - заблокировано инпутом, закрыто.
-var elm; //
 var url = '/ajax/';
 var edtdv = 0; // эта переменная определяет редактируется ли менюшка или нет
 var timer;
@@ -285,17 +284,24 @@ var searcher = new ( function(){
 
 //######################## Messages process
 
-function message(str, timeout){
+var message = new (function(){
     
     this.strobj = new Array();
     
-    this.timeout = timeout;
+    this.timeout = null;
     
     this.getSpan = function(){
         if(!this.span)
             this.span = document.getElementById('mspan');
         return this.span;
     }
+    
+    //Clears message box and adds new p. 
+    this.new = function(str, timeout){
+        this.clear()        
+        this.add(str);
+        this.timeout = timeout;
+    }    
     
     //Adds new p element.
     this.add = function(str){
@@ -311,7 +317,7 @@ function message(str, timeout){
         this.strobj.push(p);
     }
     
-    //Add html string to message.
+    //Adds html string to message.
     //FIXME: innerHTML is bad. 
     this.addHTML = function(str){
         if(!str) return;
@@ -337,27 +343,60 @@ function message(str, timeout){
             element.remove(this.strobj.shift());
     }
     
+    //Move messagebox to last event position.
+    //Pop - старый костыль, но пока никак.
+    this.toEventPosition = function(pop){
+        var dv;
+        pop ? dv = document.getElementById('popup') : dv = document.getElementById('menu');
+        
+        if(!dv)
+            return;
+        
+        var x = 20;
+        var y = 20;
+        if(isIE){
+            e = event;
+            if(e.pageX || e.pageY){
+                x = e.pageX;
+                y = e.pageY;
+            }else if(e.clientX || e.clientY){
+                x = e.clientX + (document.documentElement.scrollLeft || document.body.scrollLeft) - document.documentElement.clientLeft;
+                y = e.clientY + (document.documentElement.scrollTop || document.body.scrollTop) - document.documentElement.clientTop;
+            }
+                     
+        }else{
+            if( mCur.y+170 >= document.firstChild.clientHeight )
+                mCur.y = mCur.y - 70;            
+            if( mCur.x+200 >= document.firstChild.clientWidth )
+                mCur.x = mCur.x - 100;
+            y = mCur.y;
+            x = mCur.x;
+        }
+        dv.style.top = y + 'px';
+        dv.style.left = x + 'px';
+    }
+    
     //Show message. 
-    this.show = function(){
+    this.show = function(time){
         if(!this.getSpan())
             return;
         element.removeAllChilds(this.span);
         element.appendChild(this.span, this.strobj);
         this.span.parentNode.style.display = 'block';
+        if(time)
+            this.timeout = time;
         if(this.timeout)
             timer = setTimeout("document.getElementById('menu').style.display='none';", this.timeout);
     }
     
+    //Hide message.
     this.hide = function(){
         if(!this.getSpan())
             return;
         this.span.parentNode.style.display = 'none';
     }
     
-
-    this.add(str);
-
-};
+})();
 
 //########################
 
@@ -462,7 +501,7 @@ function copyToClipboard(content) {
 
 // Тоже попапы на длинные имена
 function lngnm(par,e){    
-        menupos(1);
+        message.toEventPosition(1);
         document.getElementById('popup').style.display = 'block';
         document.getElementById('popups').innerHTML = par;    
 }
@@ -618,70 +657,37 @@ function mv(){
                 document.getElementById('popup').style.left = mCur.x + 10 +'px';
             }
         }
+        
         if(document.getElementById('menu')){ 
-            if(document.getElementById('menu').style.display == "block" && !edtdv){    
+            if(document.getElementById('menu').style.display == "block" && !edtdv){
                 document.onclick = hideDiv;        // Прятание меню
             }
         }
     }
 }
 
-function menupos(pop){
-    
-    var dv;
-    pop ? dv = document.getElementById('popup') : dv = document.getElementById('menu');
-    //dv = document.getElementById('menu');    
-        
-      if (document.all){// если ИЕ
-        e = event;
-        if (e.pageX || e.pageY){
-            var x = e.pageX;
-            var y = e.pageY;
-        }else if (e.clientX || e.clientY){
-            var x = e.clientX + (document.documentElement.scrollLeft || document.body.scrollLeft) - document.documentElement.clientLeft;
-            var y = e.clientY + (document.documentElement.scrollTop || document.body.scrollTop) - document.documentElement.clientTop;
-        }
-        
-        dv.style.top = y + 'px';
-        dv.style.left = x + 'px';
-    //то ставим относительно верхнего элемента - коем является абсолютный див
-    // смотрите ниже
-    
-    }else{ // а если не ие (те мозилла)
-        if ( mCur.y+170 >= document.firstChild.clientHeight ){mCur.y = mCur.y - 70;}
-              dv.style.top = mCur.y+'px';
-        if ( mCur.x+200 >= document.firstChild.clientWidth ){mCur.x = mCur.x - 100;}
-              dv.style.left = mCur.x+'px';
-    //то все просто - относительно страницы
-     }
-}
-
 //################# Отрисовка менюшки
 
-function cnt(tag,num,e) {
-    
+function cnt(tag, num, e) {
     
     if (mfl != 2){
-        //var target=e?e.target:event.srcElement;        
         mfl = 1;
-        menupos();
-        elm = document.getElementById('name'+num);// В дальнейшем используется глобально
-        var name = elm.firstChild.nodeValue;        
-        var qw = 'get='+num;
+        message.toEventPosition();
+        var qw = {'id': num}
         switch (tag){
             case 'name':
-                qw += '&string=name,genre';
+                qw['field'] = ['name','genre'];
             break;
             case 'numberofep':
-                qw += '&string=bundle,duration,size';
+                qw['field'] = ['bundle','duration','size'];
             break;
             case 'id':
-                qw += '&string=state';
+                qw['field'] = 'state';
             break;
             default:
-                qw += '&string='+ tag;
+                qw['field'] = tag;
         }
-        ajax.loadXMLDoc(url,qw);
+        ajax.loadXMLDoc(url+'get/', qw);
     } 
 }
 
@@ -705,7 +711,7 @@ function sndstat(sid, name){
     for(select in sel){ if(sel[select].selected) break; }
     sel = "edit="+name+"&id="+sid+"&string="+select;
     var num =  document.getElementById('stnum');
-    if(num){        
+    if(num){
         num = num.childNodes;
         var selnumb;
         for(selnumb in num){ if(num[selnumb].selected) break; }

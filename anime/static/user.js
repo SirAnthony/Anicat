@@ -97,7 +97,7 @@ var user = new( function(){
         var dv = document.getElementById('menu');
         var displ = dv.style.display;
         if( displ == 'block'){
-            dv.style.display = 'none'; 
+            dv.style.display = 'none';
         }else{
             var div = document.getElementById('mspan');
             var register = document.getElementById('register');

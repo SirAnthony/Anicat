@@ -659,7 +659,7 @@ var edit = new (function edit_class(){
     if(!mfl){
         mfl = 2;        
         document.getElementById('menu').style.display = 'none';
-        menupos();    
+        message.toEventPosition();    
         elm = document.getElementById(tag+num);
         //долой обходные маневры. будем получать ширину по ид элементов шапки
         var cs = elm.offsetWidth - 5; 

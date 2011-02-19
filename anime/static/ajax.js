@@ -6,8 +6,7 @@ var ajax = new (function(){
     
     var xmlHttp = null;
     var cookie = cookies;
-    var msg = new message();
-   
+       
     //################# Вызов аяксового обьекта.
     this.loadXMLDoc = function(url, qry){
         var request = '';
@@ -15,6 +14,8 @@ var ajax = new (function(){
             alert('Input is old');
             return;
         }
+        
+        setRequest();
         
         if(!(/^http:.*/.test(url) || /^https:.*/.test(url)))
             qry['csrfmiddlewaretoken'] = cookie.get('csrftoken');
@@ -58,10 +59,9 @@ var ajax = new (function(){
     }
     
     var setRequest = function(){
-        msg.clear();
-        msg.add('Processing Request');
-        msg.addTree(element.create('img', {src: '/static/loader.gif'}));
-        msg.show();
+        message.new('Processing Request');
+        message.addTree(element.create('img', {src: '/static/loader.gif'}));
+        message.show();
         /*var mspan = document.getElementById('mspan');
         var menu = document.getElementById('menu');
         element.removeAllChilds(mspan)
@@ -75,12 +75,12 @@ var ajax = new (function(){
     var handleRequestStateChange = function(){
         try{
             if (!app.appajax){
-                if (xmlHttp.readyState == 1) { //Мозила
+                /*if (xmlHttp.readyState == 1) { //Мозила
                     setRequest();
                 }
                 if (xmlHttp.readyState == 2) { //А это специально для эстета оперы, которая статус 1 признавать не хочет.
                     setRequest();
-                }
+                }*/
             }
             //if (xmlHttp.readyState == 3){}
             if (xmlHttp.readyState == 4) {
@@ -102,11 +102,10 @@ var ajax = new (function(){
                     }
                     mfl = 1; //Сыграем на том, что это возьмет немного времени;                 
                 }else{
-                    msg.clear();
-                    msg.add('Status: '+xmlHttp.status);
-                    msg.add('Не удалось получить данные: \u000A'+xmlHttp.statusText);
-                    msg.addHTML(xmlHttp.responseText);
-                    msg.show();
+                    message.new('Status: '+xmlHttp.status);
+                    message.add('Не удалось получить данные: \u000A'+xmlHttp.statusText);
+                    message.addHTML(xmlHttp.responseText);
+                    message.show();
                     /*alert(xmlHttp.status);
                     alert("Не удалось получить данные: \u000A"+xmlHttp.statusText);
                     */
@@ -115,7 +114,6 @@ var ajax = new (function(){
         }catch(e){
             alert('Caught Exception: ' + e);        
             mfl = 1;
-            //msg.hide();
         }        
     }
     
@@ -160,7 +158,7 @@ var ajax = new (function(){
                 break;
                 
                 case 'nmform':                
-                    var inn = element.create('form',{ id: 'frm'});                
+                    var inn = element.create('form',{ id: 'frm'});
                     var label = element.create('label',{ htmlFor: 'state', 
                         innerText: resp.text.val });
                     var sel = element.create('select',{id: 'stid', name: 'state',
@@ -233,54 +231,96 @@ var ajax = new (function(){
                         var capCurname = curname.substr(0,1).toUpperCase() + curname.substr(1)
                         var label = element.create('label', { 'for': curname + resp.text.id,
                                             innerText: capCurname + ':', name: resp.text.id});
-                        var sp = element.create('p', {'id': curname+resp.text.id, 'name': curname});
-                        var hid = ((current.tbl) ? current.tbl : "catalog");
-                        hid = element.create('input', {type: 'hidden', name: 'table', value: hid});
-                        //var edt = createElem('span',{className: 'edtl', 'name': i});
-                        /*if(!resp.text.edt && !resp.text[i][0]){continue;}
-                        if(resp.text.edt && !resp.text[i][0]){}else{}*/
-                        var num = numHash(current);
-                        for(var g=0; g<=num; g++){
-                            var cur = current[g];
-                            if(cur && isHash(cur)){
-                                var p = (curname == 'bundle') ? element.create('p',{name: cur.elemid}) :
-                                                               element.create('p',{'name': g});
-                                var s = (curname == 'bundle') ? element.create('span',{name: 'name'}) :
-                                            element.create('span',{name: 'name', innerText: encd(cur.name)});
-                                element.appendChild(sp, [p, [s]]);
-                                if(curname == 'bundle'){
-                                    var a = element.create('a',{href: '/card/'+cur.elemid+'/', innerText: encd(cur.name),
-                                                                            className: 'snone'});
-                                    if(cur.job) pclass.add(a,"s"+cur.job);
-                                    element.appendChild(s, [a])
+                        var sp = element.create('p', {'id': curname+resp.text.id, 'name': curname});                        
+                        var cld = new Array();
+                        if(isString(current)){
+                            sp.innerText = current;
+                        }else{
+                            if(curname == 'state'){                            
+                                var sel = element.create('select',{id: 'stid', name: 'state',
+                                    onchange: function(){sndstat(resp.text.id, curname);}
+                                });                            
+                                /*
+                                // Ох, лол, это какой-то безумный sort
+                                // Я не представляю, зачем это писал, но оно мне нравится, поэтому оставлю
+                                resp.text.select = (function(obj){  
+                                    var ret = {};
+                                    for(var i = 0; i<(function(o){var n=0; for(e in o) n++; return n;})(obj); i++)
+                                        ret[i] = obj[i];
+                                    return ret;
+                                })(resp.text.select);*/
+                                element.addOption(sel, current.select);
+                                if(current.selected){                        
+                                    for(var i in sel.childNodes){
+                                        if( sel.childNodes[i].value == current.selected)
+                                            sel.childNodes[i].selected = true
+                                    }
                                 }
-                                if(cur.role){
-                                    element.appendChild(p, [
-                                            element.create('span', {name: 'role', innerText: ' as '+encd(cur.role)})]);
+                                cld.push(sel);
+                                if(current.all){
+                                    sel = element.create('select',{id: 'stnum',
+                                        onchange: function(){sndstat(resp.text.id, curname);}});
+                                    var arr = new Array();
+                                    for(var i=1; i<=current.all; i++){arr[i] = i;}//Пиздец, а не способ!
+                                    element.addOption(sel, arr);
+                                    if(current.completed && sel.childNodes[current.completed]){
+                                        var el = current.completed;
+                                        sel.childNodes[el].selected = true;
+                                    }else{sel.childNodes[0].selected = true;}
+                                    sel.removeChild(sel.firstChild);
+                                    cld.push(sel);
                                 }
-                                if(cur.comm){
-                                    element.appendChild(p, [
-                                            element.create('span', {name: 'comm', innerText: '('+encd(cur.comm)+')'})]);
+                                sel.focus();
+                            }else{
+                                var hid = ((current.tbl) ? current.tbl : "catalog");
+                                hid = element.create('input', {type: 'hidden', name: 'table', value: hid});
+                                //var edt = createElem('span',{className: 'edtl', 'name': i});
+                                /*if(!resp.text.edt && !resp.text[i][0]){continue;}
+                                if(resp.text.edt && !resp.text[i][0]){}else{}*/
+                                var num = numHash(current);
+                                for(var g=0; g<=num; g++){
+                                    var cur = current[g];
+                                    if(cur && isHash(cur)){
+                                        var p = (curname == 'bundle') ? element.create('p',{name: cur.elemid}) :
+                                                                           element.create('p',{'name': g});
+                                        var s = (curname == 'bundle') ? element.create('span',{name: 'name'}) :
+                                                    element.create('span',{name: 'name', innerText: encd(cur.name)});
+                                        cld.push(p, [s]);
+                                        if(curname == 'bundle'){
+                                            var a = element.create('a',{href: '/card/'+cur.elemid+'/',
+                                                     innerText: encd(cur.name), className: 'snone'});
+                                            if(cur.job) pclass.add(a,"s"+cur.job);
+                                            element.appendChild(s, [a])
+                                        }
+                                        if(cur.role){
+                                            element.appendChild(p, [
+                                                element.create('span', {name: 'role', innerText: ' as '+encd(cur.role)})]);
+                                        }
+                                        if(cur.comm){
+                                            element.appendChild(p, [
+                                                element.create('span', {name: 'comm', innerText: '('+encd(cur.comm)+')'})]);
+                                        }
+                                    }else{
+                                        var s;
+                                        if(curname == 'translation'){
+                                            s = element.create('span', {name: 'name'});
+                                            element.appendChild(s, [
+                                                element.create('span', {name: 'trstart', innerText: encd(current[0][0])})]);
+                                            if(current[0][1])
+                                                element.appendChild(s, [
+                                                    element.create('span', {innerText: ' - '}),
+                                                    element.create('span', {name: 'trend', innerText: encd(current[0][1])})
+                                                ]);
+                                        }else{
+                                            if(curname == 'duration') current += ' min.';
+                                            s = element.create('span', {name: 'name', innerText: encd(current)});
+                                        }
+                                        cld.push(element.create('p'), [s]);
+                                    }
                                 }
-                            }else{                                
-                                var s;
-                                if(curname == 'translation'){
-                                    s = element.create('span', {name: 'name'});
-                                    element.appendChild(s, [
-                                        element.create('span', {name: 'trstart', innerText: encd(current[0][0])})]);
-                                    if(current[0][1])
-                                        element.appendChild(s, [
-                                            element.create('span', {innerText: ' - '}),
-                                            element.create('span', {name: 'trend', innerText: encd(current[0][1])})
-                                        ]);
-                                }else{
-                                    if(curname == 'duration') current += ' min.';
-                                    s = element.create('span', {name: 'name', innerText: encd(current)});
-                                }
-                                element.appendChild(sp, [element.create('p'), [s]]);
                             }
                         }
-                        element.appendChild(mspn, [label, [/*edt,*/ sp, [hid]]]);
+                        element.appendChild(mspn, [label, [/*edt,*/ sp, cld]]);
                     }
                 break;
                 
@@ -290,7 +330,7 @@ var ajax = new (function(){
                 break;
                 
                 case 'logok':
-                    msg.hide();
+                    message.hide();
                     user.loginSuccess(resp.text);
                     window.location.reload();
                 break;
@@ -304,13 +344,12 @@ var ajax = new (function(){
                 break;
             }
         }catch(e){
-            msg.clear();
-            msg.add(e);
+            message.new(e);
             if(resp.text.text != 'notext'){
-                msg.add('Server response:');
-                msg.add(resp.text);
+                message.add('Server response:');
+                message.add(resp.text);
             }
-            msg.show();
+            message.show();
         }
     }
     

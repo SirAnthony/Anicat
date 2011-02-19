@@ -28,27 +28,27 @@
             </thead>
             <tbody id="tbdid">
             {% for title in list %}
-                <tr class="r{# { title.statusbundles.get.status } #}">
+                <tr class="r{{ title.1.status }}{% if title.0.air %}{{ title.0.air.numerator }}{% endif %}">
                     <td id="link{{ title.id }}" class="link">
-                        <a target="_blank" class="cardurl" href="/card/{{ title.id }}/">
+                        <a target="_blank" class="cardurl" href="/card/{{ title.0.id }}/">
                             <img alt="Go" src="/static/arrow.gif">
                         </a>
                     </td>
-                    <td onclick="cnt('id', '{{ title.id }}');" id="id{{ title.id }}" class="id">
+                    <td onclick="cnt('id', '{{ title.0.id }}');" id="id{{ title.0.id }}" class="id">
                         {{ forloop.counter|add:page.start }}
                     </td>
-                    <td onclick="cnt('name', '{{ title.id }}');" id="name{{ title.id }}" class="name left">
-                        {{ title.title }}
+                    <td onclick="cnt('name', '{{ title.0.id }}');" id="name{{ title.0.id }}" class="name left">
+                        {{ title.0.title }}
                     </td>
-                    <td onclick="cnt('numberofep', '{{ title.id }}');" id="numberofep{{ title.id }}" class="numberofep">
-                        {{ title.episodesCount }}
+                    <td onclick="cnt('numberofep', '{{ title.0.id }}');" id="numberofep{{ title.0.id }}" class="numberofep">
+                        {{ title.0.episodesCount }}
                     </td>
-                    <td onclick="cnt('translation', '{{ title.id }}');" id="translation{{ title.id }}" class="translation">
-                        {{ title.releasedAt|date:"d.m.Y" }}
-                        {%if title.endedAt %} - {{ title.endedAt|date:"d.m.Y" }} {% endif %} 
+                    <td onclick="cnt('translation', '{{ title.0.id }}');" id="translation{{ title.0.id }}" class="translation">
+                        {{ title.0.releasedAt|date:"d.m.Y" }}
+                        {%if title.0.endedAt %} - {{ title.0.endedAt|date:"d.m.Y" }} {% endif %} 
                     </td>                    
-                    <td onclick="cnt('type', '{{ title.id }}');" id="type{{ title.id }}" class="type">
-                        {{ title.releaseTypeS }}
+                    <td onclick="cnt('type', '{{ title.0.id }}');" id="type{{ title.0.id }}" class="type">
+                        {{ title.0.releaseTypeS }}
                     </td>
                     {# custom fields #}
                 </tr>

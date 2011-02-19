@@ -1,4 +1,4 @@
-.snone, .s0, .s {
+.sNone, .s0, .s {
     font: normal 14pt "times new roman",serif !important;
     color: #000 !important;
 }
@@ -28,7 +28,7 @@
     color: #F0F0F0 !important;
 }
 
-.rnone, .r0, .r {
+.rNone, .r0, .r {
     background-color: white;
 }
 .r1 {
@@ -51,26 +51,26 @@
     background-color: #F0F0F0;
 }
 
-.rnoneon, .r0on, .ron {
+.rNone1, .r01{
     background-color: yellow;
 }
 
-.r1on {
+.r11 {
     background-color: #FF69B4;
 }
 
-.r2on {
+.r21 {
     background-color: #FFD700;
 }
 
-.r3on {
+.r31 {
     background-color: #f2f696;
 }
 
-.r4on {
+.r41 {
     background-color: #ffb300;
 }
 
-.r5on {
+.r51 {
     background-color: #FFFFCC;
 }
