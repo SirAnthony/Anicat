@@ -741,3 +741,20 @@ function mnedt(elid,nam,e){
     }
 */
 }
+
+
+//################# Обработка и отправка формы.
+
+function sndstat(sid, name){
+    
+    var p = document.getElementById(name+sid);
+    var select = element.getSelected(p.firstChild);
+    var q = {'field': name, 'id': sid, 'value': select}
+    var num = p.childNodes[1];
+    if(num){
+        select = element.getSelected(num) + 1;
+        q['count'] = select;
+    }
+    ajax.loadXMLDoc(url, q);
+}
+

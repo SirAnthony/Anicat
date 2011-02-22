@@ -40,6 +40,14 @@ var element = new ( function(){
         }
     }
     
+    this.getSelected = function(obj){
+        var sel = obj.childNodes;
+        var select;
+        if(sel)
+            for(select in sel){ if(sel[select].selected) break; }
+        return select;
+    }
+    
     this.getChilds = function(obj){
         var childs = new Array();
         for(var i=0; i < obj.childNodes.length; i++){
@@ -298,7 +306,7 @@ var message = new (function(){
     
     //Clears message box and adds new p. 
     this.new = function(str, timeout){
-        this.clear()        
+        this.clear();
         this.add(str);
         this.timeout = timeout;
     }    
@@ -666,7 +674,7 @@ function mv(){
     }
 }
 
-//################# Отрисовка менюшки
+//################# Get menu with info
 
 function cnt(tag, num, e) {
     
@@ -696,28 +704,4 @@ function cnt(tag, num, e) {
 //Больше никаких яблок с их кривыми неработающими решениями.
 
 //#################
-
-
-//##############################################################################
-//##########################    Редактирование    ##############################
-//##############################################################################
-
-//################# Обработка и отправка формы.
-
-function sndstat(sid, name){    
-    
-    var sel =  document.getElementById('stid').childNodes;
-    var select;
-    for(select in sel){ if(sel[select].selected) break; }
-    sel = "edit="+name+"&id="+sid+"&string="+select;
-    var num =  document.getElementById('stnum');
-    if(num){
-        num = num.childNodes;
-        var selnumb;
-        for(selnumb in num){ if(num[selnumb].selected) break; }
-        selnumb++
-        sel += "&numnow="+selnumb;
-    }
-    ajax.loadXMLDoc(url, sel);
-}
 

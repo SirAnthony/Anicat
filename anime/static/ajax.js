@@ -157,44 +157,6 @@ var ajax = new (function(){
                     }
                 break;
                 
-                case 'nmform':                
-                    var inn = element.create('form',{ id: 'frm'});
-                    var label = element.create('label',{ htmlFor: 'state', 
-                        innerText: resp.text.val });
-                    var sel = element.create('select',{id: 'stid', name: 'state',
-                        onchange: function(){sndstat(resp.text.id, resp.text.name);}
-                    });
-                    resp.text.select = (function(obj){
-                        var ret = {};
-                        for(var i = 0; i<(function(o){var n=0; for(e in o) n++; return n;})(obj); i++) ret[i] = obj[i];
-                        return ret;
-                    })(resp.text.select);
-                    element.addOption(sel, resp.text.select);                                
-                    if(resp.text.selected){                        
-                        for(var i in sel.childNodes){
-                            if( sel.childNodes[i].value == resp.text.selected)
-                                sel.childNodes[i].selected = true
-                        }
-                    }
-                    element.appendChild(inn,[label,element.create('br'),sel])
-                    if(resp.text.all){
-                        var sel = element.create('select',{id: 'stnum',
-                            onchange: function(){sndstat(resp.text.id, resp.text.name);}});
-                        var arr = new Array();
-                        for(var i=1; i<=resp.text.all; i++){arr[i] = i;}//Пиздец, а не способ!
-                        element.addOption(sel, arr);
-                        if(resp.text.cmp && sel.childNodes[resp.text.cmp]){
-                            var el = resp.text.cmp;
-                            sel.childNodes[el].selected = true;
-                        }else{sel.childNodes[0].selected = true;}
-                        sel.removeChild(sel.firstChild);                    
-                        element.appendChild(inn,[sel]);
-                    }
-                    element.removeAllChilds(mspn);
-                    element.appendChild(mspn, [inn]);
-                    sel.focus();
-                break;
-                
                 case 'frmedt':
                     var el = document.getElementById('id'+resp.text.id).parentNode;
                     el.style.backgroundColor = resp.text.color;                    
@@ -250,7 +212,7 @@ var ajax = new (function(){
                                     return ret;
                                 })(resp.text.select);*/
                                 element.addOption(sel, current.select);
-                                if(current.selected){                        
+                                if(current.selected){
                                     for(var i in sel.childNodes){
                                         if( sel.childNodes[i].value == current.selected)
                                             sel.childNodes[i].selected = true
@@ -320,7 +282,7 @@ var ajax = new (function(){
                                 }
                             }
                         }
-                        element.appendChild(mspn, [label, [/*edt,*/ sp, cld]]);
+                        element.appendChild(mspn, [label, /*edt,*/ sp, cld]);
                     }
                 break;
                 
