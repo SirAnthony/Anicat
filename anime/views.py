@@ -1,6 +1,6 @@
 #import re
 
-from models import AnimeForm, AnimeItem, UserCreationFormMail, UserStatusBundle, USER_STATUS
+from models import AnimeForm, AnimeItem, AnimeName, UserCreationFormMail, UserStatusBundle, USER_STATUS
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.context_processors import csrf
 from django.shortcuts import render_to_response
@@ -55,6 +55,7 @@ def get(request):
         return {'text': 'Bad request fields: ' + str(e)}
     response = {'id': aid, 'order': fields}
     for field in fields:
+        #FIXME: so bad
         if field == 'state':
             if not request.user.is_authenticated():
                 response[field] = 'Anonymous users has not statistics.'
@@ -68,6 +69,20 @@ def get(request):
                 response[field] = {'selected': status, 'select': dict(USER_STATUS)}
                 if status == 2 or status == 4:
                     response[field].update({'completed': bundle.count, 'all': anime.episodesCount})
+        elif field == 'name':
+            #FIXME: cruve
+            response[field] = map(lambda n: {'name': str(n)}, AnimeName.objects.filter(anime=anime))
+        elif field == 'genre':
+            response[field] = ', '.join(map(lambda n: str(n), anime.genre.all()))
+        elif field == 'translation':
+            response[field] = anime.translation()
+        elif field == 'type':
+            response[field] = anime.releaseTypeS()
+        else:
+            try:
+                response[field] = getattr(anime, field)
+            except Exception, e:
+                response[field] = 'Error: ' + str(e)
     
     response = {'response': 'getok', 'text': response}
     

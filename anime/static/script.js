@@ -3,7 +3,7 @@
 
 var mCur; // Хранит текущую позицию мыши
 var xmlHttp;
-var mfl = 0;    // 0 - никаких действий. 1 - меню открыто, заболкирован инпут под ним.
+//var mfl = 0;    // 0 - никаких действий. 1 - меню открыто, заболкирован инпут под ним.
          // 2 - заблокировано инпутом, закрыто.
 var url = '/ajax/';
 var edtdv = 0; // эта переменная определяет редактируется ли менюшка или нет
@@ -297,6 +297,7 @@ var message = new (function(){
     this.strobj = new Array();
     
     this.timeout = null;
+    this.closeable = false;
     
     this.getSpan = function(){
         if(!this.span)
@@ -307,6 +308,7 @@ var message = new (function(){
     //Clears message box and adds new p. 
     this.new = function(str, timeout){
         this.clear();
+        this.lock();
         this.add(str);
         this.timeout = timeout;
     }    
@@ -384,6 +386,15 @@ var message = new (function(){
         dv.style.left = x + 'px';
     }
     
+    // Prevents menu from closing
+    this.lock = function(){
+        this.closeable = false;
+    }
+    
+    this.unlock = function(){
+        this.closeable = true;
+    }
+    
     //Show message. 
     this.show = function(time){
         if(!this.getSpan())
@@ -395,15 +406,28 @@ var message = new (function(){
             this.timeout = time;
         if(this.timeout)
             timer = setTimeout("document.getElementById('menu').style.display='none';", this.timeout);
+        this.unlock();
     }
     
     //Hide message.
-    this.hide = function(){
-        if(!this.getSpan())
+    this.hide = function(e){
+        var m = this == document ? message : this;
+        if(!m.closeable || !m.getSpan())
             return;
-        this.span.parentNode.style.display = 'none';
+        var menu = m.span.parentNode;
+        var target = e ? e.target : event.srcElement;
+        var checkParent = function(obj){
+            if(!obj) return true;
+            if(obj != menu) return checkParent(obj.parentNode);
+            return false;
+        }
+        if(checkParent(target)){
+            menu.style.display = 'none';
+            document.onclick = "undefined";
+            clearTimeout(timer);
+        }
     }
-    
+
 })();
 
 //########################
@@ -630,29 +654,6 @@ function mousePageXY(event){
     return {"x":x, "y":y};
 }
 
-//################# Прячет менюшку
-
-function hideDiv(e){
-    var dv = document.getElementById('menu');
-    var target=e?e.target:event.srcElement;
-    var tpar=target.parentNode;
-    if(tpar.parentNode != null){
-        var tpar2=tpar.parentNode;    
-        if(tpar2.parentNode != null){
-            var tpar3=tpar2.parentNode;
-            if(tpar3.parentNode != null){var tpar4=tpar3.parentNode;}
-        }
-    }
-    if( target == dv || tpar == dv || tpar2 == dv || tpar3 == dv || tpar4 == dv){
-    }else if(mfl == 1){
-        dv.style.display = 'none';        
-        document.onclick = "undefined";
-        mfl = 0;
-        clearTimeout(timer);
-        
-    } 
-}
-
 //################# Эта функция доставляет положение менюшки и контролирует ее прятание
 
 function mv(){    
@@ -668,7 +669,7 @@ function mv(){
         
         if(document.getElementById('menu')){ 
             if(document.getElementById('menu').style.display == "block" && !edtdv){
-                document.onclick = hideDiv;        // Прятание меню
+                document.onclick = message.hide; // Прятание меню
             }
         }
     }
@@ -678,25 +679,23 @@ function mv(){
 
 function cnt(tag, num, e) {
     
-    if (mfl != 2){
-        mfl = 1;
-        message.toEventPosition();
-        var qw = {'id': num}
-        switch (tag){
-            case 'name':
-                qw['field'] = ['name','genre'];
-            break;
-            case 'numberofep':
-                qw['field'] = ['bundle','duration','size'];
-            break;
-            case 'id':
-                qw['field'] = 'state';
-            break;
-            default:
-                qw['field'] = tag;
-        }
-        ajax.loadXMLDoc(url+'get/', qw);
-    } 
+    message.toEventPosition();
+    var qw = {'id': num}
+    switch (tag){
+        case 'name':
+            qw['field'] = ['name','genre'];
+        break;
+        case 'numberofep':
+            qw['field'] = ['bundle','duration'];
+        break;
+        case 'id':
+            qw['field'] = 'state';
+        break;
+        default:
+            qw['field'] = tag;
+    }
+    ajax.loadXMLDoc(url+'get/', qw);
+
 }
 
 //#################

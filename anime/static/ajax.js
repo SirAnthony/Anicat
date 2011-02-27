@@ -43,7 +43,7 @@ var ajax = new (function(){
         }
         
         //var cookies = cookie.get('SESSION');
-        if (qry){
+        if (request){
             if (xmlHttp){
                 xmlHttp.open("POST", url, true);
                 xmlHttp.onreadystatechange = handleRequestStateChange;
@@ -62,13 +62,7 @@ var ajax = new (function(){
         message.new('Processing Request');
         message.addTree(element.create('img', {src: '/static/loader.gif'}));
         message.show();
-        /*var mspan = document.getElementById('mspan');
-        var menu = document.getElementById('menu');
-        element.removeAllChilds(mspan)
-        element.appendChild(mspan, [element.create('p', {innerText: 'Processing Request'}),
-                                element.create('img', {src: '/templates/loader.gif'})]);
-        menu.style.display = 'block';
-        */
+        message.lock();
     }
     
     //################# обработка результатов
@@ -100,7 +94,7 @@ var ajax = new (function(){
                     }else if(xmlHttp.responseXML){ //Опера не отличает жсон от xml. лол.
                         ajxedt(xmlHttp.responseXML.documentElement);                 
                     }
-                    mfl = 1; //Сыграем на том, что это возьмет немного времени;                 
+                    message.unlock();
                 }else{
                     message.new('Status: '+xmlHttp.status);
                     message.add('Не удалось получить данные: \u000A'+xmlHttp.statusText);
@@ -112,8 +106,7 @@ var ajax = new (function(){
                 }
             }
         }catch(e){
-            alert('Caught Exception: ' + e);        
-            mfl = 1;
+            alert('Caught Exception: ' + e);
         }        
     }
     

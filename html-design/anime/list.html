@@ -44,8 +44,7 @@
                         {{ title.0.episodesCount }}
                     </td>
                     <td onclick="cnt('translation', '{{ title.0.id }}');" id="translation{{ title.0.id }}" class="translation">
-                        {{ title.0.releasedAt|date:"d.m.Y" }}
-                        {%if title.0.endedAt %} - {{ title.0.endedAt|date:"d.m.Y" }} {% endif %} 
+                        {{ title.0.translation }}
                     </td>                    
                     <td onclick="cnt('type', '{{ title.0.id }}');" id="type{{ title.0.id }}" class="type">
                         {{ title.0.releaseTypeS }}

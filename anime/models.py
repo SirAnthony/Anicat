@@ -14,46 +14,6 @@ ANIME_TYPES = [
     (6, u'AMV')
     ]
 
-ANIME_GENRE = [
-    (0, u'action'),
-    (1, u'adventure'),
-    (2, u'children'),
-    (3, u'comedy'),
-    (4, u'cyberpunk'),
-    (5, u'daily life'),
-    (6, u'detective'),
-    (7, u'drama'),
-    (8, u'ecchi'),
-    (9, u'fairy tale'),
-    (10, u'fantastic'),
-    (11, u'fantasy'),
-    (12, u'hentai'),
-    (13, u'history'),
-    (14, u'horror'),
-    (15, u'maho shodjo'),
-    (16, u'martial arts'),
-    (17, u'mecha'),
-    (18, u'music'),
-    (19, u'mystery'),
-    (20, u'parody'),
-    (21, u'police'),
-    (22, u'postapocalyptic'),
-    (23, u'psychology'),
-    (24, u'romance'),
-    (25, u'samurai'),
-    (26, u'school'),
-    (27, u'shojo'),
-    (28, u'shodjo-ai'),
-    (29, u'shonen'),
-    (30, u'sport'),
-    (31, u'steampunk'),
-    (32, u'thriller'),
-    (33, u'vampires'),
-    (34, u'war'),
-    (35, u'yaoi'),
-    (36, u'yuri'),
-]
-
 USER_STATUS = [
     (0, u'none'),
     (1, u'want'),
@@ -63,9 +23,15 @@ USER_STATUS = [
     (5, u'partially watched'),
 ]
 
+class Genre(models.Model):
+    name = models.CharField(max_length=200, db_index=True, unique=True)
+    
+    def __unicode__(self):
+        return self.name
+
 class AnimeItem(models.Model):
     title = models.CharField(max_length=200, db_index=True, unique_for_date='releasedAt')
-    genre = models.CommaSeparatedIntegerField(max_length=50, choices=ANIME_GENRE, blank=True)
+    genre = models.ManyToManyField(Genre)
     releaseType = models.IntegerField(choices=ANIME_TYPES)
     episodesCount = models.IntegerField()
     duration = models.IntegerField()
@@ -78,6 +44,11 @@ class AnimeItem(models.Model):
 
     def releaseTypeS(self):
         return ANIME_TYPES[self.releaseType][1]
+    
+    def translation(self):
+        if self.endedAt:
+            return ' - '.join([self.releasedAt.strftime("%d.%m.%Y"), self.endedAt.strftime("%d.%m.%Y")])
+        return self.releasedAt.strftime("%d.%m.%Y")
     
     class Meta:
         ordering = ["title"]
@@ -97,7 +68,11 @@ class AnimeName(models.Model):
     title = models.CharField(max_length=200)
     anime = models.ForeignKey(AnimeItem, related_name="animenames")
     
+    def __unicode__(self):
+        return self.title
+    
     class Meta:
+        ordering = ["title"]
         unique_together = ("title", "anime")
 
 class AnimeForm(ModelForm):

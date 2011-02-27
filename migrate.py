@@ -63,7 +63,7 @@ def encd(string):
 
 class Sql:
     "mysql module"
-    import MySQLdb    
+    import MySQLdb
 
     def __init__(self, **vars):
         if not vars.has_key("db"):
@@ -98,6 +98,7 @@ class Sql:
             return c.lastrowid
 
 def moveAll():
+    moveGenres()
     moveAnumeItems()
     moveAnimeName()
     moveCredit()
@@ -107,18 +108,31 @@ def moveAll():
     moveOrganisationBundles()
     moveUserStatus()
 
+def moveGenres():
+    sql = Sql(db='tempcat', user='catman', passwd='catpass')
+    genres = sql.executeQuery('DESC `catalog` genre')[0]['Type'].decode('utf-8')[5:-2].split("','")
+    for genre in genres:
+        try:
+            ng = Genre(name=genre)
+            ng.save()
+        except Exception, e:
+            print genre
+            raise Exception, e
+
 def moveAnumeItems():
     sql = Sql(db='tempcat', user='catman', passwd='catpass')
     res = sql.executeQuery('SELECT * FROM `catalog` ORDER BY id')
     for element in res:
         try:
             record = AnimeItem(id=element['id'], title=unicode(encd(element['name']), 'utf-8'),
-                genre=getGenreId(element['genre'].split(',')), releaseType=getTypeId(element['type']),
-                episodesCount=element['numberofep'], duration=element['duration'],
-                releasedAt=timedecode(element['translation']), endedAt=timedecode(element['enddate']),
-                air=bool(element['air'])
+                releaseType=getTypeId(element['type']), episodesCount=element['numberofep'],
+                duration=element['duration'], releasedAt=timedecode(element['translation']),
+                endedAt=timedecode(element['enddate']), air=bool(element['air'])
             )
             record.save()
+            for genre in element['genre'].split(','):
+                g = Genre.objects.get(name=genre)
+                record.genre.add(g)
         except Exception, e:
             print element
             raise Exception, e
