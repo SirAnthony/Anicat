@@ -137,6 +137,10 @@ def moveAnumeItems():
             print element
             raise Exception, e
 
+def moveBundles():
+    sql = Sql(db='tempcat', user='catman', passwd='catpass')
+    res = sql.executeQuery('SELECT * FROM `catalog` ORDER BY id')
+
 def moveAnimeName():
     sql = Sql(db='tempcat', user='catman', passwd='catpass')
     res = sql.executeQuery('SELECT * FROM `namebun` ORDER BY id')

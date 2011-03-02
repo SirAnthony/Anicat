@@ -29,6 +29,21 @@ class Genre(models.Model):
     def __unicode__(self):
         return self.name
 
+class AnimeBundle(models.Model):
+    
+    @classmethod
+    def tie(cls, one, two):
+        try:
+            bundle = one.bundle or two.bundle
+            if not bundle:
+                bundle = cls()
+                bundle.save()
+            one.bundle = two.bundle = bundle
+            one.save()
+            two.save()
+        except Exception, e:
+            raise Exception, e
+
 class AnimeItem(models.Model):
     title = models.CharField(max_length=200, db_index=True, unique_for_date='releasedAt')
     genre = models.ManyToManyField(Genre)
@@ -37,6 +52,7 @@ class AnimeItem(models.Model):
     duration = models.IntegerField()
     releasedAt = models.DateTimeField()
     endedAt = models.DateTimeField(blank=True, null=True)
+    bundle = models.ForeignKey(AnimeBundle, related_name='animeitems', null=True, blank=True)
     air = models.BooleanField()
     
     def __unicode__(self):
