@@ -8,7 +8,7 @@ from django.utils import simplejson
 from django.views.decorators.cache import cache_page
 from annoying.decorators import render_to
 from django.contrib import auth
-from functions import getVal
+from functions import getVal, getAttr
 
 def ajaxResponse(fn):
     ret = {'text': 'Unprocessed error', 'response': 'error'}
@@ -78,6 +78,12 @@ def get(request):
             response[field] = anime.translation()
         elif field == 'type':
             response[field] = anime.releaseTypeS()
+        elif field == 'bundle':
+            items = anime.bundle.animeitems.all().order_by('releasedAt')
+            status = UserStatusBundle.objects.get_for_user(items, request.user.id)
+            response[field] = map(lambda x: {'name': x.title, 'elemid': x.id,
+                                             'job': getAttr(getVal(x.id, None, status), 'status', 0, )},
+                                  items)
         else:
             try:
                 response[field] = getattr(anime, field)

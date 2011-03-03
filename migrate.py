@@ -101,6 +101,7 @@ def moveAll():
     moveGenres()
     moveAnumeItems()
     moveAnimeName()
+    moveBundles()
     moveCredit()
     movePeople()
     movePeopleBundles()
@@ -139,7 +140,16 @@ def moveAnumeItems():
 
 def moveBundles():
     sql = Sql(db='tempcat', user='catman', passwd='catpass')
-    res = sql.executeQuery('SELECT * FROM `catalog` ORDER BY id')
+    res = sql.executeQuery('SELECT * FROM `bundlebun` ORDER BY id')
+    for element in res:
+        try:
+            main = AnimeItem.objects.get(id=element['mainid'])
+            bound = AnimeItem.objects.get(id=element['elemid'])
+            if main != bound:
+                AnimeBundle.tie(main, bound)
+        except Exception, e:
+            print element
+            raise Exception, e
 
 def moveAnimeName():
     sql = Sql(db='tempcat', user='catman', passwd='catpass')
@@ -152,6 +162,7 @@ def moveAnimeName():
             record = AnimeName(title=unicode(encd(element['name']), 'utf-8'), anime=item)
             record.save()
         except Exception, e:
+            print element
             raise Exception, e
 
 def moveCredit():

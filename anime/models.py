@@ -33,16 +33,12 @@ class AnimeBundle(models.Model):
     
     @classmethod
     def tie(cls, one, two):
-        try:
-            bundle = one.bundle or two.bundle
-            if not bundle:
-                bundle = cls()
-                bundle.save()
-            one.bundle = two.bundle = bundle
-            one.save()
-            two.save()
-        except Exception, e:
-            raise Exception, e
+        bundle = one.bundle or two.bundle or cls()
+        if not bundle.id:
+            bundle.save()
+        one.bundle = two.bundle = bundle
+        one.save()
+        two.save()
 
 class AnimeItem(models.Model):
     title = models.CharField(max_length=200, db_index=True, unique_for_date='releasedAt')
@@ -137,6 +133,7 @@ class PeopleBundle(models.Model):
 
 class StatusManager(models.Manager):
     def get_for_user(self, items, user):
+        #TODO: Think about .values()
         statuses = self.filter(anime__in=[anime.id for anime in items], user=user)
         status_dict = collections.defaultdict(lambda: None)
         for status in statuses:

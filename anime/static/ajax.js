@@ -243,8 +243,7 @@ var ajax = new (function(){
                                         cld.push(p, [s]);
                                         if(curname == 'bundle'){
                                             var a = element.create('a',{href: '/card/'+cur.elemid+'/',
-                                                     innerText: encd(cur.name), className: 'snone'});
-                                            if(cur.job) pclass.add(a,"s"+cur.job);
+                                                     innerText: encd(cur.name), className: 's' + (cur.job ? cur.job : 0)});
                                             element.appendChild(s, [a])
                                         }
                                         if(cur.role){
