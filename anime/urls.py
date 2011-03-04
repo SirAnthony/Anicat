@@ -12,6 +12,6 @@ urlpatterns = patterns(
     (r'^ajax/register/$', 'ajaxregister'),    
     (r'^logout/$', 'logout'),
     (r'^register/$', 'register'),
-    (r'^/card/(?P<anime_id>\d+)/?$', 'card'),
+    (r'^card/(?P<animeId>\d+)?/?$', 'card'),
 )
 #

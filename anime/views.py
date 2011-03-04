@@ -9,6 +9,7 @@ from django.views.decorators.cache import cache_page
 from annoying.decorators import render_to
 from django.contrib import auth
 from functions import getVal, getAttr
+from random import randint
 
 def ajaxResponse(fn):
     ret = {'text': 'Unprocessed error', 'response': 'error'}
@@ -34,10 +35,24 @@ def index(request, page=0):
     return {'list': [(anime, statuses[anime.id]) for anime in items],
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
 
-@cache_page(10)
-@render_to('anime/view.html')
-def card(request, anime_id=0):
-    return {'list': AnimeItem.objects.get(id=int(anime_id))}
+#@cache_page(10)
+@render_to('anime/card.html')
+def card(request, animeId=0):
+    if not animeId:
+        animeId = randint(1, AnimeItem.objects.count())
+    try:
+        anime = AnimeItem.objects.get(id=int(animeId))
+    except Exception:
+        anime = None
+    bundles = None
+    if anime and anime.bundle:
+        bundles = anime.bundle.animeitems.all().order_by('releasedAt')
+        if request.user.is_authenticated():
+            status = UserStatusBundle.objects.get_for_user(bundles, request.user.id)
+            bundles = map(lambda x: (x, getAttr(status[x.id], 'status', 0)), bundles)
+        else:
+            bundles = map(lambda x: (x,  0), bundles)
+    return {'anime': anime, 'bundles': bundles}
 
 @ajaxResponse
 def get(request):
@@ -79,11 +94,12 @@ def get(request):
         elif field == 'type':
             response[field] = anime.releaseTypeS()
         elif field == 'bundle':
-            items = anime.bundle.animeitems.all().order_by('releasedAt')
-            status = UserStatusBundle.objects.get_for_user(items, request.user.id)
-            response[field] = map(lambda x: {'name': x.title, 'elemid': x.id,
-                                             'job': getAttr(getVal(x.id, None, status), 'status', 0, )},
-                                  items)
+            if anime.bundle:
+                items = anime.bundle.animeitems.all().order_by('releasedAt')
+                status = UserStatusBundle.objects.get_for_user(items, request.user.id)
+                response[field] = map(lambda x: {'name': x.title, 'elemid': x.id,
+                                                 'job': getAttr(getVal(x.id, None, status), 'status', 0, )},
+                                      items)
         else:
             try:
                 response[field] = getattr(anime, field)

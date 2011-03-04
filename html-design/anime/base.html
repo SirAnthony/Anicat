@@ -24,17 +24,16 @@
             &nbsp;<a class="nurl" onclick="searcher.toggle();">Search</a>
             <input type="button" style="height: 19px;" onclick="corovan++; alert('Корованов ограблено:'+corovan);" value="Грабить корованы" />
             &nbsp;<a class="nurl" href="/card/">Random</a>
-        </div>
-        {% if user.is_authenticated %}        
-        <div class="leftmenu">
+        {% if user.is_authenticated %}
     	   |&nbsp;<a class="nurl" onclick="add.toggle();">Add</a>
         </div>
         <div id="logdiv" class="rightmenu">
             <span><a href="/" title="User settings">{{ user.username }}</a></span>	
             <a class="nurl" onclick="user.logout();">Logout</a>	
-        </div>
-        <div class="rightmenu" style="margin-top: 1px;">
-            <a href="/stat/" class="nurl">Statistics</a>	
+        </div>        
+        <div class="rightmenu">
+            <a href="/stat/" class="nurl">Statistics</a>
+            {% block selectView %}	
             <select id="show" onChange="setshow();">
             {# Это можно в какой-нибудь лист ужать, значения цифровые сделать #}
                 <option value="null" selected>Display Mode</option>
@@ -44,8 +43,10 @@
                 <option value="ok">Watched</option>
                 <option value="dropped">Dropped</option>
             </select>
+            {% endblock %}
         </div>
         {% else %}
+        </div>
         <div id="logdiv" class="rightmenu">
             <a onclick="user.toggle();" class="nurl">Account</a>	
         </div>

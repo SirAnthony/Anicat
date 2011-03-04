@@ -1,0 +1,67 @@
+{% extends "anime/base.html" %}
+    
+    {% block selectView %}
+    {% endblock %}    
+
+    {% block main %}
+    {% if not anime %}
+    <div id="nocard">
+	   <p>No record found.</p>
+    </div>
+    {% else %}
+    <div id="imagebun" class="cardcol">
+        <div id="cimg">
+            <img src="/images/{{ anime.id }}/>" />
+        </div>
+        <b>Bundled with:</b><br/>
+        <!-- Это все нужно переверстать -->
+        <table>
+            {% for bundle in bundles %}
+            <tr>
+                <td>
+                {% ifequal bundle.0.id anime.id %}
+                    <img src="/static/arrowblack.gif" />
+                {% endifequal %}
+                </td>
+                <td align="right">
+                    {{ forloop.counter }}
+                </td>
+                <td>
+                    <a href="/card/{{ bundle.0.id }}" class="s{{ bundle.1 }}" >
+                        {{ bundle.0.title }}
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div id="main" class="cardcol">
+        <div>
+            <b>Name:</b><br/>
+            {% for name in anime.animenames.values %}
+            {{ name.title }}<br/>
+            {% endfor %}
+		</div>
+        <div>
+            <b>Type:</b><br/>            
+            {{ anime.releaseTypeS }}
+		</div>
+        <div>
+            <b>Genre:</b><br/>            
+            {{ anime.genre.all|join:", " }}
+		</div>		
+        <div>
+            <b>Episodes:</b><br/>            
+            {{ anime.episodesCount }}
+		</div>
+        <div>
+            <b>Duration:</b><br/>            
+            {{ anime.duration }} min.
+		</div>
+		<div>
+            <b>Translation:</b><br/>            
+            {{ anime.translation }}
+		</div>
+    </div>
+    {% endif %}
+    {% endblock %}
