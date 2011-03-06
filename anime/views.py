@@ -1,6 +1,7 @@
 #import re
 
 from models import AnimeForm, AnimeItem, AnimeName, UserCreationFormMail, UserStatusBundle, USER_STATUS
+from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.context_processors import csrf
 from django.shortcuts import render_to_response
@@ -35,7 +36,6 @@ def index(request, page=0):
     return {'list': [(anime, statuses[anime.id]) for anime in items],
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
 
-#@cache_page(10)
 @render_to('anime/card.html')
 def card(request, animeId=0):
     if not animeId:
@@ -53,6 +53,39 @@ def card(request, animeId=0):
         else:
             bundles = map(lambda x: (x,  0), bundles)
     return {'anime': anime, 'bundles': bundles}
+
+@render_to('anime/stat.html')
+def stat(request, userId=0):
+    user = None
+    tuser = []
+    username = 'Anonymous'
+    if userId:
+        try:
+            user = User.objects.get(id=userId)
+        except Exception, e:
+            user = None
+    elif request.user.is_authenticated():
+        user = request.user
+        username = user.username
+    if user:
+        total = {'name': 'Total', 'full': 0, 'count': 0, 'custom': 0}
+        for status in USER_STATUS[1::]:
+            arr = UserStatusBundle.objects.filter(user=user.id, status=status[0]).extra(
+                select = {'full': 'SUM(anime_animeitem.episodesCount*anime_animeitem.duration)',
+                          'custom': 'SUM(anime_animeitem.duration*anime_userstatusbundle.count)',
+                          'count': 'COUNT(*)'}
+                ).values('anime__episodesCount', 'anime__duration', 'full', 'custom',
+                'count').select_related('anime__episodesCount', 'anime__duration').get()
+            arr['name'] = status[1]            
+            if status[0] == 3:
+                arr['custom'] = arr['full']
+            #FUUU
+            total['full'] += arr['full'] or 0
+            total['count'] += arr['count'] or 0
+            total['custom'] += arr['custom'] or 0
+            tuser.append(arr)
+        tuser.append(total)
+    return {'username': username, 'stat': tuser}
 
 @ajaxResponse
 def get(request):

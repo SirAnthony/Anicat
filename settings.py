@@ -14,10 +14,10 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', 
-        'NAME': '1.db', 
-        'USER': '',     
+        'NAME': '1.db',
+        'USER': '',
         'PASSWORD': '', 
-        'HOST': '',     
+        'HOST': '',
         'PORT': '',     
     }
 }

@@ -1,0 +1,47 @@
+{% extends "anime/base.html" %}
+
+    {% block customScripts %}
+    <script type="text/javascript" src="/static/stat.js"></script>
+    {% endblock %}
+
+    {% block selectView %}
+    {% endblock %}
+
+    {% block main %}
+    {% if not stat %}
+    <div id="nostat">
+        No such user.
+    </div>
+    {% else %}
+    <div>
+        <p><b>User</b>: {{ username }}</p>
+    </div>
+    <div>
+        <p>Statistics:</p>
+        <table style="border-collapse: separate;">
+            <thead>
+                <th></th>
+                <th>Items</th>
+                <th colspan="2">Full duration</th>
+                <th colspan="2">Watched</th>
+            </thead>
+            <tbody>
+            {% for element in stat %}
+                <tr style="text-align: right;  border-spacing: 3;">
+                    <td style="text-align: left;">
+                        {% if forloop.last %}<b>{% endif %}
+                        {{ element.name|capfirst }}
+                        {% if forloop.last %}</b>{% endif %}:
+                    </td>
+                    <td>{{ element.count|default_if_none:0 }}</td>
+                    <td name="num">{{ element.full|default_if_none:0 }}</td>
+                    <td>min.</td>
+                    <td name="num">{{ element.custom|default_if_none:0 }}</td>
+                    <td>min.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    {% endblock %}

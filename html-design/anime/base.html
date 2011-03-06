@@ -14,6 +14,8 @@
     {% if user.is_authenticated %}        
     <script type="text/javascript" src="/static/ae.js"></script>
     {% endif %}
+    {% block customScripts %}
+    {% endblock %}
 </head>
 <body>
     <div id="header" class="thdtbl">

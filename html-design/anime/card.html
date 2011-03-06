@@ -1,12 +1,12 @@
 {% extends "anime/base.html" %}
-    
+
     {% block selectView %}
-    {% endblock %}    
+    {% endblock %}
 
     {% block main %}
     {% if not anime %}
     <div id="nocard">
-	   <p>No record found.</p>
+        <p>No record found.</p>
     </div>
     {% else %}
     <div id="imagebun" class="cardcol">
@@ -41,27 +41,27 @@
             {% for name in anime.animenames.values %}
             {{ name.title }}<br/>
             {% endfor %}
-		</div>
+        </div>
         <div>
-            <b>Type:</b><br/>            
+            <b>Type:</b><br/>
             {{ anime.releaseTypeS }}
-		</div>
+        </div>
         <div>
-            <b>Genre:</b><br/>            
+            <b>Genre:</b><br/>
             {{ anime.genre.all|join:", " }}
-		</div>		
+        </div>
         <div>
-            <b>Episodes:</b><br/>            
+            <b>Episodes:</b><br/>
             {{ anime.episodesCount }}
-		</div>
+        </div>
         <div>
-            <b>Duration:</b><br/>            
+            <b>Duration:</b><br/>
             {{ anime.duration }} min.
-		</div>
-		<div>
-            <b>Translation:</b><br/>            
+        </div>
+        <div>
+            <b>Translation:</b><br/>
             {{ anime.translation }}
-		</div>
+        </div>
     </div>
     {% endif %}
     {% endblock %}

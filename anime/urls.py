@@ -13,5 +13,6 @@ urlpatterns = patterns(
     (r'^logout/$', 'logout'),
     (r'^register/$', 'register'),
     (r'^card/(?P<animeId>\d+)?/?$', 'card'),
+    (r'^stat/(?P<userId>\d+)?/?$', 'stat'),
 )
 #

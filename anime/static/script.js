@@ -40,6 +40,19 @@ var element = new ( function(){
         }
     }
     
+    //########################
+
+function getOffset(obj){
+    var el = obj;
+    var offset = {top: 0, left: obj.offsetLeft};
+    while(el.parentNode.parentNode.nodeName != "BODY"){
+        el = el.parentNode;
+        offset.top += el.offsetTop; 
+        offset.left += el.offsetLeft;
+    }
+    return offset;    
+}
+    
     this.getSelected = function(obj){
         var sel = obj.childNodes;
         var select;
@@ -101,6 +114,19 @@ var element = new ( function(){
     this.insert = function(obj, elem){        
         obj.parentNode.insertBefore(elem, obj);
     }
+    
+    this.getOffset = function(obj, parent){
+        parent = parent ? parent : document.body;
+        var el = obj;
+        var offset = {top: 0, left: obj.offsetLeft};
+        while(el.parentNode.parentNode != parent){
+            el = el.parentNode;
+            offset.top += el.offsetTop;
+            offset.left += el.offsetLeft;
+        }
+        return offset;    
+    }
+
 })();
 
 //################# Работа с куами.
@@ -430,19 +456,6 @@ var message = new (function(){
 
 })();
 
-//########################
-
-function getOffset(obj){
-    var el = obj;
-    var offset = {top: 0, left: obj.offsetLeft};
-    while(el.parentNode.parentNode.nodeName != "BODY"){
-        el = el.parentNode;
-        offset.top += el.offsetTop; 
-        offset.left += el.offsetLeft;
-    }
-    return offset;    
-}
-
 //#######################
 
 if(!Array.prototype.indexOf){
@@ -489,7 +502,8 @@ window.onload = function(){
 
     user.init();
     searcher.init();
-    if(typeof(variableName) != "undefined") add.init();
+    if(typeof(add) != "undefined") add.init();
+    if(typeof(stat) != "undefined") stat.init();
     mv();
     //document.getElementById('srch').style.display = 'none';
     showFN();
