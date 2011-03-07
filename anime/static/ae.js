@@ -417,7 +417,31 @@ var edit = new (function edit_class(){
     
     this.init = function(){
         this.loaded = true;
-    } 
+    }
+    
+    this.getForm = function(){
+        return document.getElementById('EditForm');
+    }
+    
+    this.send = function(){
+        var form = this.getForm();
+        if(!form || !form.name)
+            return;
+        formData = {}
+        var f = function(elm){
+            if(elm.tagName == "INPUT" || elm.tagName == "TEXTAREA" || elm.tagName == "SELECT"){
+                if(elm.type != "button")
+                    formData[elm.name] = elm.value;
+            }else{
+                element.downTree(f, elm);
+            }
+        }
+        element.downTree(f, form);
+        formData['field'] = form.name;
+        ajax.loadXMLDoc(url+'set/', formData);
+    }
+    
+    
     /*this.edtdv;
     
     this.addElem = function(nam, elid, tbl, e){
@@ -652,97 +676,6 @@ var edit = new (function edit_class(){
             
 })();
 
-//################# Редактироване полей.
-
-/*function edt(tag,num,e){
-
-    if(!mfl){
-        mfl = 2;        
-        document.getElementById('menu').style.display = 'none';
-        message.toEventPosition();    
-        elm = document.getElementById(tag+num);
-        //долой обходные маневры. будем получать ширину по ид элементов шапки
-        var cs = elm.offsetWidth - 5; 
-        if(!elm.firstChild){
-            elm.innerHTML = '<input type="text" id="edtbox"    value="" onkeydown="if(event.keyCode==13){acpedt(event)}">';    
-        }else{
-            elm.innerHTML = '<input type="text" id="edtbox" onkeydown="if(event.keyCode==13){acpedt(event)}" value="'+elm.firstChild.nodeValue+'">';
-        }
-        var ebox = document.getElementById('edtbox');
-        ebox.style.width = cs + 'px'; 
-        ebox.select();
-        edtdv = 1;        
-        document.onclick = acpedt;
-            
-    }
-}*/
-
-//################# Применение изменений.
-
-/*function acpedt(e){
-    
-    var idd = elm.id; //глобальность плохо сказывается
-    var keydwn = false;
-    if(e && e.type == "keydown"){keydwn = true;}
-    var target=e?e.target:event.srcElement;
-    var tpar = target.parentNode;
-    if(!keydwn && ( target == elm || tpar == elm )){
-    }else{
-        var eid = idd.replace(/\D+/, "");
-        var tag = idd.replace(/\d+/, "");
-        var value = elm.firstChild.value;        
-        value = value.replace(/\n/g, "<br/>");
-        if(tag == "numberofep"){
-            if(!/[\d]/.test(value) || value < 0){value = "-1";}
-        }                                
-        var qw = "edit="+tag+"&id="+eid+"&string="+value;        
-        loadXMLDoc(url, qw);
-        //elm.innerHTML = elm.firstChild.value;
-        document.onclick = undefined;
-        edtdv = 0;        
-    }    
-}*/
-
-
-//Для редактирования менюшки обычные способы смогли бы подойти, но это прийдется делать через жопу
-//Поэтому будет еще одна функция
-
-//################# Редактирование меню.
-
-function mnedt(elid,nam,e){
-/*    
-    if(!edtdv){
-        elm = document.getElementById(elid+nam);
-        var ebox;
-        if(elid == 'anothername'){
-            if(elm.innerHTML == 'Править'){
-                elm.innerHTML = '<textarea rows="10" cols="50" id="edta" wrap="hard"></textarea>';
-            }else{
-                var wdt = elm.parentNode.offsetWidth;
-                if(wdt < 345){wdt = 345;}
-                var rtx = elm.innerHTML.replace(/<br>/ig, "\n");            
-                elm.innerHTML = '<textarea rows="7" id="edta" wrap="hard">'+rtx+'</textarea>';
-                document.getElementById('edta').style.width = wdt-1+'px';;
-            }
-            ebox = document.getElementById('edta');
-        }else{
-            if(elm.innerHTML == 'Править'){
-                elm.innerHTML = '<input type="text" onkeydown="if(event.keyCode==13){acpedt(event)}" id="edtbox" value="">';
-                document.getElementById('edtbox').style.width = elm.parentNode.offsetWidth-1+'px';
-            }else{
-                elm.innerHTML = '<input type="text" onkeydown="if(event.keyCode==13){acpedt(event)}" id="edtbox" value="'+elm.innerHTML+'">';
-                document.getElementById('edtbox').style.width = elm.parentNode.offsetWidth-1+'px';
-            }
-            ebox = document.getElementById('edtbox');
-        }
-        ebox.focus();
-        edtdv = 1;    
-        document.onclick = acpedt;    
-    }
-*/
-}
-
-
 //################# Обработка и отправка формы.
 
 function sndstat(sid, name){
@@ -755,6 +688,6 @@ function sndstat(sid, name){
         select = element.getSelected(num) + 1;
         q['count'] = select;
     }
-    ajax.loadXMLDoc(url, q);
+    ajax.loadXMLDoc(url+'set/', q);
 }
 

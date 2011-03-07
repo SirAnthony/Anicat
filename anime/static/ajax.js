@@ -59,7 +59,7 @@ var ajax = new (function(){
     }
     
     var setRequest = function(){
-        message.new('Processing Request');
+        message.create('Processing Request');
         message.addTree(element.create('img', {src: '/static/loader.gif'}));
         message.show();
         message.lock();
@@ -96,7 +96,7 @@ var ajax = new (function(){
                     }
                     message.unlock();
                 }else{
-                    message.new('Status: '+xmlHttp.status);
+                    message.create('Status: '+xmlHttp.status);
                     message.add('Не удалось получить данные: \u000A'+xmlHttp.statusText);
                     message.addHTML(xmlHttp.responseText);
                     message.show();
@@ -110,9 +110,8 @@ var ajax = new (function(){
         }        
     }
     
-    var processingResult = function(response){    
+    var processingResult = function(resp){    
         var mspn = document.getElementById('mspan');
-        var resp = response;
         try{      
             switch(resp['response']){
             
@@ -120,25 +119,27 @@ var ajax = new (function(){
                     app.retfunct(resp['text']);
                 break;
                 
-                case 'edtok':
-                /*
-                    document.getElementById('menu').style.display='none';
-                    mspn.innerHTML = 'none';
-                    edit.processResult(resp['text']);
-                */                
-                break;
-                
                 case 'editok':
-                /*
-                    mspn.innerHTML = 'База успешно обновлена';            
-                    if (!resp.text){
-                        elm.innerHTML = "";
-                    }else{                                    
-                        if(resp.text != 'notext' && elm)
-                            elm.innerHTML = resp.text;                    
+                    if(resp.field == 'status'){
+                        message.hide();
+                        var row = document.getElementById('id' + resp.id);
+                        if(!isUndef(resp.text.status) && row && row.parentNode){
+                            row = row.parentNode;
+                            pclass.remove(row, 'r\\d*');
+                            pclass.add(row, 'r' + resp.text.status)
+                        }
+                        var noe = document.getElementById('numberofep' + resp.id);
+                        if(noe){
+                            var noetext = noe.textContent.replace(/(\d+\/)?/, "").replace(/\s/gi, '');
+                            element.removeAllChilds(noe);                            
+                            if(resp.text.count){
+                                element.appendChild(noe, [element.create('TextNode', {
+                                                    innerText: resp.text.count + '/' + noetext})]);
+                            }else{
+                                element.appendChild(noe, [element.create('TextNode', {innerText: noetext})]);
+                            }
+                        }
                     }
-                    timer = setTimeout("document.getElementById('menu').style.display='none';", 1500);
-                */
                 break;
                 
                 case 'error':
@@ -147,32 +148,6 @@ var ajax = new (function(){
                         throw new Error(resp.text);
                     }else{
                         throw new Error('Unknown error.');
-                    }
-                break;
-                
-                case 'frmedt':
-                    var el = document.getElementById('id'+resp.text.id).parentNode;
-                    el.style.backgroundColor = resp.text.color;                    
-                    obj = document.getElementById('numberofep' + resp.text.id);
-                    nof = obj.textContent.replace(/(\d+\/)?/, "")
-                    element.removeAllChilds(obj);
-                    if(resp.text.comm){
-                        element.appendChild(obj, [element.create('TextNode', {innerText: resp.text.comm+'/'+nof})]);
-                    }else{
-                        element.appendChild(obj, [element.create('TextNode', {innerText: nof})]);
-                    }
-                    document.getElementById('menu').style.display = 'none';
-                    element.removeAllChilds(mspn);
-                break;
-                
-                case 'egetok':
-                    if(resp.text.edt == 'yes'){
-                        var name;
-                        for(var i in resp.text){
-                            if(i == 'edt' || i == 'id'){continue;}
-                            name = i;                                         
-                        }
-                        edit.fillCont(resp.text[name], name, resp.text.id);
                     }
                 break;
                 
@@ -191,19 +166,23 @@ var ajax = new (function(){
                         if(isString(current)){
                             sp.innerText = current;
                         }else{
-                            if(curname == 'state'){                            
-                                var sel = element.create('select',{id: 'stid', name: 'state',
-                                    onchange: function(){sndstat(resp.text.id, curname);}
-                                });                            
-                                /*
-                                // Ох, лол, это какой-то безумный sort
-                                // Я не представляю, зачем это писал, но оно мне нравится, поэтому оставлю
-                                resp.text.select = (function(obj){  
-                                    var ret = {};
-                                    for(var i = 0; i<(function(o){var n=0; for(e in o) n++; return n;})(obj); i++)
-                                        ret[i] = obj[i];
-                                    return ret;
-                                })(resp.text.select);*/
+                            if(curname == 'state'){
+                                sp = element.create('form', {'id': 'EditForm', name: 'status'});
+                                var sel = element.create('select',{id: 'stid', name: 'status',
+                                    onchange: function(){
+                                        var noe = document.getElementById('stnum');
+                                        if(this.value != 2 && this.value != 4){
+                                            element.remove(noe);
+                                        }else{
+                                            if(!noe)
+                                                element.appendChild(this.parentNode, [element.create('input',
+                                                     {'type': 'hidden', name: 'count', value: 1})]);
+                                        }
+                                        edit.send();
+                                    }
+                                });
+                                cld.push(element.create('input', {'type': 'hidden', name: 'id',
+                                                         'value': resp.text.id}));
                                 element.addOption(sel, current.select);
                                 if(current.selected){
                                     for(var i in sel.childNodes){
@@ -213,8 +192,8 @@ var ajax = new (function(){
                                 }
                                 cld.push(sel);
                                 if(current.all){
-                                    sel = element.create('select',{id: 'stnum',
-                                        onchange: function(){sndstat(resp.text.id, curname);}});
+                                    sel = element.create('select',{id: 'stnum', name: 'count',
+                                        onchange: function(){ edit.send(); }});
                                     var arr = new Array();
                                     for(var i=1; i<=current.all; i++){arr[i] = i;}//Пиздец, а не способ!
                                     element.addOption(sel, arr);
@@ -298,7 +277,7 @@ var ajax = new (function(){
                 break;
             }
         }catch(e){
-            message.new(e);
+            message.create(e);
             if(resp.text.text != 'notext'){
                 message.add('Server response:');
                 message.add(resp.text);

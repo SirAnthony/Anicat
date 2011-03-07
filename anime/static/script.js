@@ -40,18 +40,17 @@ var element = new ( function(){
         }
     }
     
-    //########################
 
-function getOffset(obj){
-    var el = obj;
-    var offset = {top: 0, left: obj.offsetLeft};
-    while(el.parentNode.parentNode.nodeName != "BODY"){
-        el = el.parentNode;
-        offset.top += el.offsetTop; 
-        offset.left += el.offsetLeft;
+    function getOffset(obj){
+        var el = obj;
+        var offset = {top: 0, left: obj.offsetLeft};
+        while(el.parentNode.parentNode.nodeName != "BODY"){
+            el = el.parentNode;
+            offset.top += el.offsetTop; 
+            offset.left += el.offsetLeft;
+        }
+        return offset;    
     }
-    return offset;    
-}
     
     this.getSelected = function(obj){
         var sel = obj.childNodes;
@@ -85,6 +84,8 @@ function getOffset(obj){
     }
     
     this.remove = function(elem){
+        if(!elem)
+            return;
         this.removeAllChilds(elem);
         if(elem.parentNode)
             elem.parentNode.removeChild(elem);
@@ -332,7 +333,7 @@ var message = new (function(){
     }
     
     //Clears message box and adds new p. 
-    this.new = function(str, timeout){
+    this.create = function(str, timeout){
         this.clear();
         this.lock();
         this.add(str);
@@ -435,8 +436,8 @@ var message = new (function(){
         this.unlock();
     }
     
-    //Hide message.
-    this.hide = function(e){
+    //Close message.
+    this.close = function(e){
         var m = this == document ? message : this;
         if(!m.closeable || !m.getSpan())
             return;
@@ -452,6 +453,13 @@ var message = new (function(){
             document.onclick = "undefined";
             clearTimeout(timer);
         }
+    }
+    
+    //Hide message. No closeable check.
+    this.hide = function(){
+        if(!message.getSpan())
+            return;
+        message.span.parentNode.style.display = 'none';
     }
 
 })();
@@ -480,14 +488,6 @@ if(!Array.prototype.indexOf){
     isKonqueror = (ua.indexOf("konqueror") != -1);    
 */
 
-/* 
-if (! isIE) {
-HTMLElement.prototype.__defineGetter__("innerText",
-function () { return(this.textContent); });
-HTMLElement.prototype.__defineSetter__("innerText",
-function (txt) { this.textContent = txt; });
-}
-*/
 if (! isIE) {
     if ( !isUndef(Node) && !isUndef(Node.prototype) && isFunction(Node.prototype.__defineGetter__)){
         Node.prototype.__defineGetter__("innerText", function() { return this.textContent; });    
@@ -536,14 +536,6 @@ function showFN(tbl){
         }
     }     
 }
-
-//Копирование в поле
-function copyToClipboard(content) {    
-    var ids = document.getElementById('idsa').innerHTML
-    document.getElementById('idsa').innerHTML = ids + content+' ';
-            
-}
-
 
 // Тоже попапы на длинные имена
 function lngnm(par,e){    
@@ -624,17 +616,6 @@ function rsemicolon(prm){
 }
 
 
-//доп. функция
-function setattr(obj){
-    var res = '';
-    for(var atr=0; atr<obj.attributes.length; atr++){
-        if (obj.attributes[atr]){
-            res += obj.attributes[atr].name+'="'+obj.attributes[atr].value+'" ';
-        }
-    }
-    return res;
-}
-
 //Режимы отображения
 
 function setshow(){
@@ -683,7 +664,7 @@ function mv(){
         
         if(document.getElementById('menu')){ 
             if(document.getElementById('menu').style.display == "block" && !edtdv){
-                document.onclick = message.hide; // Прятание меню
+                document.onclick = message.close; // Прятание меню
             }
         }
     }

@@ -7,12 +7,17 @@ urlpatterns = patterns(
     (r'^(?P<page>\d+)/?$', 'index'),
     (r'^changes/$', 'changes'),
     (r'^add/$', 'add'),
-    (r'^ajax/get/$', 'get'),
-    (r'^ajax/login/$', 'ajaxlogin'),
-    (r'^ajax/register/$', 'ajaxregister'),    
     (r'^logout/$', 'logout'),
     (r'^register/$', 'register'),
     (r'^card/(?P<animeId>\d+)?/?$', 'card'),
     (r'^stat/(?P<userId>\d+)?/?$', 'stat'),
+    (r'^test/$', 'test'),
+)
+
+urlpatterns += patterns('anime.ajax',
+    (r'^ajax/get/$', 'get'),
+    (r'^ajax/set/$', 'change'),
+    (r'^ajax/login/$', 'login'),
+    (r'^ajax/register/$', 'register'),
 )
 #

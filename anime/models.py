@@ -1,8 +1,8 @@
 import collections
 from django.db import models
-from django.forms import ModelForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from audit_log.models.managers import AuditLog
 
 ANIME_TYPES = [
     (0, u'TV'),
@@ -50,6 +50,7 @@ class AnimeItem(models.Model):
     endedAt = models.DateTimeField(blank=True, null=True)
     bundle = models.ForeignKey(AnimeBundle, related_name='animeitems', null=True, blank=True)
     air = models.BooleanField()
+    audit_log = AuditLog()
     
     def __unicode__(self):
         return '%s [%s]' % (self.title, ANIME_TYPES[self.releaseType][1])
@@ -68,6 +69,7 @@ class AnimeItem(models.Model):
 class AnimeEpisode(models.Model):
     title = models.CharField(max_length=200)
     anime = models.ForeignKey(AnimeItem, related_name="animeepisodes")
+    audit_log = AuditLog()
     
     def __unicode__(self):
         return '%s [%s]' % (self.title, self.anime.title)
@@ -79,6 +81,7 @@ class AnimeEpisode(models.Model):
 class AnimeName(models.Model):
     title = models.CharField(max_length=200)
     anime = models.ForeignKey(AnimeItem, related_name="animenames")
+    audit_log = AuditLog()
     
     def __unicode__(self):
         return self.title
@@ -86,11 +89,6 @@ class AnimeName(models.Model):
     class Meta:
         ordering = ["title"]
         unique_together = ("title", "anime")
-
-class AnimeForm(ModelForm):
-    class Meta():
-        model = AnimeItem
-        exclude = ('air',)
 
 class Credit(models.Model):
     title = models.CharField(max_length=200, unique=True)
@@ -100,6 +98,7 @@ class Credit(models.Model):
     
 class Organisation(models.Model):
     name = models.CharField(max_length=200, unique=True)
+    audit_log = AuditLog()
     
     def __unicode__(self):
         return self.name
@@ -110,12 +109,14 @@ class OrganisationBundle(models.Model):
     job = models.ForeignKey(Credit)
     role = models.CharField(max_length=30, blank=True)
     comment = models.CharField(max_length=100, blank=True)
+    audit_log = AuditLog()
 
     class Meta:
         unique_together = ("anime", "organisation", "job", "role")
 
 class People(models.Model):
     name = models.CharField(max_length=200, unique=True)
+    audit_log = AuditLog()
     
     def __unicode__(self):
         return self.name
@@ -126,6 +127,7 @@ class PeopleBundle(models.Model):
     job = models.ForeignKey(Credit)
     role = models.CharField(max_length=30, blank=True)
     comment = models.CharField(max_length=100, blank=True)
+    audit_log = AuditLog()
 
     class Meta:
         unique_together = ("anime", "person", "job", "role")
@@ -144,7 +146,7 @@ class UserStatusBundle(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="statusbundles")
     user = models.ForeignKey(User)
     status = models.IntegerField(choices=USER_STATUS)
-    count = models.IntegerField(blank=True)
+    count = models.IntegerField(blank=True, null=True)
     changed = models.DateTimeField(auto_now=True)
     
     objects = StatusManager()

@@ -1,6 +1,6 @@
 #Some helpful functions
 
-def getVal(val, default = '', obj = None):
+def getVal(val, obj = None, default = ''):
     if obj and obj.has_key(val):
         return obj[val]
     return default

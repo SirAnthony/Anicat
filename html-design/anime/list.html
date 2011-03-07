@@ -41,7 +41,7 @@
                         {{ title.0.title }}
                     </td>
                     <td onclick="cnt('numberofep', '{{ title.0.id }}');" id="numberofep{{ title.0.id }}" class="numberofep">
-                        {{ title.0.episodesCount }}
+                        {% if title.1.count %}{{ title.1.count }}/{% endif %}{{ title.0.episodesCount }}
                     </td>
                     <td onclick="cnt('translation', '{{ title.0.id }}');" id="translation{{ title.0.id }}" class="translation">
                         {{ title.0.translation }}
