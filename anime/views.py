@@ -1,6 +1,6 @@
 
-from models import AnimeItem, AnimeName, UserCreationFormMail, UserStatusBundle, USER_STATUS
-from forms import AnimeForm, UserStatusForm
+from models import AnimeItem, AnimeName, UserStatusBundle, USER_STATUS
+from forms import AnimeForm, UserStatusForm, UserCreationFormMail
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.context_processors import csrf
@@ -35,7 +35,7 @@ def card(request, animeId=0):
     if not animeId:
         animeId = randint(1, AnimeItem.objects.count())
     try:
-        anime = AnimeItem.objects.get(id=int(animeId))
+        anime = AnimeItem.objects.all()[animeId]
     except Exception:
         anime = None
     bundles = None

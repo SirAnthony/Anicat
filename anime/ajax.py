@@ -1,6 +1,6 @@
 
-from models import AnimeItem, AnimeName, UserCreationFormMail, UserStatusBundle, USER_STATUS
-from forms import AnimeForm, UserStatusForm
+from models import AnimeItem, AnimeName, UserStatusBundle, USER_STATUS
+from forms import AnimeForm, UserStatusForm, UserCreationFormMail
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.core.context_processors import csrf

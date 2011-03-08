@@ -12,7 +12,7 @@ var ua = navigator.userAgent.toLowerCase();
 var corovan = 0;
 
 //##############################################################################
-//##############################    Разное   ###################################
+//##############################    Element   ##################################
 //##############################################################################
 
 var element = new ( function(){
@@ -69,6 +69,8 @@ var element = new ( function(){
     }
     
     this.removeAllChilds = function(el){
+        if(!el)
+            return;
         while(el.hasChildNodes()){
             el.removeChild(el.lastChild);
         }
@@ -112,8 +114,9 @@ var element = new ( function(){
         }
     }
     
-    this.insert = function(obj, elem){        
-        obj.parentNode.insertBefore(elem, obj);
+    this.insert = function(obj, elem, next){
+        var ins = next ? obj.nextSibling : obj
+        obj.parentNode.insertBefore(elem, ins);
     }
     
     this.getOffset = function(obj, parent){
@@ -130,7 +133,9 @@ var element = new ( function(){
 
 })();
 
-//################# Работа с куами.
+//##############################################################################
+//##############################    Cookies   ##################################
+//##############################################################################
 
 var cookies = new ( function(){
     
@@ -168,7 +173,9 @@ var cookies = new ( function(){
     }
 })();
 
-//################# Классы
+//##############################################################################
+//##############################    Classes   ##################################
+//##############################################################################
 
 var pclass = new ( function(){
 
@@ -200,7 +207,9 @@ function clearOnFocus(text, obj){
     }    
 }
 
-//################# Поиск
+//##############################################################################
+//##############################    Misc   #####################################
+//##############################################################################
 
 var searcher = new ( function(){
     
@@ -464,7 +473,7 @@ var message = new (function(){
 
 })();
 
-//#######################
+//####################### Разная помойка
 
 if(!Array.prototype.indexOf){
     Array.prototype.indexOf=function(obj,start){
@@ -478,9 +487,9 @@ if(!Array.prototype.indexOf){
 // Получим userAgent браузера и переведем его в нижний регистр
     // Определим Internet Explorer
     isIE = (ua.indexOf("msie") != -1 &&  ua.indexOf("webtv") == -1);
-/*    // Opera
+    // Opera
     isOpera = (ua.indexOf("opera") != -1);
-    // Gecko = Mozilla + Firefox + Netscape
+/*    // Gecko = Mozilla + Firefox + Netscape
     isGecko = (ua.indexOf("gecko") != -1);
     // Safari
     isSafari = (ua.indexOf("safari") != -1);
@@ -693,9 +702,27 @@ function cnt(tag, num, e) {
 
 }
 
-//#################
- 
-//Больше никаких яблок с их кривыми неработающими решениями.
+// Cross-browser event handlers.
+function addEvent(obj, evType, fn) {
+    if (obj.addEventListener) {
+        obj.addEventListener(evType, fn, false);
+        return true;
+    } else if (obj.attachEvent) {
+        var r = obj.attachEvent("on" + evType, fn);
+        return r;
+    } else {
+        return false;
+    }
+}
 
-//#################
-
+function removeEvent(obj, evType, fn) {
+    if (obj.removeEventListener) {
+        obj.removeEventListener(evType, fn, false);
+        return true;
+    } else if (obj.detachEvent) {
+        obj.detachEvent("on" + evType, fn);
+        return true;
+    } else {
+        return false;
+    }
+}

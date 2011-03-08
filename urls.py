@@ -4,7 +4,8 @@ from django.conf.urls.defaults import *
 from django.contrib import admin
 admin.autodiscover()
 
-from anime.models import AnimeItem
+from anime.models import Genre, AnimeBundle, AnimeItem, AnimeEpisode, AnimeName, Credit, \
+    Organisation, OrganisationBundle, People, PeopleBundle, UserStatusBundle
 
 admin.site.register(AnimeItem)
 

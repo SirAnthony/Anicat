@@ -1,7 +1,6 @@
 import collections
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
 from audit_log.models.managers import AuditLog
 
 ANIME_TYPES = [
@@ -154,11 +153,3 @@ class UserStatusBundle(models.Model):
     class Meta:
         unique_together = ("anime", "user")
 
-class UserCreationFormMail(UserCreationForm):
-    def __init__(self, *args, **kwargs):
-        super(UserCreationFormMail, self).__init__(*args, **kwargs)
-        self.fields['email'].required = True
-
-    class Meta:
-        model = User
-        fields = ('username', 'email') 
