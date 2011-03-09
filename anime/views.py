@@ -5,29 +5,43 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.context_processors import csrf
 from django.shortcuts import render_to_response
-from django.views.decorators.cache import cache_page
+from django.views.decorators.http import condition
 from annoying.decorators import render_to
 from django.contrib import auth
 from functions import getAttr
 from random import randint
 
-
+def latestStatus(request, userId=0):
+    if userId:
+        try:
+            return UserStatusBundle.objects.filter(user=User.objects.get(id=userId)).latest("changed").changed
+        except:
+            return
+    return UserStatusBundle.objects.filter(user=request.user).latest("changed").changed
 
 # TODO: Pager here
 @render_to('anime/list.html')
-def index(request, page=0):
-    page = int(request.REQUEST.get('page', int(page)))
+def index(request, order='title', page=0):
+    try:
+        page = int(page)
+    except:
+        page = 0
+    page = int(request.REQUEST.get('page', page))
     limit = 100
     pages = []
+    try:
+        AnimeItem._meta.get_field(order)
+    except Exception:
+        order='title'
     for i in range(0, AnimeItem.objects.count(), 100):
-        s = AnimeItem.objects.only('title')[i:i+2]
+        s = AnimeItem.objects.order_by(order).only(order)[i:i+2]
         pages.extend(map(lambda x: x.title.strip()[:3], s))
-    pages.append(AnimeItem.objects.order_by('-title').only('title')[0].title.strip()[:3])
+    pages.append(AnimeItem.objects.order_by('-'+order).only(order)[0].title.strip()[:3])
     pages = pages[1:]
     pages = [a+' - '+b for a,b in zip(pages[::2], pages[1::2])]
-    items = AnimeItem.objects.all()[page*limit:(page+1)*limit]
-    statuses = UserStatusBundle.objects.get_for_user(items, request.user.id)
-    return {'list': [(anime, statuses[anime.id]) for anime in items],
+    items = AnimeItem.objects.filter().order_by(order)[page*limit:(page+1)*limit]
+    #statuses = UserStatusBundle.objects.get_for_user(items, request.user.id)
+    return {'list': items, # [(anime, statuses[anime.id]) for anime in items]
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
 
 @render_to('anime/card.html')
@@ -48,6 +62,7 @@ def card(request, animeId=0):
             bundles = map(lambda x: (x,  0), bundles)
     return {'anime': anime, 'bundles': bundles}
 
+@condition(last_modified_func=latestStatus)
 @render_to('anime/stat.html')
 def stat(request, userId=0):
     user = None
@@ -118,9 +133,20 @@ def add(request):
     ctx.update(csrf(request))
     return ctx
 
-@render_to('anime/add.html')
+@condition(last_modified_func=latestStatus)
+@render_to('anime/user.css', 'text/css')
+def generateCss(request):
+    styles = [[] for i in range(0,len(USER_STATUS))]
+    if request.user.is_authenticated():
+        statuses = UserStatusBundle.objects.filter(user=request.user).exclude(status=0).values('anime','status')
+        for status in statuses:
+            styles[status['status']].append(str(status['anime']))
+        styles = [[', .r'.join(style), ', .a'.join(style)] for style in styles]
+    return {'style': styles}
+
+#@render_to('anime/add.html')
 def test(request):
-    form = UserStatusForm()
-    ctx = {'form': form}
-    ctx.update(csrf(request))
+    #form = UserStatusForm()
+    #ctx = {'form': form}
+    #ctx.update(csrf(request))
     return ctx

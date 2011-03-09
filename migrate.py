@@ -125,6 +125,8 @@ def moveAnumeItems():
     res = sql.executeQuery('SELECT * FROM `catalog` ORDER BY id')
     for element in res:
         try:
+            if element['enddate'] == 0:
+                element['enddate'] = None
             record = AnimeItem(id=element['id'], title=unicode(encd(element['name']), 'utf-8'),
                 releaseType=getTypeId(element['type']), episodesCount=element['numberofep'],
                 duration=element['duration'], releasedAt=timedecode(element['translation']),

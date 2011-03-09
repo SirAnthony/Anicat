@@ -16,38 +16,38 @@
 	                   <a rel="nofollow" href="">Name</a>
                     </th>
                     <th class="numberofep" id="numberofep">
-	                   <a rel="nofollow" href="">Episodes</a>
+	                   <a rel="nofollow" href="/sort/episodesCount/">Episodes</a>
                     </th>
                     <th class="translation" id="translation">
-	                   <a rel="nofollow" href="">Translation</a>
+	                   <a rel="nofollow" href="/sort/releasedAt/">Translation</a>
                     </th>
                     <th class="type" id="type">
-	                   <a rel="nofollow" href="">Type</a>
+	                   <a rel="nofollow" href="/sort/releaseType/">Type</a>
                     </th>                    
                 </tr>
             </thead>
             <tbody id="tbdid">
             {% for title in list %}
-                <tr class="r{{ title.1.status }}{% if title.0.air %}{{ title.0.air.numerator }}{% endif %}">
+                <tr class="{% if title.air %}air a{% else %}r{% endif %}{{ title.id }}">
                     <td id="link{{ title.id }}" class="link">
-                        <a target="_blank" class="cardurl" href="/card/{{ title.0.id }}/">
+                        <a target="_blank" class="cardurl" href="/card/{{ title.id }}/">
                             <img alt="Go" src="/static/arrow.gif">
                         </a>
                     </td>
-                    <td onclick="cnt('id', '{{ title.0.id }}');" id="id{{ title.0.id }}" class="id">
+                    <td onclick="cnt('id', '{{ title.id }}');" id="id{{ title.id }}" class="id">
                         {{ forloop.counter|add:page.start }}
                     </td>
-                    <td onclick="cnt('name', '{{ title.0.id }}');" id="name{{ title.0.id }}" class="name left">
-                        {{ title.0.title }}
+                    <td onclick="cnt('name', '{{ title.id }}');" id="name{{ title.id }}" class="name left">
+                        {{ title.title }}
                     </td>
-                    <td onclick="cnt('numberofep', '{{ title.0.id }}');" id="numberofep{{ title.0.id }}" class="numberofep">
-                        {% if title.1.count %}{{ title.1.count }}/{% endif %}{{ title.0.episodesCount }}
+                    <td onclick="cnt('numberofep', '{{ title.id }}');" id="numberofep{{ title.id }}" class="numberofep">
+                        {% if title.1.count %}{{ title.1.count }}/{% endif %}{{ title.episodesCount }}
                     </td>
-                    <td onclick="cnt('translation', '{{ title.0.id }}');" id="translation{{ title.0.id }}" class="translation">
-                        {{ title.0.translation }}
+                    <td onclick="cnt('translation', '{{ title.id }}');" id="translation{{ title.id }}" class="translation">
+                        {{ title.translation }}
                     </td>                    
-                    <td onclick="cnt('type', '{{ title.0.id }}');" id="type{{ title.0.id }}" class="type">
-                        {{ title.0.releaseTypeS }}
+                    <td onclick="cnt('type', '{{ title.id }}');" id="type{{ title.id }}" class="type">
+                        {{ title.releaseTypeS }}
                     </td>
                     {# custom fields #}
                 </tr>

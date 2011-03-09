@@ -4,13 +4,14 @@ from django.conf.urls.defaults import *
 urlpatterns = patterns(
     'anime.views',
     (r'^$', 'index'),
-    (r'^(?P<page>\d+)/?$', 'index'),
+    (r'^(sort/(?P<order>\w+))?/?(?P<page>\d+)?/$', 'index'),
     (r'^changes/$', 'changes'),
     (r'^add/$', 'add'),
     (r'^logout/$', 'logout'),
     (r'^register/$', 'register'),
-    (r'^card/(?P<animeId>\d+)?/?$', 'card'),
-    (r'^stat/(?P<userId>\d+)?/?$', 'stat'),
+    (r'^card/(?P<animeId>\d+)?/$', 'card'),
+    (r'^stat/(?P<userId>\d+)?/$', 'stat'),
+    (r'^css/$', 'generateCss'),
     (r'^test/$', 'test'),
 )
 
