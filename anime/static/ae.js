@@ -10,10 +10,10 @@ var add = new (function add_class(){
     var loaded = false;
     
     this.init = function(){
-        this.createForm();
-        this.form = document.getElementById('addfrm');
-        if(!this.form) return;
-        this.loaded = true;
+        add.createForm();
+        add.form = document.getElementById('addfrm');
+        if(!add.form) return;
+        add.loaded = true;
     } 
     
     this.toggle = function(){
@@ -416,7 +416,7 @@ var edit = new (function edit_class(){
     var visible = false;
     
     this.init = function(){
-        this.loaded = true;
+        edit.loaded = true;
     }
     
     this.getForm = function(){
@@ -691,3 +691,5 @@ function sndstat(sid, name){
     ajax.loadXMLDoc(url+'set/', q);
 }
 
+addEvent(window, 'load', add.init);
+addEvent(window, 'load', edit.init);

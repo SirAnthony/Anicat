@@ -17,8 +17,8 @@ var user = new( function(){
     }
     
     this.init = function(){
-        this.info = document.getElementById('logininfo');
-        this.loaded = true;
+        user.info = document.getElementById('logininfo');
+        user.loaded = true;
     }    
     
     this.toggle = function(){
@@ -171,3 +171,5 @@ var user = new( function(){
     }
     
 })();
+
+addEvent(window, 'load', user.init);

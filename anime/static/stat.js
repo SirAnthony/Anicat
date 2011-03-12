@@ -4,9 +4,9 @@ var stat = new ( function(){
     this.hrs = null;
 
     this.init = function(){
-        this.hrs = element.create('div', {id: 'tohrs', className: 'cont_men'});
-        this.hrs.style.position = 'absolute';
-        element.appendChild(document.body, [this.hrs]);
+        stat.hrs = element.create('div', {id: 'tohrs', className: 'cont_men'});
+        stat.hrs.style.position = 'absolute';
+        element.appendChild(document.body, [stat.hrs]);
         var el = document.getElementsByName('num');
         for(var i in el){
             el[i].onmouseover = function(){
@@ -35,3 +35,5 @@ var stat = new ( function(){
     }
 
 })();
+
+addEvent(window, 'load', stat.init);

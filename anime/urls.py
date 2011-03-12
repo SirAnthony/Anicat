@@ -4,15 +4,17 @@ from django.conf.urls.defaults import *
 urlpatterns = patterns(
     'anime.views',
     (r'^$', 'index'),
-    (r'^(sort/(?P<order>\w+))?/?(?P<page>\d+)?/$', 'index'),
+    (r'^(show/(?P<status>\d+))?/?(sort/(?P<order>\w+))?/?(?P<page>\d+)?/$', 'index'),
     (r'^changes/$', 'changes'),
     (r'^add/$', 'add'),
+    (r'^login/$', 'login'),
     (r'^logout/$', 'logout'),
     (r'^register/$', 'register'),
-    (r'^card/(?P<animeId>\d+)?/$', 'card'),
-    (r'^stat/(?P<userId>\d+)?/$', 'stat'),
+    (r'^card/(?P<animeId>\d+)?/?$', 'card'),
+    (r'^stat/(?P<userId>\d+)?/?$', 'stat'),
     (r'^css/$', 'generateCss'),
     (r'^test/$', 'test'),
+    (r'^search/$', 'blank'),
 )
 
 urlpatterns += patterns('anime.ajax',
@@ -20,6 +22,7 @@ urlpatterns += patterns('anime.ajax',
     (r'^ajax/set/$', 'change'),
     (r'^ajax/login/$', 'login'),
     (r'^ajax/register/$', 'register'),
+    (r'^ajax/search/$', 'search'),
 )
 
 urlpatterns += patterns('',

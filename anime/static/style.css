@@ -39,10 +39,7 @@ margin-left: 2px;
 margin-right: 3px;
 }
 .tbl{ 
-line-height: 23px;
-border-right: black dotted 1px;
-border-top: black dotted 1px;
-border-bottom: none;
+    line-height: 23px;
 }
 .thdtbl{
 background-color: #339966;
@@ -56,10 +53,7 @@ border: none;
 #tbl td, #tbl th, #srchtbl td{
 position: relative;
 /*height: 22px;*/
-border: black dotted 1px;
-border-right: none;
 text-align: center;
-border-top: none;
 width: 180px;
 z-index: 0;
 overflow: hidden;

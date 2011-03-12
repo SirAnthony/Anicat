@@ -1,87 +1,60 @@
 {% if user.is_authenticated %}
-
 .air{
-    background-color: yellow;
+	background-color: yellow;
 }
-
 .sNone, .s0, .s {
-    font: normal 14pt "times new roman",serif !important;
-    color: #000 !important;
+	font: normal 14pt "times new roman",serif !important;
+	color: #000 !important;
 }
-
 .s1 {
-    font: normal 14pt "times new roman",serif !important;
-    color: MediumBlue !important;
+	font: normal 14pt "times new roman",serif !important;
+	color: MediumBlue !important;
 }
-
 .s2 {
-    font: normal 14pt "times new roman",serif !important;
-    color: DarkTurquoise !important;
+	font: normal 14pt "times new roman",serif !important;
+	color: DarkTurquoise !important;
 }
-
 .s3 {
-    font: normal 14pt "times new roman",serif !important;
-    color: SeaGreen !important;
+	font: normal 14pt "times new roman",serif !important;
+	color: SeaGreen !important;
 }
-
 .s4 {
-    font: normal 14pt "times new roman",serif !important;
-    color: red !important;
+	font: normal 14pt "times new roman",serif !important;
+	color: red !important;
 }
-
 .s5 {
-    font: normal 14pt "times new roman",serif !important;
-    color: #F0F0F0 !important;
+	font: normal 14pt "times new roman",serif !important;
+	color: #F0F0F0 !important;
 }
-
-{% if style.0 %}
-{% endif %}
-
-{% if style.1.0 %}
-.r{{ style.1.0 }} {
-    background-color: DeepSkyBlue;
+{% if style.0 %}{% endif %}
+{% if style.1.0 %}.r{{ style.1.0 }} {
+	background-color: DeepSkyBlue;
 }
-
 .a{{ style.1.1 }} {
-    background-color: #FF69B4;
-}
-{% endif %}
-
-{% if style.2.0 %}
-.r{{ style.2.0 }} {
-    background-color: cyan;
+	background-color: #FF69B4;
+}{% endif %}
+{% if style.2.0 %}.r{{ style.2.0 }} {
+	background-color: cyan;
 }
 .a{{ style.2.1 }} {
-    background-color: #FFD700;
+	background-color: #FFD700;
+}{% endif %}
+{% if style.3.0 %}.r{{ style.3.0 }} {
+	background-color: #ccffcc;
 }
-{% endif %}
-
-{% if style.3.0 %}
-.r{{ style.3.0 }} {
-    background-color: #ccffcc;
 .a{{ style.3.1 }} {
-    background-color: #f2f696;
+	background-color: #f2f696;
+}{% endif %}
+{% if style.4.0 %}.r{{ style.4.0 }} {
+	background-color: red;
 }
-{% endif %}
-
-{% if style.4.0 %}
-.r{{ style.4.0 }} {
-    background-color: red;
-}
-
 .a{{ style.4.1 }} {
-    background-color: #ffb300;
-}
-{% endif %}
-
-
-{% if style.5.0 %}
-.r{{ style.5.0 }} {
-    background-color: #F0F0F0;
+	background-color: #ffb300;
+}{% endif %}
+{% if style.5.0 %}.r{{ style.5.0 }} {
+	background-color: #F0F0F0;
 }
 .a{{ style.5.1 }} {
     background-color: #FFFFCC;
-}
-{% endif %}
-
+}{% endif %}
 {% endif %}

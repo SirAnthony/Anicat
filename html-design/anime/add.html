@@ -1,5 +1,6 @@
 {% extends "anime/base.html" %}
 
+{% user.is_authenticated %}
     {% block customScripts %}{{ form.media.render }}{% endblock %}
 
     {% block main %}
@@ -9,3 +10,5 @@
         <input type="submit" value="Add" />
     </form>o
     {% endblock %}
+
+{% endif %}

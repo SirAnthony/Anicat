@@ -4,6 +4,7 @@ from forms import AnimeForm, UserStatusForm, UserCreationFormMail
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.core.context_processors import csrf
+from django.core.cache import cache
 from django.utils import simplejson
 from django.views.decorators.cache import cache_page
 from django.contrib import auth
@@ -97,6 +98,8 @@ def change(request):
         except UserStatusBundle.DoesNotExist:
             obj = UserStatusBundle(user=request.user, anime=anime, status=0)
         form = UserStatusForm(request.POST, instance=obj)
+        cache.delete('userCss:%s' % request.user.id)
+        cache.delete('Stat:%s' % request.user.id)
     if form:
         if form.is_valid():
             for fieldname in form.cleaned_data:
@@ -119,8 +122,8 @@ def login(request):
     elif request.user.is_authenticated():
         response['text'] = 'Already logined.'
     else:
-        username = request.POST['name']
-        password = request.POST['pass']
+        username = request.POST.get('name', None)
+        password = request.POST.get('pass', None)
         user = auth.authenticate(username=username, password=password)
         if user is not None and user.is_active:
             auth.login(request, user)
@@ -145,4 +148,36 @@ def register(request):
             response.update({'response': 'logok', 'text': {'name': user.username}})
         else:
             response.update({'response': 'regfail', 'text': form.errors})
+    return response
+
+@ajaxResponse
+def search(request):
+    if not request.POST:
+        return {'text': 'Only POST method allowed.'}
+    string = request.POST.get('string')
+    if not string:
+        return {'text': 'Empty query.'}
+    response = {}
+    limit = 20
+    field = request.POST.get('field', 'name')
+    qs = None
+    try:
+        order = request.POST.get('sort')
+        AnimeItem._meta.get_field(order)
+    except Exception:
+        order = 'title'
+    try:
+        page = int(request.POST.get('page', 0))
+    except:
+        page = 0
+    if field == 'name':
+        qs = AnimeItem.objects.filter(animenames__title__icontains=string).distinct()
+    else:
+        return {'text': 'This field not avaliable yet.'}    
+    res = qs.order_by(order)[page*limit:(page+1)*limit]
+    #FUUUUUUSHENKIFUFU
+    items = [{'name': x.title, 'type': x.releaseTypeS(), 'numberofep': x.episodesCount,
+             'id': x.id, 'translation': x.translation(), 'air': x.air} for x in res]
+    response = {'text': {'items': items, 'page': page,
+                'count': qs.count()}, 'response': 'search'}
     return response

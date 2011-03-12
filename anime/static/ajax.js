@@ -3,10 +3,10 @@
 //##############################################################################
 
 var ajax = new (function(){
-    
+
     var xmlHttp = null;
     var cookie = cookies;
-       
+
     //################# Вызов аяксового обьекта.
     this.loadXMLDoc = function(url, qry){
         var request = '';
@@ -14,19 +14,19 @@ var ajax = new (function(){
             alert('Input is old');
             return;
         }
-        
+
         setRequest();
-        
+
         if(!(/^http:.*/.test(url) || /^https:.*/.test(url)))
             qry['csrfmiddlewaretoken'] = cookie.get('csrftoken');
-        
+
         for(item in qry){
             if(!qry[item]) continue;
             if(request)
                 request += '&';
             request += item + '=' + qry[item];
-        } 
-        
+        }
+
         xmlHttp = null;
         if(window.XMLHttpRequest){
             try{
@@ -34,37 +34,31 @@ var ajax = new (function(){
             }catch(e){}
         }else if(window.ActiveXObject){
             try{
-                xmlHttp = new ActiveXObject('Msxml2.XMLHTTP');            
+                xmlHttp = new ActiveXObject('Msxml2.XMLHTTP');
             }catch(e){
                 try{
                     xmlHttp = new ActiveXObject('Microsoft.XMLHTTP');
                 }catch(e){}
             }
         }
-        
-        //var cookies = cookie.get('SESSION');
+
         if (request){
             if (xmlHttp){
                 xmlHttp.open("POST", url, true);
                 xmlHttp.onreadystatechange = handleRequestStateChange;
                 xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-                /*xmlHttp.setRequestHeader("Connection", "close");                
-                if (cookie){
-                    cookies = 'SESSION=' + cookies+ ';';
-                    xmlHttp.setRequestHeader("Cookie", cookies);
-                }*/
                 xmlHttp.send(request);
-            }    
+            }
         }
     }
-    
+
     var setRequest = function(){
         message.create('Processing Request');
         message.addTree(element.create('img', {src: '/static/loader.gif'}));
         message.show();
         message.lock();
     }
-    
+
     //################# обработка результатов
     var handleRequestStateChange = function(){
         try{
@@ -78,21 +72,14 @@ var ajax = new (function(){
             }
             //if (xmlHttp.readyState == 3){}
             if (xmlHttp.readyState == 4) {
-                app.appajax = null;                        
+                app.appajax = null;
                 if (xmlHttp.status == 200){
-                    //alert(xmlHttp.responseText);
-                    //    document.getElementById('mspan').innerHTML = xmlHttp.responseText;
                     var resp = xmlHttp.responseText.replace(/\n/gi,'');
                     if( /^\{.*\}$/.test(resp)){
                         resp = eval("("+resp+")");
-                        //if( /^\[.*\]$/.test(xmlHttp.responseText)){
                         processingResult(resp);
-                        /*}else{
-                            var resp = xmlHttp.responseText;
-                            document.getElementById('mspan').innerHTML = resp;
-                        */
                     }else if(xmlHttp.responseXML){ //Опера не отличает жсон от xml. лол.
-                        ajxedt(xmlHttp.responseXML.documentElement);                 
+                        ajxedt(xmlHttp.responseXML.documentElement);
                     }
                     message.unlock();
                 }else{
@@ -100,58 +87,49 @@ var ajax = new (function(){
                     message.add('Не удалось получить данные: \u000A'+xmlHttp.statusText);
                     message.addHTML(xmlHttp.responseText);
                     message.show();
-                    /*alert(xmlHttp.status);
-                    alert("Не удалось получить данные: \u000A"+xmlHttp.statusText);
-                    */
                 }
             }
         }catch(e){
             alert('Caught Exception: ' + e);
-        }        
+        }
     }
-    
-    var processingResult = function(resp){    
+
+    var processingResult = function(resp){
         var mspn = document.getElementById('mspan');
-        try{      
+        try{
             switch(resp['response']){
-            
-                case 'app':                
+
+                case 'app':
                     app.retfunct(resp['text']);
                 break;
-                
+
                 case 'editok':
                     if(resp.field == 'status'){
                         message.hide();
-                        var row = document.getElementById('id' + resp.id);
-                        if(!isUndef(resp.text.status) && row && row.parentNode){
-                            row = row.parentNode;
-                            pclass.remove(row, 'r\\d*');
-                            pclass.add(row, 'r' + resp.text.status)
-                        }
-                        var noe = document.getElementById('numberofep' + resp.id);
+                        updateStylesheets('/css/');// Наверное лучше бы создавать цсс с нужным стилем.                        
+                        /*var noe = document.getElementById('numberofep' + resp.id);
                         if(noe){
                             var noetext = noe.textContent.replace(/(\d+\/)?/, "").replace(/\s/gi, '');
-                            element.removeAllChilds(noe);                            
+                            element.removeAllChilds(noe);
                             if(resp.text.count){
                                 element.appendChild(noe, [element.create('TextNode', {
                                                     innerText: resp.text.count + '/' + noetext})]);
                             }else{
                                 element.appendChild(noe, [element.create('TextNode', {innerText: noetext})]);
                             }
-                        }
+                        }*/
                     }
                 break;
-                
+
                 case 'error':
-                    //if(elm && elm.firstChild.defaultValue){elm.innerHTML = elm.firstChild.defaultValue;}
                     if(resp.text){
                         throw new Error(resp.text);
                     }else{
                         throw new Error('Unknown error.');
                     }
                 break;
-                
-                case 'getok':                
+
+                case 'getok':
                     element.removeAllChilds(mspn);
                     for(var i in resp.text.order){
                         var curname = resp.text.order[i];
@@ -161,7 +139,7 @@ var ajax = new (function(){
                         var capCurname = curname.substr(0,1).toUpperCase() + curname.substr(1)
                         var label = element.create('label', { 'for': curname + resp.text.id,
                                             innerText: capCurname + ':', name: resp.text.id});
-                        var sp = element.create('p', {'id': curname+resp.text.id, 'name': curname});                        
+                        var sp = element.create('p', {'id': curname+resp.text.id, 'name': curname});
                         var cld = new Array();
                         if(isString(current)){
                             sp.innerText = current;
@@ -256,22 +234,22 @@ var ajax = new (function(){
                         element.appendChild(mspn, [label, /*edt,*/ sp, cld]);
                     }
                 break;
-                
+
                 case 'logfail':
                     user.loginFail(resp.text);
                     throw new Error("Login error");
                 break;
-                
+
                 case 'logok':
                     message.hide();
                     user.loginSuccess(resp.text);
                     window.location.reload();
                 break;
-                
+
                 case 'regfail':
                     user.registerFail(resp.text);
                 break;
-                
+
                 case 'search':
                     searcher.putResult(resp.text);
                 break;
@@ -285,5 +263,5 @@ var ajax = new (function(){
             message.show();
         }
     }
-    
+
 })();

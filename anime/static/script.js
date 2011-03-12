@@ -243,85 +243,78 @@ var searcher = new ( function(){
     
     this.send = function(page){
         if(!this.loaded) return;
-        element.removeAllChilds(this.result);
-        if(!page) page = 1;          
-        //var text =  document.getElementById('sin');    
+        if(!page) page = 0;
+        //var text =  document.getElementById('sin');
         var val; // = document.getElementById('advsrch').value;
         var sort; // = document.getElementById('sortsrch').value;
         if(this.input.textLength < 3 && val != 'numberofep' && val != 'type'){
+            element.removeAllChilds(this.result);
             element.appendChild(this.result, [element.create('p', {
                 innerText: 'Query must consist of at least 3 characters.'})]);
         }else if( /\.{2,3}/.test(this.input.value) || /\.{1}(\s{1}|\S{1})\.{1}/.test(this.input.value) ){
+            element.removeAllChilds(this.result);
             element.appendChild(this.result, [element.create('p', {innerText: 'Invalid request.'})]);
         }else{
             var text = this.input.value.toLowerCase();
-            var qw;
-            if(val && val != 'null' && val != 'name'){
-                qw = 'page='+page+'&search=' + val + '&string=' + text;
-            }else{
-                qw = 'page='+page+'&search=name&string=' + text;
-            }
-            if(sort && sort != 'null' && sort != 'name'){
-                qw += '&sort=' + sort;
-            }
+            if(!val) val = 'name';
+            var qw = {'page': page, 'field': val, 'string': text, 'sort': sort};
             var menu = document.getElementById('menu');
-            menu.style.top = 65 + 'px';
-            menu.style.left = 40 + 'px';                
-            ajax.loadXMLDoc(url,qw);
+            message.toPosition(40, 65);
+            ajax.loadXMLDoc(url+'search/',qw);
         }
     }
     
     this.putResult = function(rs){
         if(!this.loaded) return;
-        if(rs.data == 'none'){
+        message.hide();
+        element.removeAllChilds(this.result);
+        if(!rs.count || !rs.items.length){
            element.appendChild(this.result, [element.create('p', {innerText: 'Nothing found.'})]);
         }else{
             var tr = new Array();
-            for(i in rs.data){            
-                var row = element.create('tr');
+            for(i in rs.items){
+                var elem = rs.items[i];
+                var row = element.create('tr', {className: (elem.air ? 'air a' : 'r') + elem.id});
                 tr.push(row);
-                var elem = rs.data[i];
                 element.appendChild(row, [
                                     element.create('td', {'id': 'link' + elem.id, className: 'link'}), [
                                         element.create('a', {className: 'cardurl', 'target': '_blank',
                                                                     'href': '/card/'+elem.id+'/'}), [
-                                            element.create('img', {'src': '/templates/arrow.gif', 'alt': 'Go'}),
+                                            element.create('img', {'src': '/static/arrow.gif', 'alt': 'Go'}),
                                             ]
                                         ],
                                     element.create('td', {'id': 'id' + elem.id, className: 'id',
                                     onclick: (  function(i, j){ 
                                                     return function(){ cnt(i, j); };
                                                 })('id', elem.id),
-                                             innerText: Number(i) + 1 + rs.results * (rs.page - 1) }),
+                                             innerText: Number(i) + 1 + rs.items.length * rs.page }),
                                     ]);
-                for(var helem in rs.header){
-                    var column = rs.header[helem].name;
+                for(var column in elem){
+                    if(column == 'air' || column == 'id') continue;
                     element.appendChild(row, [element.create('td', {'id': column + elem.id, className: column, 
                                 onclick: (function(i, j){ return function(){ cnt(i, j); };})(column, elem.id),
                                     innerText: encd(elem[column])})]);
                 }
-                if(elem.job){
+                /*if(elem.job){
                    pclass.add(row, 'r' + elem.job + ((elem.air) ? 'on': '' ));
-                }
+                }*/
             }
-            element.appendChild(this.result, [element.create('table', {'id': 'srchtbl', className: 'tbl', 
-                                            cellSpacing: 0}), tr]);
-            if(rs.count > rs.results){
+            var srctbl = element.create('table', {'id': 'srchtbl', className: 'tbl', cellSpacing: 0});
+            element.appendChild(this.result, [srctbl, tr]);
+            if(rs.count > rs.items.length){
                 var pg = new Array();
-                for( var i = 1; i < (rs.count / rs.results + 1); i++){
-                    if(rs.page == i){
+                for( var i = 1; i <= Math.ceil(rs.count / 20); i++){
+                    if(rs.page == i-1){
                         pg.push(element.create('span', {innerText: '[' + i + ']'}));
                     }else{
                         pg.push(element.create('a', {innerText: i, 
-                                onclick: (function(pg){ return function(){ searcher.send(pg);};})(i)}));
+                                onclick: (function(pg){ return function(){ searcher.send(pg);};})(i-1)}));
                     }
                 }
                 element.appendChild(this.result, [element.create('div', {'id': 'srchpg'}), pg]);
             }
+            showFN(srctbl);
         }
-        if(rs.time)
-            element.appendChild(this.result, [element.create('span', {innerText: 'Search time: '+rs.time+'s.'})]);
-        document.getElementById('menu').style.display='none';        
     }
         
 })();
@@ -389,6 +382,13 @@ var message = new (function(){
             element.remove(this.strobj.shift());
     }
     
+    this.toPosition = function(x, y){
+        if(!this.getSpan())
+            return;
+        this.span.parentNode.style.left = x + 'px';
+        this.span.parentNode.style.top = y + 'px';        
+    }
+    
     //Move messagebox to last event position.
     //Pop - старый костыль, но пока никак.
     this.toEventPosition = function(pop){
@@ -397,7 +397,6 @@ var message = new (function(){
         
         if(!dv)
             return;
-        
         var x = 20;
         var y = 20;
         if(isIE){
@@ -507,53 +506,33 @@ if (! isIE) {
 
 
 // Доставляет попапы на длинные имена. Срабатывает при загрузке
-window.onload = function(){
-
-    user.init();
+addEvent(window, 'load', function(){
     searcher.init();
-    if(typeof(add) != "undefined") add.init();
-    if(typeof(stat) != "undefined") stat.init();
     mv();
-    //document.getElementById('srch').style.display = 'none';
     showFN();
-    if(isIE){
-        document.getElementById('ie').innerHTML = "В данном браузере проект работает некорректно. И вообще браузер-корявко."
-        /*var cn = document.getElementById('menu');
-        cn.removeChild(cn.firstChild);*/
-    }
-    //var wtr = document.getElementById('wtr')    
-    //document.getElementById('dvid').style.width = wtr.scrollWidth+2+'px';
-    //if(wtr.scrollWidth >= window.outerWidth){
-        //document.getElementById('header').style.width = window.outerWidth + window.scrollMaxX - 32 + 'px';
-    //}        
-    
-}
+});
 
 //Расставляет попапы с тем, что скрыто
-function showFN(tbl){
-    var el;
-    (tbl) ? el=document.getElementById('srchtbl').firstChild:el=document.getElementById('tbdid');
-    var elms = new Array();
-    elms = getElementsByClassName("name", el, 'td');
+function showFN(tbl, cn){
+    var el = (tbl) ? tbl : document.getElementById('tbdid');    
+    var elms = getElementsByClassName((cn ? cn : "name"), el, 'td');
     for(i in elms){
-        var el = elms[i];        
+        var el = elms[i];
+        //Как-то оно не так.
         if(el.nextSibling && el.offsetHeight < el.nextSibling.offsetHeight)
             el.style.height = el.nextSibling.offsetHeight + 'px';
+        pclass.add(el, 'left');
         if(el.offsetHeight < el.scrollHeight){
-            el.onmouseover = function(){lngnm(this.innerText);}
-            el.onmouseout = function(){lngnmo();}
+            el.onmouseover = function(){
+                message.toEventPosition(1);
+                document.getElementById('popup').style.display = 'block';
+                document.getElementById('popups').innerText = this.innerText;
+            }
+            el.onmouseout = function(){
+                document.getElementById('popup').style.display = 'none';
+            }
         }
     }     
-}
-
-// Тоже попапы на длинные имена
-function lngnm(par,e){    
-        message.toEventPosition(1);
-        document.getElementById('popup').style.display = 'block';
-        document.getElementById('popups').innerHTML = par;    
-}
-function lngnmo(){    
-        document.getElementById('popup').style.display = 'none';     
 }
 
 //Покрадено
@@ -629,10 +608,11 @@ function rsemicolon(prm){
 
 function setshow(){
     var mode = document.getElementById('show').value;
-    (mode == 'all') ? mode = '' : mode = '&show='+mode;
-    url = location.href.replace(/[\?|\&]{1}\S+$/, "");
-    if(location.href != url + mode){
-        window.location.href = url + mode;
+    if(!mode && !isNumber(mode))
+        return;
+    (mode == 'a') ? mode = '/' : mode = '/show/'+mode+'/';
+    if(window.location.pathname != mode){
+        window.location.href = mode;
     }
 }
 
@@ -725,4 +705,18 @@ function removeEvent(obj, evType, fn) {
     } else {
         return false;
     }
+}
+
+function updateStylesheets(name, link){
+	var a = document.getElementsByTagName('link');
+	for(var i=0; i<a.length; i++){
+		var s = a[i];
+		if(s.rel.toLowerCase().indexOf('stylesheet') >= 0 && s.href){
+		    var path = s.href.replace(/^https?:\/\/[^\/]+/i, '');
+		    path = path.replace(/#.*$/i, '');
+		    if(!name || path == name){
+		        s.href = s.href+'#'+(new Date().valueOf());
+		    }
+		}
+	}
 }

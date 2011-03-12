@@ -1,101 +1,101 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-    <title>Anime catalog</title>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
-    <link rel="search" type="application/opensearchdescription+xml" title="Anime catalog" href="/static/srch.xml" />
-    <link href="/static/style.css" type="text/css" rel="stylesheet" />
-    <link href="/css/" type="text/css" rel="stylesheet" />
-    <script type="text/javascript" src="/jsi18n/"></script>
-    <script type="text/javascript" src="/static/script.js"></script>
-    <script type="text/javascript" src="/static/app.js"></script>
-    <script type="text/javascript" src="/static/ajax.js"></script>
-    <script type="text/javascript" src="/static/user.js"></script>    
-    {% if user.is_authenticated %}<script type="text/javascript" src="/static/ae.js"></script>{% endif %}
-    {% block customScripts %}{% endblock %}
+	<title>Anime catalog</title>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	<link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+	<link rel="search" type="application/opensearchdescription+xml" title="Anime catalog" href="/static/srch.xml" />
+	<link href="/static/style.css" type="text/css" rel="stylesheet" />
+	<link href="/css/" type="text/css" rel="stylesheet" />
+	<script type="text/javascript" src="/jsi18n/"></script>
+	<script type="text/javascript" src="/static/script.js"></script>
+	<script type="text/javascript" src="/static/app.js"></script>
+	<script type="text/javascript" src="/static/ajax.js"></script>
+	<script type="text/javascript" src="/static/user.js"></script>
+	{% if user.is_authenticated %}<script type="text/javascript" src="/static/ae.js"></script>{% endif %}
+	{% block customScripts %}{% endblock %}
 </head>
 <body>
-    <div id="header" class="thdtbl">
-        <div class="leftmenu">
-        {% block mainlink %}
-            &nbsp;<a class="nurl" href="/">Main</a>&nbsp;|
-        {% endblock %}
-            &nbsp;<a class="nurl" onclick="searcher.toggle();">Search</a>
-            <input type="button" style="height: 19px;" onclick="corovan++; alert('Корованов ограблено:'+corovan);" value="Грабить корованы" />
-            &nbsp;<a class="nurl" href="/card/">Random</a>
-        {% if user.is_authenticated %}
-    	   |&nbsp;<a class="nurl" onclick="add.toggle();">Add</a>
-        </div>
-        <div id="logdiv" class="rightmenu">
-            <span><a href="/" title="User settings">{{ user.username }}</a></span>	
-            <a class="nurl" onclick="user.logout();">Logout</a>	
-        </div>        
-        <div class="rightmenu">
-            <a href="/stat/" class="nurl">Statistics</a>
-            {% block selectView %}	
-            <select id="show" onChange="setshow();">
-            {# Это можно в какой-нибудь лист ужать, значения цифровые сделать #}
-                <option value="null" selected>Display Mode</option>
-                <option value="all">All</option>
-                <option value="want">Want</option>
-                <option value="now">Now</option>
-                <option value="ok">Watched</option>
-                <option value="dropped">Dropped</option>
-            </select>
-            {% endblock %}
-        </div>
-        {% else %}
-        </div>
-        <div id="logdiv" class="rightmenu">
-            <a onclick="user.toggle();" class="nurl">Account</a>	
-        </div>
-        <div id="logdv" class="right">	
-            <form method="POST" action="/login/" id="login" class="thdtbl">
-                {% csrf_token %}
-                <a onclick="user.quickreg();" class="nurl">Registration</a>
-                <input id="lname" name="name"  type="text" />
-                <input id="lpasswd" name="pass" type="password" />
-                <input type="button" onclick="user.login();" value="Login" />
-                <p id="logininfo"></p>
-            </form>
-        </div>
-        {% endif %}
-        <div id="ie" style="color: #FFFF00;"></div>
-    </div>
-    <br />
-    <div id="srch">
-    {# Когда-нибудь потом #}
-    {# <!--<p id="chtext"><input type="checkbox" id="chsrch" onClick="searcher.showAdvance();" />Advanced Search</p>--> #}
-        <p id="srchp">
-        {% comment %}
-            <!--<select id="advsrch" class="advsrch">
-                <option value="null" selected="selected">Find by:</option>
-                <option value="genre">Genre</option>
-                $opts.
-            </select>
-            <select id="sortsrch" class="advsrch">
-                <option value="null" selected="selected">Sort by:</option>
-                <option value="genre">Genre</option>
-                $opts.
-            </select>
-            -->
-            <!--<input type="text" onkeyup="app.acomp(this, 'catalog', event);" /><br/>-->
-        {% endcomment %}
-            <input id="sin"  type="text" ondblclick="document.getElementById('sin').value='';" onkeydown="if(event.keyCode==13){searcher.send();} " />
-            <input type="button" onclick="searcher.send();" value="Искать" />
-        </p>
-        <div id="srchres"></div>	
-    </div>
-    {% block main %}
-    {% endblock %}
-    <div class="cont_men" id="menu">
-	   <span id="mspan" class="mnspan"></span>
+	<div id="header" class="thdtbl">
+		<div class="leftmenu">
+		{% block mainlink %}
+			&nbsp;<a class="nurl" href="/">Main</a>&nbsp;|
+		{% endblock %}
+			&nbsp;<a class="nurl" onclick="searcher.toggle();">Search</a>
+			<input type="button" style="height: 19px;" onclick="corovan++; alert('Корованов ограблено:'+corovan);" value="Грабить корованы" />
+			&nbsp;<a class="nurl" href="/card/">Random</a>
+		{% if user.is_authenticated %}
+			|&nbsp;<a class="nurl" onclick="add.toggle();">Add</a>
+		</div>
+		<div id="logdiv" class="rightmenu">
+			<span><a href="/" title="User settings">{{ user.username }}</a></span>	
+			<a class="nurl" onclick="user.logout();">Logout</a>	
+		</div>
+		<div class="rightmenu">
+			<a href="/stat/" class="nurl">Statistics</a>
+			{% block selectView %}	
+			<select id="show" onChange="setshow();">
+			{# Это можно в какой-нибудь лист ужать #}
+				<option value="" selected>Display Mode</option>
+				<option value="a">All</option>
+				<option value="0">None</option>
+				<option value="1">Want</option>
+				<option value="2">Now</option>
+				<option value="3">Watched</option>
+				<option value="4">Dropped</option>
+				<option value="5">Partially watched</option>
+			</select>
+			{% endblock %}
+		</div>
+		{% else %}
+		</div>
+		<div id="logdiv" class="rightmenu">
+			<a onclick="user.toggle();" class="nurl">Account</a>	
+		</div>
+		<div id="logdv" class="right">	
+			<form method="POST" action="/login/" id="login" class="thdtbl">
+				{% csrf_token %}
+				<a onclick="user.quickreg();" class="nurl">Registration</a>
+				<input id="lname" name="name"  type="text" />
+				<input id="lpasswd" name="pass" type="password" />
+				<input type="button" onclick="user.login();" value="Login" />
+				<p id="logininfo"></p>
+			</form>
+		</div>
+		{% endif %}
+		<div id="ie" style="color: #FFFF00;"></div>
 	</div>
-    <div class="cont_men" id="popup">
-        <span id="popups" class="mnspan"></span>
-    </div> 
+	<br />
+	<div id="srch">
+		<form method="POST" action="/search/" id="srchp">
+		{% csrf_token %}
+		{% comment %}
+			<!--<p id="chtext"><input type="checkbox" id="chsrch" onClick="searcher.showAdvance();" />Advanced Search</p>-->
+			<!--<select id="advsrch" class="advsrch">
+				<option value="null" selected="selected">Find by:</option>
+				<option value="genre">Genre</option>
+			</select>
+			<select id="sortsrch" class="advsrch">
+				<option value="null" selected="selected">Sort by:</option>
+				<option value="genre">Genre</option>
+			</select>
+			-->
+			<!--<input type="text" onkeyup="app.acomp(this, 'catalog', event);" /><br/>-->
+		{% endcomment %}
+			<input id="sin" type="text" ondblclick="document.getElementById('sin').value='';" onkeydown="if(event.keyCode==13){searcher.send(); return false;}" />
+			<input type="button" onclick="searcher.send();" value="Search" />
+		</form>
+		<div id="srchres"></div>
+	</div>
+	{% block main %}
+	{% endblock %}
+	<div class="cont_men" id="menu">
+		<span id="mspan" class="mnspan"></span>
+	</div>
+	<div class="cont_men" id="popup">
+		<span id="popups" class="mnspan"></span>
+	</div>
 	<div class="footer" id="">
-	   v. <a href="/changes/" style="font-size: 10pt; color: rgb(0, 0, 129);">3.0.99</a>.
-    </div>
+		v. <a href="/changes/" style="font-size: 10pt; color: rgb(0, 0, 129);">3.0.99</a>.
+	</div>
 </body>
