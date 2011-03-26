@@ -1,11 +1,11 @@
-{% if user.is_authenticated %}
-.air{
+.air {
 	background-color: yellow;
 }
 .sNone, .s0, .s {
 	font: normal 14pt "times new roman",serif !important;
 	color: #000 !important;
 }
+{% if user.is_authenticated %}
 .s1 {
 	font: normal 14pt "times new roman",serif !important;
 	color: MediumBlue !important;

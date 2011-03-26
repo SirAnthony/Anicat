@@ -14,12 +14,12 @@ from functions import getAttr
 from random import randint
 
 def latestStatus(request, userId=0):
-    if userId:
-        try:
+    try:
+        if userId:
             return UserStatusBundle.objects.filter(user=User.objects.get(id=userId)).latest("changed").changed
-        except:
-            return
-    return UserStatusBundle.objects.filter(user=request.user).latest("changed").changed
+        return UserStatusBundle.objects.filter(user=request.user).latest("changed").changed
+    except:
+        return
 
 # TODO: Pager here
 @render_to('anime/list.html')
@@ -81,12 +81,18 @@ def index(request, order='title', page=0, status=None):
 
 @render_to('anime/card.html')
 def card(request, animeId=0):
+    anime = None
     if not animeId:
         animeId = randint(1, AnimeItem.objects.count())
-    try:
-        anime = AnimeItem.objects.all()[animeId]
-    except Exception:
-        anime = None
+        try:
+            anime = AnimeItem.objects.all()[animeId]
+        except:
+            pass
+    else:
+        try:
+            anime = AnimeItem.objects.get(id=animeId)
+        except:
+            pass
     bundles = None
     if anime and anime.bundle:
         bundles = anime.bundle.animeitems.all().order_by('releasedAt')

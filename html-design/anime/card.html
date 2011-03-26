@@ -1,5 +1,7 @@
 {% extends "anime/base.html" %}
 
+{% load cache %}
+
     {% block selectView %}
     {% endblock %}
 
@@ -63,5 +65,5 @@
             {{ anime.translation }}
         </div>
     </div>
-    {% endif %}
+    {% endif %}    
     {% endblock %}

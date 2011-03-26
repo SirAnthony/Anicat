@@ -2,12 +2,11 @@ from django.conf.urls.defaults import *
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
+from django.db.models.loading import get_models, get_app
 admin.autodiscover()
 
-from anime.models import Genre, AnimeBundle, AnimeItem, AnimeEpisode, AnimeName, Credit, \
-    Organisation, OrganisationBundle, People, PeopleBundle, UserStatusBundle
-
-admin.site.register(AnimeItem)
+for m in get_models(get_app('anime')):
+    admin.site.register(m)
 
 urlpatterns = patterns('',
     # Example:
