@@ -21,9 +21,8 @@
 		{% block mainlink %}
 			&nbsp;<a class="nurl" href="/">Main</a>&nbsp;|
 		{% endblock %}
-			&nbsp;<a class="nurl" onclick="searcher.toggle();">Search</a>
-			<input type="button" style="height: 19px;" onclick="corovan++; alert('Корованов ограблено:'+corovan);" value="Грабить корованы" />
-			&nbsp;<a class="nurl" href="/card/">Random</a>
+			&nbsp;<a class="nurl" onclick="searcher.toggle();">Search</a>			
+			|&nbsp;<a class="nurl" href="/card/">Random</a>
 		{% if user.is_authenticated %}
 			|&nbsp;<a class="nurl" onclick="add.toggle();">Add</a>
 		</div>

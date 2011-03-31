@@ -10,7 +10,7 @@ from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
 from django.contrib import auth
-from functions import getAttr
+from functions import getAttr, invalidateCacheKey
 from random import randint
 
 def latestStatus(request, userId=0):
@@ -31,6 +31,7 @@ def index(request, order='title', page=0, status=None):
     page = int(request.REQUEST.get('page', page))
     limit = 100
     link = ''
+    
     try:
         AnimeItem._meta.get_field(order)
     except Exception:
@@ -57,9 +58,18 @@ def index(request, order='title', page=0, status=None):
     if order != AnimeItem._meta.ordering[0]:
         link += 'sort/%s/' % order
     if status >= 0:
-        cachestr = '%s:%s' % (request.user.id, link)
+        cachestr = '%s:%s%s' % (request.user.id, link, page)
+        stat = cache.get('User:%s' % request.user.id)
+        try:
+            stat['updated'].remove(status)
+        except Exception, e:
+            pass
+        else:
+            cache.set('User:%s' % request.user.id, stat)
+            invalidateCacheKey('mainTable', cachestr)
+            cache.delete('Pages:' + cachestr)
     else:
-        cachestr = link
+        cachestr = link + str(page)
     pages = cache.get('Pages:' + cachestr)
     if not pages:
         pages = []
@@ -71,11 +81,8 @@ def index(request, order='title', page=0, status=None):
             pages.extend(map(lambda x: unicode(getattr(x, order)).strip()[:4], s))
         pages.append(unicode(getattr(AnimeItem.objects.order_by('-'+order).only(order)[0], order)).strip()[:4])
         pages = [a+' - '+b for a,b in zip(pages[::2], pages[1::2])]
-        cache.set('Pages:' + cachestr, pages)
+        cache.set('Pages:%s' % cachestr, pages)
     items = qs[page*limit:(page+1)*limit]
-    #FUFUFU
-    cachestr += str(page)
-    #statuses = UserStatusBundle.objects.get_for_user(items, request.user.id)
     return {'list': items, 'link': link, 'cachestr': cachestr,
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
 

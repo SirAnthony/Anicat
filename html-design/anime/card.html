@@ -13,7 +13,7 @@
     {% else %}
     <div id="imagebun" class="cardcol">
         <div id="cimg">
-            <img src="/images/{{ anime.id }}/>" />
+            <img src="/images/{{ anime.id }}/" />
         </div>
         <b>Bundled with:</b><br/>
         <!-- Это все нужно переверстать -->
@@ -22,7 +22,7 @@
             <tr>
                 <td>
                 {% ifequal bundle.0.id anime.id %}
-                    <img src="/static/arrowblack.gif" />
+                    ►
                 {% endifequal %}
                 </td>
                 <td align="right">
@@ -65,5 +65,5 @@
             {{ anime.translation }}
         </div>
     </div>
-    {% endif %}    
+    {% endif %}
     {% endblock %}

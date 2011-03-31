@@ -97,7 +97,23 @@ def change(request):
             obj = UserStatusBundle.objects.get(user=request.user, anime=anime)
         except UserStatusBundle.DoesNotExist:
             obj = UserStatusBundle(user=request.user, anime=anime, status=0)
+        oldstatus = obj.status
         form = UserStatusForm(request.POST, instance=obj)
+        try:
+            status = int(request.POST.get('status'))            
+        except:
+            status = 0
+        stat = cache.get('User:%s', request.user.id)
+        for s in [status, oldstatus]:
+            try:
+                stat['updated'].index(s)
+            except TypeError:
+                stat = {'updated': [s]}
+            except KeyError:
+                stat['updated'] = [s]
+            except ValueError:
+                stat['updated'].append(s)
+        cache.set('User:%s' % request.user.id, stat)
         cache.delete('userCss:%s' % request.user.id)
         cache.delete('Stat:%s' % request.user.id)
     if form:
