@@ -151,7 +151,7 @@ def stat(request, userId=0):
 #FIXME: Do normal page if fail
 def login(request):
     response = {}
-    if not request.POST:
+    if request.method != 'POST':
         response['text'] = 'Only POST method allowed.'
     elif request.user.is_authenticated():
         response['text'] = 'Already logined.'
@@ -176,7 +176,7 @@ def register(request):
         form = UserCreationFormMail(request.POST)
         if form.is_valid():
             user = form.save()
-            user = auth.authenticate(username=user.username, password=form.data['password1'])
+            user = auth.authenticate(username=user.username, password=form.cleaned_data['password1'])
             auth.login(request, user)
             return HttpResponseRedirect("/")
     else:

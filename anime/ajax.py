@@ -20,7 +20,7 @@ def ajaxResponse(fn):
 @ajaxResponse
 def get(request):
     fields = []
-    if not request.POST:
+    if request.method != 'POST':
         return {'text': 'Only POST method allowed.'}
     try:
         aid = int(request.POST.get('id', 0))
@@ -36,9 +36,9 @@ def get(request):
         #FIXME: so bad
         if field == 'state':
             if not request.user.is_authenticated():
-                response[field] = 'Anonymous users has not statistics.'
+                response[field] = 'Anonymous users have no statistics.'
                 continue
-            else:                
+            else:
                 try:
                     bundle = UserStatusBundle.objects.get(anime=anime, user=request.user)
                     status = int(bundle.status)
@@ -68,15 +68,15 @@ def get(request):
                 response[field] = getattr(anime, field)
             except Exception, e:
                 response[field] = 'Error: ' + str(e)
-    
+
     response = {'response': 'getok', 'text': response}
-    
+
     return response
 
 @ajaxResponse
 def change(request):
     response = {}
-    if not request.POST:
+    if request.method != 'POST':
         return {'text': 'Only POST method allowed.'}
     elif not request.user.is_authenticated():
         return {'text': 'You must be logged in.'}
@@ -100,19 +100,19 @@ def change(request):
         oldstatus = obj.status
         form = UserStatusForm(request.POST, instance=obj)
         try:
-            status = int(request.POST.get('status'))            
+            status = int(request.POST.get('status'))
         except:
             status = 0
         stat = cache.get('User:%s', request.user.id)
         for s in [status, oldstatus]:
             try:
                 stat['updated'].index(s)
-            except TypeError:
-                stat = {'updated': [s]}
             except KeyError:
                 stat['updated'] = [s]
             except ValueError:
                 stat['updated'].append(s)
+            except:
+                stat = {'updated': [s]}
         cache.set('User:%s' % request.user.id, stat)
         cache.delete('userCss:%s' % request.user.id)
         cache.delete('Stat:%s' % request.user.id)
@@ -126,17 +126,17 @@ def change(request):
             response['text'] = form.errors
     else:
         response['text'] = 'Null form error.'
-    
+
     return response
 
 
 @ajaxResponse
 def login(request):
     response = {}
-    if not request.POST:
+    if request.method != 'POST':
         response['text'] = 'Only POST method allowed.'
     elif request.user.is_authenticated():
-        response['text'] = 'Already logined.'
+        response['text'] = 'Already logged in.'
     else:
         username = request.POST.get('name', None)
         password = request.POST.get('pass', None)
@@ -151,7 +151,7 @@ def login(request):
 @ajaxResponse
 def register(request):
     response = {}
-    if not request.POST:
+    if request.method != 'POST':
         response['text'] = 'Only POST method allowed.'
     elif request.user.is_authenticated():
         response['text'] = 'Already registred.'
@@ -159,7 +159,7 @@ def register(request):
         form = UserCreationFormMail(request.POST)
         if form.is_valid():
             user = form.save()
-            user = auth.authenticate(username=user.username, password=form.data['password1'])
+            user = auth.authenticate(username=user.username, password=form.cleaned_data['password1'])
             auth.login(request, user)
             response.update({'response': 'logok', 'text': {'name': user.username}})
         else:
@@ -168,7 +168,7 @@ def register(request):
 
 @ajaxResponse
 def search(request):
-    if not request.POST:
+    if request.method != 'POST':
         return {'text': 'Only POST method allowed.'}
     string = request.POST.get('string')
     if not string:
@@ -189,7 +189,7 @@ def search(request):
     if field == 'name':
         qs = AnimeItem.objects.filter(animenames__title__icontains=string).distinct()
     else:
-        return {'text': 'This field not avaliable yet.'}    
+        return {'text': 'This field not avaliable yet.'}
     res = qs.order_by(order)[page*limit:(page+1)*limit]
     #FUUUUUUSHENKIFUFU
     items = [{'name': x.title, 'type': x.releaseTypeS(), 'numberofep': x.episodesCount,
