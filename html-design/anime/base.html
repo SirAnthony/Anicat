@@ -9,7 +9,6 @@
 	<link href="/css/" type="text/css" rel="stylesheet" />
 	<script type="text/javascript" src="/jsi18n/"></script>
 	<script type="text/javascript" src="/static/script.js"></script>
-	<script type="text/javascript" src="/static/app.js"></script>
 	<script type="text/javascript" src="/static/ajax.js"></script>
 	<script type="text/javascript" src="/static/user.js"></script>
 	{% if user.is_authenticated %}<script type="text/javascript" src="/static/ae.js"></script>{% endif %}
@@ -21,18 +20,18 @@
 		{% block mainlink %}
 			&nbsp;<a class="nurl" href="/">Main</a>&nbsp;|
 		{% endblock %}
-			&nbsp;<a class="nurl" onclick="searcher.toggle();">Search</a>			
+			&nbsp;<a class="nurl" onclick="searcher.toggle();">Search</a>
 			|&nbsp;<a class="nurl" href="/card/">Random</a>
 		{% if user.is_authenticated %}
 			|&nbsp;<a class="nurl" onclick="add.toggle();">Add</a>
 		</div>
 		<div id="logdiv" class="rightmenu">
-			<span><a href="/" title="User settings">{{ user.username }}</a></span>	
+			<span><a href="/" title="User settings">{{ user.username }}</a></span>
 			<a class="nurl" onclick="user.logout();">Logout</a>	
 		</div>
 		<div class="rightmenu">
 			<a href="/stat/" class="nurl">Statistics</a>
-			{% block selectView %}	
+			{% block selectView %}
 			<select id="show" onChange="setshow();">
 			{# Это можно в какой-нибудь лист ужать #}
 				<option value="" selected>Display Mode</option>
@@ -49,24 +48,23 @@
 		{% else %}
 		</div>
 		<div id="logdiv" class="rightmenu">
-			<a onclick="user.toggle();" class="nurl">Account</a>	
+			<a onclick="user.toggle();" class="nurl">Account</a>
 		</div>
-		<div id="logdv" class="right">	
-			<form method="POST" action="/login/" id="login" class="thdtbl">
+		<div id="logdv" class="right">
+			<form method="POST" action="/login/" id="login" class="thdtbl" onsubmit="user.login(); return false;">
 				{% csrf_token %}
 				<a onclick="user.quickreg();" class="nurl">Registration</a>
 				<input id="lname" name="name"  type="text" />
 				<input id="lpasswd" name="pass" type="password" />
-				<input type="button" onclick="user.login();" value="Login" />
+				<input type="submit" value="Login" />
 				<p id="logininfo"></p>
 			</form>
 		</div>
 		{% endif %}
-		<div id="ie" style="color: #FFFF00;"></div>
 	</div>
 	<br />
 	<div id="srch">
-		<form method="POST" action="/search/" id="srchp">
+		<form method="POST" action="/search/" id="srchp" onsubmit="searcher.send(); return false;">
 		{% csrf_token %}
 		{% comment %}
 			<!--<p id="chtext"><input type="checkbox" id="chsrch" onClick="searcher.showAdvance();" />Advanced Search</p>-->
@@ -81,8 +79,8 @@
 			-->
 			<!--<input type="text" onkeyup="app.acomp(this, 'catalog', event);" /><br/>-->
 		{% endcomment %}
-			<input id="sin" type="text" ondblclick="document.getElementById('sin').value='';" onkeydown="if(event.keyCode==13){searcher.send(); return false;}" />
-			<input type="button" onclick="searcher.send();" value="Search" />
+			<input id="sin" type="text" ondblclick="document.getElementById('sin').value='';" />
+			<input type="submit" value="Search" />
 		</form>
 		<div id="srchres"></div>
 	</div>

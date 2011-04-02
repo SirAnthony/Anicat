@@ -214,7 +214,7 @@ def generateCss(request):
             statuses = UserStatusBundle.objects.filter(user=request.user).exclude(status=0).values('anime','status')
             for status in statuses:
                 styles[status['status']].append(str(status['anime']))
-            styles = [[', .r'.join(style), ', .a'.join(style)] for style in styles]
+            styles = [[',.r'.join(style), ',.a'.join(style)] for style in styles]
         cache.set('userCss:%s' % request.user.id, styles)
     return {'style': styles}
 
