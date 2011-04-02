@@ -167,6 +167,8 @@ var cookies = new ( function(){
 var pclass = new ( function(){
 
 	this.hasClass = function(ele, cls){
+		if(!ele.className)
+			return
 		return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
 	}
 
@@ -176,9 +178,9 @@ var pclass = new ( function(){
 	}
 
 	this.remove = function(ele, cls){
-		if (this.hasClass(ele,cls)){
+		if (this.hasClass(ele, cls)){
 			var reg = new RegExp('(\\s|^)'+cls+'(\\s|$)');
-			ele.className=ele.className.replace(reg,'');
+			ele.className = ele.className.replace(reg,'');
 		}
 	}
 })();
