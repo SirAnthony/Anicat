@@ -1,5 +1,6 @@
 /*Помойка*/
 
+/* Tags */
 body {
     font-size: 12pt;
     padding: 0px;
@@ -12,6 +13,15 @@ body * {
     padding: 0px;
 }
 
+input {
+    height: 18px;
+}
+
+input, select {
+    padding: 0 2px;
+}
+
+/* Global classes */
 .error{
     color: #cc0000;
 }
@@ -23,6 +33,8 @@ body * {
 .right {
     float: right;
 }
+
+/* Trash */
 
 #dvid{
 clear: both;
@@ -409,6 +421,50 @@ font: normal 12pt "times new roman", serif !important;
 }
 .elemlbl{
 font-weight: bold; 
+}
+
+#id_genre {
+    height: 22px;
+    padding-top: 2px;
+}
+
+#id_genre:hover {
+    position: absolute;
+    height: 30em;
+}
+
+.calendarbox {
+    border-color: #FFFFFF #FFFFFF #808080 #808080;
+    background-color: #D4D0C8;
+    padding: 5px;
+}
+
+.calendarbox caption {
+    width: 100%;
+    margin-left: -10px;
+}
+
+.calendarbox a {
+    cursor: pointer;
+}
+
+.calendarbox a:hover {
+    font: normal 12pt "times new roman", serif;
+}
+
+.calendar-shortcuts a, .calendar-shortcuts a:hover {
+    font-size: 11pt;
+}
+
+.calendarbox td {
+    width: 21px;
+    height: 21px;
+    text-align: right;
+    padding: 1px;
+}
+
+.calendar-cancel {
+    text-align: center;
 }
 
 /*Some ie hacks */

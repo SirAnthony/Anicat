@@ -10,9 +10,9 @@ from django.views.decorators.cache import cache_page
 from django.contrib import auth
 from functions import getVal, getAttr
 
-def ajaxResponse(fn):
-    ret = {'text': 'Unprocessed error', 'response': 'error'}
+def ajaxResponse(fn):    
     def new(*args):
+        ret = {'text': 'Unprocessed error', 'response': 'error'}
         ret.update(fn(*args)) #FIXME: no type check
         return HttpResponse(simplejson.dumps(ret), mimetype='application/javascript')
     return new
