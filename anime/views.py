@@ -187,22 +187,6 @@ def register(request):
 def changes(request):
     return {}
 
-@render_to('anime/add.html')
-def add(request):
-    form = AnimeForm()
-    if request.method == 'POST':
-        form = AnimeForm(request.POST, request.FILES)
-        if form.is_valid():
-            model = form.save(commit=False)
-            #slugt = re.sub(r'[^a-z0-9\s-]', ' ', model.title)
-            #slugt = re.sub(r'\s+', ' ', slugt)
-            #model.slug = re.sub(r'\s', '-', slugt)
-            #model.save()
-            return HttpResponseRedirect('/thanks/')
-    ctx = {'form': form}
-    ctx.update(csrf(request))
-    return ctx
-
 @cache_control(private=True, no_cache=True)
 #@condition(last_modified_func=latestStatus)
 @render_to('anime/user.css', 'text/css')
@@ -222,6 +206,22 @@ def generateCss(request):
 @render_to('anime/blank.html', 'text/css')
 def blank(request):
     return {}
+
+@render_to('anime/add.html')
+def add(request):
+    form = AnimeForm()
+    if request.method == 'POST':
+        form = AnimeForm(request.POST, request.FILES)
+        if form.is_valid():
+            model = form.save(commit=False)
+            #slugt = re.sub(r'[^a-z0-9\s-]', ' ', model.title)
+            #slugt = re.sub(r'\s+', ' ', slugt)
+            #model.slug = re.sub(r'\s', '-', slugt)
+            #model.save()
+            return HttpResponseRedirect('/thanks/')
+    ctx = {'form': form}
+    ctx.update(csrf(request))
+    return ctx
 
 #@render_to('anime/add.html')
 def test(request):

@@ -11,12 +11,12 @@ class CalendarWidget(TextInput):
         super(CalendarWidget, self).__init__(attrs={'class': 'vDateField', 'size': '10'})
 
 class AnimeForm(ModelForm):
-    releasedAt = DateTimeField(widget=CalendarWidget)
-    endedAt = DateTimeField(widget=CalendarWidget)
+    releasedAt = DateTimeField(label='Released', widget=CalendarWidget)
+    endedAt = DateTimeField(label='Ended', widget=CalendarWidget)
     
     class Meta():
         model = AnimeItem
-        exclude = ('bundle', 'air',)
+        exclude = ('bundle', 'locked')
 
 class UserStatusForm(ModelForm):
     class Meta():

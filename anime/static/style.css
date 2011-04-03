@@ -13,16 +13,12 @@ body * {
     padding: 0px;
 }
 
-input {
-    height: 18px;
-}
-
 input, select {
     padding: 0 2px;
 }
 
 /* Global classes */
-.error{
+.error, .errorlist{
     color: #cc0000;
 }
 
@@ -426,11 +422,13 @@ font-weight: bold;
 #id_genre {
     height: 22px;
     padding-top: 2px;
+    display: block;
 }
 
 #id_genre:hover {
     position: absolute;
     height: 30em;
+    width: 200px;    
 }
 
 .calendarbox {
@@ -444,11 +442,11 @@ font-weight: bold;
     margin-left: -10px;
 }
 
-.calendarbox a {
+.calendarbox a, .datetimeshortcuts a {
     cursor: pointer;
 }
 
-.calendarbox a:hover {
+.calendarbox a:hover, .datetimeshortcuts a:hover {
     font: normal 12pt "times new roman", serif;
 }
 
@@ -465,6 +463,43 @@ font-weight: bold;
 
 .calendar-cancel {
     text-align: center;
+}
+
+.datetimeshortcuts {
+    float: right;
+    margin-top: -1px;
+}
+
+.addform {
+    width: 425px;
+}
+
+.addform input {
+    clear: both;
+    margin-right: 10px;
+}
+
+.addform input[type=checkbox] {
+    margin-left: 10px;
+}
+
+.addform div {
+    width: 200px;
+    min-height: 48px;
+    float: left;
+    margin: 5px;
+}
+.addform div input {
+    width: 192px;
+    margin: 3px 0;
+}
+.addform div select {
+    width: 100%;
+    margin: 3px 0;
+}
+
+.addform ul li {
+    list-style: none;
 }
 
 /*Some ie hacks */

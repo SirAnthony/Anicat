@@ -1,14 +1,20 @@
 {% extends "anime/base.html" %}
 
-{% if user.is_authenticated %}
-    {% block customScripts %}{{ form.media.render }}{% endblock %}
+    {% block customScripts %}{% if user.is_authenticated %}{{ form.media.render }}{% endif %}{% endblock %}
 
     {% block main %}
-    <form action="" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value="Add" />
+    {% if user.is_authenticated %}
+    <form class="addform" action="/add/" method="post" enctype="multipart/form-data">
+        {% csrf_token %}            
+    	{% for field in form %}
+        <div>
+            {{ field.label_tag }}: {{ field }}
+            {{ field.errors }}
+        </div>
+        {% endfor %}            
+        <input type="submit" class="right" value="Add" />
     </form>
+    {% else %}
+    <div>Pool's closed.</div>
+    {% endif %}
     {% endblock %}
-
-{% endif %}

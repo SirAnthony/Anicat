@@ -22,11 +22,28 @@ USER_STATUS = [
     (5, u'partially watched'),
 ]
 
+class Locable(models.Model):
+    locked = models.BooleanField(default=False)
+    
+    def save(self, *args, **kwargs):
+        if self.locked:
+            return None
+        return super(Locable, self).save(*args, **kwargs)
+
+    class Meta:
+        abstract = True
+
 class Genre(models.Model):
     name = models.CharField(max_length=200, db_index=True, unique=True)
     
     def __unicode__(self):
         return self.name
+
+class Credit(models.Model):
+    title = models.CharField(max_length=200, unique=True)
+    
+    def __unicode__(self):
+        return self.title
 
 class AnimeBundle(models.Model):
     
@@ -39,7 +56,7 @@ class AnimeBundle(models.Model):
         one.save()
         two.save()
 
-class AnimeItem(models.Model):
+class AnimeItem(Locable):
     title = models.CharField(max_length=200, db_index=True, unique_for_date='releasedAt')
     genre = models.ManyToManyField(Genre)
     releaseType = models.IntegerField(choices=ANIME_TYPES)
@@ -65,7 +82,7 @@ class AnimeItem(models.Model):
     class Meta:
         ordering = ["title"]
 
-class AnimeEpisode(models.Model):
+class AnimeEpisode(Locable):
     title = models.CharField(max_length=200)
     anime = models.ForeignKey(AnimeItem, related_name="animeepisodes")
     audit_log = AuditLog()
@@ -77,7 +94,7 @@ class AnimeEpisode(models.Model):
         unique_together = ("title", "anime")
 
 
-class AnimeName(models.Model):
+class AnimeName(Locable):
     title = models.CharField(max_length=200)
     anime = models.ForeignKey(AnimeItem, related_name="animenames")
     audit_log = AuditLog()
@@ -89,20 +106,14 @@ class AnimeName(models.Model):
         ordering = ["title"]
         unique_together = ("title", "anime")
 
-class Credit(models.Model):
-    title = models.CharField(max_length=200, unique=True)
-    
-    def __unicode__(self):
-        return self.title
-    
-class Organisation(models.Model):
+class Organisation(Locable):
     name = models.CharField(max_length=200, unique=True)
     audit_log = AuditLog()
     
     def __unicode__(self):
         return self.name
 
-class OrganisationBundle(models.Model):
+class OrganisationBundle(Locable):
     anime = models.ForeignKey(AnimeItem, related_name="organisationbundles")
     organisation = models.ForeignKey(Organisation, related_name="organisationbundles")
     job = models.ForeignKey(Credit)
@@ -113,14 +124,14 @@ class OrganisationBundle(models.Model):
     class Meta:
         unique_together = ("anime", "organisation", "job", "role")
 
-class People(models.Model):
+class People(Locable):
     name = models.CharField(max_length=200, unique=True)
     audit_log = AuditLog()
     
     def __unicode__(self):
         return self.name
 
-class PeopleBundle(models.Model):
+class PeopleBundle(Locable):
     anime = models.ForeignKey(AnimeItem, related_name="peoplebundles")
     person = models.ForeignKey(People, related_name="peoplebundles")
     job = models.ForeignKey(Credit)

@@ -9,17 +9,11 @@ var DateTimeShortcuts = {
 	calendarDivName2: 'calendarin',  // name of <div> that contains calendar
 	calendarLinkName: 'calendarlink',// name of the link that is used to toggle
 	shortCutsClass: 'datetimeshortcuts', // class of the clock and cal shortcuts
-	admin_media_prefix: '',
 	init: function(){
 		// Get admin_media_prefix by grabbing it off the window object. It's
 		// set in the admin/base.html template, so if it's not there, someone's
 		// overridden the template. In that case, we'll set a clearly-invalid
 		// value in the hopes that someone will examine HTTP requests and see it.
-		if (window.__admin_media_prefix__ != undefined) {
-			DateTimeShortcuts.admin_media_prefix = window.__admin_media_prefix__;
-		} else {
-			DateTimeShortcuts.admin_media_prefix = '/missing-admin-media-prefix/';
-		}
 
 		var ftype = ['vDateField', 'vTimeField']
 		for(var i in ftype){
@@ -53,12 +47,9 @@ var DateTimeShortcuts = {
 							element.create('', {innerText: '\240|\240'}),
 							element.create('a', {onclick: (function(num){
 									return function(){DateTimeShortcuts.openCalendar(num);}
-								})(num), id: DateTimeShortcuts.calendarLinkName + num}), [
-								element.create('img', {
-										'src': DateTimeShortcuts.admin_media_prefix + 'img/admin/icon_calendar.gif',
-										'alt': gettext('Calendar')})],
+								})(num), id: DateTimeShortcuts.calendarLinkName + num, innerText: gettext('Calendar')}),
 		]);
-		element.insert(inp, shortcuts_span, 1);
+		element.insert(inp.previousSibling, shortcuts_span);
 
 		// Create calendarbox div.
 		//
