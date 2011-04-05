@@ -1,7 +1,11 @@
-from django.forms import ModelForm, TextInput, DateTimeField
+from django.forms import ModelForm, TextInput, DateTimeField, BooleanField
 from models import AnimeItem, UserStatusBundle
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+
+class ErrorForm(ModelForm):
+    def addError(self, text):
+        self.errors['__all__'] = self.error_class([text])
 
 class CalendarWidget(TextInput):
     class Media:
@@ -10,12 +14,12 @@ class CalendarWidget(TextInput):
     def __init__(self, attrs={}):
         super(CalendarWidget, self).__init__(attrs={'class': 'vDateField', 'size': '10'})
 
-class AnimeForm(ModelForm):
+class AnimeForm(ErrorForm):
     releasedAt = DateTimeField(label='Released', widget=CalendarWidget)
-    endedAt = DateTimeField(label='Ended', widget=CalendarWidget)
+    endedAt = DateTimeField(label='Ended', widget=CalendarWidget, required=False)
     
     class Meta():
-        model = AnimeItem
+        model = AnimeItem        
         exclude = ('bundle', 'locked')
 
 class UserStatusForm(ModelForm):

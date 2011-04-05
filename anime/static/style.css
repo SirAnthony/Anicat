@@ -30,6 +30,10 @@ input, select {
     float: right;
 }
 
+.clear {
+    clear: both;
+}
+
 /* Trash */
 
 #dvid{
@@ -500,6 +504,12 @@ font-weight: bold;
 
 .addform ul li {
     list-style: none;
+}
+
+.addform div.mainerror {
+    float: none;
+    width: 100%;
+    min-height: 0px; 
 }
 
 /*Some ie hacks */

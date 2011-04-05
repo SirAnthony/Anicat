@@ -12,6 +12,7 @@ from annoying.decorators import render_to
 from django.contrib import auth
 from functions import getAttr, invalidateCacheKey
 from random import randint
+from datetime import datetime
 
 def latestStatus(request, userId=0):
     try:
@@ -210,15 +211,18 @@ def blank(request):
 @render_to('anime/add.html')
 def add(request):
     form = AnimeForm()
-    if request.method == 'POST':
+    if request.method == 'POST' and request.user.is_authenticated():
         form = AnimeForm(request.POST, request.FILES)
         if form.is_valid():
-            model = form.save(commit=False)
-            #slugt = re.sub(r'[^a-z0-9\s-]', ' ', model.title)
-            #slugt = re.sub(r'\s+', ' ', slugt)
-            #model.slug = re.sub(r'\s', '-', slugt)
-            #model.save()
-            return HttpResponseRedirect('/thanks/')
+            if (datetime.now() - request.user.date_joined).days < 20:
+                form.addError("You cannot doing this now")
+            else:
+                model = form.save(commit=False)
+                #slugt = re.sub(r'[^a-z0-9\s-]', ' ', model.title)
+                #slugt = re.sub(r'\s+', ' ', slugt)
+                #model.slug = re.sub(r'\s', '-', slugt)
+                #model.save()
+                return HttpResponseRedirect('/thanks/')
     ctx = {'form': form}
     ctx.update(csrf(request))
     return ctx
