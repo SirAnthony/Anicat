@@ -217,15 +217,25 @@ def add(request):
             if (datetime.now() - request.user.date_joined).days < 20:
                 form.addError("You cannot doing this now")
             else:
-                model = form.save(commit=False)
-                #slugt = re.sub(r'[^a-z0-9\s-]', ' ', model.title)
-                #slugt = re.sub(r'\s+', ' ', slugt)
-                #model.slug = re.sub(r'\s', '-', slugt)
-                #model.save()
-                return HttpResponseRedirect('/thanks/')
+                try:
+                    model = form.save(commit=False)
+                    #slugt = re.sub(r'[^a-z0-9\s-]', ' ', model.title)
+                    #slugt = re.sub(r'\s+', ' ', slugt)
+                    #model.slug = re.sub(r'\s', '-', slugt)
+                    model.save()
+                    name = AnimeName(title=model.title, anime=model)
+                    name.save()
+                    cache.clear() #Dirty, but work
+                    return HttpResponseRedirect('/')
+                except Exception, e:
+                    form.addError("Error %s has occured. Please make sure that the addition was successful." % e)
     ctx = {'form': form}
     ctx.update(csrf(request))
     return ctx
+
+def updateUserCaches():
+    for id in map(lambda x: x[0], User.objects.all().values_list('id')):
+        pass
 
 #@render_to('anime/add.html')
 def test(request):
