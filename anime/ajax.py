@@ -103,17 +103,13 @@ def change(request):
             status = int(request.POST.get('status'))
         except:
             status = 0
-        stat = cache.get('User:%s', request.user.id)
+        stat = cache.get('mainTable:%s' % request.user.id)
         for s in [status, oldstatus]:
             try:
-                stat['updated'].index(s)
-            except KeyError:
-                stat['updated'] = [s]
-            except ValueError:
-                stat['updated'].append(s)
+                stat[s] = {}
             except:
-                stat = {'updated': [s]}
-        cache.set('User:%s' % request.user.id, stat)
+                pass
+        cache.set('mainTable:%s' % request.user.id, stat)
         cache.delete('userCss:%s' % request.user.id)
         cache.delete('Stat:%s' % request.user.id)
     if form:

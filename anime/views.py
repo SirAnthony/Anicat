@@ -10,7 +10,7 @@ from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
 from django.contrib import auth
-from functions import getAttr, invalidateCacheKey
+from functions import getAttr, cleanTableCache
 from random import randint
 from datetime import datetime
 
@@ -31,8 +31,6 @@ def index(request, order='title', page=0, status=None):
         page = 0
     page = int(request.REQUEST.get('page', page))
     limit = 100
-    link = ''
-    
     try:
         AnimeItem._meta.get_field(order)
     except Exception:
@@ -54,23 +52,7 @@ def index(request, order='title', page=0, status=None):
             raise Exception
     except Exception:
         status = None
-    if status >= 0:
-        link += 'show/%s/' % status
-    if order != AnimeItem._meta.ordering[0]:
-        link += 'sort/%s/' % order
-    if status >= 0:
-        cachestr = '%s:%s%s' % (request.user.id, link, page)
-        stat = cache.get('User:%s' % request.user.id)
-        try:
-            stat['updated'].remove(status)
-        except Exception, e:
-            pass
-        else:
-            cache.set('User:%s' % request.user.id, stat)
-            invalidateCacheKey('mainTable', cachestr)
-            cache.delete('Pages:' + cachestr)
-    else:
-        cachestr = link + str(page)
+    (link, cachestr) = cleanTableCache(order, status, page, request.user)
     pages = cache.get('Pages:' + cachestr)
     if not pages:
         pages = []
@@ -225,7 +207,7 @@ def add(request):
                     model.save()
                     name = AnimeName(title=model.title, anime=model)
                     name.save()
-                    cache.clear() #Dirty, but work
+                    updateMainCaches()
                     return HttpResponseRedirect('/')
                 except Exception, e:
                     form.addError("Error %s has occured. Please make sure that the addition was successful." % e)
@@ -233,9 +215,10 @@ def add(request):
     ctx.update(csrf(request))
     return ctx
 
-def updateUserCaches():
+def updateMainCaches():
     for id in map(lambda x: x[0], User.objects.all().values_list('id')):
-        pass
+        cache.set('mainTable:%s' % id, {})
+    cache.set('mainTable', {})
 
 #@render_to('anime/add.html')
 def test(request):
