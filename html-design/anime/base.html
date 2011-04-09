@@ -12,6 +12,7 @@
 	<script type="text/javascript" src="/static/ajax.js"></script>
 	<script type="text/javascript" src="/static/user.js"></script>
 	{% if user.is_authenticated %}<script type="text/javascript" src="/static/ae.js"></script>{% endif %}
+	{% if user.is_authenticated %}{{ form.media.render }}{% endif %}
 	{% block customScripts %}{% endblock %}
 </head>
 <body>
@@ -91,8 +92,23 @@
 	</div>
 	<div class="cont_men" id="popup">
 		<span id="popups" class="mnspan"></span>
-	</div>
+	</div>	
 	<div class="footer" id="">
 		v. <a href="/changes/" style="font-size: 10pt; color: rgb(0, 0, 129);">3.0.99</a>.
 	</div>
+	{% if user.is_authenticated %}
+	<form id="addform" class="addform cont_men" action="/add/" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mainerror">
+            {{ form.non_field_errors }}
+        </div>
+    	{% for field in form %}
+        <div {% if forloop.counter0|divisibleby:2 %}class="clear"{% endif %}>
+            {{ field.label_tag }}: {{ field }}
+            {{ field.errors }}
+        </div>
+        {% endfor %}            
+        <input type="submit" class="right" value="Add" />
+    </form>
+    {% endif %}
 </body>

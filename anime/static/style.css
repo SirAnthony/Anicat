@@ -204,56 +204,6 @@ max-height: 500px;
 overflow: auto;
 }
 
-#addfrm{
-top: 30px;
-left: 30px;
-font-size: 12pt;
-width: 480px !important;
-}
-.frmdv {    
-margin: 0px 7px !important;
-}
-.frmdv div {
-    clear: both;
-}
-
-.ac1 {
-    margin: 0px 6px 0px 1px;
-    float: left;
-    clear: left;
-}
-.ac2 {
-    margin: 0px 1px 0px 6px;
-    float: left;
-}
-
-#addfrm input, #addfrm select, #addfrm textarea{
-width: 220px;
-height: 18px;
-}
-#addfrm textarea{
-float: right;
-height: 120px;
-}
-#addfrm label {
-    width: 220px;
-    margin-top: 4px;
-    margin-bottom: 2px;
-    padding-left: 5px;
-}
-#addfrm select, #addfrm input[type=button]{
-height: 25px !important;
-}
-.adddiv select{
-margin: 1px 9px !important;
-}
-.adddiv input{
-margin: 1px 7px !important;
-}
-#addfrm input[type=button]{
-margin: 8px 7px 8px 6px;
-}
-
 .leftmenu{
     float: left;
     margin: 2px 3px 10px 3px;
@@ -284,8 +234,6 @@ margin: 8px 7px 8px 6px;
 #lname, #lpasswd{
 width: 150px;
 }
-
-
 
 #login p.error {
     display: none;
@@ -511,6 +459,14 @@ font-weight: bold;
     width: 100%;
     min-height: 0px; 
 }
+
+/* Id's */
+#addform{
+    top: 30px;
+    left: 30px;
+    font-size: 12pt;
+}
+
 
 /*Some ie hacks */
 <!--[if lt IE 8]>

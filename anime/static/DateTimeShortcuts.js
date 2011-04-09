@@ -69,7 +69,7 @@ var DateTimeShortcuts = {
 		//	<p class="calendar-cancel"><a href="#">Cancel</a></p>
 		// </div>
 
-		var cal_box = element.create('div', {className: 'calendarbox module',
+		var cal_box = element.create('div', {className: 'cont_men calendarbox module',
 										id: DateTimeShortcuts.calendarDivName1 + num,
 										onclick: DateTimeShortcuts.cancelEventPropagation});
 

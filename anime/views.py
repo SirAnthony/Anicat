@@ -66,7 +66,7 @@ def index(request, order='title', page=0, status=None):
         pages = [a+' - '+b for a,b in zip(pages[::2], pages[1::2])]
         cache.set('Pages:%s' % cachestr, pages)
     items = qs[page*limit:(page+1)*limit]
-    return {'list': items, 'link': link, 'cachestr': cachestr,
+    return {'list': items, 'link': link, 'cachestr': cachestr, 'form': AnimeForm(),
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
 
 @render_to('anime/card.html')
@@ -201,9 +201,6 @@ def add(request):
             else:
                 try:
                     model = form.save(commit=False)
-                    #slugt = re.sub(r'[^a-z0-9\s-]', ' ', model.title)
-                    #slugt = re.sub(r'\s+', ' ', slugt)
-                    #model.slug = re.sub(r'\s', '-', slugt)
                     model.save()
                     name = AnimeName(title=model.title, anime=model)
                     name.save()
