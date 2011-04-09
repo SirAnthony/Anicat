@@ -24,47 +24,45 @@ def invalidateCacheKey(fragment_name, *variables):
 #TODO: fix it later
 def cleanTableCache(order, status, page, user):
     link = ''
-    if status >= 0:
+    if status is not None:
         link += 'show/%s/' % status
     if order != AnimeItem._meta.ordering[0]:
         link += 'sort/%s/' % order
-    if status >= 0:
+    if status is not None:
         cachestr = '%s:%s%s' % (user.id, link, page)
     else:
         cachestr = link + str(page)
-    if user.is_authenticated():
+    if status is not None and user.is_authenticated():
         maintablekey = 'mainTable:%s' % user.id
     else:
         maintablekey = 'mainTable'        
-    maintable = cache.get(maintablekey)       
-    try:
-        cached = True
-        if status >= 0:
-            #Last exception can be thrown here 
-            currenttable = maintable[status]
-        else:
-            currenttable = maintable
+    maintable = cache.get(maintablekey)
+    if maintable is None:
+        maintable = {}
+    cached = True
+    if status is not None:
         try:
-            currenttable[order].index(page)
-        except KeyError:
-            currenttable[order] = [page]
-        except ValueError:
-            currenttable[order].append(page)
+            currenttable = maintable[status]
         except:
-            currenttable = {order: [page]}
+            currenttable = {}
+    else:
+        currenttable = maintable
+    try:
+        currenttable[order].index(page)
+    except KeyError:
+        currenttable[order] = [page]
+    except ValueError:
+        currenttable[order].append(page)
+    except Exception, e:
+        currenttable = {order: [page]}
+    else:
+        cached = False
+    if cached:
+        if status is not None:
+            maintable[status] = currenttable
         else:
-            cached = False
-        if cached:
-            if status >= 0:
-                #or here, lol
-                maintable[status] = currenttable
-                cache.delete('Pages:' + cachestr)
-            else:
-                maintable = currenttable
-            invalidateCacheKey('mainTable', cachestr)
-            cache.set(maintablekey, maintable)
-    except:
+            maintable = currenttable
+        cache.delete('Pages:' + cachestr)
         invalidateCacheKey('mainTable', cachestr)
-        maintable = {status: {order:[page]}}
         cache.set(maintablekey, maintable)
     return link, cachestr

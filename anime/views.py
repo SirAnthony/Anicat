@@ -207,7 +207,8 @@ def add(request):
                     model.save()
                     name = AnimeName(title=model.title, anime=model)
                     name.save()
-                    updateMainCaches()
+                    #Not watched and main need to be reloaded
+                    updateMainCaches(USER_STATUS[0][0])
                     return HttpResponseRedirect('/')
                 except Exception, e:
                     form.addError("Error %s has occured. Please make sure that the addition was successful." % e)
@@ -215,9 +216,16 @@ def add(request):
     ctx.update(csrf(request))
     return ctx
 
-def updateMainCaches():
+def updateMainCaches(status=None):
     for id in map(lambda x: x[0], User.objects.all().values_list('id')):
-        cache.set('mainTable:%s' % id, {})
+        t = {}
+        if status is not None:
+            t = cache.get('mainTable:%s' % id)
+            try:
+                t[status] = {}
+            except:
+                t = {}
+        cache.set('mainTable:%s' % id, t)
     cache.set('mainTable', {})
 
 #@render_to('anime/add.html')
