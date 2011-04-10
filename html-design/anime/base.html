@@ -58,7 +58,7 @@
 				<input id="lname" name="name"  type="text" />
 				<input id="lpasswd" name="pass" type="password" />
 				<input type="submit" value="Login" />
-				<p id="logininfo"></p>
+				<p id="logininfo" class="error"></p>
 			</form>
 		</div>
 		{% endif %}
@@ -97,7 +97,8 @@
 		v. <a href="/changes/" style="font-size: 10pt; color: rgb(0, 0, 129);">3.0.99</a>.
 	</div>
 	{% if user.is_authenticated %}
-	<form id="addform" class="addform cont_men" action="/add/" method="post" enctype="multipart/form-data">
+	<form id="addform" class="addform cont_men" action="/add/" method="post" enctype="multipart/form-data"
+		onsubmit="return false;">
         {% csrf_token %}
         <div class="mainerror">
             {{ form.non_field_errors }}
@@ -108,7 +109,7 @@
             {{ field.errors }}
         </div>
         {% endfor %}            
-        <input type="submit" class="right" value="Add" />
+        <input type="submit" class="right" value="Add" onclick="add.sendForm(event); return false;" />
     </form>
     {% endif %}
 </body>

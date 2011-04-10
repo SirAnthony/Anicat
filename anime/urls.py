@@ -20,6 +20,7 @@ urlpatterns = patterns(
 urlpatterns += patterns('anime.ajax',
     (r'^ajax/get/$', 'get'),
     (r'^ajax/set/$', 'change'),
+    (r'^ajax/add/$', 'add'),
     (r'^ajax/login/$', 'login'),
     (r'^ajax/register/$', 'register'),
     (r'^ajax/search/$', 'search'),

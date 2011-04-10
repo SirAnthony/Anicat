@@ -55,17 +55,16 @@ var user = new( function(){
 		element.removeAllChilds(div);
 		while(div.nextSibling)
 			element.remove(div.nextSibling);
-		var a = element.create('a', {href: '', onclick: function(){quickreg();},
-								innerText: 'Account', className: "nurl"});
-		element.appendChild(div, [a]);
-		var ldiv = element.create('div', {id: 'logdv'});
-		var form = element.create('form', {id: 'login', className: 'thdtbl'});
-		var i1 = element.create('input', {id: 'lname', type: 'text'});
-		var i2 = element.create('input', {id: 'lpasswd', type: 'password'});
-		var ib = element.create('input', {onclick: function(){quickreg();}, type: 'button',
-								value: 'Enter'});
-		var p = element.create('p', {id: 'logininfo'});
-		element.appendChild(div.parentNode, [ldiv, [form, [i1, i2, ib, /*ir, il,*/ p]]]);
+		element.appendChild(div, [{'a': {href: '', onclick: function(){quickreg();},
+								innerText: 'Account', className: "nurl"}}]);		
+		element.appendChild(div.parentNode, [{'div': {id: 'logdv'}}, [
+		                                  {'form': {id: 'login', className: 'thdtbl'}}, [
+		                                      {'input': {id: 'lname', type: 'text'}},
+		                                      {'input': {id: 'lpasswd', type: 'password'}},
+		                                      {'input': {onclick: function(){quickreg();}, type: 'button',
+								                value: 'Enter'}},
+								              /*ir, il,*/
+								              {'p': {id: 'logininfo', className: 'error'}}]]]);
 		window.location.replace('/logout/'); //Возможно, когда-нибудь будет без релоада, только зачем?
 	}
 
@@ -77,20 +76,23 @@ var user = new( function(){
 		element.remove(document.getElementById('logdv'));
 		element.removeAllChilds(form);
 		element.appendChild(form, [
-			element.create('span'), [
-				element.create('a', {'href': '/', title: 'User settings', innerText: nick})],
-			element.create('a', {className: 'nurl', innerText: 'Logout',
-									onclick: function(){user.logout();}})
+			{'span': {}}, [
+				{'a': {'href': '/', title: 'User settings', innerText: nick}}],
+			{'a': {className: 'nurl', innerText: 'Logout',
+									onclick: function(){user.logout();}}}
 		]);
 		var select = element.create('select', {id: 'show', onchange: function(){setshow();}});
-		element.appendChild(select, [element.create('option', {value: '', text: 'Display Mode', selected: 'selected'})]);
+		element.appendChild(select, [{'option': {value: '', text: 'Display Mode', selected: 'selected'}}]);
 		element.addOption(select, {'a': 'All', '0': 'None', '1': 'Want', '2': 'Now',
 									'3': 'Watched', '4': 'Dropped', '5': 'Partially watched'});
 		element.appendChild(form.parentNode, [
-			element.create('div', {className: 'rightmenu'}), [
-				element.create('a', {href: '/stat/', className: 'nurl', innerText: 'Statistics'}),
+			{'div': {className: 'rightmenu'}}, [
+				{'a': {href: '/stat/', className: 'nurl', innerText: 'Statistics'}},
 				select
 			]
+		]);
+		element.appendChild(document.getElementsByTagName("head")[0], [
+		    {'script': {'type': 'text/javascript', 'src': '/static/ae.js'}}
 		]);
 	}
 
@@ -116,18 +118,18 @@ var user = new( function(){
 				if(!div.firstChild || !(div.childNodes[1] && div.childNodes[1] == register)){
 					element.removeAllChilds(div);
 					element.appendChild(div, [
-								{'elemType': 'form', 'id': 'register'}, [
-									{'elemType': 'span', 'className': 'left', innerText: 'Quick registration'},
-									{'elemType': 'label', 'for': 'id_username', innerText: 'Login:'},
-									{'elemType': 'input', 'id': 'id_username', type: 'text'},
-									{'elemType': 'label', 'for': 'id_email', innerText: 'E-Mail:'},
-									{'elemType': 'input', 'id': 'id_email', type: 'text'},
-									{'elemType': 'label', 'for': 'id_password1', innerText: 'Password:'},
-									{'elemType': 'input', 'id': 'id_password1', type: 'password'},
-									{'elemType': 'label', 'for': 'id_password2', innerText: 'Confirm:'},
-									{'elemType': 'input', 'id': 'id_password2', type: 'password'},
-									{'elemType': 'input', type: 'button', onclick: function(){user.register();}, value: 'Ok'},
-									{'elemType': 'input', type: 'button', onclick: function(){user.register('abort');}, value: 'Cancel'}]
+								{'form': {'id': 'register'}}, [
+									{'span': {'className': 'left', innerText: 'Quick registration'}},
+									{'label': {'for': 'id_username', innerText: 'Login:'}},
+									{'input': {'id': 'id_username', type: 'text'}},
+									{'label': {'for': 'id_email', innerText: 'E-Mail:'}},
+									{'input': {'id': 'id_email', type: 'text'}},
+									{'label': {'for': 'id_password1', innerText: 'Password:'}},
+									{'input': {'id': 'id_password1', type: 'password'}},
+									{'label': {'for': 'id_password2', innerText: 'Confirm:'}},
+									{'input': {'id': 'id_password2', type: 'password'}},
+									{'input': {type: 'button', onclick: function(){user.register();}, value: 'Ok'}},
+									{'input': {type: 'button', onclick: function(){user.register('abort');}, value: 'Cancel'}}]
 								]);
 				}
 			}

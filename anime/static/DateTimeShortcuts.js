@@ -75,10 +75,14 @@ var DateTimeShortcuts = {
 
 		element.appendChild(document.body, [cal_box, [
 			element.create('div'), [ //В образце h2, а в коде div ололо
-				element.create('a', {className: 'left', innerText: '<', 
+				element.create('a', {className: 'left', innerText: '<<\240',
+					onclick: (function(num){return function(){DateTimeShortcuts.drawPrevY(num);}})(num)}),
+				element.create('a', {className: 'left', innerText: '<',
 					onclick: (function(num){return function(){DateTimeShortcuts.drawPrev(num);}})(num)}),
-				element.create('a', {className: 'right',  innerText: '>',
-					onclick: (function(num){return function(){DateTimeShortcuts.drawNext(num);}})(num)})
+				element.create('a', {className: 'right',  innerText: '>>',
+					onclick: (function(num){return function(){DateTimeShortcuts.drawNextY(num);}})(num)}),
+				element.create('a', {className: 'right',  innerText: '>\240',
+					onclick: (function(num){return function(){DateTimeShortcuts.drawNext(num);}})(num)}),
 				],
 			element.create('div', {className: 'calendar', id: DateTimeShortcuts.calendarDivName2 + num}),
 			element.create('div', {className: 'calendar-shortcuts'}), [
@@ -135,7 +139,7 @@ var DateTimeShortcuts = {
 			// since style's width is in em, it'd be tough to calculate
 			// px value of it. let's use an estimated px for now
 			// TODO: IE returns wrong value for findPosX when in rtl mode
-			//	   (it returns as it was left aligned), needs to be fixed.
+			// (it returns as it was left aligned), needs to be fixed.
 			position.left += 180;
 		}
 		cal_box.style.left = position.left + 'px';
@@ -156,6 +160,14 @@ var DateTimeShortcuts = {
 
 	drawNext: function(num) {
 		DateTimeShortcuts.calendars[num].drawNextMonth();
+	},
+	
+	drawPrevY: function(num) {
+		DateTimeShortcuts.calendars[num].drawPreviousYear();
+	},
+
+	drawNextY: function(num) {
+		DateTimeShortcuts.calendars[num].drawNextYear();
 	},
 
 	handleCalendarCallback: function(num) {

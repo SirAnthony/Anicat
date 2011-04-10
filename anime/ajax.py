@@ -9,6 +9,7 @@ from django.utils import simplejson
 from django.views.decorators.cache import cache_page
 from django.contrib import auth
 from functions import getVal, getAttr
+from datetime import datetime
 
 def ajaxResponse(fn):    
     def new(*args):
@@ -125,6 +126,28 @@ def change(request):
 
     return response
 
+@ajaxResponse
+def add(request):
+    if request.method != 'POST':
+        return {'text': 'Only POST method allowed.'}
+    elif not request.user.is_authenticated():
+        return {'text': 'You must be logged in.'}
+    form = AnimeForm(request.POST, request.FILES)
+    if form.is_valid():
+        if (datetime.now() - request.user.date_joined).days < 20:
+            form.addError("You cannot doing this now")
+        else:
+            try:
+                #model = form.save(commit=False)
+                #model.save()
+                #name = AnimeName(title=model.title, anime=model)
+                #name.save()
+                #Not watched and main need to be reloaded
+                #updateMainCaches(USER_STATUS[0][0])
+                return {'response': 'add', 'status': 'ok'}
+            except Exception, e:
+                form.addError("Error %s has occured. Please make sure that the addition was successful." % e)
+    return {'response': 'add', 'status': 'fail', 'text': form.errors}
 
 @ajaxResponse
 def login(request):

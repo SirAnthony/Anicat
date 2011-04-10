@@ -79,7 +79,7 @@ var ajax = new (function(){
 						resp = eval("("+resp+")");
 						processingResult(resp);
 					}else if(xmlHttp.responseXML){ //Опера не отличает жсон от xml. лол.
-						ajxedt(xmlHttp.responseXML.documentElement);
+						//ajxedt(xmlHttp.responseXML.documentElement);
 					}
 					message.unlock();
 				}else{
@@ -102,6 +102,13 @@ var ajax = new (function(){
 				/*case 'app':
 					app.retfunct(resp['text']);
 				break;*/
+				
+				case 'add':
+				    if(resp.status=='ok'){
+				    }else{				    
+				        add.processError(resp.text);
+				    }
+				break;
 
 				case 'editok':
 					if(resp.field == 'status'){

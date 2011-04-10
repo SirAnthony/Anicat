@@ -31,48 +31,46 @@ var add = new (function add_class(){
 	}
 
 	this.clearForm = function(){
-		if(!this.loaded) return;
-		element.removeAllChilds(this.form);
-		document.body.removeChild(this.form);
-		this.createForm();
-		this.toggle();
+	    var errors = getElementsByClassName('error', this.form, 'span');
+	    element.remove(errors);
 	}
 
-	this.sendForm = function(){
-		/*var dv = document.getElementById('menu');
-		dv.style.top = '200px';
-		dv.style.left = '600px';
-		var fm = document.getElementById('addform');
-		var check = this.checkForm(fm)
-		if(check == 'ok'){
-			var qw = 'add&string=catalog';
-			var a = function(elm){
-				if( elm.tagName == "INPUT" || elm.tagName == "TEXTAREA" || elm.tagName == "SELECT"){
-					if(elm.type != "button" && elm.type != "hidden"){
-						var val = rsemicolon(elm.value.replace(/\n/g, "<br/>"));
-						var nm = elm.name;
-						if(nm) nm += ','
-						if(!/;$/.test(qw)) qw += ',';
-						qw += nm+val;
-					}
-				}
+	this.sendForm = function(e){
+		if(!this.loaded)
+			return;
+		if(!(e.clientX | e.clientY))
+			return;
+		this.clearForm();	
+		formData = {}
+		var f = function(elm){
+			if(elm.tagName == "INPUT" || elm.tagName == "TEXTAREA" || elm.tagName == "SELECT"){
+				if(elm.type != "button")
+					formData[elm.name] = elm.value;
+			}else{
+				element.downTree(f, elm);
 			}
-			var f = function(elm){
-				if(elm.tagName == 'DIV'){
-					allelements(a,elm);
-					if(!/;$/.test(qw))
-						qw += ';';
-				}
+		}
+		element.downTree(f, this.form);
+		ajax.loadXMLDoc(url+'add/', formData);
+	}
+	
+	this.processError = function(error){
+	    if(!this.loaded)
+			return;
+	    for(var target in error){
+	        var obj = null;
+	        if(target == '__all__'){
+	            obj = element.create('div', {className: 'mainerror'});
+	            element.insert(this.form.firstChild, obj);
+	        }else{
+			    obj = document.getElementById('id_'+target);
 			}
-			element.downTree(f,fm);
-			//alert(qw);
-			//clearProto();
-			//if(!isIE){ loadXMLDoc(url, qw);
-			//}else{ alert('Enjoy ur ie.');}
-			//document.getElementById('addform').style.display = 'none';
-		}else{
-			alert(check);
-		}*/
+			if(!obj) continue;
+			for(var e in error[target]){
+			    element.insert(obj, element.create('span', {
+				            className: 'error left', innerText: error[target][e]}), 1);
+			}
+		}
 	}
 
 })();
