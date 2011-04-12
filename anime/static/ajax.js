@@ -24,7 +24,14 @@ var ajax = new (function(){
 			if(!qry[item]) continue;
 			if(request)
 				request += '&';
-			request += item + '=' + qry[item];
+			if(isArray(qry[item])){
+				var e = new Array();
+				for(var i in qry[item])
+					e.push(item + '=' + qry[item][i]);
+				request += e.join('&');
+			}else{
+				request += item + '=' + qry[item];
+			}
 		}
 
 		xmlHttp = null;
@@ -104,10 +111,7 @@ var ajax = new (function(){
 				break;*/
 				
 				case 'add':
-				    if(resp.status=='ok'){
-				    }else{				    
-				        add.processError(resp.text);
-				    }
+					add.processResponse(resp);
 				break;
 
 				case 'editok':
@@ -148,15 +152,15 @@ var ajax = new (function(){
 						}else{
 							if(curname == 'state'){
 								sp = element.create('form', {'id': 'EditForm', name: 'status'});
-								var sel = element.create('select',{id: 'stid', name: 'status',
+								var sel = element.create('select', {id: 'stid', name: 'status',
 									onchange: function(){
 										var noe = document.getElementById('stnum');
 										if(this.value != 2 && this.value != 4){
 											element.remove(noe);
 										}else{
 											if(!noe)
-												element.appendChild(this.parentNode, [element.create('input',
-													 {'type': 'hidden', name: 'count', value: 1})]);
+												element.appendChild(this.parentNode, [{'input':
+													{'type': 'hidden', name: 'count', value: 1}}]);
 										}
 										edit.send();
 									}
@@ -172,7 +176,7 @@ var ajax = new (function(){
 								}
 								cld.push(sel);
 								if(current.all){
-									sel = element.create('select',{id: 'stnum', name: 'count',
+									sel = element.create('select', {id: 'stnum', name: 'count',
 										onchange: function(){ edit.send(); }});
 									var arr = new Array();
 									for(var i=1; i<=current.all; i++){arr[i] = i;}//Пиздец, а не способ!
@@ -201,28 +205,28 @@ var ajax = new (function(){
 													element.create('span',{name: 'name', innerText: encd(cur.name)});
 										cld.push(p, [s]);
 										if(curname == 'bundle'){
-											var a = element.create('a',{href: '/card/'+cur.elemid+'/',
-													 innerText: encd(cur.name), className: 's' + (cur.job ? cur.job : 0)});
-											element.appendChild(s, [a])
+											element.appendChild(s, [{'a':
+												{href: '/card/'+cur.elemid+'/', innerText: encd(cur.name),
+												className: 's' + (cur.job ? cur.job : 0)}}]);
 										}
 										if(cur.role){
 											element.appendChild(p, [
-												element.create('span', {name: 'role', innerText: ' as '+encd(cur.role)})]);
+												{'span': {name: 'role', innerText: ' as '+encd(cur.role)}}]);
 										}
 										if(cur.comm){
 											element.appendChild(p, [
-												element.create('span', {name: 'comm', innerText: '('+encd(cur.comm)+')'})]);
+												{'span': {name: 'comm', innerText: '('+encd(cur.comm)+')'}}]);
 										}
 									}else{
 										var s;
 										if(curname == 'translation'){
 											s = element.create('span', {name: 'name'});
 											element.appendChild(s, [
-												element.create('span', {name: 'trstart', innerText: encd(current[0][0])})]);
+												{'span': {name: 'trstart', innerText: encd(current[0][0])}}]);
 											if(current[0][1])
 												element.appendChild(s, [
-													element.create('span', {innerText: ' - '}),
-													element.create('span', {name: 'trend', innerText: encd(current[0][1])})
+													{'span': {innerText: ' - '}},
+													{'span': {name: 'trend', innerText: encd(current[0][1])}}
 												]);
 										}else{
 											if(curname == 'duration') current += ' min.';

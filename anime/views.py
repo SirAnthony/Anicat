@@ -10,7 +10,7 @@ from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
 from django.contrib import auth
-from functions import getAttr, cleanTableCache
+from functions import getAttr, cleanTableCache, updateMainCaches
 from random import randint
 from datetime import datetime
 
@@ -202,6 +202,8 @@ def add(request):
                 try:
                     model = form.save(commit=False)
                     model.save()
+                    form.save_m2m()
+                    #FIXME: i'm dislike it
                     name = AnimeName(title=model.title, anime=model)
                     name.save()
                     #Not watched and main need to be reloaded
@@ -213,17 +215,7 @@ def add(request):
     ctx.update(csrf(request))
     return ctx
 
-def updateMainCaches(status=None):
-    for id in map(lambda x: x[0], User.objects.all().values_list('id')):
-        t = {}
-        if status is not None:
-            t = cache.get('mainTable:%s' % id)
-            try:
-                t[status] = {}
-            except:
-                t = {}
-        cache.set('mainTable:%s' % id, t)
-    cache.set('mainTable', {})
+
 
 #@render_to('anime/add.html')
 def test(request):

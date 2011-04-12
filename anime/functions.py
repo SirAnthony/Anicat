@@ -2,6 +2,7 @@
 from django.core.cache import cache
 from django.utils.hashcompat import md5_constructor
 from django.utils.http import urlquote
+from django.contrib.auth.models import User
 from models import AnimeItem
 
 def getVal(val, obj = None, default = ''):
@@ -66,3 +67,15 @@ def cleanTableCache(order, status, page, user):
         invalidateCacheKey('mainTable', cachestr)
         cache.set(maintablekey, maintable)
     return link, cachestr
+
+def updateMainCaches(status=None):
+    for id in map(lambda x: x[0], User.objects.all().values_list('id')):
+        t = {}
+        if status is not None:
+            t = cache.get('mainTable:%s' % id)
+            try:
+                t[status] = {}
+            except:
+                t = {}
+        cache.set('mainTable:%s' % id, t)
+    cache.set('mainTable', {})

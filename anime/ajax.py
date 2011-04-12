@@ -8,7 +8,7 @@ from django.core.cache import cache
 from django.utils import simplejson
 from django.views.decorators.cache import cache_page
 from django.contrib import auth
-from functions import getVal, getAttr
+from functions import getVal, getAttr, updateMainCaches
 from datetime import datetime
 
 def ajaxResponse(fn):    
@@ -29,7 +29,7 @@ def get(request):
     except Exception, e:
         return {'text': 'Invalid id.'  + str(e)}
     try:
-        fields.extend(request.POST['field'].split(','))
+        fields.extend(request.POST.getlist('field'))
     except Exception, e:
         return {'text': 'Bad request fields: ' + str(e)}
     response = {'id': aid, 'order': fields}
@@ -138,13 +138,14 @@ def add(request):
             form.addError("You cannot doing this now")
         else:
             try:
-                #model = form.save(commit=False)
-                #model.save()
-                #name = AnimeName(title=model.title, anime=model)
-                #name.save()
+                model = form.save(commit=False)
+                model.save()
+                form.save_m2m()
+                name = AnimeName(title=model.title, anime=model)
+                name.save()
                 #Not watched and main need to be reloaded
-                #updateMainCaches(USER_STATUS[0][0])
-                return {'response': 'add', 'status': 'ok'}
+                updateMainCaches(USER_STATUS[0][0])
+                return {'response': 'add', 'status': 'ok', 'text': model.id}
             except Exception, e:
                 form.addError("Error %s has occured. Please make sure that the addition was successful." % e)
     return {'response': 'add', 'status': 'fail', 'text': form.errors}

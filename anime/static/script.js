@@ -22,7 +22,7 @@ var element = new ( function(){
 			var e = funct(obj.childNodes[i]);
 			if(e) return e;
 		}
-		if(er) return 'ok';
+		if(er) return true;
 	}
 
 	this.addOption = function(obj, arr){
@@ -78,11 +78,11 @@ var element = new ( function(){
 		if(!elem)
 			return;
 		if(isArray(elem)){
-		    for(var el in elem)
-		        this.remove(elem[el]);
-		}else{    	
-		    this.removeAllChilds(elem);
-		    if(elem.parentNode)
+			for(var el in elem)
+				this.remove(elem[el]);
+		}else{
+			this.removeAllChilds(elem);
+			if(elem.parentNode)
 			    elem.parentNode.removeChild(elem);
 		}	
 	}
@@ -95,12 +95,12 @@ var element = new ( function(){
 		for(var i=0; i < l; i++){
 			if(!ar[i] || (!isElement(ar[i]) && !isArray(ar[i]) && !isHash(ar[i]))) continue;
 			if(isHash(ar[i])){
-			    var elems = ar[i];
-			    for(var key in elems){
-			        if(elems[key] && !isHash(elems[key]))
-			            continue;
-			        ar[i] = this.create(key, elems[key]);
-			    }
+				var elems = ar[i];
+				for(var key in elems){
+					if(elems[key] && !isHash(elems[key]))
+						continue;
+					ar[i] = this.create(key, elems[key]);
+				}
 			}
 			if(isArray(ar[i])){
 				this.appendChild(ar[i-1], ar[i]);
@@ -110,7 +110,16 @@ var element = new ( function(){
 		}
 	}
 
+	//Insert elem before(after if next) obj
 	this.insert = function(obj, elem, next){
+		if(isHash(elem)){
+			var el;
+			for(var key in elem){
+				if(!isHash(elem[key])) continue;
+				el = this.create(key, elem[key]);
+			}
+			elem = el;
+		}
 		var ins = next ? obj.nextSibling : obj
 		obj.parentNode.insertBefore(elem, ins);
 	}
@@ -247,11 +256,11 @@ var searcher = new ( function(){
 		var sort; // = document.getElementById('sortsrch').value;
 		if(this.input.textLength < 3 && val != 'numberofep' && val != 'type'){
 			element.removeAllChilds(this.result);
-			element.appendChild(this.result, [element.create('p', {
-				innerText: 'Query must consist of at least 3 characters.'})]);
+			element.appendChild(this.result, [{'p': {
+				innerText: 'Query must consist of at least 3 characters.'}}]);
 		}else if( /\.{2,3}/.test(this.input.value) || /\.{1}(\s{1}|\S{1})\.{1}/.test(this.input.value) ){
 			element.removeAllChilds(this.result);
-			element.appendChild(this.result, [element.create('p', {innerText: 'Invalid request.'})]);
+			element.appendChild(this.result, [{'p': {innerText: 'Invalid request.'}}]);
 		}else{
 			var text = this.input.value.toLowerCase();
 			if(!val) val = 'name';
@@ -267,7 +276,7 @@ var searcher = new ( function(){
 		message.hide();
 		element.removeAllChilds(this.result);
 		if(!rs.count || !rs.items.length){
-		   element.appendChild(this.result, [element.create('p', {innerText: 'Nothing found.'})]);
+		   element.appendChild(this.result, [{'p': {innerText: 'Nothing found.'}}]);
 		}else{
 			var tr = new Array();
 			for(i in rs.items){
@@ -275,23 +284,23 @@ var searcher = new ( function(){
 				var row = element.create('tr', {className: (elem.air ? 'air a' : 'r') + elem.id});
 				tr.push(row);
 				element.appendChild(row, [
-									element.create('td', {'id': 'link' + elem.id, className: 'link'}), [
-										element.create('a', {className: 'cardurl', 'target': '_blank',
-																	'href': '/card/'+elem.id+'/'}), [
-											element.create('img', {'src': '/static/arrow.gif', 'alt': 'Go'}),
+									{'td': {'id': 'link' + elem.id, className: 'link'}}, [
+										{'a': {className: 'cardurl', 'target': '_blank',
+															'href': '/card/'+elem.id+'/'}}, [
+											{'img': {'src': '/static/arrow.gif', 'alt': 'Go'}},
 											]
 										],
-									element.create('td', {'id': 'id' + elem.id, className: 'id',
+									{'td': {'id': 'id' + elem.id, className: 'id',
 									onclick: (  function(i, j){ 
 													return function(){ cnt(i, j); };
 												})('id', elem.id),
-											 innerText: Number(i) + 1 + rs.items.length * rs.page }),
+											 innerText: Number(i) + 1 + rs.items.length * rs.page }},
 									]);
 				for(var column in elem){
 					if(column == 'air' || column == 'id') continue;
-					element.appendChild(row, [element.create('td', {'id': column + elem.id, className: column, 
+					element.appendChild(row, [{'td': {'id': column + elem.id, className: column, 
 								onclick: (function(i, j){ return function(){ cnt(i, j); };})(column, elem.id),
-									innerText: encd(elem[column])})]);
+									innerText: encd(elem[column])}}]);
 				}
 				/*if(elem.job){
 				   pclass.add(row, 'r' + elem.job + ((elem.air) ? 'on': '' ));
@@ -309,7 +318,7 @@ var searcher = new ( function(){
 								onclick: (function(pg){ return function(){ searcher.send(pg);};})(i-1)}));
 					}
 				}
-				element.appendChild(this.result, [element.create('div', {'id': 'srchpg'}), pg]);
+				element.appendChild(this.result, [{'div': {'id': 'srchpg'}}, pg]);
 			}
 			showFN(srctbl);
 		}

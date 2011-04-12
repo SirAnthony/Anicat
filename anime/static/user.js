@@ -56,15 +56,15 @@ var user = new( function(){
 		while(div.nextSibling)
 			element.remove(div.nextSibling);
 		element.appendChild(div, [{'a': {href: '', onclick: function(){quickreg();},
-								innerText: 'Account', className: "nurl"}}]);		
+								innerText: 'Account', className: "nurl"}}]);
 		element.appendChild(div.parentNode, [{'div': {id: 'logdv'}}, [
-		                                  {'form': {id: 'login', className: 'thdtbl'}}, [
-		                                      {'input': {id: 'lname', type: 'text'}},
-		                                      {'input': {id: 'lpasswd', type: 'password'}},
-		                                      {'input': {onclick: function(){quickreg();}, type: 'button',
-								                value: 'Enter'}},
-								              /*ir, il,*/
-								              {'p': {id: 'logininfo', className: 'error'}}]]]);
+										{'form': {id: 'login', className: 'thdtbl'}}, [
+											{'input': {id: 'lname', type: 'text'}},
+											{'input': {id: 'lpasswd', type: 'password'}},
+											{'input': {onclick: function(){quickreg();}, type: 'button',
+												value: 'Enter'}},
+											/*ir, il,*/
+											{'p': {id: 'logininfo', className: 'error'}}]]]);
 		window.location.replace('/logout/'); //Возможно, когда-нибудь будет без релоада, только зачем?
 	}
 
@@ -174,8 +174,7 @@ var user = new( function(){
 			var obj = document.getElementById('id_'+target);
 			if(!obj) continue;
 			for(var e in error[target]){
-				element.insert(obj.nextSibling,
-						element.create('span', {className: 'error left', innerText: error[target][e]}));
+				element.insert(obj.nextSibling, {'span': {className: 'error left', innerText: error[target][e]}});
 			}
 		}
 	}

@@ -31,8 +31,11 @@ var add = new (function add_class(){
 	}
 
 	this.clearForm = function(){
-	    var errors = getElementsByClassName('error', this.form, 'span');
-	    element.remove(errors);
+		if(!this.form)
+			return;
+		element.remove(getElementsByClassName('error', this.form, 'span'));
+		element.remove(getElementsByClassName('s3', this.form, 'span'));
+		return true;
 	}
 
 	this.sendForm = function(e){
@@ -40,12 +43,19 @@ var add = new (function add_class(){
 			return;
 		if(!(e.clientX | e.clientY))
 			return;
-		this.clearForm();	
-		formData = {}
+		this.clearForm();
+		var formData = {}
 		var f = function(elm){
 			if(elm.tagName == "INPUT" || elm.tagName == "TEXTAREA" || elm.tagName == "SELECT"){
-				if(elm.type != "button")
-					formData[elm.name] = elm.value;
+				if(elm.type == "checkbox"){
+					formData[elm.name] = elm.checked;
+				}else if(elm.type == "select-multiple"){
+					var values = new Array();
+					element.downTree(function(opt){if(opt.selected) values.push(opt.value);}, elm);
+					formData[elm.name] = values;
+				}else if(elm.type != "button"){
+						formData[elm.name] = elm.value;
+				}
 			}else{
 				element.downTree(f, elm);
 			}
@@ -53,22 +63,36 @@ var add = new (function add_class(){
 		element.downTree(f, this.form);
 		ajax.loadXMLDoc(url+'add/', formData);
 	}
-	
+
+	this.processResponse = function(resp){
+		if(resp.status != 'ok'){
+			this.processError(resp.text);
+		}else{
+			if(this.clearForm()){
+				element.insert(this.form.lastChild, {'span': {className: 's3 left', innerText: 'Added'}});
+				/*if(isNumber(resp.text))
+					window.location.replace('/card/' + resp.text + '/');
+				else
+					window.location.replace('/');*/
+			}
+		}
+	}
+
 	this.processError = function(error){
-	    if(!this.loaded)
+		if(!this.loaded)
 			return;
-	    for(var target in error){
-	        var obj = null;
-	        if(target == '__all__'){
-	            obj = element.create('div', {className: 'mainerror'});
-	            element.insert(this.form.firstChild, obj);
-	        }else{
-			    obj = document.getElementById('id_'+target);
+		for(var target in error){
+			var obj = null;
+			if(target == '__all__'){
+				obj = element.create('div', {className: 'mainerror'});
+				element.insert(this.form.firstChild, obj);
+			}else{
+				obj = document.getElementById('id_'+target);
 			}
 			if(!obj) continue;
 			for(var e in error[target]){
-			    element.insert(obj, element.create('span', {
-				            className: 'error left', innerText: error[target][e]}), 1);
+				element.insert(obj, element.create('span', {
+						className: 'error left', innerText: error[target][e]}), 1);
 			}
 		}
 	}
@@ -95,11 +119,18 @@ var edit = new (function edit_class(){
 		var form = this.getForm();
 		if(!form || !form.name)
 			return;
-		formData = {}
+		var formData = {}
 		var f = function(elm){
 			if(elm.tagName == "INPUT" || elm.tagName == "TEXTAREA" || elm.tagName == "SELECT"){
-				if(elm.type != "button")
-					formData[elm.name] = elm.value;
+				if(elm.type == "checkbox"){
+					formData[elm.name] = elm.checked;
+				}else if(elm.type == "select-multiple"){
+					var values = new Array();
+					element.downTree(function(opt){if(opt.selected) values.push(opt.value);}, elm);
+					formData[elm.name] = values;
+				}else if(elm.type != "button"){
+						formData[elm.name] = elm.value;
+				}
 			}else{
 				element.downTree(f, elm);
 			}
