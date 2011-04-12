@@ -70,10 +70,10 @@ var add = new (function add_class(){
 		}else{
 			if(this.clearForm()){
 				element.insert(this.form.lastChild, {'span': {className: 's3 left', innerText: 'Added'}});
-				/*if(isNumber(resp.text))
+				if(isNumber(resp.text))
 					window.location.replace('/card/' + resp.text + '/');
 				else
-					window.location.replace('/');*/
+					window.location.replace('/');
 			}
 		}
 	}
