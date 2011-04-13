@@ -36,18 +36,9 @@ var DateTimeShortcuts = {
 		var shortcuts_span = element.create('span', {className: DateTimeShortcuts.shortCutsClass});
 
 		element.appendChild(shortcuts_span, [
-							element.create('', {innerText: '\240'}),
-							element.create('a', {
-								onclick: (function(num, format){
-									return function(){
-										DateTimeShortcuts.handleCalendarQuickLink(num, 0);
-									}
-								})(num),
-								innerText: gettext('Today')}),
-							element.create('', {innerText: '\240|\240'}),
-							element.create('a', {onclick: (function(num){
+							{'a': {onclick: (function(num){
 									return function(){DateTimeShortcuts.openCalendar(num);}
-								})(num), id: DateTimeShortcuts.calendarLinkName + num, innerText: gettext('Calendar')}),
+								})(num), id: DateTimeShortcuts.calendarLinkName + num, innerText: gettext('Calendar')}},
 		]);
 		element.insert(inp.previousSibling, shortcuts_span);
 
@@ -74,30 +65,30 @@ var DateTimeShortcuts = {
 										onclick: DateTimeShortcuts.cancelEventPropagation});
 
 		element.appendChild(document.body, [cal_box, [
-			element.create('div'), [ //В образце h2, а в коде div ололо
-				element.create('a', {className: 'left', innerText: '<<\240',
-					onclick: (function(num){return function(){DateTimeShortcuts.drawPrevY(num);}})(num)}),
-				element.create('a', {className: 'left', innerText: '<',
-					onclick: (function(num){return function(){DateTimeShortcuts.drawPrev(num);}})(num)}),
-				element.create('a', {className: 'right',  innerText: '>>',
-					onclick: (function(num){return function(){DateTimeShortcuts.drawNextY(num);}})(num)}),
-				element.create('a', {className: 'right',  innerText: '>\240',
-					onclick: (function(num){return function(){DateTimeShortcuts.drawNext(num);}})(num)}),
+			{'div': {}}, [ //В образце h2, а в коде div ололо
+				{'a': {className: 'left', innerText: '<<\240',
+					onclick: (function(num){return function(){DateTimeShortcuts.drawPrevY(num);}})(num)}},
+				{'a': {className: 'left', innerText: '<',
+					onclick: (function(num){return function(){DateTimeShortcuts.drawPrev(num);}})(num)}},
+				{'a': {className: 'right',  innerText: '>>',
+					onclick: (function(num){return function(){DateTimeShortcuts.drawNextY(num);}})(num)}},
+				{'a': {className: 'right',  innerText: '>\240',
+					onclick: (function(num){return function(){DateTimeShortcuts.drawNext(num);}})(num)}},
 				],
-			element.create('div', {className: 'calendar', id: DateTimeShortcuts.calendarDivName2 + num}),
-			element.create('div', {className: 'calendar-shortcuts'}), [
-				element.create('a', {innerText: gettext('Yesterday'),
-					onclick: (function(num){return function(){DateTimeShortcuts.handleCalendarQuickLink(num, -1);}})(num)}),
+			{'div': {className: 'calendar', id: DateTimeShortcuts.calendarDivName2 + num}},
+			{'div': {className: 'calendar-shortcuts'}}, [
+				{'a': {innerText: gettext('Yesterday'),
+					onclick: (function(num){return function(){DateTimeShortcuts.handleCalendarQuickLink(num, -1);}})(num)}},
 				element.create('', {innerText: '\240|\240'}),
-				element.create('a', {innerText: gettext('Today'),
-					onclick: (function(num){return function(){DateTimeShortcuts.handleCalendarQuickLink(num, 0);}})(num)}),
+				{'a': {innerText: gettext('Today'),
+					onclick: (function(num){return function(){DateTimeShortcuts.handleCalendarQuickLink(num, 0);}})(num)}},
 				element.create('', {innerText: '\240|\240'}),
-				element.create('a', {innerText: gettext('Tomorrow'),
-					onclick: (function(num){return function(){DateTimeShortcuts.handleCalendarQuickLink(num, 1);}})(num)}),
+				{'a': {innerText: gettext('Tomorrow'),
+					onclick: (function(num){return function(){DateTimeShortcuts.handleCalendarQuickLink(num, 1);}})(num)}},
 				],
-			element.create('p', {className: 'calendar-cancel'}), [
-				element.create('a', {innerText: gettext('Cancel'),
-					onclick: (function(num){ return function(){DateTimeShortcuts.dismissCalendar(num);}})(num)})
+			{'p': {className: 'calendar-cancel'}}, [
+				{'a': {innerText: gettext('Cancel'),
+					onclick: (function(num){ return function(){DateTimeShortcuts.dismissCalendar(num);}})(num)}}
 			]
 		]])
 

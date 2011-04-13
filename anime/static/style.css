@@ -378,7 +378,7 @@ font-weight: bold;
 }
 
 #id_genre:hover {
-    position: absolute;
+    #position: absolute;
     height: 30em;
     width: 200px;    
 }
@@ -433,6 +433,7 @@ font-weight: bold;
 
 .addform input[type=checkbox] {
     margin-left: 10px;
+    width: auto;
 }
 
 .addform div {

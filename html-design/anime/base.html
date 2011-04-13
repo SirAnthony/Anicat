@@ -24,7 +24,7 @@
 			&nbsp;<a class="nurl" onclick="searcher.toggle();">Search</a>
 			|&nbsp;<a class="nurl" href="/card/">Random</a>
 		{% if user.is_authenticated %}
-			|&nbsp;<a class="nurl" onclick="add.toggle();">Add</a>
+			|&nbsp;<a class="nurl" href="/add/" onclick="add.toggle(); return false;">Add</a>
 		</div>
 		<div id="logdiv" class="rightmenu">
 			<span><a href="/" title="User settings">{{ user.username }}</a></span>

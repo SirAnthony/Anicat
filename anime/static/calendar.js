@@ -2,21 +2,6 @@
 calendar.js - Calendar functions by Adrian Holovaty
 */
 
-// quickElement(tagType, parentReference, textInChildNode, [, attribute, attributeValue ...]);
-function quickElement() {
-	var obj = document.createElement(arguments[0]);
-	if (arguments[2] != '' && arguments[2] != null) {
-		var textNode = document.createTextNode(arguments[2]);
-		obj.appendChild(textNode);
-	}
-	var len = arguments.length;
-	for (var i = 3; i < len; i += 2) {
-		obj.setAttribute(arguments[i], arguments[i+1]);
-	}
-	arguments[1].appendChild(obj);
-	return obj;
-}
-
 // CalendarNamespace -- Provides a collection of HTML calendar-related helper functions
 var CalendarNamespace = {
 	monthsOfYear: gettext('January February March April May June July August September October November December').split(' '),
@@ -81,13 +66,13 @@ var CalendarNamespace = {
 				element.appendChild(row, [_cell]);
 			}else{
 				element.appendChild(row, [
-					element.create('td', {className: todayClass}), [
-						element.create('a', {
+					{'td': {className: todayClass}}, [
+						{'a': {
 							innerText: currentDay,
 							onclick: (function(callback, year, month, currentDay){
 									return function(){ callback(year, month, currentDay); }
 								})(callback, year, month, currentDay)
-						})
+						}}
 					]
 				]);
 				currentDay++;
@@ -103,14 +88,14 @@ var CalendarNamespace = {
 		var calDiv = document.getElementById(div_id);
 		element.removeAllChilds(calDiv);
 		element.appendChild(calDiv, [
-			element.create('table'), [
-				element.create('tbody'), weeks
+			{'table': {}}, [
+				{'tbody': {}}, weeks
 			]
 		])
 		var caption = calDiv.previousSibling.getElementsByTagName('caption');
 		if(!caption || !caption[0])
 			element.appendChild(calDiv.previousSibling, [
-			element.create('caption', {innerText: CalendarNamespace.monthsOfYear[month-1] + ' ' + year})]);
+			{'caption': {innerText: CalendarNamespace.monthsOfYear[month-1] + ' ' + year}}]);
 		else
 			caption[0].innerText = CalendarNamespace.monthsOfYear[month-1] + ' ' + year;
 	}
