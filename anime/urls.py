@@ -15,6 +15,7 @@ urlpatterns = patterns(
     (r'^css/$', 'generateCss'),
     (r'^test/$', 'test'),
     (r'^search/$', 'blank'),
+    (r'^history/add/(?P<field>\w+)/?$', 'blank'),
 )
 
 urlpatterns += patterns('anime.ajax',

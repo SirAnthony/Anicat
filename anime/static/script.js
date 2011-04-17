@@ -233,6 +233,7 @@ var searcher = new ( function(){
 			this.sobj.style.display = 'none';
 		}else{
 			this.sobj.style.display = 'block';
+			this.input.focus();
 		}
 	}
 

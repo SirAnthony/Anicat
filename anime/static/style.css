@@ -378,7 +378,7 @@ font-weight: bold;
 }
 
 #id_genre:hover {
-    #position: absolute;
+    position: absolute;
     height: 30em;
     width: 200px;    
 }
