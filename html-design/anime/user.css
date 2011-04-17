@@ -51,10 +51,10 @@
 .as4, .a{{ style.4.1 }} {
 	background-color: #ffb300;
 }{% endif %}
-{% if style.5.0 %}.rs5, .r{{ style.5.0 }} {
+.as5{% if style.5.0 %}, .a{{ style.5.1 }}{% endif %}{
+	background-color: #FFFFCC;
+}
+{% endif %}
+.rs5{% if style.5.0 %}, .r{{ style.5.0 }}{% endif %} {
 	background-color: #F0F0F0;
 }
-.as5, .a{{ style.5.1 }} {
-	background-color: #FFFFCC;
-}{% endif %}
-{% endif %}

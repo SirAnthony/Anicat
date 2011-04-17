@@ -1,0 +1,46 @@
+{% extends "anime/base.html" %}
+
+{% block main %}
+    {% if table %}
+    <table id="tbl" cellspacing="0" class="tbl">
+        <thead class="thdtbl">
+            <tr id="wtr">
+            {% for title in table.0.keys %}
+                {% if not title == 'action_id' and not title == 'locked' %}
+                <th>{{ title }}</th>
+                {% endif %}
+            {% endfor %}
+                <th>Locked</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in table %}
+            <tr {% if forloop.counter0|divisibleby:2 %}class="rs5"{% endif %}>            
+            {% for field, value in row.items %}
+                {% if not field == 'action_id' and not field == 'locked' %}
+                <td>{{ value }}</td>
+                {%endif%}
+            {% endfor %}
+                <td>{{ row.locked }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div id="pg">
+    {% for num in pages %}
+    	{% ifequal page forloop.counter0 %}
+			<span id="spanl">[
+		{% else %}
+			<a href="/history/{{ link }}{% ifnotequal forloop.counter0 0 %}{{forloop.counter0}}/{% endifnotequal %}">
+		{% endifequal %}
+			{{ num }}
+		{% ifequal page forloop.counter0 %}
+			]</span>
+		{% else %}
+			</a>
+		{% endifequal %}
+	{% endfor %}	
+    {% else %}
+    <div>Nothinhg found.</div>
+    {% endif %}
+{% endblock %}
