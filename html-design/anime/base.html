@@ -1,4 +1,5 @@
 {% spaceless %}
+{% if user.is_authenticated %}{% load animetemplates %}{% endif %}
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
@@ -28,7 +29,7 @@
 			|&nbsp;<a class="nurl" href="/add/" onclick="add.toggle(); return false;">Add</a>
 		</div>
 		<div id="logdiv" class="rightmenu">
-			<span><a href="/" title="User settings">{{ user.username }}</a></span>
+			<span><a href="/settings/" title="User settings">{{ user.username }}</a></span>
 			<a class="nurl" onclick="user.logout();">Logout</a>	
 		</div>
 		<div class="rightmenu">
@@ -98,20 +99,19 @@
 		v. <a href="/changes/" style="font-size: 10pt; color: rgb(0, 0, 129);">3.0.99</a>.
 	</div>
 	{% if user.is_authenticated %}
+	{% addForm %}
 	<form id="addform" class="addform cont_men" action="/add/" method="post" enctype="multipart/form-data"
 		onsubmit="return false;">
-        {% csrf_token %}
-        <div class="mainerror">
-            {{ form.non_field_errors }}
-        </div>
-    	{% for field in form %}
-        <div {% if forloop.counter0|divisibleby:2 %}class="clear"{% endif %}>
-            {{ field.label_tag }}: {{ field }}
-            {{ field.errors }}
-        </div>
-        {% endfor %}            
-        <input type="submit" class="right" value="Add" onclick="add.sendForm(event); return false;" />
-    </form>
-    {% endif %}
+		{% csrf_token %}
+		<div class="mainerror">{{ form.non_field_errors }}</div>
+		{% for field in AddForm %}
+		<div {% if forloop.counter0|divisibleby:2 %}class="clear"{% endif %}>
+			{{ field.label_tag }}: {{ field }}
+			{{ field.errors }}
+		</div>
+		{% endfor %}
+		<input type="submit" class="right" value="Add" onclick="add.sendForm(event); return false;" />
+	</form>
+	{% endif %}
 </body>
 {% endspaceless %}

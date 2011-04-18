@@ -1,0 +1,21 @@
+{% extends "anime/base.html" %}
+
+    {% block main %}
+    {% if user.is_authenticated %}
+        <form class="addform" action="/settings/" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mainerror">
+            {{ mallist.non_field_errors }}
+        </div>
+    	{% for field in mallist %}
+        <div {% if forloop.counter0|divisibleby:2 %}class="clear"{% endif %}>
+            {{ field.label_tag }}: {{ field }}
+            {{ field.errors }}
+        </div>
+        {% endfor %}
+        <input type="submit" class="right" value="Upload" />
+    </form>
+    {% else %}
+    <div>No settings for you.</div>
+    {% endif %}
+    {% endblock %}

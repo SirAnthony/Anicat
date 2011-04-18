@@ -1,6 +1,5 @@
 
-from models import AnimeItem, AnimeName, UserStatusBundle, USER_STATUS
-from forms import AnimeForm, UserStatusForm, UserCreationFormMail
+from django.contrib import auth
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.cache import cache
@@ -9,10 +8,13 @@ from django.shortcuts import render_to_response
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
-from django.contrib import auth
-from functions import getAttr, cleanTableCache, updateMainCaches
+from anime.models import AnimeItem, AnimeName, UserStatusBundle, USER_STATUS
+from anime.functions import getAttr, cleanTableCache, updateMainCaches
+from anime.forms import AnimeForm, UserStatusForm, UserCreationFormMail, UploadFileForm
+from anime.malconvert import passFile
 from random import randint
 from datetime import datetime
+
 
 def latestStatus(request, userId=0):
     try:
@@ -257,6 +259,21 @@ def history(request, field=None, page=0):
     return {'table': table, 'pages': range(1, pages+1),
             'link': link, 'page': page
     }
+
+
+@render_to('anime/settings.html')
+def settings(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            status, error = passFile(request.FILES['file'], request.user)
+            if status:
+                return HttpResponseRedirect('/settings/')
+            else:
+                form.addError(error)
+    else:
+        form = UploadFileForm()
+    return {'mallist': form}
 
 #@render_to('anime/add.html')
 def test(request):

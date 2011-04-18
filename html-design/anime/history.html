@@ -15,7 +15,7 @@
         </thead>
         <tbody>
         {% for row in table %}
-            <tr {% if forloop.counter0|divisibleby:2 %}class="rs5"{% endif %}>            
+            <tr {% if forloop.counter|divisibleby:2 %}class="rs5"{% endif %}>            
             {% for field, value in row.items %}
                 {% if not field == 'action_id' and not field == 'locked' %}
                 <td>{{ value }}</td>
