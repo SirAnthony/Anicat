@@ -66,7 +66,7 @@ def index(request, order='title', page=0, status=None):
         pages = [a+' - '+b for a,b in zip(pages[::2], pages[1::2])]
         cache.set('Pages:%s' % cachestr, pages)
     items = qs[page*limit:(page+1)*limit]
-    return {'list': items, 'link': link, 'cachestr': cachestr, 'form': AnimeForm(),
+    return {'list': items, 'link': link, 'cachestr': cachestr,
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
 
 @render_to('anime/card.html')

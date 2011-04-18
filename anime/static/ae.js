@@ -65,6 +65,7 @@ var add = new (function add_class(){
 	}
 
 	this.processResponse = function(resp){
+	    message.hide()
 		if(resp.status != 'ok'){
 			this.processError(resp.text);
 		}else{
@@ -82,6 +83,7 @@ var add = new (function add_class(){
 		if(!this.loaded)
 			return;
 		for(var target in error){
+		    if(!target) continue;
 			var obj = null;
 			if(target == '__all__'){
 				obj = element.create('div', {className: 'mainerror'});
