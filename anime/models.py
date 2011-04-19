@@ -82,7 +82,6 @@ class AnimeEpisode(models.Model):
     class Meta:
         unique_together = ("title", "anime")
 
-
 class AnimeName(models.Model):
     title = models.CharField(max_length=200)
     anime = models.ForeignKey(AnimeItem, related_name="animenames")
@@ -94,6 +93,13 @@ class AnimeName(models.Model):
     class Meta:
         ordering = ["title"]
         unique_together = ("title", "anime")
+
+class AnimeLinks(models.Model):
+    anime = models.ForeignKey(AnimeItem, related_name="links")
+    anidb = models.IntegerField(unique=True)
+    ann = models.IntegerField(unique=True)
+    mal = models.IntegerField(unique=True)
+    audit_log = AuditLog()
 
 class Organisation(models.Model):
     name = models.CharField(max_length=200, unique=True)

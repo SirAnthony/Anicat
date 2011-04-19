@@ -1,9 +1,12 @@
-import gzip
 import os
-import xml.dom.minidom as xmlp
-from anime.models import AnimeItem, AnimeName, UserStatusBundle
-from django.conf import settings
 import re
+import gzip
+import threading
+import xml.dom.minidom as xmlp
+from django.core.cache import cache
+from django.conf import settings
+from anime.models import AnimeLinks, AnimeName, UserStatusBundle
+from datetime import datetime
 
 MAL_STATUS = [
     (0, ''),
@@ -42,23 +45,26 @@ def getData(file):
     return file_content
 
 def process(user, filename, rewrite=True):
-    file = open(filename, 'rb+')
-    doc = xmlp.parseString(getData(file))
-    file.close()
-    os.remove(filename)
-    animelist = doc.getElementsByTagName('myanimelist')[0].getElementsByTagName('anime')
-    result = {'withMal': [], 'withNames': [], 'notFound': []}
-    for anime in animelist:
-        state, anime = searchAnime(anime)
-        l = None
-        if state > 0:
-            l = result['withMal']
-        elif state < 0:
-            l = result['withNames']
-        else:
-            l = result['notFound']
-        l.append(anime)
-    addInBase(user, result, rewrite)
+    try:
+        file = open(filename, 'rb+')
+        doc = xmlp.parseString(getData(file))
+        file.close()
+        os.remove(filename)
+        animelist = doc.getElementsByTagName('myanimelist')[0].getElementsByTagName('anime')
+        result = {'withMal': [], 'withNames': [], 'notFound': []}
+        for anime in animelist:
+            state, anime = searchAnime(anime)
+            l = None
+            if state > 0:
+                l = result['withMal']
+            elif state < 0:
+                l = result['withNames']
+            else:
+                l = result['notFound']
+            l.append(anime)
+        addInBase(user, result, rewrite)
+    except Exception, e:
+        result = {'error': e}
     addToCache(user, result)
 
 def searchAnime(obj):
@@ -81,6 +87,35 @@ def searchAnime(obj):
             anime[node.nodeName] = val
     if anime['my_status'] not in [2, 4]:
         anime['my_watched_episodes'] = None
+    try:
+        anime['object'] = AnimeLinks.objects.get(mal=int(anime['series_animedb_id']))
+        state = 1
+    except AnimeLinks.DoesNotExist:
+        matchedTitles = []
+        unmatchedTitles = []
+        names = AnimeName.objects.filter(title__iexact=anime['series_title'])
+        if 0 < anime['series_title'].find('The ') < 1:
+            names = list(names)
+            names.extend(AnimeName.objects.filter(title__iexact=re.sub('^The ', '', anime['series_title'])))
+        for name in names:
+            title = name.anime
+            if title not in matchedTitles and title not in unmatchedTitles:
+                if title.releaseType == anime['series_type'] or ( 
+                    anime['series_type'] == 1 and title.releaseType == 4):
+                    matchedTitles.append(title)
+                else:
+                    unmatchedTitles.append(title)
+        if len(matchedTitles) > 0:
+            anime['object'] = matchedTitles[:1][0]
+            unmatchedTitles = matchedTitles[1:] #Report about
+            state = -1
+        else: #Nothing found but we try to found similar
+            names = AnimeName.objects.filter(title__icontains=anime['series_title'])
+            for name in names:
+                title = name.anime
+                if title not in unmatchedTitles:
+                    unmatchedTitles.append(title)
+        anime['unmatched'] = map(lambda x: {'name': x.title, 'id': x.id}, unmatchedTitles) #Report about
     return (state, anime)
 
 def addInBase(user, animeList, rewrite=True):
@@ -96,13 +131,15 @@ def addInBase(user, animeList, rewrite=True):
                 ub = UserStatusBundle(anime=anime['object'], user=user, 
                                         status=anime['my_status'], count=anime['my_watched_episodes'])
                 #ub.save()
+            anime['object'] = {'name': anime['object'].title, 'id': anime['object'].id}
 
 def addToCache(user, animeList):
-    pass
-    
+    lastload = {'list': animeList, 'date': datetime.now()}
+    cache.set('MalList:%s' % user.id, lastload)
 
 def passFile(file, user, rewrite=True):
-    filename = os.path.join(settings.MEDIA_ROOT, file.name + str(file.size))
+    cache.set('MalList:%s' % user.id, {'list': {'updated': 1}, 'date': datetime.now()})
+    filename = os.path.join(settings.MEDIA_ROOT, file.name + str(file.size))    
     if os.path.exists(filename):
         return False, 'File already loading.'
     try:
@@ -112,7 +149,8 @@ def passFile(file, user, rewrite=True):
         fileobj.close()
     except Exception, e:
         return False, e
-    
-    process(user, filename, rewrite)
+    t = threading.Thread(target=process, args=[user, filename, rewrite], kwargs={})
+    t.setDaemon(True)
+    t.start()
     return True, None
 

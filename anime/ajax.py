@@ -139,6 +139,7 @@ def add(request):
         else:
             try:
                 model = form.save(commit=False)
+                model.title = model.title.strip()
                 model.save()
                 form.save_m2m()
                 name = AnimeName(title=model.title, anime=model)

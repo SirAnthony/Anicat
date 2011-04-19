@@ -2,12 +2,13 @@
 
     {% block main %}
     {% if user.is_authenticated %}
-        <form class="addform" action="/settings/" method="post" enctype="multipart/form-data">
+    <h4>Load MAL list:</h4>
+    <form class="addform" action="/settings/" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="mainerror">
-            {{ mallist.non_field_errors }}
+            {{ mallistform.non_field_errors }}
         </div>
-    	{% for field in mallist %}
+    	{% for field in mallistform %}
         <div {% if forloop.counter0|divisibleby:2 %}class="clear"{% endif %}>
             {{ field.label_tag }}: {{ field }}
             {{ field.errors }}
@@ -15,6 +16,55 @@
         {% endfor %}
         <input type="submit" class="right" value="Upload" />
     </form>
+    {% if mallist and mallist.list %}
+    <div class="clear">
+        <p>Updated: {{ mallist.date|date:"d.m.Y f" }}</p>
+        {% if mallist.list.error %}
+        <p class="error">{{ mallist.list.error }}</p>
+        {% else %}
+        {% if mallist.list.updated %}
+        <p class="s3">Your list is processed. This may take some time. Reload page to see result.</p>
+        {% else %}
+        <div class="left">
+            <p>Found by mal id:</p>
+            <span>This records already have mal id. Added successfully.</span><br />
+            {% for record in mallist.list.withMal %}
+            <a href="/card/{{ record.object.id }}">{{ record.object.name }}</a><br />
+            {% endfor %}
+        </div>
+        <div class="left">
+            <p>Found by name match:</p>
+            <span>This records has no mal id. Added successfully, but may contain mismatches. Please add mal id to it.</span><br />
+            {% for record in mallist.list.withNames %}
+            <a href="/card/{{ record.object.id }}">{{ record.object.name }}</a><br />
+            {% if record.unmatched %}
+            <p>Other possible matches:<br />
+            {% for variant in record.unmatched %}
+                <a href="/card/{{ variant.id }}">{{ variant.name }}</a><br />
+            {% endfor %}
+            </p>
+            {% endif %}
+            {% endfor %}
+        </div>
+        <div class="left">
+            <p>Not-found records:</p>
+            <span>This records not in the database, or have another name.</span><br />
+            <span>Mal has a redundancy in the records. Please does not add titles if it is a short(<30 min) TV-Sp related to exiting title, it will be deleted.</span><br />
+            {% for record in mallist.list.notFound %}
+            <span>{{ record.series_title }}</span><br />
+            {% if record.unmatched %}
+            <p>Possible matches:<br />
+            {% for variant in record.unmatched %}
+                <a href="/card/{{ variant.id }}">{{ variant.name }}</a><br />
+            {% endfor %}
+            </p>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+    {%endif%}
     {% else %}
     <div>No settings for you.</div>
     {% endif %}

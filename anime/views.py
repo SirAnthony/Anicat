@@ -1,20 +1,16 @@
 
-from django.contrib import auth
 from django.contrib.auth.models import User
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.core.cache import cache
 from django.core.context_processors import csrf
-from django.shortcuts import render_to_response
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
 from anime.models import AnimeItem, AnimeName, UserStatusBundle, USER_STATUS
 from anime.functions import getAttr, cleanTableCache, updateMainCaches
-from anime.forms import AnimeForm, UserStatusForm, UserCreationFormMail, UploadFileForm
-from anime.malconvert import passFile
+from anime.forms import AnimeForm
 from random import randint
 from datetime import datetime
-
 
 def latestStatus(request, userId=0):
     try:
@@ -133,40 +129,8 @@ def stat(request, userId=0):
             cache.set('Stat:%s' % user.id, tuser)
     return {'username': username, 'stat': tuser}
 
-#FIXME: Do normal page if fail
-def login(request):
-    response = {}
-    if request.method != 'POST':
-        response['text'] = 'Only POST method allowed.'
-    elif request.user.is_authenticated():
-        response['text'] = 'Already logined.'
-    else:
-        username = request.POST.get('name', None)
-        password = request.POST.get('pass', None)
-        user = auth.authenticate(username=username, password=password)
-        if user is not None and user.is_active:
-            auth.login(request, user)
-            response.update({'response': 'logok', 'text': {'name': user.username}})
-        else:
-            response.update({'response': 'logfail', 'text': 'Bad username or password'})
-    return HttpResponseRedirect("/")
 
-def logout(request):
-    auth.logout(request)
-    return HttpResponseRedirect("/")
 
-@render_to('anime/register.html')
-def register(request):
-    if not request.user.is_authenticated() and request.method == 'POST':
-        form = UserCreationFormMail(request.POST)
-        if form.is_valid():
-            user = form.save()
-            user = auth.authenticate(username=user.username, password=form.cleaned_data['password1'])
-            auth.login(request, user)
-            return HttpResponseRedirect("/")
-    else:
-        form = UserCreationFormMail()
-    return {'form': form}
 
 @render_to('anime/changes.html')
 def changes(request):
@@ -203,6 +167,7 @@ def add(request):
             else:
                 try:
                     model = form.save(commit=False)
+                    model.title = model.title.strip()
                     model.save()
                     form.save_m2m()
                     #FIXME: i'm dislike it
@@ -261,23 +226,7 @@ def history(request, field=None, page=0):
     }
 
 
-@render_to('anime/settings.html')
-def settings(request):
-    if request.method == 'POST':
-        form = UploadFileForm(request.POST, request.FILES)
-        if form.is_valid():
-            status, error = passFile(request.FILES['file'], request.user)
-            if status:
-                return HttpResponseRedirect('/settings/')
-            else:
-                form.addError(error)
-    else:
-        form = UploadFileForm()
-    return {'mallist': form}
-
 #@render_to('anime/add.html')
 def test(request):
-    #form = UserStatusForm()
-    #ctx = {'form': form}
-    #ctx.update(csrf(request))
+    ctx = {}
     return ctx
