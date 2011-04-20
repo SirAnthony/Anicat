@@ -12,7 +12,7 @@
 		<div>
 			{{ mallistform.file }}
 			<input type="submit" value="Upload" />
-			{{ mallistform.errors }}
+			{{ mallistform.file.errors }}
 		</div>
 	</form>
 	{% if mallist and mallist.list %}

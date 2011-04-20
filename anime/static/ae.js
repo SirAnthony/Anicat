@@ -105,7 +105,7 @@ var edit = new (function edit_class(){
 		var form = this.getForm();
 		if(!form || !form.name)
 			return;
-		var formData = getFormData(this.form);
+		var formData = getFormData(form);
 		formData['field'] = form.name;
 		ajax.loadXMLDoc(url+'set/', formData);
 	}

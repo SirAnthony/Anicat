@@ -38,18 +38,22 @@ MAL_TYPE_CONVERT_LIST = [
     (6, u'Music')
 ]
 
-def getData(file):
-    f = gzip.GzipFile(fileobj=file)
-    file_content = f.read()
-    f.close()
+def getData(filename):
+    try:
+        file = open(filename, 'rb+')
+        f = gzip.GzipFile(fileobj=file)
+        file_content = f.read()
+        f.close()
+        file.close()
+    except:
+        raise
+    finally:
+        os.remove(filename)
     return file_content
 
 def process(user, filename, rewrite=True):
     try:
-        file = open(filename, 'rb+')
-        doc = xmlp.parseString(getData(file))
-        file.close()
-        os.remove(filename)
+        doc = xmlp.parseString(getData(filename))
         animelist = doc.getElementsByTagName('myanimelist')[0].getElementsByTagName('anime')
         result = {'withMal': [], 'withNames': [], 'notFound': []}
         for anime in animelist:
@@ -65,6 +69,7 @@ def process(user, filename, rewrite=True):
         addInBase(user, result, rewrite)
     except Exception, e:
         result = {'error': e}
+
     addToCache(user, result)
 
 def searchAnime(obj):
@@ -81,9 +86,14 @@ def searchAnime(obj):
                 except TypeError:
                     val = re.sub('[\s-]', '', val).lower()
                     val = MAL_STATUS_CONVERT_LIST[[i[0] for i in MAL_STATUS if i[-1] == val][0]]
-            if node.nodeName == 'series_type':
+            elif node.nodeName == 'series_type':
                 val = val.lower()
                 val = [i[0] for i in MAL_TYPE_CONVERT_LIST if i[-1].lower() == val][0]
+            elif node.nodeName == 'my_finish_date':
+                try:
+                    val = datetime.strptime(val, '%Y-%m-%d')
+                except:
+                    val = datetime(1, 1, 1)
             anime[node.nodeName] = val
     if anime['my_status'] not in [2, 4]:
         anime['my_watched_episodes'] = None
@@ -126,12 +136,16 @@ def addInBase(user, animeList, rewrite=True):
                 if rewrite and not anime['my_status'] == ub.status:
                     ub.status = anime['my_status']
                     ub.count = anime['my_watched_episodes']
-                    #ub.save()
+                    ub.changed = anime['my_finish_date']
+                    ub.save()
             except UserStatusBundle.DoesNotExist:
-                ub = UserStatusBundle(anime=anime['object'], user=user, 
+                ub = UserStatusBundle(anime=anime['object'], user=user, changed = anime['my_finish_date'],
                                         status=anime['my_status'], count=anime['my_watched_episodes'])
-                #ub.save()
+                ub.save()
             anime['object'] = {'name': anime['object'].title, 'id': anime['object'].id}
+    cache.delete('mainTable:%s' % user.id)
+    cache.delete('userCss:%s' % user.id)
+    cache.delete('Stat:%s' % user.id)
 
 def addToCache(user, animeList):
     lastload = {'list': animeList, 'date': datetime.now()}
@@ -139,7 +153,7 @@ def addToCache(user, animeList):
 
 def passFile(file, user, rewrite=True):
     cache.set('MalList:%s' % user.id, {'list': {'updated': 1}, 'date': datetime.now()})
-    filename = os.path.join(settings.MEDIA_ROOT, file.name + str(file.size))    
+    filename = os.path.join(settings.MEDIA_ROOT, file.name + str(file.size))
     if os.path.exists(filename):
         return False, 'File already loading.'
     try:

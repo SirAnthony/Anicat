@@ -1,6 +1,10 @@
 
 from django.contrib import auth
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.core.cache import cache
+from anime.forms import UploadMalListForm
+from anime.malconvert import passFile
+from datetime import datetime
 
 def login(request):
     response = {}
@@ -17,4 +21,26 @@ def login(request):
             response.update({'response': True, 'text': {'name': user.username}})
     response['form'] = form or AuthenticationForm()
     return response
-    
+
+def loadMalList(request):
+    lastLoad = cache.get('MalList:%s' % request.user.id)
+    if request.method == 'POST':
+        form = UploadMalListForm(request.POST, request.FILES)
+        if form.is_valid():
+            timeLeft = 0
+            try:
+                timeLeft = (18 - (datetime.now() - lastLoad['date']).seconds) / 60
+            except TypeError:
+                lastLoad = {}
+                pass
+            if lastLoad and timeLeft > 0:
+                form.addError('You doing it too often. Try again in %s minutes.' % timeLeft)
+            else:
+                status, error = passFile(request.FILES['file'], request.user, form.cleaned_data['rewrite'])
+                if not status:
+                    form.addError(error)
+                else:
+                    lastLoad['updated'] = True
+    else:
+        form = UploadMalListForm()
+    return {'mallistform': form, 'mallist': lastLoad}
