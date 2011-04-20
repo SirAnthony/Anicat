@@ -94,9 +94,9 @@ def searchAnime(obj):
         matchedTitles = []
         unmatchedTitles = []
         names = AnimeName.objects.filter(title__iexact=anime['series_title'])
-        if 0 < anime['series_title'].find('The ') < 1:
+        if not anime['series_title'].find('The '):
             names = list(names)
-            names.extend(AnimeName.objects.filter(title__iexact=re.sub('^The ', '', anime['series_title'])))
+            names.extend(AnimeName.objects.filter(title__iexact=re.sub('^The\s+', '', anime['series_title'])))
         for name in names:
             title = name.anime
             if title not in matchedTitles and title not in unmatchedTitles:

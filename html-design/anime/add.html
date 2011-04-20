@@ -7,12 +7,12 @@
         <div class="mainerror">
             {{ form.non_field_errors }}
         </div>
-    	{% for field in form %}
+        {% for field in form %}
         <div {% if forloop.counter0|divisibleby:2 %}class="clear"{% endif %}>
             {{ field.label_tag }}: {{ field }}
             {{ field.errors }}
         </div>
-        {% endfor %}            
+        {% endfor %}
         <input type="submit" class="right" value="Add" />
     </form>
     {% else %}

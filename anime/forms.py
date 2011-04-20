@@ -31,8 +31,9 @@ class UserStatusForm(ModelForm):
         model = UserStatusBundle
         exclude = ('anime', 'user')
 
-class UploadFileForm(ErrorForm):
+class UploadMalListForm(ErrorForm):
     file = FileField(max_length=200)
+    rewrite = BooleanField(label='Overwrite existing data', required=False)
 
 class UserCreationFormMail(UserCreationForm):
     def __init__(self, *args, **kwargs):

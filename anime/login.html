@@ -1,0 +1,12 @@
+{% extends "anime/base.html" %}
+{% block main %}
+{% if not user.is_authenticated %}
+    <form action="/login/" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Login" />
+    </form>
+{% else %}
+    <p>Already logged in. <a href="/logout/">Logout</a>?</p>
+{% endif %}
+{% endblock %}

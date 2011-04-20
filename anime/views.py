@@ -1,16 +1,13 @@
 
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect
 from django.core.cache import cache
-from django.core.context_processors import csrf
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
-from anime.models import AnimeItem, AnimeName, UserStatusBundle, USER_STATUS
+from anime.models import AnimeItem, UserStatusBundle, USER_STATUS
 from anime.functions import getAttr, cleanTableCache, updateMainCaches
-from anime.forms import AnimeForm
 from random import randint
-from datetime import datetime
+
 
 def latestStatus(request, userId=0):
     try:
@@ -155,32 +152,6 @@ def generateCss(request):
 @render_to('anime/blank.html', 'text/css')
 def blank(request):
     return {}
-
-@render_to('anime/add.html')
-def add(request):
-    form = AnimeForm()
-    if request.method == 'POST' and request.user.is_authenticated():
-        form = AnimeForm(request.POST, request.FILES)
-        if form.is_valid():
-            if (datetime.now() - request.user.date_joined).days < 20:
-                form.addError("You cannot doing this now")
-            else:
-                try:
-                    model = form.save(commit=False)
-                    model.title = model.title.strip()
-                    model.save()
-                    form.save_m2m()
-                    #FIXME: i'm dislike it
-                    name = AnimeName(title=model.title, anime=model)
-                    name.save()
-                    #Not watched and main need to be reloaded
-                    updateMainCaches(USER_STATUS[0][0])
-                    return HttpResponseRedirect('/')
-                except Exception, e:
-                    form.addError("Error %s has occured. Please make sure that the addition was successful." % e)
-    ctx = {'form': form}
-    ctx.update(csrf(request))
-    return ctx
 
 @render_to('anime/history.html')
 def history(request, field=None, page=0):

@@ -1,6 +1,7 @@
 
-from models import AnimeItem, AnimeName, UserStatusBundle, USER_STATUS
-from forms import AnimeForm, UserStatusForm, UserCreationFormMail
+from anime.models import AnimeItem, AnimeName, UserStatusBundle, USER_STATUS
+from anime.forms import UserStatusForm, UserCreationFormMail
+from anime.edit import _addAnimeItem
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.core.context_processors import csrf
@@ -10,6 +11,7 @@ from django.views.decorators.cache import cache_page
 from django.contrib import auth
 from functions import getVal, getAttr, updateMainCaches
 from datetime import datetime
+import anime.user as userMethods
 
 def ajaxResponse(fn):    
     def new(*args):
@@ -132,42 +134,21 @@ def add(request):
         return {'text': 'Only POST method allowed.'}
     elif not request.user.is_authenticated():
         return {'text': 'You must be logged in.'}
-    form = AnimeForm(request.POST, request.FILES)
-    if form.is_valid():
-        if (datetime.now() - request.user.date_joined).days < 20:
-            form.addError("You cannot doing this now")
-        else:
-            try:
-                model = form.save(commit=False)
-                model.title = model.title.strip()
-                model.save()
-                form.save_m2m()
-                name = AnimeName(title=model.title, anime=model)
-                name.save()
-                #Not watched and main need to be reloaded
-                updateMainCaches(USER_STATUS[0][0])
-                return {'response': 'add', 'status': 'ok', 'text': model.id}
-            except Exception, e:
-                form.addError("Error %s has occured. Please make sure that the addition was successful." % e)
-    return {'response': 'add', 'status': 'fail', 'text': form.errors}
+    result = _addAnimeItem(request)
+    try:
+        return {'response': 'add', 'status': 'ok', 'text': result['id']}
+    except KeyError:
+        return {'response': 'add', 'status': 'fail', 'text': result['form'].errors}
+
 
 @ajaxResponse
 def login(request):
-    response = {}
-    if request.method != 'POST':
-        response['text'] = 'Only POST method allowed.'
-    elif request.user.is_authenticated():
-        response['text'] = 'Already logged in.'
+    res = userMethods.login(request)
+    if res.has_key('response') and res['response']: #logged
+        form = res['form']
+        return {'response': 'login', 'status': True, 'text': {'name': form.get_user().username}}
     else:
-        username = request.POST.get('name', None)
-        password = request.POST.get('pass', None)
-        user = auth.authenticate(username=username, password=password)
-        if user is not None and user.is_active:
-            auth.login(request, user)
-            response.update({'response': 'logok', 'text': {'name': user.username}})
-        else:
-            response.update({'response': 'logfail', 'text': 'Bad username or password'})
-    return response
+        return {'response': 'login', 'status': False, 'text': res['form'].errors}
 
 @ajaxResponse
 def register(request):

@@ -17,7 +17,7 @@ def getGenreId(genres):
 def getTypeId(tp):
     try:
         itp = [i[0] for i in ANIME_TYPES if i[-1] == tp][0]
-    except Exception:    
+    except Exception:
         raise NameError, tp
     return itp
 
@@ -29,22 +29,23 @@ def timedecode(tstr):
 
 def encd(string):
     "Convert codes into characters"
+    string = string.strip()
     string = re.sub(r"&quot;", r"\"", string)
     string = re.sub(r"&#37;", r"%", string)
-    string = re.sub(r"&#39;", r"'", string)        
+    string = re.sub(r"&#39;", r"'", string)
     string = re.sub(r"&#92;", r"\\", string)
     string = re.sub(r"&#47;", r"/", string)
     string = re.sub(r"&#43;", r"+", string)
     string = re.sub(r"&#61;", r"=", string)
     string = re.sub(r"&lt;", r"<", string)
     string = re.sub(r"&rt;", r">", string)
-    string = re.sub(r"&#171;", r"«", string)    
+    string = re.sub(r"&#171;", r"«", string)
     string = re.sub(r"&#176;", r"°", string)
     string = re.sub(r"&#187;", r"»", string)
     string = re.sub(r"&#189;", r"½", string)
     string = re.sub(r"&#212;", r"Ô", string)
     string = re.sub(r"&#215;", r"×", string)
-    string = re.sub(r"&#216;", r"Ø", string)        
+    string = re.sub(r"&#216;", r"Ø", string)
     string = re.sub(r"&#227;", r"ã", string)
     string = re.sub(r"&#232;", r"è", string)
     string = re.sub(r"&#233;", r"é", string)
@@ -52,11 +53,11 @@ def encd(string):
     string = re.sub(r"&#251;", r"û", string)
     string = re.sub(r"&#8211;", r"–", string)
     string = re.sub(r"&#8212;", r"—", string)
-    string = re.sub(r"&#8217;", r"’", string)    
+    string = re.sub(r"&#8217;", r"’", string)
     string = re.sub(r"&#8220;", r"“", string)
     string = re.sub(r"&#8221;", r"”", string)
     string = re.sub(r"&#8224;", r"†", string)
-    string = re.sub(r"&#8230;", r"…", string)    
+    string = re.sub(r"&#8230;", r"…", string)
     string = re.sub(r"&#35;", r"#", string)
     string = re.sub(r"&amp;", r"&", string)
     return str(string)
@@ -94,7 +95,7 @@ class Sql:
         if action == "select":
             fetch = c.fetchall()
             return fetch
-        if action == "insert":    
+        if action == "insert":
             return c.lastrowid
 
 def moveAll():
@@ -170,7 +171,7 @@ def moveAnimeName():
 def moveCredit():
     sql = Sql(db='tempcat', user='catman', passwd='catpass')
     res = sql.executeQuery('SELECT * FROM `credit` ORDER BY id')
-    for element in res:        
+    for element in res:
         try:
             record = Credit(id=element['id'], title=unicode(encd(element['name']), 'utf-8'))
             record.save()
@@ -181,7 +182,7 @@ def moveCredit():
 def movePeople():
     sql = Sql(db='tempcat', user='catman', passwd='catpass')
     res = sql.executeQuery('SELECT * FROM `people` ORDER BY id')
-    for element in res:        
+    for element in res:
         try:
             record = People(id=element['id'], name=unicode(encd(element['name']), 'utf-8'))
             record.save()
@@ -192,7 +193,7 @@ def movePeople():
 def movePeopleBundles():
     sql = Sql(db='tempcat', user='catman', passwd='catpass')
     res = sql.executeQuery('SELECT * FROM `peoplebun` ORDER BY id')
-    for element in res:        
+    for element in res:
         try:
             anime = AnimeItem.objects.get(id=element['mainid'])
             man = People.objects.get(id=element['elemid'])
@@ -212,10 +213,10 @@ def moveOrganisation():
         try: 
             record = Organisation(id=element['id'], name=unicode(encd(element['name']), 'utf-8'))
             record.save()
-        except Exception, e:            
+        except Exception, e:
             print element
             raise Exception, e
-        
+
 def moveOrganisationBundles():
     sql = Sql(db='tempcat', user='catman', passwd='catpass')
     res = sql.executeQuery('SELECT * FROM `organisationbun` ORDER BY id')

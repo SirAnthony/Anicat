@@ -35,17 +35,9 @@ var user = new( function(){
 	this.login = function(){
 		if(!this.loaded) return;
 		this.info.style.display = 'none';
-		var nick = document.getElementById('lname');
-		var pass = document.getElementById('lpasswd');
-		//var cb = document.getElementById('long').checked;
-		nick = nick.value;
-		pass = pass.value;
-		if(!nick || !pass){
-			inform('Not all fields are filled');
-		}else{
-			var qw = {'name': nick, 'pass': pass};
-			ajax.loadXMLDoc(url+'login/', qw);
-		}
+		var rform = document.getElementById('login');
+		var formData = getFormData(rform);
+		ajax.loadXMLDoc(url+'login/', formData);
 	}
 
 	this.logout = function(){
@@ -58,12 +50,11 @@ var user = new( function(){
 		element.appendChild(div, [{'a': {href: '', onclick: function(){quickreg();},
 								innerText: 'Account', className: "nurl"}}]);
 		element.appendChild(div.parentNode, [{'div': {id: 'logdv'}}, [
-										{'form': {id: 'login', className: 'thdtbl'}}, [
-											{'input': {id: 'lname', type: 'text'}},
-											{'input': {id: 'lpasswd', type: 'password'}},
-											{'input': {onclick: function(){quickreg();}, type: 'button',
-												value: 'Enter'}},
-											/*ir, il,*/
+										{'form': {id: 'login', className: 'thdtbl',
+											onsubmit: function(){ user.login(); return false;}}}, [
+											{'input': {id: 'id_username', type: 'text', name: 'username'}},
+											{'input': {id: 'id_password', type: 'password', name: 'password'}},
+											{'input': {type: 'submit', value: 'Login'}},
 											{'p': {id: 'logininfo', className: 'error'}}]]]);
 		window.location.replace('/logout/'); //Возможно, когда-нибудь будет без релоада, только зачем?
 	}
@@ -99,7 +90,7 @@ var user = new( function(){
 	this.loginFail = function(text){
 		if(!this.loaded) return;
 		document.getElementById('menu').style.display = 'none';
-		this.inform(text);
+		this.inform(text.__all__);
 	}
 
 	this.quickreg = function(){

@@ -5,22 +5,24 @@ urlpatterns = patterns(
     'anime.views',
     (r'^$', 'index'),
     (r'^(show/(?P<status>\d+))?/?(sort/(?P<order>\w+))?/?(?P<page>\d+)?/$', 'index'),
-    (r'^changes/$', 'changes'),
-    (r'^add/$', 'add'),    
+    (r'^changes/$', 'changes'),    
     (r'^card/(?P<animeId>\d+)?/?$', 'card'),
     (r'^stat/(?P<userId>\d+)?/?$', 'stat'),
     (r'^css/$', 'generateCss'),
     (r'^test/$', 'test'),
     (r'^search/$', 'blank'),
     (r'^history/add/?/?(f/(?P<field>\w+))?/?(?P<page>\d+)?/$', 'history'),
-    
 )
 
-urlpatterns += patterns('anime.user',
+urlpatterns += patterns('anime.userviews',
     (r'^login/$', 'login'),
     (r'^logout/$', 'logout'),
     (r'^register/$', 'register'),
     (r'^settings/$', 'settings')
+)
+
+urlpatterns += patterns('anime.edit',
+    (r'^add/$', 'add'),
 )
 
 urlpatterns += patterns('anime.ajax',

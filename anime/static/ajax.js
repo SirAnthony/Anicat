@@ -240,8 +240,18 @@ var ajax = new (function(){
 						element.appendChild(mspn, [label, /*edt,*/ sp, cld]);
 					}
 				break;
-
-				case 'logfail':
+				
+				case 'login':
+					message.hide();
+					if(resp.status){
+						user.loginSuccess(resp.text);
+						updateStylesheets('/css/');
+					}else{
+						user.loginFail(resp.text);
+					}
+				break;
+				
+				/*case 'logfail':
 					user.loginFail(resp.text);
 					throw new Error("Login error");
 				break;
@@ -250,7 +260,7 @@ var ajax = new (function(){
 					message.hide();
 					user.loginSuccess(resp.text);
 					updateStylesheets('/css/');
-				break;
+				break;*/
 
 				case 'regfail':
 					user.registerFail(resp.text);

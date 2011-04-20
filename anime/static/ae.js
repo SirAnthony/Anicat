@@ -44,23 +44,7 @@ var add = new (function add_class(){
 		if(!(e.clientX | e.clientY))
 			return;
 		this.clearForm();
-		var formData = {}
-		var f = function(elm){
-			if(elm.tagName == "INPUT" || elm.tagName == "TEXTAREA" || elm.tagName == "SELECT"){
-				if(elm.type == "checkbox"){
-					formData[elm.name] = elm.checked;
-				}else if(elm.type == "select-multiple"){
-					var values = new Array();
-					element.downTree(function(opt){if(opt.selected) values.push(opt.value);}, elm);
-					formData[elm.name] = values;
-				}else if(elm.type != "button"){
-						formData[elm.name] = elm.value;
-				}
-			}else{
-				element.downTree(f, elm);
-			}
-		}
-		element.downTree(f, this.form);
+		var formData = getFormData(this.form);
 		ajax.loadXMLDoc(url+'add/', formData);
 	}
 
@@ -121,23 +105,7 @@ var edit = new (function edit_class(){
 		var form = this.getForm();
 		if(!form || !form.name)
 			return;
-		var formData = {}
-		var f = function(elm){
-			if(elm.tagName == "INPUT" || elm.tagName == "TEXTAREA" || elm.tagName == "SELECT"){
-				if(elm.type == "checkbox"){
-					formData[elm.name] = elm.checked;
-				}else if(elm.type == "select-multiple"){
-					var values = new Array();
-					element.downTree(function(opt){if(opt.selected) values.push(opt.value);}, elm);
-					formData[elm.name] = values;
-				}else if(elm.type != "button"){
-						formData[elm.name] = elm.value;
-				}
-			}else{
-				element.downTree(f, elm);
-			}
-		}
-		element.downTree(f, form);
+		var formData = getFormData(this.form);
 		formData['field'] = form.name;
 		ajax.loadXMLDoc(url+'set/', formData);
 	}

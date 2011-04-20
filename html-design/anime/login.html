@@ -1,0 +1,27 @@
+{% extends "anime/base.html" %}
+{% block main %}
+{% if not user.is_authenticated %}
+    <form action="/login/" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <table>
+        <tr class="mainerror">
+            <td colspan="2">{{ form.non_field_errors }}</td>
+        </tr>
+        {% for field in form %}
+        <tr>
+            <td>{{ field.label_tag }}:</td>
+            <td>{{ field }}</td>
+        </tr>
+        {% if field.errors %}
+        <tr>
+            <td colspan="2">field.errors</td>
+        </tr>
+        {% endif %}        
+        {% endfor %}
+        <tr><td><input type="submit" value="Login" /></td></tr>
+        </table>
+    </form>
+{% else %}
+    <p>Already logged in. <a href="/logout/">Logout</a>?</p>
+{% endif %}
+{% endblock %}

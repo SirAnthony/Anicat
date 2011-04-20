@@ -40,21 +40,11 @@
 							<img alt="Go" src="/static/arrow.gif">
 						</a>
 					</td>
-					<td onclick="cnt('id', '{{ title.id }}');" id="id{{ title.id }}" class="id">
-						{{ forloop.counter|add:page.start }}
-					</td>
-					<td onclick="cnt('name', '{{ title.id }}');" id="name{{ title.id }}" class="name left">
-						{{ title.title }}
-					</td>
-					<td onclick="cnt('numberofep', '{{ title.id }}');" id="numberofep{{ title.id }}" class="numberofep">
-						{% if title.1.count %}{{ title.1.count }}/{% endif %}{{ title.episodesCount }}
-					</td>
-					<td onclick="cnt('translation', '{{ title.id }}');" id="translation{{ title.id }}" class="translation">
-						{{ title.translation }}
-					</td>
-					<td onclick="cnt('type', '{{ title.id }}');" id="type{{ title.id }}" class="type">
-						{{ title.releaseTypeS }}
-					</td>
+					<td onclick="cnt('id', '{{ title.id }}');" id="id{{ title.id }}" class="id">{{ forloop.counter|add:page.start }}</td>
+					<td onclick="cnt('name', '{{ title.id }}');" id="name{{ title.id }}" class="name left">{{ title.title }}</td>
+					<td onclick="cnt('numberofep', '{{ title.id }}');" id="numberofep{{ title.id }}" class="numberofep">{% if title.1.count %}{{ title.1.count }}/{% endif %}{{ title.episodesCount }}</td>
+					<td onclick="cnt('translation', '{{ title.id }}');" id="translation{{ title.id }}" class="translation">{{ title.translation }}</td>
+					<td onclick="cnt('type', '{{ title.id }}');" id="type{{ title.id }}" class="type">{{ title.releaseTypeS }}</td>
 					{# custom fields #}
 				{% endfor %}
 				</tr>
@@ -64,15 +54,9 @@
 	<div id="pg">
 		{% for pname in pages %}
 			{% ifequal page.number forloop.counter0 %}
-				<span id="spanl">[
+				<span id="spanl">[{{ pname }}]</span>
 			{% else %}
-				<a href="/{{ link }}{% ifnotequal forloop.counter0 0 %}{{forloop.counter0}}/{% endifnotequal %}">
-			{% endifequal %}
-				{{ pname }}
-			{% ifequal page.number forloop.counter0 %}
-				]</span>
-			{% else %}
-				</a>
+				<a href="/{{ link }}{% ifnotequal forloop.counter0 0 %}{{forloop.counter0}}/{% endifnotequal %}">{{ pname }}</a>
 			{% endifequal %}
 		{% endfor %}
 	</div>

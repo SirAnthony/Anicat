@@ -479,7 +479,31 @@ var message = new (function(){
 
 })();
 
+//####################### Form data
+
+function getFormData(form){
+	var formData = {};
+	var f = function(elm){
+	if(elm.tagName == "INPUT" || elm.tagName == "TEXTAREA" || elm.tagName == "SELECT"){
+		if(elm.type == "checkbox"){
+			formData[elm.name] = elm.checked;
+		}else if(elm.type == "select-multiple"){
+			var values = new Array();
+			element.downTree(function(opt){if(opt.selected) values.push(opt.value);}, elm);
+				formData[elm.name] = values;
+			}else if(elm.type != "button"){
+					formData[elm.name] = elm.value;
+			}
+		}else{
+			element.downTree(f, elm);
+		}
+	}
+	element.downTree(f, form);
+	return formData;
+}
+
 //####################### Разная помойка
+
 
 if(!Array.prototype.indexOf){
 	Array.prototype.indexOf=function(obj,start){

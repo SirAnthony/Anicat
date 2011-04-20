@@ -34,6 +34,10 @@ input, select {
     clear: both;
 }
 
+.hidden {
+	display: none;
+}
+
 /* Trash */
 
 #dvid{
@@ -94,8 +98,8 @@ width: 55px !important;
 width: 200px !important;
 }
 .footer{
-/*margin: 10px 0px 5px 10px;*/
-clear: both;
+	margin-top: 10px;
+	clear: both;
 }
 
 /* контент для меню */
@@ -117,14 +121,18 @@ display: none;
 }
 
 /*Спан, и шрифт для ссылок*/
-#spanl, a:link, a:visited, a:active, a:hover{
-font: bold 14pt "verdana",sans-serif;
-text-decoration: none;
-color: #0068ef;
+a:link, a:visited, a:active, a:hover{
+    text-decoration: none;
+    color: #0068ef;
+}
+
+
+#pg a, #spanl{
+    font: bold 14pt "verdana",sans-serif;
 }
 
 #spanl{
-color: #000;
+    color: #000;
 }
 
 .link a:link, .link a:visited, .link a:active, .link a:hover{
@@ -138,7 +146,7 @@ border: none;
 /* Ссылки*/
 .leftmenu, #login a:link, .nurl,  
 .thdtbl a:link, .thdtbl a:visited, .thdtbl a:active, .thdtbl a:hover{
-font: bold 12pt "times new roman",serif;
+font-weight: bold;
 text-decoration: none;
 color: #000081;
 }
@@ -150,7 +158,6 @@ cursor: pointer;
 #edtbox{
 width: 200px;
 height: 22px;
-font: normal 12pt "times new roman",serif;
 }
 #edit{
 position: fixed;
@@ -178,7 +185,6 @@ display: block !important;
 background-color: #D4D0C8;
 }
 #edit ul{
-font: normal 12pt "times new roman", serif !important;
 list-style-type: none;
 background-color: transparent;
 }
@@ -364,9 +370,6 @@ margin-bottom: 30px !important;
 #imagebun img{
 max-width: 400px; 
 }
-#imagebun.cardcol a{
-font: normal 12pt "times new roman", serif !important;
-}
 .elemlbl{
 font-weight: bold; 
 }
@@ -396,10 +399,6 @@ font-weight: bold;
 
 .calendarbox a, .datetimeshortcuts a {
     cursor: pointer;
-}
-
-.calendarbox a:hover, .datetimeshortcuts a:hover {
-    font: normal 12pt "times new roman", serif;
 }
 
 .calendar-shortcuts a, .calendar-shortcuts a:hover {
@@ -451,7 +450,7 @@ font-weight: bold;
     margin: 3px 0;
 }
 
-.addform ul li {
+.addform ul li, .errorlist li {
     list-style: none;
 }
 
@@ -461,13 +460,56 @@ font-weight: bold;
     min-height: 0px; 
 }
 
+.fileform {
+	margin-bottom: 10px;
+}
+
+.fileform div {
+	margin-bottom: 5px;
+}
+
+.helpText {
+    font-size: 11pt;
+}
+
+.column {
+    width: 350px;
+    margin: 10px;
+}
+
+.column p {
+    font-size: 14pt;
+}
+
+.column .helpText {
+    display: block;
+    margin: 5px 0 5px 10px;
+}
+
+.column dt {
+    margin-top: 5px;
+}
+
+.column dd {
+    margin-top: 2px;
+}
+
+.column ul {
+	margin-left: 15px;
+	margin-bottom: 7px;
+}
+
 /* Id's */
 #addform{
     top: 30px;
     left: 30px;
-    font-size: 12pt;
 }
 
+/* Specific things */
+.malresult p.s3, .malresult .error{
+	margin-top: 5px;
+	font-size: 12pt !important;
+}
 
 /*Some ie hacks */
 <!--[if lt IE 8]>
