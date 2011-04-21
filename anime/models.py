@@ -96,11 +96,11 @@ class AnimeName(models.Model):
 
 class AnimeLinks(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="links")
-    anidb = models.IntegerField(unique=True)
-    ann = models.IntegerField(unique=True)
-    mal = models.IntegerField(unique=True)
+    AniDB = models.IntegerField(unique=True, blank=True, null=True)
+    ANN = models.IntegerField(unique=True, blank=True, null=True)
+    MAL = models.IntegerField(unique=True, blank=True, null=True)
     audit_log = AuditLog()
-
+  
 class Organisation(models.Model):
     name = models.CharField(max_length=200, unique=True)
     audit_log = AuditLog()
@@ -159,3 +159,15 @@ class UserStatusBundle(models.Model):
     class Meta:
         unique_together = ("anime", "user")
 
+
+EDIT_MODELS = {
+    'anime': AnimeItem,
+    'episode': AnimeEpisode,
+    'name': AnimeName,
+    'link': AnimeLinks,
+    'organisation': Organisation,
+    'organisationbundle': OrganisationBundle,
+    'people': People,
+    'peoplebundle': PeopleBundle,
+    'status': UserStatusBundle
+}

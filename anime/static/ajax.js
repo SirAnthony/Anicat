@@ -190,7 +190,7 @@ var ajax = new (function(){
 								}
 								sel.focus();
 							}else{
-								var hid = ((current.tbl) ? current.tbl : "catalog");
+								var hid = ((current.model) ? current.model : "anime");
 								hid = element.create('input', {type: 'hidden', name: 'table', value: hid});
 								//var edt = createElem('span',{className: 'edtl', 'name': i});
 								/*if(!resp.text.edt && !resp.text[i][0]){continue;}
@@ -200,7 +200,7 @@ var ajax = new (function(){
 									var cur = current[g];
 									if(cur && isHash(cur)){
 										var p = (curname == 'bundle') ? element.create('p',{name: cur.elemid}) :
-																		   element.create('p',{'name': g});
+																			element.create('p',{'name': g});
 										var s = (curname == 'bundle') ? element.create('span',{name: 'name'}) :
 													element.create('span',{name: 'name', innerText: encd(cur.name)});
 										cld.push(p, [s]);
@@ -218,21 +218,32 @@ var ajax = new (function(){
 												{'span': {name: 'comm', innerText: '('+encd(cur.comm)+')'}}]);
 										}
 									}else{
-										var s;
-										if(curname == 'translation'){
-											s = element.create('span', {name: 'name'});
-											element.appendChild(s, [
-												{'span': {name: 'trstart', innerText: encd(current[0][0])}}]);
-											if(current[0][1])
-												element.appendChild(s, [
-													{'span': {innerText: ' - '}},
-													{'span': {name: 'trend', innerText: encd(current[0][1])}}
-												]);
+										if(curname == 'links'){
+											var s = new Array();
+											for(var link in current){
+												if(!current[link]) continue;
+												var l;
+												switch(link){
+													case 'AniDB':
+														l = "http://anidb.net/perl-bin/animedb.pl?show=anime&aid=";
+													break;
+													case 'ANN':
+														l = "http://www.animenewsnetwork.com/encyclopedia/anime.php?id=";
+													break;
+													case 'MAL':
+														l = "http://myanimelist.net/anime/";
+													break;
+												}
+												s.push(element.create('a', {className: 's0', href: l+current[link],
+																			innerText: link}));
+												s.push(element.create('', {innerText: '\240'}));
+											}
+											cld.push(element.create('p'), s);
 										}else{
 											if(curname == 'duration') current += ' min.';
-											s = element.create('span', {name: 'name', innerText: encd(current)});
+											var s = element.create('span', {name: 'name', innerText: encd(current)});
+											cld.push(element.create('p'), [s]);
 										}
-										cld.push(element.create('p'), [s]);
 									}
 								}
 							}
@@ -240,7 +251,7 @@ var ajax = new (function(){
 						element.appendChild(mspn, [label, /*edt,*/ sp, cld]);
 					}
 				break;
-				
+
 				case 'login':
 					message.hide();
 					if(resp.status){
@@ -250,17 +261,6 @@ var ajax = new (function(){
 						user.loginFail(resp.text);
 					}
 				break;
-				
-				/*case 'logfail':
-					user.loginFail(resp.text);
-					throw new Error("Login error");
-				break;
-
-				case 'logok':
-					message.hide();
-					user.loginSuccess(resp.text);
-					updateStylesheets('/css/');
-				break;*/
 
 				case 'regfail':
 					user.registerFail(resp.text);

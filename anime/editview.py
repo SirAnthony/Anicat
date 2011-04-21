@@ -14,8 +14,9 @@ def add(request):
     result.update(csrf(request))
     return result
 
-@render_to('anime/add.html')
+@render_to('anime/edit.html')
 def edit(request, itemId, model='anime', field=None):
-    return {}
+    res = editMethods.edit(request, itemId, model, field)
+    return res
     
     

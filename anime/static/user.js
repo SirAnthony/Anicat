@@ -111,14 +111,14 @@ var user = new( function(){
 					element.appendChild(div, [
 								{'form': {'id': 'register'}}, [
 									{'span': {'className': 'left', innerText: 'Quick registration'}},
-									{'label': {'for': 'id_username', innerText: 'Login:'}},
-									{'input': {'id': 'id_username', type: 'text'}},
-									{'label': {'for': 'id_email', innerText: 'E-Mail:'}},
-									{'input': {'id': 'id_email', type: 'text'}},
-									{'label': {'for': 'id_password1', innerText: 'Password:'}},
-									{'input': {'id': 'id_password1', type: 'password'}},
-									{'label': {'for': 'id_password2', innerText: 'Confirm:'}},
-									{'input': {'id': 'id_password2', type: 'password'}},
+									{'label': {'for': 'id_register-username', innerText: 'Login:'}},
+									{'input': {'id': 'id_register-username', type: 'text', name: 'register-username'}},
+									{'label': {'for': 'id_register-email', innerText: 'E-Mail:'}},
+									{'input': {'id': 'id_register-email', type: 'text', name: 'register-email'}},
+									{'label': {'for': 'id_register-password1', innerText: 'Password:'}},
+									{'input': {'id': 'id_register-password1', type: 'password', name: 'register-password1'}},
+									{'label': {'for': 'id_register-password2', innerText: 'Confirm:'}},
+									{'input': {'id': 'id_register-password2', type: 'password', name: 'register-password2'}},
 									{'input': {type: 'button', onclick: function(){user.register();}, value: 'Ok'}},
 									{'input': {type: 'button', onclick: function(){user.register('abort');}, value: 'Cancel'}}]
 								]);
@@ -137,22 +137,13 @@ var user = new( function(){
 		if(cncl == 'abort'){
 			document.getElementById('menu').style.display = 'none';
 		}else{
-			var form = document.getElementById('register');
-			var nick = document.getElementById('id_username');
-			var pass = document.getElementById('id_password1');
-			var passchk = document.getElementById('id_password2');
-			var mail = document.getElementById('id_email');
-			nick = nick.value;
-			pass = pass.value;
-			passchk = passchk.value;
-			mail = mail.value.toLowerCase();
+		    var form = document.getElementById('register');
+		    var formData = getFormData(form);
 			errors = getElementsByClassName('error', form);
-			for(var el in errors)
-				element.remove(errors[el]);
+			element.remove(errors);
 			if(!this.registerForm)
 				this.registerForm = form.parentNode.removeChild(form);
-			var qw = {'username': nick, 'password1': pass, 'password2': passchk, 'email': mail};
-			ajax.loadXMLDoc(url+'register/', qw);
+			ajax.loadXMLDoc(url+'register/', formData);
 		}
 	}
 
@@ -162,7 +153,7 @@ var user = new( function(){
 		element.removeAllChilds(div);
 		element.appendChild(div, [this.registerForm]);
 		for(var target in error){
-			var obj = document.getElementById('id_'+target);
+			var obj = document.getElementById('id_register-'+target);
 			if(!obj) continue;
 			for(var e in error[target]){
 				element.insert(obj.nextSibling, {'span': {className: 'error left', innerText: error[target][e]}});

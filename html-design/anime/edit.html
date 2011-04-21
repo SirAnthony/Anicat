@@ -1,0 +1,25 @@
+{% extends "anime/base.html" %}
+
+    {% block main %}
+    {% if user.is_authenticated %}
+    {% if not form %}
+    {% if text %}<div>{{ text }}</div>{% endif %}
+    {% else %}
+    <form class="addform" action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mainerror">
+            {{ form.non_field_errors }}
+        </div>
+        {% for field in form %}
+        <div {% if forloop.counter0|divisibleby:2 %}class="clear"{% endif %}>
+            {{ field.label_tag }}: {{ field }}
+            {{ field.errors }}
+        </div>
+        {% endfor %}
+        <input type="submit" class="right" value="Save" />
+    </form>
+    {% endif %}
+    {% else %}
+    <div>Pool's closed.</div>
+    {% endif %}
+    {% endblock %}

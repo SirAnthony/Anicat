@@ -21,8 +21,9 @@ urlpatterns += patterns('anime.userviews',
     (r'^settings/$', 'settings')
 )
 
-urlpatterns += patterns('anime.edit',
+urlpatterns += patterns('anime.editview',
     (r'^add/$', 'add'),
+    (r'^edit/(?P<model>[a-zA-Z_]+)?/?(?P<itemId>\d+)/?(?P<field>[a-zA-Z_]+)?/?$', 'edit'),
 )
 
 urlpatterns += patterns('anime.ajax',

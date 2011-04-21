@@ -1,8 +1,8 @@
 
 from django.contrib import auth
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm
 from django.core.cache import cache
-from anime.forms import UploadMalListForm
+from anime.forms import UploadMalListForm, UserCreationFormMail
 from anime.malconvert import passFile
 from datetime import datetime
 
@@ -20,6 +20,23 @@ def login(request):
             auth.login(request, user)
             response.update({'response': True, 'text': {'name': user.username}})
     response['form'] = form or AuthenticationForm()
+    return response
+
+def register(request):
+    response = {}
+    form = None
+    if request.method != 'POST':
+        response['text'] = 'Only POST method allowed.'
+    elif request.user.is_authenticated():
+        response['text'] = 'Already registred.'
+    else:
+        form = UserCreationFormMail(request.POST)
+        if form.is_valid():        
+            user = form.save()
+            user = auth.authenticate(username=user.username, password=form.cleaned_data['password1'])
+            auth.login(request, user)
+            response.update({'response': True, 'text': {'name': user.username}})
+    response['form'] = form or UserCreationFormMail()
     return response
 
 def loadMalList(request):

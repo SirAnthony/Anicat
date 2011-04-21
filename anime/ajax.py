@@ -1,17 +1,14 @@
 
-from anime.models import AnimeItem, AnimeName, UserStatusBundle, USER_STATUS
-from anime.forms import UserStatusForm, UserCreationFormMail
-from anime.edit import _addAnimeItem
 from django.contrib.auth.models import User
 from django.http import HttpResponse
-from django.core.context_processors import csrf
 from django.core.cache import cache
 from django.utils import simplejson
-from django.views.decorators.cache import cache_page
-from django.contrib import auth
-from functions import getVal, getAttr, updateMainCaches
-from datetime import datetime
+from anime.functions import getVal, getAttr, updateMainCaches
+from anime.models import AnimeItem, AnimeName, AnimeLinks, UserStatusBundle, USER_STATUS
+from anime.forms import UserStatusForm, UserCreationFormMail
+import anime.edit as editMethods
 import anime.user as userMethods
+from datetime import datetime
 
 def ajaxResponse(fn):    
     def new(*args):
@@ -55,6 +52,11 @@ def get(request):
             response[field] = map(lambda n: {'name': str(n)}, AnimeName.objects.filter(anime=anime))
         elif field == 'genre':
             response[field] = ', '.join(map(lambda n: str(n), anime.genre.all()))
+        elif field == 'links':
+            try:
+                response[field] = AnimeLinks.objects.filter(anime=anime).values('AniDB','ANN', 'MAL')[0]
+            except:
+                pass
         elif field == 'translation':
             response[field] = anime.translation()
         elif field == 'type':
@@ -71,75 +73,28 @@ def get(request):
                 response[field] = getattr(anime, field)
             except Exception, e:
                 response[field] = 'Error: ' + str(e)
-
     response = {'response': 'getok', 'text': response}
-
+    if (datetime.now() - request.user.date_joined).days > 20:
+        response[edt] = True
+                
     return response
 
 @ajaxResponse
 def change(request):
-    response = {}
-    if request.method != 'POST':
-        return {'text': 'Only POST method allowed.'}
-    elif not request.user.is_authenticated():
-        return {'text': 'You must be logged in.'}
     try:
         aid = int(request.POST.get('id', 0))
-        anime = AnimeItem.objects.get(id=aid)
     except Exception, e:
         return {'text': 'Invalid id.'  + str(e)}
-    try:
-        field = request.POST['field']
-    except Exception, e:
-        return {'text': 'Bad request fields: ' + str(e)}
-    response = {'id': aid, 'field': field}
-    form = None
-    obj = None
-    if field == 'status':
-        try:
-            obj = UserStatusBundle.objects.get(user=request.user, anime=anime)
-        except UserStatusBundle.DoesNotExist:
-            obj = UserStatusBundle(user=request.user, anime=anime, status=0)
-        oldstatus = obj.status
-        form = UserStatusForm(request.POST, instance=obj)
-        try:
-            status = int(request.POST.get('status'))
-        except:
-            status = 0
-        stat = cache.get('mainTable:%s' % request.user.id)
-        for s in [status, oldstatus]:
-            try:
-                stat[s] = {}
-            except:
-                pass
-        cache.set('mainTable:%s' % request.user.id, stat)
-        cache.delete('userCss:%s' % request.user.id)
-        cache.delete('Stat:%s' % request.user.id)
-    if form:
-        if form.is_valid():
-            for fieldname in form.cleaned_data:
-                setattr(obj, fieldname, form.cleaned_data[fieldname])
-            obj.save()
-            response.update({'response': 'editok', 'text': form.cleaned_data})
-        else:
-            response['text'] = form.errors
-    else:
-        response['text'] = 'Null form error.'
-
+    response = editMethods.edit(request, aid, request.POST.get('model', None), request.POST.get('field', None))
     return response
 
 @ajaxResponse
 def add(request):
-    if request.method != 'POST':
-        return {'text': 'Only POST method allowed.'}
-    elif not request.user.is_authenticated():
-        return {'text': 'You must be logged in.'}
-    result = _addAnimeItem(request)
+    result = editMethods.addAnimeItem(request)
     try:
         return {'response': 'add', 'status': 'ok', 'text': result['id']}
     except KeyError:
         return {'response': 'add', 'status': 'fail', 'text': result['form'].errors}
-
 
 @ajaxResponse
 def login(request):
@@ -152,21 +107,11 @@ def login(request):
 
 @ajaxResponse
 def register(request):
-    response = {}
-    if request.method != 'POST':
-        response['text'] = 'Only POST method allowed.'
-    elif request.user.is_authenticated():
-        response['text'] = 'Already registred.'
+    res = userMethods.register(request)
+    if res.has_key('response'): #logged
+        return {'response': 'login', 'status': True, 'text': res['text']}
     else:
-        form = UserCreationFormMail(request.POST)
-        if form.is_valid():
-            user = form.save()
-            user = auth.authenticate(username=user.username, password=form.cleaned_data['password1'])
-            auth.login(request, user)
-            response.update({'response': 'logok', 'text': {'name': user.username}})
-        else:
-            response.update({'response': 'regfail', 'text': form.errors})
-    return response
+        return {'response': 'regfail', 'text': res['form'].errors}
 
 @ajaxResponse
 def search(request):

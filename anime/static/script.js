@@ -698,7 +698,7 @@ function cnt(tag, num, e) {
 	var qw = {'id': num}
 	switch (tag){
 		case 'name':
-			qw['field'] = ['name','genre'];
+			qw['field'] = ['name','genre', 'links'];
 		break;
 		case 'numberofep':
 			qw['field'] = ['bundle','duration'];

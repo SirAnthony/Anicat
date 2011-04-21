@@ -1,11 +1,14 @@
 from django.forms import Form, ModelForm, TextInput, FileField, DateTimeField, BooleanField
-from models import AnimeItem, UserStatusBundle
+from models import AnimeItem, UserStatusBundle, AnimeLinks
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
 class ErrorModelForm(ModelForm):
     def addError(self, text):
         self.errors['__all__'] = self.error_class([text])
+
+    class Meta:
+        pass
 
 class ErrorForm(Form):
     def addError(self, text):
@@ -23,11 +26,11 @@ class AnimeForm(ErrorModelForm):
     endedAt = DateTimeField(label='Ended', widget=CalendarWidget, required=False)
     
     class Meta():
-        model = AnimeItem        
+        model = AnimeItem
         exclude = ('bundle', 'locked')
 
 class UserStatusForm(ModelForm):
-    class Meta():
+    class Meta:
         model = UserStatusBundle
         exclude = ('anime', 'user')
 
@@ -37,10 +40,31 @@ class UploadMalListForm(ErrorForm):
 
 class UserCreationFormMail(UserCreationForm):
     def __init__(self, *args, **kwargs):
-        super(UserCreationFormMail, self).__init__(*args, **kwargs)
+        super(UserCreationFormMail, self).__init__(*args, prefix='register', **kwargs)
         self.fields['email'].required = True
 
     class Meta:
         model = User
-        fields = ('username', 'email') 
+        fields = ('username', 'email')
 
+class LinksForm(ErrorModelForm):
+    class Meta:
+        exclude = ('anime')
+
+EDIT_FORMS = {
+    AnimeItem: AnimeForm,
+    UserStatusBundle: UserStatusForm,
+    AnimeLinks: LinksForm,
+}
+
+def createFormFromModel(model, fields=None):
+    parent = ErrorModelForm
+    if model in EDIT_FORMS:
+        parent = EDIT_FORMS[model]
+    m = model
+    f = fields.split(',') if fields else None
+    class _ModelForm(parent):
+        class Meta(parent.Meta):
+            model = m
+            fields = f
+    return _ModelForm
