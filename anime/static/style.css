@@ -351,11 +351,16 @@ color: HighlightText;
     margin-top: 5px;
 }
 .cardcol{
-float: left;
-margin: 0px 10px !important;
+    float: left;
+    margin: 0px 10px !important;
+    min-width: 125px;
 }
 .cardcol div{
-margin-right: 10px; 
+    margin-right: 10px; 
+}
+.cardcol a.right {
+    color: #000;
+    font-size: 10pt;
 }
 #staff.cardcol{ 
 clear: left; 
@@ -423,6 +428,10 @@ font-weight: bold;
 
 .addform {
     width: 425px;
+}
+
+.addfrmoc { /* Опять же костыли */
+    width: 215px;
 }
 
 .addform input {

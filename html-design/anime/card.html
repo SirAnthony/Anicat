@@ -20,18 +20,10 @@
         <table>
             {% for bundle in bundles %}
             <tr>
+                <td>{% ifequal bundle.0.id anime.id %}►{% endifequal %}</td>
+                <td align="right">{{ forloop.counter }}</td>
                 <td>
-                {% ifequal bundle.0.id anime.id %}
-                    ►
-                {% endifequal %}
-                </td>
-                <td align="right">
-                    {{ forloop.counter }}
-                </td>
-                <td>
-                    <a href="/card/{{ bundle.0.id }}" class="s{{ bundle.1 }}" >
-                        {{ bundle.0.title }}
-                    </a>
+                    <a href="/card/{{ bundle.0.id }}" class="s{{ bundle.1 }}" >{{ bundle.0.title }}</a>
                 </td>
             </tr>
             {% endfor %}
@@ -40,30 +32,43 @@
     <div id="main" class="cardcol">
         <div>
             <b>Name:</b><br/>
-            {% for name in anime.animenames.values %}
-            {{ name.title }}<br/>
-            {% endfor %}
+            {% for name in anime.animenames.values %}{{ name.title }}<br/>{% endfor %}
         </div>
         <div>
-            <b>Type:</b><br/>
-            {{ anime.releaseTypeS }}
+            {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releaseType/" class="right">Edit</a>{%endif%}
+            <b>Type:</b><br/>{{ anime.releaseTypeS }}
         </div>
         <div>
-            <b>Genre:</b><br/>
-            {{ anime.genre.all|join:", " }}
+            {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/genre/" class="right">Edit</a>{%endif%}
+            <b>Genre:</b><br/>{{ anime.genre.all|join:", " }}
         </div>
         <div>
-            <b>Episodes:</b><br/>
-            {{ anime.episodesCount }}
+            {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/episodesCount/" class="right">Edit</a>{%endif%}
+            <b>Episodes:</b><br/>{{ anime.episodesCount }}
         </div>
         <div>
-            <b>Duration:</b><br/>
-            {{ anime.duration }} min.
+            {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/duration/" class="right">Edit</a>{%endif%}
+            <b>Duration:</b><br/>{{ anime.duration }} min.
         </div>
         <div>
-            <b>Translation:</b><br/>
-            {{ anime.translation }}
+            {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releasedAt,endedAt/" class="right">Edit</a>{%endif%}
+            <b>Translation:</b><br/>{{ anime.translation }}
         </div>
+        {% if animelinks %} 
+        <div>
+            {% if user.is_authenticated %}<a href="/edit/links/{{ anime.id }}/" class="right">Edit</a>{%endif%}
+            <b>Links:</b><br />
+            {% if animelinks.AniDB %}
+            <a href="http://anidb.net/perl-bin/animedb.pl?show=anime&aid={{ animelinks.AniDB }}" >AniDB</a>&nbsp;
+            {% endif %}
+            {% if animelinks.ANN %}
+            <a href="http://www.animenewsnetwork.com/encyclopedia/anime.php?id={{ animelinks.ANN }}" >ANN</a>&nbsp;
+            {% endif %}
+            {% if animelinks.MAL %}
+            <a href="http://myanimelist.net/anime/{{ animelinks.MAL }}" >MAL</a>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
     {% endif %}
     {% endblock %}

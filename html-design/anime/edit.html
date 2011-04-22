@@ -2,10 +2,15 @@
 
     {% block main %}
     {% if user.is_authenticated %}
-    {% if not form %}
-    {% if text %}<div>{{ text }}</div>{% endif %}
+    {% if not form or not form.fields %}
+    {% if text %}
+    <div>{{ text }}</div>
     {% else %}
-    <form class="addform" action="" method="post" enctype="multipart/form-data">
+    <div>Bad parameters passed.</div>
+    {% endif %}
+    {% else %}
+    {# Костыли, костыли everywhere #}
+    <form class="addform{% if form.fields|length < 2 %} addfrmoc{% endif %}" action="" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="mainerror">
             {{ form.non_field_errors }}

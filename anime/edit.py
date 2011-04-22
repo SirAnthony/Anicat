@@ -1,8 +1,9 @@
 
+from django.core.cache import cache
+from django.db.models.fields import FieldDoesNotExist
 from anime.forms import AnimeForm, UserStatusForm, createFormFromModel
 from anime.models import AnimeItem, AnimeName, USER_STATUS, EDIT_MODELS
 from anime.functions import updateMainCaches
-from django.core.cache import cache
 from datetime import datetime
 
 def addAnimeItem(request):
@@ -30,7 +31,7 @@ def addAnimeItem(request):
                     response['id'] = model.id
                 except Exception, e:
                     form.addError("Error %s has occured. Please make sure that the addition was successful." % e)
-    response['form'] = form or AuthenticationForm()
+    response['form'] = form or AnimeForm()
     return response
 
 def edit(request, itemId, modelname='anime', field=None):
@@ -39,23 +40,23 @@ def edit(request, itemId, modelname='anime', field=None):
     response = {}
     if not request.user.is_authenticated():
         response['text'] = 'You must be logged in.'
+    elif modelname != 'status' and (datetime.now() - request.user.date_joined).days < 20:
+        response['text'] = 'You cannot doing this now.'
     elif modelname not in EDIT_MODELS:
         response['text'] = 'Bad model name passed.'
     else:
         form = None
         obj = None
         lastfunc = None
+        fields = None
         model = EDIT_MODELS[modelname]
         if field:
             try:
                 fields = field.split(',')
-                models = map(lambda x: x.name, model._meta.fields)
-                for f in fields:
-                    if f not in models:
-                        raise Exception
-            except:
-                return {'text' : 'Bad fields passed.'}
-        formobject = createFormFromModel(model, field)
+                map(lambda x: model._meta.get_field(x), fields)
+            except FieldDoesNotExist:
+                return {'text': 'Bad fields passed.'}
+        formobject = createFormFromModel(model, fields)
         if modelname == 'status':
             try:
                 anime = AnimeItem.objects.get(id=itemId)
@@ -86,7 +87,7 @@ def edit(request, itemId, modelname='anime', field=None):
                         cache.delete('Stat:%s' % user.id)
                     return _f
                 lastfunc = st(status, oldstatus, request.user)
-        elif modelname == 'link':
+        elif modelname == 'links':
             try:
                 anime = AnimeItem.objects.get(id=itemId)
             except AnimeItem.DoesNotExist:
@@ -104,7 +105,8 @@ def edit(request, itemId, modelname='anime', field=None):
             form = formobject(request.POST, instance=obj)
             if obj and form.is_valid():
                 for fieldname in form.cleaned_data:
-                    if fieldname != obj._meta.pk.name:
+                    #TODO: Fix title update on AnimeItem 
+                    if fieldname != obj._meta.pk.name and fieldname != 'title':
                         setattr(obj, fieldname, form.cleaned_data[fieldname])
                 try:
                     obj.save()

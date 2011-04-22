@@ -162,12 +162,12 @@ class UserStatusBundle(models.Model):
 
 EDIT_MODELS = {
     'anime': AnimeItem,
-    'episode': AnimeEpisode,
-    'name': AnimeName,
-    'link': AnimeLinks,
-    'organisation': Organisation,
-    'organisationbundle': OrganisationBundle,
-    'people': People,
-    'peoplebundle': PeopleBundle,
+    #'episode': AnimeEpisode,
+    #'name': AnimeName,
+    'links': AnimeLinks,
+    #'organisation': Organisation,
+    #'organisationbundle': OrganisationBundle,
+    #'people': People,
+    #'peoplebundle': PeopleBundle,
     'status': UserStatusBundle
 }

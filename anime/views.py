@@ -4,7 +4,7 @@ from django.core.cache import cache
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
-from anime.models import AnimeItem, UserStatusBundle, USER_STATUS
+from anime.models import AnimeItem, AnimeLinks, UserStatusBundle, USER_STATUS
 from anime.functions import getAttr, cleanTableCache, updateMainCaches
 from random import randint
 
@@ -86,7 +86,11 @@ def card(request, animeId=0):
             bundles = map(lambda x: (x, getAttr(status[x.id], 'status', 0)), bundles)
         else:
             bundles = map(lambda x: (x,  0), bundles)
-    return {'anime': anime, 'bundles': bundles}
+    try:
+        links = anime.links.get()
+    except AnimeLinks.DoesNotExist:
+        links = None
+    return {'anime': anime, 'bundles': bundles, 'animelinks': links}
 
 @condition(last_modified_func=latestStatus)
 @render_to('anime/stat.html')

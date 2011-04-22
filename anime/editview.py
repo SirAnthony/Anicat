@@ -6,7 +6,7 @@ import anime.edit as editMethods
 
 @render_to('anime/add.html')
 def add(request):
-    result = editMethods.add(request)
+    result = editMethods.addAnimeItem(request)
     try:
         return HttpResponseRedirect('/card/%s/' % result['id'])
     except KeyError:
