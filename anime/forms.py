@@ -11,56 +11,60 @@ class ErrorModelForm(ModelForm):
         self.errors['__all__'] = self.error_class([text])
 
     def as_json(self):
+        #TODO: no checkboxes, radiobuttons or textareas
         top_errors = self.non_field_errors() # Errors that should be displayed above all fields.
         output, hidden_fields = [], []
 
         for name, field in self.fields.items():
             html_class_attr = None
             bf = BoundField(self, field, name)
-            bf_errors = self.error_class([conditional_escape(error) for error in bf.errors]) # Escape and cache in local variable.
+            bf_errors = self.error_class([conditional_escape(error) for error in bf.errors])
+            fieldobj = {
+                'id': bf.auto_id,
+                'name': bf.name,
+                'value': bf.value(),
+                'tag': 'input',
+            }
             if bf.is_hidden:
                 if bf_errors:
                     top_errors.extend([u'(Hidden field %s) %s' % (name, force_unicode(e)) for e in bf_errors])
-                hidden_fields.append(unicode(bf))
+                fieldobj['type'] = 'hidden'
             else:
-                css_classes = bf.css_classes()
-                if css_classes:
-                    html_class_attr = css_classes.split()
-
-                if bf_errors:
-                    output.append(force_unicode(bf_errors))
-
-                if bf.label:
-                    label = conditional_escape(force_unicode(bf.label))
-                    # Only add the suffix if the label does not end in
-                    # punctuation.
-                    if self.label_suffix:
-                        if label[-1] not in ':?.!':
-                            label += self.label_suffix
-                    label = bf.label_tag(label) or ''
+                if hasattr(field.widget, 'choises'):
+                    fieldobj['tag'] = 'select'
+                    fieldobj['type'] = 'select'
+                    sel = {}
+                    for c in field.widget.choises:
+                        sel[c.pk] = force_unicode(c)
+                    fieldobj['select'] = sel
                 else:
-                    label = ''
+                    try:
+                        fieldobj['type'] = field.widget.input_type
+                    except AttributeError:
+                        pass
+                try:
+                    html_class_attr = bf.css_classes().split()
+                except:
+                    pass
 
                 if field.help_text:
                     help_text = force_unicode(field.help_text)
                 else:
-                    help_text = u''
+                    help_text = None
 
                 output.append({
-                    'errors': force_unicode(bf_errors),
-                    'label': force_unicode(label),
-                    'field': unicode(bf),
+                    'errors': bf_errors,
+                    'field': fieldobj,
                     'help_text': help_text,
                     'html_class_attr': html_class_attr
                 })
 
         if top_errors:
-            output.insert(0, force_unicode(top_errors))
+            output.extend(0, top_errors)
         if hidden_fields: # Insert any hidden fields in the last row.
             for field in hidden_fields:
                 output.append(field)
         return output
-
 
     class Meta:
         pass

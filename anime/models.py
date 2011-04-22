@@ -163,7 +163,7 @@ class UserStatusBundle(models.Model):
 EDIT_MODELS = {
     'anime': AnimeItem,
     #'episode': AnimeEpisode,
-    #'name': AnimeName,
+    'name': AnimeName,
     'links': AnimeLinks,
     #'organisation': Organisation,
     #'organisationbundle': OrganisationBundle,
