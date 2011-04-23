@@ -24,7 +24,9 @@
 		{% if mallist.list.updated %}
 		<p class="s3">Your list is processed. This may take some time. Reload page to see result.</p>
 		{% else %}
+		<span class="helpText">This is alpha version of script which only for facilitation of data transfer, please be patient.</span>
 		<div class="column left">
+			<span class="right">{{ mallist.list.withMal|length }}</span>
 			<h4>Found by mal id:</h4>
 			<span class="helpText">This records already have mal id. Added successfully.</span>
 			<dl>
@@ -34,6 +36,7 @@
 			</dl>
 		</div>
 		<div class="column left">
+			<span class="right">{{ mallist.list.withNames|length }}</span>
 			<h4>Found by name match:</h4>
 			<span class="helpText">This records has no mal id. Added successfully, but may contain mismatches. Please add mal id to it.</span>
 			<span class="helpText">Other possible matches listed below the records.</span>
@@ -52,8 +55,9 @@
 			<dl>
 		</div>
 		<div class="column left">
+			<span class="right">{{ mallist.list.notFound|length }}</span>
 			<h4>Not-found records:</h4>
-			<span class="helpText">This records not in the database, or have another name.</span>
+			<span class="helpText">This records not in the database or have another name.</span>
 			<span class="helpText">Possible matches listed below the records.</span>
 			<span class="helpText">Mal has a redundancy in the records. Please does not add items if it is a short(<30 min) TV-Sp related to exiting title, it will be deleted.</span>
 			<dl>

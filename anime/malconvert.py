@@ -2,11 +2,13 @@ import os
 import re
 import gzip
 import threading
+import mimetypes
 import xml.dom.minidom as xmlp
 from django.core.cache import cache
 from django.conf import settings
 from anime.models import AnimeLinks, AnimeName, UserStatusBundle
 from datetime import datetime
+
 
 MAL_STATUS = [
     (0, ''),
@@ -40,10 +42,15 @@ MAL_TYPE_CONVERT_LIST = [
 
 def getData(filename):
     try:
+        mimetypes.init()
+        ftype = mimetypes.guess_type(filename)[0]
         file = open(filename, 'rb+')
-        f = gzip.GzipFile(fileobj=file)
-        file_content = f.read()
-        f.close()
+        if ftype != 'application/xml':
+            f = gzip.GzipFile(fileobj=file)
+            file_content = f.read()
+            f.close()
+        else:
+            file_content = file.read()
         file.close()
     except:
         raise
@@ -98,7 +105,8 @@ def searchAnime(obj):
     if anime['my_status'] not in [2, 4]:
         anime['my_watched_episodes'] = None
     try:
-        anime['object'] = AnimeLinks.objects.get(mal=int(anime['series_animedb_id']))
+        link = AnimeLinks.objects.get(MAL=int(anime['series_animedb_id']))
+        anime['object'] = link.anime
         state = 1
     except AnimeLinks.DoesNotExist:
         matchedTitles = []
@@ -153,7 +161,7 @@ def addToCache(user, animeList):
 
 def passFile(file, user, rewrite=True):
     cache.set('MalList:%s' % user.id, {'list': {'updated': 1}, 'date': datetime.now()})
-    filename = os.path.join(settings.MEDIA_ROOT, file.name + str(file.size))
+    filename = os.path.join(settings.MEDIA_ROOT, str(file.size)+file.name)
     if os.path.exists(filename):
         return False, 'File already loading.'
     try:

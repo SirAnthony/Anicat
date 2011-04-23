@@ -92,7 +92,7 @@ def card(request, animeId=0):
         links = None
     return {'anime': anime, 'bundles': bundles, 'animelinks': links}
 
-@condition(last_modified_func=latestStatus)
+#@condition(last_modified_func=latestStatus)
 @render_to('anime/stat.html')
 def stat(request, userId=0):
     user = None
@@ -129,7 +129,6 @@ def stat(request, userId=0):
             tuser.append(total)
             cache.set('Stat:%s' % user.id, tuser)
     return {'username': username, 'stat': tuser}
-
 
 
 

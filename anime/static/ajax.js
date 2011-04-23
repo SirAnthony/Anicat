@@ -114,8 +114,10 @@ var ajax = new (function(){
 					add.processResponse(resp);
 				break;
 
-				case 'editok':
-					if(resp.field == 'status'){
+				case 'edit':
+					if(!resp.status)
+						break;
+					if(resp.model == 'status'){
 						message.hide();
 						var rs = getStylesheetRule('.rs'+resp.text.status, 'background-color');
 						rs = rs ? rs : '#FFF';
@@ -167,6 +169,8 @@ var ajax = new (function(){
 								});
 								cld.push(element.create('input', {'type': 'hidden', name: 'id',
 														 'value': resp.text.id}));
+								cld.push(element.create('input', {'type': 'hidden', name: 'model',
+														 'value': 'status'}));
 								element.addOption(sel, current.select);
 								if(current.selected){
 									for(var i in sel.childNodes){

@@ -11,8 +11,8 @@ def addAnimeItem(request):
     form = None
     if request.method != 'POST':
         response['text'] = 'Only POST method allowed.'
-    elif request.user.is_authenticated():
-        response['text'] = 'Already registred.'
+    elif not request.user.is_authenticated():
+        response['text'] = 'You must be logged in.'
     else:
         form = AnimeForm(request.POST, request.FILES)
         if form.is_valid():
@@ -37,7 +37,7 @@ def addAnimeItem(request):
 def edit(request, itemId, modelname='anime', field=None):
     if not modelname:
         modelname = 'anime'
-    response = {}
+    response = {'model': modelname, 'id': itemId}
     if not request.user.is_authenticated():
         response['text'] = 'You must be logged in.'
     elif modelname != 'status' and (datetime.now() - request.user.date_joined).days < 20:
@@ -113,7 +113,7 @@ def edit(request, itemId, modelname='anime', field=None):
                 except Exception, e:
                     response['text'] = str(e)
                 else:
-                    response.update({'response': 'editok', 'text': form.cleaned_data})
+                    response.update({'response': 'edit', 'status': True, 'text': form.cleaned_data})
                     if lastfunc:
                         lastfunc()
             else:

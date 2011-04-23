@@ -50,7 +50,7 @@ var add = new (function add_class(){
 
 	this.processResponse = function(resp){
 	    message.hide()
-		if(resp.status != 'ok'){
+		if(!resp.status){
 			this.processError(resp.text);
 		}else{
 			if(this.clearForm()){
@@ -106,7 +106,6 @@ var edit = new (function edit_class(){
 		if(!form || !form.name)
 			return;
 		var formData = getFormData(form);
-		formData['field'] = form.name;
 		ajax.loadXMLDoc(url+'set/', formData);
 	}
 

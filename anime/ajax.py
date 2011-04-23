@@ -75,7 +75,7 @@ def get(request):
                 response[field] = 'Error: ' + str(e)
     response = {'response': 'getok', 'text': response}
     if (datetime.now() - request.user.date_joined).days > 20:
-        response[edt] = True
+        response['edt'] = True
                 
     return response
 
@@ -85,16 +85,23 @@ def change(request):
         aid = int(request.POST.get('id', 0))
     except Exception, e:
         return {'text': 'Invalid id.'  + str(e)}
-    response = editMethods.edit(request, aid, request.POST.get('model', None), request.POST.get('field', None))
+    response = editMethods.edit(request, aid, request.POST.get('model', None), request.POST.get('fields', None))
+    if response.get('status', None): #logged
+        del response['form']
+    else:
+        try:
+            response['form'] = response['form'].as_json()
+        except:
+            del response['form']
     return response
 
 @ajaxResponse
 def add(request):
     result = editMethods.addAnimeItem(request)
     try:
-        return {'response': 'add', 'status': 'ok', 'text': result['id']}
+        return {'response': 'add', 'status': True, 'text': result['id']}
     except KeyError:
-        return {'response': 'add', 'status': 'fail', 'text': result['form'].errors}
+        return {'response': 'add', 'status': False, 'text': result['form'].errors or result['text']}
 
 @ajaxResponse
 def login(request):
