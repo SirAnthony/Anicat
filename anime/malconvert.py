@@ -112,7 +112,7 @@ def searchAnime(obj):
         matchedTitles = []
         unmatchedTitles = []
         names = AnimeName.objects.filter(title__iexact=anime['series_title'])
-        if not anime['series_title'].find('The '):
+        if anime['series_title'].find('The ') == 0:
             names = list(names)
             names.extend(AnimeName.objects.filter(title__iexact=re.sub('^The\s+', '', anime['series_title'])))
         for name in names:
@@ -160,7 +160,7 @@ def addToCache(user, animeList):
     cache.set('MalList:%s' % user.id, lastload)
 
 def passFile(file, user, rewrite=True):
-    cache.set('MalList:%s' % user.id, {'list': {'updated': 1}, 'date': datetime.now()})
+    cache.set('MalList:%s' % user.id, {'list': {'updated': 1}, 'date': datetime.now()}, 1800)
     filename = os.path.join(settings.MEDIA_ROOT, str(file.size)+file.name)
     if os.path.exists(filename):
         return False, 'File already loading.'

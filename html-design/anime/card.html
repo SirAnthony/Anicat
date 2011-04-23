@@ -15,6 +15,10 @@
         <div id="cimg">
             <img src="/images/{{ anime.id }}/" />
         </div>
+        
+        {% if user.is_authenticated %}
+        <a href="/edit/bundle/{% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}0{% endif %}/" class="right">Edit</a>
+        {%endif%}
         <b>Bundled with:</b><br/>
         <!-- Это все нужно переверстать -->
         <table>

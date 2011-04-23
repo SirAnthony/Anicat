@@ -68,7 +68,7 @@ var user = new( function(){
 		element.removeAllChilds(form);
 		element.appendChild(form, [
 			{'span': {}}, [
-				{'a': {'href': '/', title: 'User settings', innerText: nick}}],
+				{'a': {'href': '/settings/', title: 'User settings', innerText: nick}}],
 			{'a': {className: 'nurl', innerText: 'Logout',
 									onclick: function(){user.logout();}}}
 		]);

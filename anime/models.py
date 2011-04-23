@@ -35,7 +35,23 @@ class Credit(models.Model):
         return self.title
 
 class AnimeBundle(models.Model):
+
+    def __setattr__(self, name, value):
+        if name.find('bundle') == 0:
+            if not hasattr(self, 'tied'):
+                setattr(self, 'tied', [])
+            self.tied.append(value)
+            return
+        super(AnimeBundle, self).__setattr__(name, value)
     
+    def save(self):
+        if not hasattr(self, 'tied') or not self.tied:
+            return
+        raise Exception
+        for i in range(len(self.tied)-1):
+            self.tie(*self.tied[i:i+2])
+        self.tied = []
+
     @classmethod
     def tie(cls, one, two):
         bundle = one.bundle or two.bundle or cls()
@@ -163,6 +179,7 @@ class UserStatusBundle(models.Model):
 EDIT_MODELS = {
     'anime': AnimeItem,
     #'episode': AnimeEpisode,
+    'bundle': AnimeBundle,
     'name': AnimeName,
     'links': AnimeLinks,
     #'organisation': Organisation,
