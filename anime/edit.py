@@ -24,8 +24,6 @@ def addAnimeItem(request):
                     model.title = model.title.strip()
                     model.save()
                     form.save_m2m()
-                    name = AnimeName(title=model.title, anime=model)
-                    name.save()
                     #Not watched and main need to be reloaded
                     updateMainCaches(USER_STATUS[0][0])
                     response['id'] = model.id
@@ -49,6 +47,7 @@ def edit(request, itemId, modelname='anime', field=None):
         obj = None
         lastfunc = None
         fields = None
+        retid = None
         model = EDIT_MODELS[modelname]
         if field:
             try:
@@ -74,6 +73,7 @@ def edit(request, itemId, modelname='anime', field=None):
                         raise ValueError
                 except:
                     status = 0
+                retid = itemId
                 def st(status, oldstatus, user):
                     def _f():
                         stat = cache.get('mainTable:%s' % user.id)
@@ -105,25 +105,58 @@ def edit(request, itemId, modelname='anime', field=None):
             except model.DoesNotExist:
                 obj = model()
         if request.method != 'POST':
-            form = formobject(instance=obj)
+            try:
+                form = formobject(instance=obj)
+            except Exception, e:
+                response['text'] = str(e)
         else:
             form = formobject(request.POST, instance=obj)
             if obj and form.is_valid():
-                for fieldname in form.cleaned_data:
-                    #TODO: Fix title update on AnimeItem 
-                    if fieldname != obj._meta.pk.name and fieldname != 'title':
-                        setattr(obj, fieldname, form.cleaned_data[fieldname])
-                #raise Exception
                 try:
-                    obj.save()
+                    if modelname == 'name':
+                        _saveAnimeNames(form, obj)
+                    else:
+                        for fieldname in form.cleaned_data:
+                            #TODO: Fix title update on AnimeItem 
+                            if fieldname != obj._meta.pk.name:
+                                setattr(obj, fieldname, form.cleaned_data[fieldname])
+                            obj.save()
                 except Exception, e:
                     response['text'] = str(e)
-                    form.addError("Error %s has occured." % e)
+                    form.addError('Error "%s" has occured.' % e)
                 else:
-                    response.update({'response': 'edit', 'status': True, 'id': obj.id, 'text': form.cleaned_data})
+                    response.update({'response': 'edit', 'status': True, 'id': retid or obj.id, 'text': form.cleaned_data})
                     if lastfunc:
                         lastfunc()
             else:
                 response['text'] = form.errors
         response['form'] = form
     return response
+
+
+def _saveAnimeNames(form, obj):
+    if not obj or not obj.id:
+        raise ValueError('%s not exists.' % type(obj).__name__)
+    names = obj.animenames.all()
+    cleaned = form.cleaned_data.values()
+    newNames = filter(lambda x: x and x not in names, cleaned)
+    oldNames = filter(lambda x: x and x not in cleaned, names)
+    if not newNames and len(oldNames) == len(names):
+        raise Exception('Cannot delete all names. One name must be left.')
+    for name in oldNames:
+        try:
+            newname = newNames.pop()
+        except IndexError:
+            name.delete()
+            if obj.title == name.title:
+                newname = obj.animenames.all()[0]
+                obj.title = newname.title
+                super(AnimeItem, obj).save() #Does not check again
+        else:
+            if obj.title == name.title:
+                obj.title = newname.title
+                super(AnimeItem, obj).save() #Does not check again
+            name.title = newname.title
+            name.save()
+    for name in newNames:
+        name.save()

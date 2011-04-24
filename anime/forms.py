@@ -154,7 +154,7 @@ class TextToAnimeNameField(CharField):
         if not self._animeobject:
             raise ValidationError('AnimeItem not set.')
         try:
-            value = AnimeName(anime=self._animeobject, title=value)
+            value, create = AnimeName.objects.get_or_create(anime=self._animeobject, title=value)
         except:
             raise ValidationError(e)
         return value
@@ -162,26 +162,25 @@ class TextToAnimeNameField(CharField):
 class AnimeNameForm(DynamicModelForm):
     def __init__(self, data=None, *args, **kwargs):
         instance = kwargs.pop('instance', None)
-        self._animeobject = instance
+        if not instance or not instance.id:
+            raise ValueError('Record not exist.')
+        if not isinstance(instance, AnimeItem):
+            raise TypeError('%s is not AnimeName instance.' % type(instance).__name__)
         super(AnimeNameForm, self).__init__(data, *args, **kwargs)
-        if instance:
-            if not isinstance(instance, AnimeItem):
-                raise TypeError('%s is not AnimeName instance.' % type(instance).__name__)
-            fields = {}
-            if not instance.id:
-                raise TypeError('%s not exists.' % type(instance).__name__)
-            items = instance.animenames.all()
-            for i in range(len(items) + 1):
-                try:
-                    initial = items[i].title
-                except:
-                    initial = None
-                field = TextToAnimeNameField(initial=initial, required=False)
-                fields['Name %i' % i] = field
-            for fieldname in self.fields.keys():
-                del self.fields[fieldname]
-            self.setFields(fields)
-            self.setData(data)
+        fields = {}
+        items = instance.animenames.all()
+        for i in range(len(items) + 1):
+            try:
+                initial = items[i].title
+            except:
+                initial = None
+            field = TextToAnimeNameField(initial=initial, required=False)
+            field._animeobject = instance
+            fields['Name %i' % i] = field
+        for fieldname in self.fields.keys():
+            del self.fields[fieldname]
+        self.setFields(fields)
+        self.setData(data)
 
 class UserStatusForm(ModelForm):
     class Meta:

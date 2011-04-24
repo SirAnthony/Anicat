@@ -1,5 +1,5 @@
 import collections
-from django.db import models
+from django.db import models, IntegrityError
 from django.contrib.auth.models import User
 from audit_log.models.managers import AuditLog
 
@@ -120,6 +120,25 @@ class AnimeItem(models.Model):
     bundle = models.ForeignKey(AnimeBundle, related_name='animeitems', null=True, blank=True)
     air = models.BooleanField()
     audit_log = AuditLog()
+    
+    def save(self, *args, **kwargs):
+        try:
+            last = self.audit_log.latest('action_date')
+        except:
+            last = None
+        super(AnimeItem, self).save(*args, **kwargs)
+        if not last or last.title != self.title:
+            if last:
+                title = last.title
+            else:
+                title = self.title
+            name, created = AnimeName.objects.get_or_create(anime=self, title=title)
+            if not created:
+                name.title = self.title
+            try:
+                name.save()
+            except IntegrityError: #Already exists
+                pass
     
     def __unicode__(self):
         return '%s [%s]' % (self.title, ANIME_TYPES[self.releaseType][1])

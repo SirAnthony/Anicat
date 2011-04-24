@@ -43,7 +43,8 @@ MAL_TYPE_CONVERT_LIST = [
 def getData(filename):
     try:
         mimetypes.init()
-        ftype = mimetypes.guess_type(filename)[0]
+        ftype = mimetypes.guess_type(filename)
+        ftype = ftype[1] or ftype[0]
         file = open(filename, 'rb+')
         if ftype != 'application/xml':
             f = gzip.GzipFile(fileobj=file)
