@@ -5,7 +5,7 @@ from django.forms import Form, ModelForm, TextInput, FileField, DateTimeField, B
 from django.forms.forms import BoundField
 from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
-from anime.models import AnimeBundle, AnimeItem, UserStatusBundle, AnimeLinks
+from anime.models import AnimeBundle, AnimeItem, AnimeName, UserStatusBundle, AnimeLinks
 
 class ErrorForm(Form):
     def addError(self, text):
@@ -102,6 +102,8 @@ class TextToAnimeItemField(CharField):
                 value = AnimeItem.objects.get(title=value)
             except AnimeItem.DoesNotExist, e:
                 raise ValidationError(e)
+            except AnimeItem.MultipleObjectsReturned, e:
+                raise ValidationError('Too many items with such title, try to use id instead title.')
         return value
 
 class AnimeBundleForm(DynamicModelForm):
@@ -145,6 +147,42 @@ class AnimeForm(ErrorModelForm):
         model = AnimeItem
         exclude = ('bundle', 'locked')
 
+class TextToAnimeNameField(CharField):
+    def to_python(self, value):
+        if not value:
+            return None
+        if not self._animeobject:
+            raise ValidationError('AnimeItem not set.')
+        try:
+            value = AnimeName(anime=self._animeobject, title=value)
+        except:
+            raise ValidationError(e)
+        return value
+
+class AnimeNameForm(DynamicModelForm):
+    def __init__(self, data=None, *args, **kwargs):
+        instance = kwargs.pop('instance', None)
+        self._animeobject = instance
+        super(AnimeNameForm, self).__init__(data, *args, **kwargs)
+        if instance:
+            if not isinstance(instance, AnimeItem):
+                raise TypeError('%s is not AnimeName instance.' % type(instance).__name__)
+            fields = {}
+            if not instance.id:
+                raise TypeError('%s not exists.' % type(instance).__name__)
+            items = instance.animenames.all()
+            for i in range(len(items) + 1):
+                try:
+                    initial = items[i].title
+                except:
+                    initial = None
+                field = TextToAnimeNameField(initial=initial, required=False)
+                fields['Name %i' % i] = field
+            for fieldname in self.fields.keys():
+                del self.fields[fieldname]
+            self.setFields(fields)
+            self.setData(data)
+
 class UserStatusForm(ModelForm):
     class Meta:
         model = UserStatusBundle
@@ -170,6 +208,7 @@ class LinksForm(ErrorModelForm):
 EDIT_FORMS = {
     AnimeBundle: AnimeBundleForm,
     AnimeItem: AnimeForm,
+    AnimeName: AnimeNameForm,
     UserStatusBundle: UserStatusForm,
     AnimeLinks: LinksForm,
 }

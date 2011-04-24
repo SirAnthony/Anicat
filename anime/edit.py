@@ -94,6 +94,11 @@ def edit(request, itemId, modelname='anime', field=None):
                 response['text'] = 'Bad id passed.'
             else:
                 obj, created = model.objects.get_or_create(anime=anime)
+        elif modelname == 'name':
+            try:
+                obj = AnimeItem.objects.get(id=itemId)
+            except AnimeItem.DoesNotExist:
+                response['text'] = 'Bad id passed.'
         else:
             try:
                 obj = model.objects.get(id=itemId)
@@ -109,7 +114,6 @@ def edit(request, itemId, modelname='anime', field=None):
                     if fieldname != obj._meta.pk.name and fieldname != 'title':
                         setattr(obj, fieldname, form.cleaned_data[fieldname])
                 #raise Exception
-                obj.save()
                 try:
                     obj.save()
                 except Exception, e:

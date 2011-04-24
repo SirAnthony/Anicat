@@ -60,19 +60,18 @@ class AnimeBundle(models.Model):
         super(AnimeBundle, self).save()
         if not hasattr(self, 'tied') or not self.tied:
             return
-        for i in range(len(self.tied)-1):
-            self.tie(*self.tied[i:i+2])
+        if self.id:
+            for item in self.tied:
+                bundle = item.bundle
+                item.bundle = self
+                item.save()
+                self.removeLast(bundle)
         for animeitem in self.animeitems.all():
             if animeitem not in self.tied:
                 animeitem.bundle = None
                 animeitem.save()
         self.tied = []
-        #items = self.animeitems.all()
-        #if len(items) < 2:
-        #    for item in items:
-        #        item.bundle = None
-        #        item.save()
-        #    self.delete()
+        self.removeLast(self)
 
     @classmethod
     def tie(cls, one, two):
@@ -88,6 +87,27 @@ class AnimeBundle(models.Model):
             one.bundle = two.bundle = bundle
             one.save()
             two.save()
+    
+    @classmethod
+    def untie(cls, item):
+        if not item:
+            return
+        bundle = item.bundle
+        if bundle:
+            item.bundle = None
+            item.save()
+            removeLast(bundle)
+    
+    @classmethod
+    def removeLast(cls, bundle):
+        if not bundle or not bundle.id:
+            return
+        items = bundle.animeitems.all()
+        if len(items) < 2:
+            for item in items:
+                item.bundle = None
+                item.save()
+            bundle.delete()
     
 class AnimeItem(models.Model):
     title = models.CharField(max_length=200, db_index=True, unique_for_date='releasedAt')

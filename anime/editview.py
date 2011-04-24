@@ -21,7 +21,10 @@ def edit(request, itemId, model='anime', field=None):
         if model in ['anime', 'name', 'links', 'status']:
             return HttpResponseRedirect('/card/%s/' % itemId)
         elif model == 'bundle':
-            return HttpResponseRedirect('/edit/bundle/%s/' % res.get('id', 0))
+            rid = res.get('id')
+            if rid == None:
+                rid = 0
+            return HttpResponseRedirect('/edit/bundle/%s/' % rid)
     else:
         return res
     
