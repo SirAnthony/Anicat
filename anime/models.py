@@ -40,27 +40,55 @@ class AnimeBundle(models.Model):
         if name.find('bundle') == 0:
             if not hasattr(self, 'tied'):
                 setattr(self, 'tied', [])
-            self.tied.append(value)
+            if value and value not in self.tied:
+                self.tied.append(value)
             return
         super(AnimeBundle, self).__setattr__(name, value)
     
+    def loadOldItems(self):
+        if not self.id:
+            return
+        for animeitem in self.animeitems.all():
+            setattr(self, 'bundle', animeitem)
+    
     def save(self):
+        '''
+        WARNING! This function removes links from all items
+        which is not in tied array. For linking single items 
+        use tie classmethod instead.
+        '''
+        super(AnimeBundle, self).save()
         if not hasattr(self, 'tied') or not self.tied:
             return
-        raise Exception
         for i in range(len(self.tied)-1):
             self.tie(*self.tied[i:i+2])
+        for animeitem in self.animeitems.all():
+            if animeitem not in self.tied:
+                animeitem.bundle = None
+                animeitem.save()
         self.tied = []
+        #items = self.animeitems.all()
+        #if len(items) < 2:
+        #    for item in items:
+        #        item.bundle = None
+        #        item.save()
+        #    self.delete()
 
     @classmethod
     def tie(cls, one, two):
-        bundle = one.bundle or two.bundle or cls()
-        if not bundle.id:
-            bundle.save()
-        one.bundle = two.bundle = bundle
-        one.save()
-        two.save()
-
+        if not one or not two:
+            raise ValueError('Blank field.')
+        if not one.bundle or not two.bundle or one.bundle != two.bundle:
+            if isinstance(cls, AnimeBundle):
+                bundle = cls
+            else:
+                bundle = one.bundle or two.bundle or cls()
+            if not bundle.id:
+                super(AnimeBundle, bundle).save()
+            one.bundle = two.bundle = bundle
+            one.save()
+            two.save()
+    
 class AnimeItem(models.Model):
     title = models.CharField(max_length=200, db_index=True, unique_for_date='releasedAt')
     genre = models.ManyToManyField(Genre)

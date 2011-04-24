@@ -17,8 +17,11 @@ def add(request):
 @render_to('anime/edit.html')
 def edit(request, itemId, model='anime', field=None):
     res = editMethods.edit(request, itemId, model, field)
-    if res.get('status', None) and model in ['anime', 'name', 'links', 'status']:
-        return HttpResponseRedirect('/card/%s/' % itemId)
+    if res.get('status', None):
+        if model in ['anime', 'name', 'links', 'status']:
+            return HttpResponseRedirect('/card/%s/' % itemId)
+        elif model == 'bundle':
+            return HttpResponseRedirect('/edit/bundle/%s/' % res.get('id', 0))
     else:
         return res
     

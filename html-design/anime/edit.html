@@ -11,7 +11,7 @@
     {% else %}
     {# Костыли, костыли everywhere #}
     <form class="addform{% if form.fields|length < 2 %} addfrmoc{% endif %}" action="" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+        {% csrf_token %}        
         <div class="mainerror">
             {{ form.non_field_errors }}
         </div>

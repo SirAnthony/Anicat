@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from django.forms import Form, ModelForm, TextInput, FileField, DateTimeField, BooleanField, ChoiceField
+from django.core.exceptions import ValidationError
+from django.forms import Form, ModelForm, TextInput, FileField, DateTimeField, BooleanField, CharField
 from django.forms.forms import BoundField
 from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
@@ -76,38 +77,57 @@ class ErrorModelForm(ModelForm):
 class DynamicModelForm(ErrorModelForm):
     def setFields(self, kwds):
         keys = kwds.keys()
-        keys.sort()
+        keys.sort(cmp=lambda x, y: cmp(int(x.rsplit(None, 1)[1]), int(y.rsplit(None, 1)[1])))
         for k in keys:
             self.fields[k] = kwds[k]
 
     def setData(self, kwds):
+        if not kwds:
+            return
         keys = kwds.keys()
         keys.sort()
         for name,field in self.fields.items():
             self.data[name] = field.widget.value_from_datadict(kwds, self.files, self.add_prefix(name))
         self.is_bound = True
 
+class TextToAnimeItemField(CharField):
+    def to_python(self, value):
+        if not value:
+            return None
+        try:
+            ivalue = int(value)
+            value = AnimeItem.objects.get(id=ivalue)
+        except:
+            try:
+                value = AnimeItem.objects.get(title=value)
+            except AnimeItem.DoesNotExist, e:
+                raise ValidationError(e)
+        return value
+
 class AnimeBundleForm(DynamicModelForm):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, data=None, *args, **kwargs):
         instance = kwargs.pop('instance', None)
-        super(AnimeBundleForm, self).__init__(*args, **kwargs)
+        super(AnimeBundleForm, self).__init__(data, *args, **kwargs)
         if instance:
             if not isinstance(instance, AnimeBundle):
                 raise TypeError('%s is not AnimeBundle instance.' % type(instance).__name__)
-            anime = list(AnimeItem.objects.all().values_list('id', 'title'))
-            anime.insert(0,['','----Remove----'])
-            items = instance.animeitems.all()
+            items = ()
             fields = {}
-            for i in range(len(items) + 1):
-                pass
-                field = ChoiceField(choices=anime, required=False)
-                #try:
-                #    field.initial = [x for x in range(len(anime)) if anime[x][1] == items[i]][0]
-                #except IndexError:
-                #    pass
-                fields['bundle%i' % i] = field
+            if instance.id:
+                items = instance.animeitems.all()
+                fieldsCount = len(items) + 1
+            else:
+                fieldsCount = 2
+            for i in range(fieldsCount):
+                try:
+                    initial = items[i].title
+                except:
+                    initial = None
+                field = TextToAnimeItemField(initial=initial, required=False)
+                fields['bundle %i' % i] = field
             self.setFields(fields)
+            self.setData(data)
 
 
 class CalendarWidget(TextInput):

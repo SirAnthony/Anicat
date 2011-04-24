@@ -108,12 +108,15 @@ def edit(request, itemId, modelname='anime', field=None):
                     #TODO: Fix title update on AnimeItem 
                     if fieldname != obj._meta.pk.name and fieldname != 'title':
                         setattr(obj, fieldname, form.cleaned_data[fieldname])
+                #raise Exception
+                obj.save()
                 try:
                     obj.save()
                 except Exception, e:
                     response['text'] = str(e)
+                    form.addError("Error %s has occured." % e)
                 else:
-                    response.update({'response': 'edit', 'status': True, 'text': form.cleaned_data})
+                    response.update({'response': 'edit', 'status': True, 'id': obj.id, 'text': form.cleaned_data})
                     if lastfunc:
                         lastfunc()
             else:
