@@ -31,7 +31,7 @@ def register(request):
         response['text'] = 'Already registred.'
     else:
         form = UserCreationFormMail(request.POST)
-        if form.is_valid():        
+        if form.is_valid():
             user = form.save()
             user = auth.authenticate(username=user.username, password=form.cleaned_data['password1'])
             auth.login(request, user)
@@ -46,7 +46,7 @@ def loadMalList(request):
         if form.is_valid():
             timeLeft = 0
             try:
-                timeLeft = (18 - (datetime.now() - lastLoad['date']).seconds) / 60
+                timeLeft = (1800 - (datetime.now() - lastLoad['date']).seconds) / 60
             except TypeError:
                 lastLoad = {}
                 pass

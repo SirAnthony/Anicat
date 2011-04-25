@@ -8,9 +8,9 @@ from anime.models import AnimeItem, AnimeName, AnimeLinks, UserStatusBundle, USE
 from anime.forms import UserStatusForm, UserCreationFormMail
 import anime.edit as editMethods
 import anime.user as userMethods
-from datetime import datetime
+#from datetime import datetime
 
-def ajaxResponse(fn):    
+def ajaxResponse(fn):
     def new(*args):
         ret = {'text': 'Unprocessed error', 'response': 'error'}
         ret.update(fn(*args)) #FIXME: no type check
@@ -74,8 +74,8 @@ def get(request):
             except Exception, e:
                 response[field] = 'Error: ' + str(e)
     response = {'response': 'getok', 'text': response}
-    if (datetime.now() - request.user.date_joined).days > 20:
-        response['edt'] = True
+    #if (datetime.now() - request.user.date_joined).days > 20:
+    #    response['edt'] = True
                 
     return response
 

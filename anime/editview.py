@@ -27,5 +27,3 @@ def edit(request, itemId, model='anime', field=None):
             return HttpResponseRedirect('/edit/bundle/%s/' % rid)
     else:
         return res
-    
-    
