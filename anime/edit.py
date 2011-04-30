@@ -16,7 +16,7 @@ def addAnimeItem(request):
     else:
         form = AnimeForm(request.POST, request.FILES)
         if form.is_valid():
-            if (datetime.now() - request.user.date_joined).days < 20:
+            if (datetime.now() - request.user.date_joined).days < 15:
                 form.addError("You cannot doing this now")
             else:
                 try:
@@ -38,7 +38,7 @@ def edit(request, itemId, modelname='anime', field=None):
     response = {'model': modelname, 'id': itemId}
     if not request.user.is_authenticated():
         response['text'] = 'You must be logged in.'
-    elif modelname != 'status' and (datetime.now() - request.user.date_joined).days < 20:
+    elif modelname != 'status' and (datetime.now() - request.user.date_joined).days < 15:
         response['text'] = 'You cannot doing this now.'
     elif modelname not in EDIT_MODELS:
         response['text'] = 'Bad model name passed.'

@@ -57,13 +57,11 @@ def get(request):
                 response[field] = AnimeLinks.objects.filter(anime=anime).values('AniDB','ANN', 'MAL')[0]
             except:
                 pass
-        elif field == 'translation':
-            response[field] = anime.translation()
         elif field == 'type':
-            response[field] = anime.releaseTypeS()
+            response[field] = anime.releaseTypeS
         elif field == 'bundle':
             if anime.bundle:
-                items = anime.bundle.animeitems.all().order_by('releasedAt')
+                items = anime.bundle.animeitems.all().order_by('_releasedAt')
                 status = UserStatusBundle.objects.get_for_user(items, request.user.id)
                 response[field] = map(lambda x: {'name': x.title, 'elemid': x.id,
                                                  'job': getAttr(getVal(x.id, status, None), 'status', 0, )},
@@ -76,7 +74,7 @@ def get(request):
     response = {'response': 'getok', 'text': response}
     #if (datetime.now() - request.user.date_joined).days > 20:
     #    response['edt'] = True
-                
+
     return response
 
 @ajaxResponse

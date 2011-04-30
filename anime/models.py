@@ -22,6 +22,8 @@ USER_STATUS = [
     (5, u'partially watched'),
 ]
 
+UNKNOWN_DATE = [1, 2, 4] # day, month, year
+
 class Genre(models.Model):
     name = models.CharField(max_length=200, db_index=True, unique=True)
     
@@ -108,18 +110,45 @@ class AnimeBundle(models.Model):
                 item.bundle = None
                 item.save()
             bundle.delete()
-    
+
+
 class AnimeItem(models.Model):
+
+    def _getReleasedAt(self):
+        return self._releasedAt
+    def _setReleasedAt(self, value):
+        self._releasedAt = value
+    def _getEndedAt(self):
+        return self._endedAt
+    def _setEndedAt(self, value):
+        self._endedAt = value
+    releasedAt = property(_getReleasedAt, _setReleasedAt)
+    endedAt = property(_getEndedAt, _setEndedAt)
+
     title = models.CharField(max_length=200, db_index=True, unique_for_date='releasedAt')
     genre = models.ManyToManyField(Genre)
     releaseType = models.IntegerField(choices=ANIME_TYPES)
     episodesCount = models.IntegerField()
-    duration = models.IntegerField()
-    releasedAt = models.DateTimeField()
-    endedAt = models.DateTimeField(blank=True, null=True)
+    duration = models.IntegerField()    
+    _releasedAt = models.DateTimeField()
+    releasedKnown = models.SmallIntegerField(blank=True, default=0)
+    _endedAt = models.DateTimeField(blank=True, null=True)
+    endedKnown = models.SmallIntegerField(blank=True, default=0)
     bundle = models.ForeignKey(AnimeBundle, related_name='animeitems', null=True, blank=True)
     air = models.BooleanField()
     audit_log = AuditLog()
+
+
+    def _getReleaseTypeString(self):
+        return ANIME_TYPES[self.releaseType][1]
+    
+    def _getTranslation(self):
+        if self.endedAt:
+            return ' - '.join([self.releasedAt.strftime("%d.%m.%Y"), self.endedAt.strftime("%d.%m.%Y")])
+        return self.releasedAt.strftime("%d.%m.%Y")
+    
+    releaseTypeS = property(_getReleaseTypeString)
+    translation = property(_getTranslation)
     
     def save(self, *args, **kwargs):
         try:
@@ -139,18 +168,10 @@ class AnimeItem(models.Model):
                 name.save()
             except IntegrityError: #Already exists
                 pass
-    
+
     def __unicode__(self):
         return '%s [%s]' % (self.title, ANIME_TYPES[self.releaseType][1])
 
-    def releaseTypeS(self):
-        return ANIME_TYPES[self.releaseType][1]
-    
-    def translation(self):
-        if self.endedAt:
-            return ' - '.join([self.releasedAt.strftime("%d.%m.%Y"), self.endedAt.strftime("%d.%m.%Y")])
-        return self.releasedAt.strftime("%d.%m.%Y")
-    
     class Meta:
         ordering = ["title"]
 
@@ -179,8 +200,8 @@ class AnimeName(models.Model):
 
 class AnimeLinks(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="links")
-    AniDB = models.IntegerField(unique=True, blank=True, null=True)
-    ANN = models.IntegerField(unique=True, blank=True, null=True)
+    AniDB = models.IntegerField(blank=True, null=True)
+    ANN = models.IntegerField(blank=True, null=True)
     MAL = models.IntegerField(unique=True, blank=True, null=True)
     audit_log = AuditLog()
   

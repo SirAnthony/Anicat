@@ -2,6 +2,10 @@
 
 {% load cache %}
 
+    {% block title %} - {% if not anime %}Nothing found{% else %}{{ anime.title }}{% endif %}{% endblock %}
+    {% block description %}{% if anime %}Name: {{ anime.title }}. Type: {{ anime.releaseTypeS }}{% endif %}{% endblock %}
+    {% block keywords %}{% if anime %}{{ anime.title }}, {{ anime.releaseTypeS }}{% endif %}{% endblock %}
+
     {% block selectView %}
     {% endblock %}
 
@@ -15,7 +19,6 @@
         <div id="cimg">
             <img src="/images/{{ anime.id }}/" />
         </div>
-        
         {% if user.is_authenticated %}
         <a href="/edit/bundle/{% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}0{% endif %}/" class="right">Edit</a>
         {%endif%}
@@ -59,18 +62,18 @@
             {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releasedAt,endedAt/" class="right">Edit</a>{%endif%}
             <b>Translation:</b><br/>{{ anime.translation }}
         </div>
-        {% if animelinks %} 
+        {% if animelinks or user.is_authenticated %}
         <div>
             {% if user.is_authenticated %}<a href="/edit/links/{{ anime.id }}/" class="right">Edit</a>{%endif%}
             <b>Links:</b><br />
             {% if animelinks.AniDB %}
-            <a href="http://anidb.net/perl-bin/animedb.pl?show=anime&aid={{ animelinks.AniDB }}" >AniDB</a>&nbsp;
+            <a rel="nofollow" target="_blank" href="http://anidb.net/perl-bin/animedb.pl?show=anime&aid={{ animelinks.AniDB }}" >AniDB</a>&nbsp;
             {% endif %}
             {% if animelinks.ANN %}
-            <a href="http://www.animenewsnetwork.com/encyclopedia/anime.php?id={{ animelinks.ANN }}" >ANN</a>&nbsp;
+            <a rel="nofollow" target="_blank" href="http://www.animenewsnetwork.com/encyclopedia/anime.php?id={{ animelinks.ANN }}" >ANN</a>&nbsp;
             {% endif %}
             {% if animelinks.MAL %}
-            <a href="http://myanimelist.net/anime/{{ animelinks.MAL }}" >MAL</a>
+            <a rel="nofollow" target="_blank" href="http://myanimelist.net/anime/{{ animelinks.MAL }}" >MAL</a>
             {% endif %}
         </div>
         {% endif %}

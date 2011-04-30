@@ -1,6 +1,7 @@
 
 from django.contrib.auth.models import User
 from django.core.cache import cache
+from django.http import HttpResponseRedirect
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
@@ -73,6 +74,9 @@ def card(request, animeId=0):
             anime = AnimeItem.objects.all()[animeId]
         except:
             pass
+        else:
+            #fixme double job
+            return HttpResponseRedirect('/card/%s/' % animeId)
     else:
         try:
             anime = AnimeItem.objects.get(id=animeId)

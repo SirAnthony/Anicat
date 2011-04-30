@@ -145,11 +145,15 @@ class AnimeForm(ErrorModelForm):
 
     class Meta():
         model = AnimeItem
-        exclude = ('bundle', 'locked')
+        exclude = ('bundle', 'locked', '_releasedAt', 'releasedKnown', '_endedAt', 'endedKnown')
 
 class TextToAnimeNameField(CharField):
     def to_python(self, value):
-        if not value:
+        try:
+            value = value.strip()
+            if not value:
+                raise ValueError
+        except:
             return None
         if not self._animeobject:
             raise ValidationError('AnimeItem not set.')
@@ -169,9 +173,9 @@ class AnimeNameForm(DynamicModelForm):
         super(AnimeNameForm, self).__init__(data, *args, **kwargs)
         fields = {}
         items = instance.animenames.all()
-        for i in range(len(items) + 1):
+        for i in range(len(items) + 4):
             try:
-                initial = items[i].title
+                initial = items[i].title.strip()
             except:
                 initial = None
             field = TextToAnimeNameField(initial=initial, required=False)
