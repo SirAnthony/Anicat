@@ -1,11 +1,13 @@
 from django.conf import settings
 from django.conf.urls.defaults import *
+from django.views.generic.simple import direct_to_template
 
 urlpatterns = patterns(
     'anime.views',
     (r'^$', 'index'),
     (r'^(show/(?P<status>\d+))?/?(sort/(?P<order>\w+))?/?(?P<page>\d+)?/$', 'index'),
-    (r'^changes/$', 'changes'),    
+    (r'^changes/$', direct_to_template, {'template': 'anime/changes.html'}),
+    (r'^faq/$', direct_to_template, {'template': 'anime/faq.html'}),
     (r'^card/(?P<animeId>\d+)?/?$', 'card'),
     (r'^stat/(?P<userId>\d+)?/?$', 'stat'),
     (r'^css/$', 'generateCss'),

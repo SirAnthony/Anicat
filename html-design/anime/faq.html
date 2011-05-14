@@ -1,0 +1,35 @@
+{% extends "anime/base.html" %}
+
+	{% block main %}
+	<h4>What is this?</h4>
+	<p>Anime catalog is a place where you can create and manage yours anime list.
+	The idea is the ability to rapidly set an anime status. Project is the result of
+	script for managing personal anime sheet, written several years ago for myself and Anonymous from /s/.
+	It is still in development yet, but already has the status of beta.</p><br />
+	<h4>How can I use this?</h4>
+	<p>Just click on list item number.</p><br />
+	<h4>it is a social network?</h4>
+	<p><b>No.</b> You already have enough social networks. If you want to communicate with
+	friends use facebook or anything else. This project is for manage anime lists, nothing more.</p><br />
+	<h4>Will this project becomes a social network in future?</h4>
+	<h4>NO</h4><br />
+	<h4>But I want to show my list to friends.<span style="font-size: 7px;"> Though they are random people from the Internets, I have no life and my powerlevel is 9001 title, I should boast somehow!</span></h4>
+	<p>You can use your id in statistic link{% if user.is_authenticated %} like <a href="/stat/{{user.id}}">this</a>{% endif %}.</p><br />
+	<h4>Why am I Anonymous for other?</h4>
+	<p>It is bad? Originally acts forced anonymity of users. In the future it will be possible to disable it for youself.</p><br />
+	<h4>I registered yesterday but cannot edit or add titles. Does this work?</h4>
+	<p>Yes it works but has a protection from vandalism. Wait a bit more. Nevertheless,
+	list management is available immediately.</p><br />
+	<h4>Okay it works. What the policy of adding? Can I add all I want?</h4>
+	<p>Not quite. You should not add bonus dvd-specials. Anicat not intended to cover all the additional releases
+	and advertisements. If you're not sure, try to see how it's done in AniDB and ANN. MAL is a bad example.</p><br />
+	<h4>I have MAL. Can i migrate easily?</h4>
+	<p>You can try MAL migration tool in you <a href="/settings/" >settings</a> page.</p><br />
+	<h4>You said that it is beta now but why current version is 3?</h4>
+	<p>As i said first version was little standalone script in perl.
+	Project received version 2 when it became a multi-user.
+	Now it rewritten in python so version bumped to 3.</p><br />
+	<h4>Can i get source code?</h4>
+	<p>Check project <a href="https://github.com/SirAnthony/Anicat/tree/django">github</a>.
+	You must remember that Anicat free for personal use only. Check the <a href="/LICENSE" >license</a> for feature details.</p><br />
+	{% endblock %}

@@ -134,12 +134,6 @@ def stat(request, userId=0):
             cache.set('Stat:%s' % user.id, tuser)
     return {'username': username, 'stat': tuser}
 
-
-
-@render_to('anime/changes.html')
-def changes(request):
-    return {}
-
 @cache_control(private=True, no_cache=True)
 #@condition(last_modified_func=latestStatus)
 @render_to('anime/user.css', 'text/css')
@@ -202,7 +196,6 @@ def history(request, field=None, page=0):
     return {'table': table, 'pages': range(1, pages+1),
             'link': link, 'page': page
     }
-
 
 #@render_to('anime/add.html')
 def test(request):

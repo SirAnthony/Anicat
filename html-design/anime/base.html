@@ -25,7 +25,8 @@
 		<div class="leftmenu">{% block mainlink %}
 			&nbsp;<a class="nurl" href="/">Main</a>&nbsp;|{% endblock %}
 			&nbsp;<a class="nurl" onclick="searcher.toggle();">Search</a>
-			|&nbsp;<a class="nurl" href="/card/">Random</a>
+			|&nbsp;<a class="nurl" href="/faq/">FAQ</a>
+			|&nbsp;<a class="nurl" href="/card/" rel="nofollow">Random</a>
 		{% if user.is_authenticated %}
 			|&nbsp;<a class="nurl" href="/add/" onclick="add.toggle(); return false;">Add</a>
 		</div>
