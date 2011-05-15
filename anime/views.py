@@ -58,7 +58,7 @@ def index(request, order='title', page=0, status=None):
             else:
                 s = qs.only(order)[i-1:i+1]
             pages.extend(map(lambda x: unicode(getattr(x, order)).strip()[:4], s))
-        pages.append(unicode(getattr(AnimeItem.objects.order_by('-'+order).only(order)[0], order)).strip()[:4])
+        pages.append(unicode(getattr(qs.order_by('-'+order).only(order)[0], order)).strip()[:4])
         pages = [a+' - '+b for a,b in zip(pages[::2], pages[1::2])]
         cache.set('Pages:%s' % cachestr, pages)
     items = qs[page*limit:(page+1)*limit]

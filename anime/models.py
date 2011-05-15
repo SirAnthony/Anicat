@@ -22,7 +22,11 @@ USER_STATUS = [
     (5, u'partially watched'),
 ]
 
-UNKNOWN_DATE = [1, 2, 4] # day, month, year
+DATE_FORMATS = (
+    "%d.%m.%Y", "??.%m.%Y", "%d.??.%Y",
+    "??.??.%Y", "%d.%m.??", "??.%m.??",
+    "%d.??.??", "??.??.??",
+)
 
 class Genre(models.Model):
     name = models.CharField(max_length=200, db_index=True, unique=True)
@@ -114,38 +118,32 @@ class AnimeBundle(models.Model):
 
 class AnimeItem(models.Model):
 
-    def _getReleasedAt(self):
-        return self._releasedAt
-    def _setReleasedAt(self, value):
-        self._releasedAt = value
-    def _getEndedAt(self):
-        return self._endedAt
-    def _setEndedAt(self, value):
-        self._endedAt = value
-    releasedAt = property(_getReleasedAt, _setReleasedAt)
-    endedAt = property(_getEndedAt, _setEndedAt)
-
     title = models.CharField(max_length=200, db_index=True, unique_for_date='releasedAt')
     genre = models.ManyToManyField(Genre)
     releaseType = models.IntegerField(choices=ANIME_TYPES)
     episodesCount = models.IntegerField()
     duration = models.IntegerField()    
-    _releasedAt = models.DateTimeField()
+    releasedAt = models.DateTimeField()
     releasedKnown = models.SmallIntegerField(blank=True, default=0)
-    _endedAt = models.DateTimeField(blank=True, null=True)
+    endedAt = models.DateTimeField(blank=True, null=True)
     endedKnown = models.SmallIntegerField(blank=True, default=0)
     bundle = models.ForeignKey(AnimeBundle, related_name='animeitems', null=True, blank=True)
     air = models.BooleanField()
     audit_log = AuditLog()
 
-
     def _getReleaseTypeString(self):
         return ANIME_TYPES[self.releaseType][1]
     
     def _getTranslation(self):
-        if self.endedAt:
-            return ' - '.join([self.releasedAt.strftime("%d.%m.%Y"), self.endedAt.strftime("%d.%m.%Y")])
-        return self.releasedAt.strftime("%d.%m.%Y")
+        try:
+            if self.endedAt:
+                return ' - '.join([
+                    self.releasedAt.strftime(DATE_FORMATS[self.releasedKnown]), 
+                    self.endedAt.strftime(DATE_FORMATS[self.endedKnown])
+                ])
+            return self.releasedAt.strftime(DATE_FORMATS[self.releasedKnown])
+        except ValueError:
+            return 'Bad value'
     
     releaseTypeS = property(_getReleaseTypeString)
     translation = property(_getTranslation)
@@ -176,7 +174,7 @@ class AnimeItem(models.Model):
         ordering = ["title"]
 
 class AnimeEpisode(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, db_index=True)
     anime = models.ForeignKey(AnimeItem, related_name="animeepisodes")
     audit_log = AuditLog()
     

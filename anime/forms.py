@@ -1,11 +1,21 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
-from django.forms import Form, ModelForm, TextInput, FileField, DateTimeField, BooleanField, CharField
+from django.forms import Form, ModelForm, TextInput, FileField, DateField, BooleanField, CharField
 from django.forms.forms import BoundField
 from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
-from anime.models import AnimeBundle, AnimeItem, AnimeName, UserStatusBundle, AnimeLinks
+from anime.models import AnimeBundle, AnimeItem, AnimeName, UserStatusBundle, AnimeLinks, DATE_FORMATS
+import datetime
+
+#dirty but works
+INPUT_FORMATS = (
+    '%Y-%m-%d', '%m/%d/%Y', '%m/%d/%y',
+    '%b %d %Y', '%b %d, %Y',
+    '%d %b %Y', '%d %b, %Y',
+    '%B %d %Y', '%B %d, %Y',
+    '%d %B %Y', '%d %B, %Y',
+)
 
 class ErrorForm(Form):
     def addError(self, text):
@@ -139,13 +149,49 @@ class CalendarWidget(TextInput):
     def __init__(self, attrs={}):
         super(CalendarWidget, self).__init__(attrs={'class': 'vDateField', 'size': '10'})
 
+    def render(self, name, value, attrs=None):
+        if isinstance(value, datetime.date):
+            try:
+                value = value.strftime("%d.%m.%Y")
+            except:
+                value = 'Bad value'
+        return super(CalendarWidget, self).render(name, value, attrs)
+
+
+class UnknownDateField(DateField):
+    widget=CalendarWidget
+    cleaned_data = {}
+
+    def __init__(self, *args, **kwargs):
+        super(UnknownDateField, self).__init__(*args, **kwargs)
+        self.input_formats = DATE_FORMATS + INPUT_FORMATS
+
+    def strptime(self, value, format):
+        raise ValidationError(self.error_messages['invalid'])
+        #raise Exception
+        #try:
+        #    self.cleaned_data[self.label.lower()+'Known'] = DATE_FORMATS.index(format)
+        #except IndexError:
+        #    pass
+        return #super(UnknownDateField, self).strptime(self, value, format)
+
 class AnimeForm(ErrorModelForm):
-    releasedAt = DateTimeField(label='Released', widget=CalendarWidget)
-    endedAt = DateTimeField(label='Ended', widget=CalendarWidget, required=False)
+    releasedAt = UnknownDateField(label='Released')
+    endedAt = UnknownDateField(label='Ended', required=False)
+
+    def _clean_form(self):
+        super(AnimeForm, self)._clean_form()
+        for name, field in self.fields.items():
+            #f = field.cleaned_data
+            #raise Exception
+            try:
+                self.cleaned_data.update(getattr(field, 'cleaned_data'))
+            except AttributeError:
+                pass
 
     class Meta():
         model = AnimeItem
-        exclude = ('bundle', 'locked', '_releasedAt', 'releasedKnown', '_endedAt', 'endedKnown')
+        exclude = ('bundle', 'locked', 'releasedKnown', 'endedKnown')
 
 class TextToAnimeNameField(CharField):
     def to_python(self, value):
