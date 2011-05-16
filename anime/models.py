@@ -168,7 +168,9 @@ class AnimeItem(models.Model):
                 pass
 
     def __unicode__(self):
-        return '%s [%s]' % (self.title, ANIME_TYPES[self.releaseType][1])
+        if self.id:
+            return '%s [%s]' % (self.title, ANIME_TYPES[self.releaseType][1])
+        return ''
 
     class Meta:
         ordering = ["title"]

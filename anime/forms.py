@@ -1,12 +1,14 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
+from django.core.validators import EMPTY_VALUES
 from django.forms import Form, ModelForm, TextInput, FileField, DateField, BooleanField, CharField
 from django.forms.forms import BoundField
 from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
 from anime.models import AnimeBundle, AnimeItem, AnimeName, UserStatusBundle, AnimeLinks, DATE_FORMATS
 import datetime
+import time
 
 #dirty but works
 INPUT_FORMATS = (
@@ -147,12 +149,12 @@ class CalendarWidget(TextInput):
         js = ("calendar.js", "DateTimeShortcuts.js")
 
     def __init__(self, attrs={}):
-        super(CalendarWidget, self).__init__(attrs={'class': 'vDateField', 'size': '10'})
-
+        super(CalendarWidget, self).__init__(attrs={'class': 'vDateField', 'size': '10', 'Known': 0})
+        
     def render(self, name, value, attrs=None):
         if isinstance(value, datetime.date):
             try:
-                value = value.strftime("%d.%m.%Y")
+                value = value.strftime(DATE_FORMATS[self.attrs['Known']])
             except:
                 value = 'Bad value'
         return super(CalendarWidget, self).render(name, value, attrs)
@@ -165,25 +167,52 @@ class UnknownDateField(DateField):
     def __init__(self, *args, **kwargs):
         super(UnknownDateField, self).__init__(*args, **kwargs)
         self.input_formats = DATE_FORMATS + INPUT_FORMATS
+    
+    #Not needed if changeset > 16137
+    def to_python(self, value):
+        """
+        Validates that the input can be converted to a date. Returns a Python
+        datetime.date object.
+        """
+        if value in EMPTY_VALUES:
+            return None
+        if isinstance(value, datetime.datetime):
+            return value.date()
+        if isinstance(value, datetime.date):
+            return value
+        for format in self.input_formats:
+            try:
+                return self.strptime(value, format)
+            except ValueError:
+                continue
+        raise ValidationError(self.error_messages['invalid'])
 
     def strptime(self, value, format):
-        raise ValidationError(self.error_messages['invalid'])
-        #raise Exception
-        #try:
-        #    self.cleaned_data[self.label.lower()+'Known'] = DATE_FORMATS.index(format)
-        #except IndexError:
-        #    pass
-        return #super(UnknownDateField, self).strptime(self, value, format)
+        date = datetime.date(*time.strptime(value, format)[:3])
+        #cs > 16137
+        #date = super(UnknownDateField, self).strptime(self, value, format)
+        try:
+            self.cleaned_data[self.label.lower()+'Known'] = DATE_FORMATS.index(format)
+        except ValueError:
+            self.cleaned_data[self.label.lower()+'Known'] = 0
+        return date
 
 class AnimeForm(ErrorModelForm):
     releasedAt = UnknownDateField(label='Released')
     endedAt = UnknownDateField(label='Ended', required=False)
+    
+    def __init__(self, *args, **kwargs):
+        super(AnimeForm, self).__init__(*args, **kwargs)
+        if self.instance.id:
+            for field in ['released', 'ended']:
+                try:
+                    self.fields[field + 'At'].widget.attrs['Known'] = getattr(self.instance, field + 'Known')
+                except:
+                    continue
 
     def _clean_form(self):
         super(AnimeForm, self)._clean_form()
         for name, field in self.fields.items():
-            #f = field.cleaned_data
-            #raise Exception
             try:
                 self.cleaned_data.update(getattr(field, 'cleaned_data'))
             except AttributeError:
