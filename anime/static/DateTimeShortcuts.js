@@ -131,10 +131,10 @@ var DateTimeShortcuts = {
 			// px value of it. let's use an estimated px for now
 			// TODO: IE returns wrong value for findPosX when in rtl mode
 			// (it returns as it was left aligned), needs to be fixed.
-			position.left += 180;
+			//position.left += 150;
 		}
 		cal_box.style.left = position.left + 'px';
-		cal_box.style.top = Math.max(0, position.top - 175) + 'px';
+		cal_box.style.top = Math.max(0, position.top - 90) + 'px';
 
 		cal_box.style.display = 'block';
 		//addEvent(window.document, 'click', function(){DateTimeShortcuts.dismissCalendar(num);});
