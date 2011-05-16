@@ -162,13 +162,13 @@ var DateTimeShortcuts = {
 	},
 
 	handleCalendarCallback: function(num) {
-		format = get_format('DATE_INPUT_FORMATS')[0];
+		format = '%d.%m.%Y'; /*get_format('DATE_INPUT_FORMATS')[0]; Fix it in l18n
 		// the format needs to be escaped a little
 		format = format.replace('\\', '\\\\');
 		format = format.replace('\r', '\\r');
 		format = format.replace('\n', '\\n');
 		format = format.replace('\t', '\\t');
-		format = format.replace("'", "\\'");
+		format = format.replace("'", "\\'");*/
 		return (function(num, format){
 			return function(y, m, d){
 				DateTimeShortcuts.calendarInputs[num].value = new Date(y, m-1, d).strftime(format);
@@ -180,7 +180,7 @@ var DateTimeShortcuts = {
 	handleCalendarQuickLink: function(num, offset) {
 		var d = new Date();
 		d.setDate(d.getDate() + offset)
-		DateTimeShortcuts.calendarInputs[num].value = d.strftime(get_format('DATE_INPUT_FORMATS')[0]);
+		DateTimeShortcuts.calendarInputs[num].value = d.strftime('%d.%m.%Y'); //get_format('DATE_INPUT_FORMATS')[0]);
 		DateTimeShortcuts.calendarInputs[num].focus();
 		DateTimeShortcuts.dismissCalendar(num);
 	},

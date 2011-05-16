@@ -127,8 +127,7 @@ Calendar.prototype = {
 		if (this.currentMonth == 1) {
 			this.currentMonth = 12;
 			this.currentYear--;
-		}
-		else {
+		}else{
 			this.currentMonth--;
 		}
 		this.drawCurrent();
@@ -137,8 +136,7 @@ Calendar.prototype = {
 		if (this.currentMonth == 12) {
 			this.currentMonth = 1;
 			this.currentYear++;
-		}
-		else {
+		}else{
 			this.currentMonth++;
 		}
 		this.drawCurrent();
@@ -161,8 +159,7 @@ function getStyle(oElm, strCssRule){
 	var strValue = "";
 	if(document.defaultView && document.defaultView.getComputedStyle){
 		strValue = document.defaultView.getComputedStyle(oElm, "").getPropertyValue(strCssRule);
-	}
-	else if(oElm.currentStyle){
+	}else if(oElm.currentStyle){
 		strCssRule = strCssRule.replace(/\-(\w)/g, function (strMatch, p1){
 			return p1.toUpperCase();
 		});
@@ -185,8 +182,7 @@ Date.prototype.getTwelveHours = function() {
 	hours = this.getHours();
 	if (hours == 0) {
 		return 12;
-	}
-	else {
+	}else{
 		return hours <= 12 ? hours : hours-12
 	}
 }
@@ -249,8 +245,7 @@ Date.prototype.strftime = function(format) {
 		if (format.charAt(i) === '%') {
 			result = result + fields[format.charAt(i + 1)];
 			++i;
-		}
-		else {
+		}else{
 			result = result + format.charAt(i);
 		}
 		++i;

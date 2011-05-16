@@ -84,7 +84,7 @@ var app = {
     moveSelect: function(step){
         
         if (this.timeout) clearTimeout(this.timeout);
-        var lis = getChilds(this.appdiv.firstChild);
+        var lis = this.appdiv.firstChild.childNodes;
         element.downTree(function(el){pclass.remove(el, "app_over");}, this.appdiv.firstChild);                         
         this.selected += step;
         if(this.selected <= 0){
