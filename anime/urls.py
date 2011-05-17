@@ -6,13 +6,13 @@ urlpatterns = patterns(
     'anime.views',
     (r'^$', 'index'),
     (r'^(show/(?P<status>\d+))?/?(sort/(?P<order>\w+))?/?(?P<page>\d+)?/$', 'index'),
+    (r'^search/(?P<string>[^/]+)?/?(field/(?P<field>\w+))?/?(sort/(?P<order>\w+))?/?(?P<page>\d+)?/?$', 'search'),
     (r'^changes/$', direct_to_template, {'template': 'anime/changes.html'}),
     (r'^faq/$', direct_to_template, {'template': 'anime/faq.html'}),
     (r'^card/(?P<animeId>\d+)?/?$', 'card'),
     (r'^stat/(?P<userId>\d+)?/?$', 'stat'),
     (r'^css/$', 'generateCss'),
     (r'^test/$', 'test'),
-    (r'^search/$', 'blank'),
     (r'^history/add/?/?(f/(?P<field>\w+))?/?(?P<page>\d+)?/$', 'history'),
 )
 

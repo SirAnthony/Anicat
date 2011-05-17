@@ -1,11 +1,10 @@
 
-from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.core.cache import cache
 from django.utils import simplejson
 from anime.functions import getVal, getAttr, updateMainCaches
 from anime.models import AnimeItem, AnimeName, AnimeLinks, UserStatusBundle, USER_STATUS
-from anime.forms import UserStatusForm, UserCreationFormMail
+import anime.core as coreMethods
 import anime.edit as editMethods
 import anime.user as userMethods
 #from datetime import datetime
@@ -122,30 +121,18 @@ def register(request):
 def search(request):
     if request.method != 'POST':
         return {'text': 'Only POST method allowed.'}
-    string = request.POST.get('string')
-    if not string:
-        return {'text': 'Empty query.'}
-    response = {}
     limit = 20
-    field = request.POST.get('field', 'name')
-    qs = None
-    try:
-        order = request.POST.get('sort')
-        AnimeItem._meta.get_field(order)
-    except Exception:
-        order = 'title'
-    try:
-        page = int(request.POST.get('page', 0))
-    except:
-        page = 0
-    if field == 'name':
-        qs = AnimeItem.objects.filter(animenames__title__icontains=string).distinct()
-    else:
-        return {'text': 'This field not avaliable yet.'}
-    res = qs.order_by(order)[page*limit:(page+1)*limit]
-    #FUUUUUUSHENKIFUFU
-    items = [{'name': x.title, 'type': x.releaseTypeS(), 'numberofep': x.episodesCount,
-             'id': x.id, 'translation': x.translation(), 'air': x.air} for x in res]
-    response = {'text': {'items': items, 'page': page,
-                'count': qs.count()}, 'response': 'search'}
+    response = coreMethods.search(request.POST.get('field', 'name'), 
+        request.POST.get('string'), request,
+        {'page': request.POST.get('page', 0), 'order': request.POST.get('sort')}
+    )
+    if response.has_key('response'):
+        #FIXME: no cache
+        qs = response['text']['items']
+        page = response['text']['page']
+        #FUUUUUUSHENKIFUFU
+        response['text']['items'] = [{'name': x.title, 'type': x.releaseTypeS,
+            'numberofep': x.episodesCount, 'id': x.id, 'translation': x.translation,
+            'air': x.air } for x in qs[page*limit:(page+1)*limit]]
+        response['text']['count'] = qs.count()
     return response

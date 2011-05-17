@@ -6,7 +6,8 @@ from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
 from anime.models import AnimeItem, AnimeLinks, UserStatusBundle, USER_STATUS
-from anime.functions import getAttr, cleanTableCache, updateMainCaches
+from anime.functions import getAttr, createPages, cleanTableCache, updateMainCaches
+import anime.core as coreMethods
 from random import randint
 
 
@@ -51,18 +52,44 @@ def index(request, order='title', page=0, status=None):
     (link, cachestr) = cleanTableCache(order, status, page, request.user)
     pages = cache.get('Pages:' + cachestr)
     if not pages:
-        pages = []
-        for i in range(0, qs.count(), limit):
-            if not i:
-                s = (qs.only(order)[i],)
-            else:
-                s = qs.only(order)[i-1:i+1]
-            pages.extend(map(lambda x: unicode(getattr(x, order)).strip()[:4], s))
-        pages.append(unicode(getattr(qs.order_by('-'+order).only(order)[0], order)).strip()[:4])
-        pages = [a+' - '+b for a,b in zip(pages[::2], pages[1::2])]
+        pages = createPages(qs, order, limit)
         cache.set('Pages:%s' % cachestr, pages)
     items = qs[page*limit:(page+1)*limit]
-    return {'list': items, 'link': link, 'cachestr': cachestr,
+    return {'list': items, 'link': link, 'cachestr': cachestr, 'cachetime': 600,
+            'pages': pages, 'page': {'number': page, 'start': page*limit}}
+
+@render_to('anime/list.html')
+def search(request, string=None, field=None, order=None, page=0):
+    limit = 20
+    link = 'search/'
+    items = None
+    pages = None
+    if string:
+        link += string + '/'
+    if field:
+        link += '/field/%s/' % field
+    if order: #FIXME: 2 caches: /sort/title/ and /
+        link += 'sort/%s/' % order
+    else:
+        order = 'title'
+    if not page:
+        page = 0
+    response = coreMethods.search(field, string, request, {'page': page, 'order': order})
+    if response.has_key('response'):
+        cachestr = link + str(page)
+        page = response['text']['page']
+        cached = cache.get('search:%s' % cachestr)
+        if cached:
+            pages = cached['pages']
+            items = cached['items']
+        else:
+            qs = response['text']['items']
+            pages = createPages(qs, order, limit)
+            items = qs[page*limit:(page+1)*limit]
+            cache.set('search:%s' % cachestr, {'pages': pages, 'items': items})
+    else:
+        cachestr = 'badsearch'
+    return {'list': items, 'link': link, 'cachestr': cachestr, 'cachetime': 600,
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
 
 @render_to('anime/card.html')
