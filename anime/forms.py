@@ -191,10 +191,14 @@ class UnknownDateField(DateField):
         date = datetime.date(*time.strptime(value, format)[:3])
         #cs > 16137
         #date = super(UnknownDateField, self).strptime(self, value, format)
+        label = self.label.lower()
         try:
-            self.cleaned_data[self.label.lower()+'Known'] = DATE_FORMATS.index(format)
+            self.cleaned_data[label + 'Known'] = DATE_FORMATS.index(format)
+            for field in ('released', 'ended'):
+                if field == label:
+                    self.cleaned_data[u'air'] = True if date >= date.today() else False
         except ValueError:
-            self.cleaned_data[self.label.lower()+'Known'] = 0
+            self.cleaned_data[label + 'Known'] = 0
         return date
 
 class AnimeForm(ErrorModelForm):
