@@ -400,7 +400,6 @@ if(!Array.prototype.indexOf){
 */
 
 
-// Доставляет попапы на длинные имена. Срабатывает при загрузке
 addEvent(window, 'load', function(){
 	searcher.init();
 	mv();

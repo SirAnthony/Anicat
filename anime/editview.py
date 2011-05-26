@@ -10,7 +10,8 @@ def add(request):
     try:
         return HttpResponseRedirect('/card/%s/' % result['id'])
     except KeyError:
-            form = result['form']
+        #form = result['form']
+        pass
     result.update(csrf(request))
     return result
 

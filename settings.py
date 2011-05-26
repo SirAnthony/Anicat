@@ -13,7 +13,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'mysql', 
+        'ENGINE': 'django.db.backends.mysql', 
         'NAME': 'catalogdev',
         'USER': 'catman',
         'PASSWORD': 'catpass', 

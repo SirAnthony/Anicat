@@ -149,12 +149,13 @@ class CalendarWidget(TextInput):
         js = ("calendar.js", "DateTimeShortcuts.js")
 
     def __init__(self, attrs={}):
-        super(CalendarWidget, self).__init__(attrs={'class': 'vDateField', 'size': '10', 'Known': 0})
+        self._known = 0
+        super(CalendarWidget, self).__init__(attrs={'class': 'vDateField', 'size': '10'})
         
     def render(self, name, value, attrs=None):
         if isinstance(value, datetime.date):
             try:
-                value = value.strftime(DATE_FORMATS[self.attrs['Known']])
+                value = value.strftime(DATE_FORMATS[self._known])
             except:
                 value = 'Bad value'
         return super(CalendarWidget, self).render(name, value, attrs)
@@ -210,7 +211,7 @@ class AnimeForm(ErrorModelForm):
         if self.instance.id:
             for field in ['released', 'ended']:
                 try:
-                    self.fields[field + 'At'].widget.attrs['Known'] = getattr(self.instance, field + 'Known')
+                    self.fields[field + 'At'].widget._known = getattr(self.instance, field + 'Known')
                 except:
                     continue
 

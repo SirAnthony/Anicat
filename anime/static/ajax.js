@@ -115,9 +115,16 @@ var ajax = new (function(){
 				break;
 
 				case 'edit':
-					if(!resp.status)
-						break;
 					if(resp.model == 'status'){
+						if(!resp.status){
+							if(resp.returned && typeof user_storage != "undefined" && user_storage.enabled){
+								resp.text = {'status': resp.returned};
+								user_storage.addItem('list.'+resp.id, resp.returned);
+							}else{
+								throw new Error(resp.text);
+								break;
+							}
+						}
 						message.hide();
 						var rs = getStylesheetRule('.rs'+resp.text.status, 'background-color');
 						rs = rs ? rs : '#FFF';
@@ -149,105 +156,118 @@ var ajax = new (function(){
 											innerText: capCurname + ':', name: resp.text.id});
 						var sp = element.create('p', {'id': curname+resp.text.id, 'name': curname});
 						var cld = new Array();
-						if(isString(current)){
+						if(curname == 'state'){
+							//Ненадежно это все
+							if(isString(current)){
+								if(typeof user_storage != "undefined" && user_storage.loaded){
+									if(!user_storage.enabled) user_storage.enable();
+									var list = user_storage.getItem('list.'+resp.text.id);
+									current = {"selected": ((list) ? list : 0), "select": {
+										"0": "none", "1": "want", "2": "now", "3": "ok",
+										"4": "dropped", "5": "partially watched"}};
+								}else{
+									sp.innerText = current;
+									element.appendChild(mspn, [label, sp,{'p': {
+											innerText: 'Enable local storage to use catalog anonymously.'}}]);
+									continue;
+								}
+							}
+							sp = element.create('form', {'id': 'EditForm', name: 'status'});
+							var sel = element.create('select', {name: 'status',
+								onchange: function(){
+									var noe = document.getElementById('stnum');
+									if(this.value != 2 && this.value != 4){
+										element.remove(noe);
+									}else{
+										if(!noe)
+											element.appendChild(this.parentNode, [{'input':
+												{'type': 'hidden', name: 'count', value: 1}}]);
+									}
+									edit.send();
+								}
+							});
+							cld.push(element.create('input', {'type': 'hidden', name: 'id',
+													 'value': resp.text.id}));
+							cld.push(element.create('input', {'type': 'hidden', name: 'model',
+													 'value': 'status'}));
+							element.addOption(sel, current.select);
+							if(current.selected){
+								for(var i in sel.childNodes){
+									if( sel.childNodes[i].value == current.selected)
+										sel.childNodes[i].selected = true
+								}
+							}
+							cld.push(sel);
+							if(current.all){
+								sel = element.create('select', {id: 'stnum', name: 'count',
+									onchange: function(){ edit.send(); }});
+								var arr = new Array();
+								for(var i=1; i<=current.all; i++){arr[i] = i;}//Пиздец, а не способ!
+								element.addOption(sel, arr);
+								if(current.completed && sel.childNodes[current.completed]){
+									var el = current.completed;
+									sel.childNodes[el].selected = true;
+								}else{sel.childNodes[0].selected = true;}
+								sel.removeChild(sel.firstChild);
+								cld.push(sel);
+							}
+							sel.focus();
+						}else if(isString(current)){
 							sp.innerText = current;
 						}else{
-							if(curname == 'state'){
-								sp = element.create('form', {'id': 'EditForm', name: 'status'});
-								var sel = element.create('select', {id: 'stid', name: 'status',
-									onchange: function(){
-										var noe = document.getElementById('stnum');
-										if(this.value != 2 && this.value != 4){
-											element.remove(noe);
-										}else{
-											if(!noe)
-												element.appendChild(this.parentNode, [{'input':
-													{'type': 'hidden', name: 'count', value: 1}}]);
-										}
-										edit.send();
+							var hid = ((current.model) ? current.model : "anime");
+							hid = element.create('input', {type: 'hidden', name: 'table', value: hid});
+							//var edt = createElem('span',{className: 'edtl', 'name': i});
+							/*if(!resp.text.edt && !resp.text[i][0]){continue;}
+							if(resp.text.edt && !resp.text[i][0]){}else{}*/
+							var num = numHash(current);
+							for(var g=0; g<=num; g++){
+								var cur = current[g];
+								if(cur && isHash(cur)){
+									var p = (curname == 'bundle') ? element.create('p',{name: cur.elemid}) :
+																		element.create('p',{'name': g});
+									var s = (curname == 'bundle') ? element.create('span',{name: 'name'}) :
+												element.create('span',{name: 'name', innerText: encd(cur.name)});
+									cld.push(p, [s]);
+									if(curname == 'bundle'){
+										element.appendChild(s, [{'a':
+											{href: '/card/'+cur.elemid+'/', innerText: encd(cur.name),
+											className: 's' + (cur.job ? cur.job : 0)}}]);
 									}
-								});
-								cld.push(element.create('input', {'type': 'hidden', name: 'id',
-														 'value': resp.text.id}));
-								cld.push(element.create('input', {'type': 'hidden', name: 'model',
-														 'value': 'status'}));
-								element.addOption(sel, current.select);
-								if(current.selected){
-									for(var i in sel.childNodes){
-										if( sel.childNodes[i].value == current.selected)
-											sel.childNodes[i].selected = true
+									if(cur.role){
+										element.appendChild(p, [
+											{'span': {name: 'role', innerText: ' as '+encd(cur.role)}}]);
 									}
-								}
-								cld.push(sel);
-								if(current.all){
-									sel = element.create('select', {id: 'stnum', name: 'count',
-										onchange: function(){ edit.send(); }});
-									var arr = new Array();
-									for(var i=1; i<=current.all; i++){arr[i] = i;}//Пиздец, а не способ!
-									element.addOption(sel, arr);
-									if(current.completed && sel.childNodes[current.completed]){
-										var el = current.completed;
-										sel.childNodes[el].selected = true;
-									}else{sel.childNodes[0].selected = true;}
-									sel.removeChild(sel.firstChild);
-									cld.push(sel);
-								}
-								sel.focus();
-							}else{
-								var hid = ((current.model) ? current.model : "anime");
-								hid = element.create('input', {type: 'hidden', name: 'table', value: hid});
-								//var edt = createElem('span',{className: 'edtl', 'name': i});
-								/*if(!resp.text.edt && !resp.text[i][0]){continue;}
-								if(resp.text.edt && !resp.text[i][0]){}else{}*/
-								var num = numHash(current);
-								for(var g=0; g<=num; g++){
-									var cur = current[g];
-									if(cur && isHash(cur)){
-										var p = (curname == 'bundle') ? element.create('p',{name: cur.elemid}) :
-																			element.create('p',{'name': g});
-										var s = (curname == 'bundle') ? element.create('span',{name: 'name'}) :
-													element.create('span',{name: 'name', innerText: encd(cur.name)});
-										cld.push(p, [s]);
-										if(curname == 'bundle'){
-											element.appendChild(s, [{'a':
-												{href: '/card/'+cur.elemid+'/', innerText: encd(cur.name),
-												className: 's' + (cur.job ? cur.job : 0)}}]);
-										}
-										if(cur.role){
-											element.appendChild(p, [
-												{'span': {name: 'role', innerText: ' as '+encd(cur.role)}}]);
-										}
-										if(cur.comm){
-											element.appendChild(p, [
-												{'span': {name: 'comm', innerText: '('+encd(cur.comm)+')'}}]);
-										}
-									}else{
-										if(curname == 'links'){
-											var s = new Array();
-											for(var link in current){
-												if(!current[link]) continue;
-												var l;
-												switch(link){
-													case 'AniDB':
-														l = "http://anidb.net/perl-bin/animedb.pl?show=anime&aid=";
-													break;
-													case 'ANN':
-														l = "http://www.animenewsnetwork.com/encyclopedia/anime.php?id=";
-													break;
-													case 'MAL':
-														l = "http://myanimelist.net/anime/";
-													break;
-												}
-												s.push(element.create('a', {className: 's0', href: l+current[link],
-																			innerText: link}));
-												s.push(element.create('', {innerText: '\240'}));
+									if(cur.comm){
+										element.appendChild(p, [
+											{'span': {name: 'comm', innerText: '('+encd(cur.comm)+')'}}]);
+									}
+								}else{
+									if(curname == 'links'){
+										var s = new Array();
+										for(var link in current){
+											if(!current[link]) continue;
+											var l;
+											switch(link){
+												case 'AniDB':
+													l = "http://anidb.net/perl-bin/animedb.pl?show=anime&aid=";
+												break;
+												case 'ANN':
+													l = "http://www.animenewsnetwork.com/encyclopedia/anime.php?id=";
+												break;
+												case 'MAL':
+													l = "http://myanimelist.net/anime/";
+												break;
 											}
-											cld.push(element.create('p'), s);
-										}else{
-											if(curname == 'duration') current += ' min.';
-											var s = element.create('span', {name: 'name', innerText: encd(current)});
-											cld.push(element.create('p'), [s]);
+											s.push(element.create('a', {className: 's0', href: l+current[link],
+																		innerText: link}));
+											s.push(element.create('', {innerText: '\240'}));
 										}
+										cld.push(element.create('p'), s);
+									}else{
+										if(curname == 'duration') current += ' min.';
+										var s = element.create('span', {name: 'name', innerText: encd(current)});
+										cld.push(element.create('p'), [s]);
 									}
 								}
 							}

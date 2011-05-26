@@ -162,7 +162,7 @@ def stat(request, userId=0):
     return {'username': username, 'stat': tuser}
 
 @cache_control(private=True, no_cache=True)
-#@condition(last_modified_func=latestStatus)
+@condition(last_modified_func=latestStatus)
 @render_to('anime/user.css', 'text/css')
 def generateCss(request):
     styles = cache.get('userCss:%s' % request.user.id)

@@ -1,5 +1,8 @@
 {% extends "anime/base.html" %}
 
+    {% block addLink %}{% endblock %}
+    {% block addForm %}{% endblock %}
+    
     {% block main %}
     {% if user.is_authenticated %}
     <form class="addform" action="/add/" method="post" enctype="multipart/form-data">
