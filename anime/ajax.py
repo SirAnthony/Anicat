@@ -95,7 +95,7 @@ def change(request):
 
 @ajaxResponse
 def add(request):
-    result = editMethods.addAnimeItem(request)
+    result = editMethods.edit(request)
     try:
         return {'response': 'add', 'status': True, 'text': result['id']}
     except KeyError:

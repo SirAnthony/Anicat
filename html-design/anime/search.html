@@ -2,11 +2,40 @@
 
 {% load cache %}
 
-{% block mainlink %}
+{% block searchlink %}
 {% endblock %}
 
+
+{% block search %}
+	<div id="srch">
+		<form method="POST" action="/search/" id="srchp">
+			{% csrf_token %}
+			{% comment %}
+			<!--<p id="chtext"><input type="checkbox" id="chsrch" onClick="searcher.showAdvance();" />Advanced Search</p>-->
+			<!--<select id="advsrch" class="advsrch">
+				<option value="null" selected="selected">Find by:</option>
+				<option value="genre">Genre</option>
+			</select>
+			<select id="sortsrch" class="advsrch">
+				<option value="null" selected="selected">Sort by:</option>
+				<option value="genre">Genre</option>
+			</select>
+			-->
+			<!--<input type="text" onkeyup="app.acomp(this, 'catalog', event);" /><br/>-->
+			{% endcomment %}
+			<input id="sin" name="string" type="text" value="{{ string }}"/>
+			<input type="submit" value="Search" />
+		</form>
+	</div>
+{% endblock %}
+
+
 {% block main %}
-{% cache 600 mainTable cachestr %}
+{% cache 600 search cachestr %}
+	{% ifnotequal link 'search/' %}
+	{% if not list %}
+	<p>Nothing found.</p>
+	{% else %}
 	<div id="dvid">
 		<table id="tbl" cellspacing="0" class="tbl">
 			<thead class="thdtbl">
@@ -59,5 +88,7 @@
 			{% endifequal %}
 		{% endfor %}
 	</div>
+	{% endif %}
+	{% endifnotequal %}
 {% endcache %}
 {% endblock %}

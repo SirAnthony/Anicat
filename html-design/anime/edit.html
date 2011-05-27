@@ -1,5 +1,30 @@
 {% extends "anime/base.html" %}
 
+    {% block addLink %}
+        {% if model != 'anime' or  id and id != '0' %}
+        <span class="delimiter">|</span>
+        <a class="nurl" href="/add/" rel="nofollow" onclick="add.toggle(); return false;">Add</a>
+        {% endif %}
+    {% endblock %}
+
+    {% block addForm %}
+        {% if model != 'anime' or  id and id != '0' %}
+        {% if user.is_authenticated %}
+        <form id="addform" class="addform cont_men" action="/add/" method="post" enctype="multipart/form-data" onsubmit="return false;">
+        {% csrf_token %}
+            <div class="mainerror">{{ AddForm.non_field_errors }}</div>
+            {% for field in AddForm %}
+            <div {% if forloop.counter0|divisibleby:2 %}class="clear"{% endif %}>
+                {{ field.label_tag }}: {{ field }}
+                {{ field.errors }}
+            </div>
+            {% endfor %}
+            <input type="submit" class="right" value="Add" onclick="add.sendForm(event); return false;" />
+        </form>
+        {% endif %}
+        {% endif %}
+    {% endblock %}
+
     {% block main %}
     {% if user.is_authenticated %}
     {% if not form or not form.fields %}
@@ -11,7 +36,7 @@
     {% else %}
     {# Костыли, костыли everywhere #}
     <form class="addform{% if form.fields|length < 2 %} addfrmoc{% endif %}" action="" method="post" enctype="multipart/form-data">
-        {% csrf_token %}        
+        {% csrf_token %}
         <div class="mainerror">
             {{ form.non_field_errors }}
         </div>

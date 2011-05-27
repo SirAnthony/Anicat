@@ -18,14 +18,16 @@ def getAttr(obj, val, default = ''):
 
 def createPages(qs, order, limit=20):
     pages = []
-    for i in range(0, qs.count(), limit):
-        if not i:
-            s = (qs.only(order)[i],)
-        else:
-            s = qs.only(order)[i-1:i+1]
-        pages.extend(map(lambda x: unicode(getattr(x, order)).strip()[:4], s))
-    pages.append(unicode(getattr(qs.order_by('-'+order).only(order)[0], order)).strip()[:4])
-    pages = [a+' - '+b for a,b in zip(pages[::2], pages[1::2])]
+    count = qs.count()
+    if count > limit:
+        for i in range(0, count, limit):
+            if not i:
+                s = (qs.only(order)[i],)
+            else:
+                s = qs.only(order)[i-1:i+1]
+            pages.extend(map(lambda x: unicode(getattr(x, order)).strip()[:4], s))
+        pages.append(unicode(getattr(qs.order_by('-'+order).only(order)[0], order)).strip()[:4])
+        pages = [a+' - '+b for a,b in zip(pages[::2], pages[1::2])]
     return pages
 
 def invalidateCacheKey(fragment_name, *variables):

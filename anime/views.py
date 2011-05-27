@@ -55,19 +55,23 @@ def index(request, order='title', page=0, status=None):
         pages = createPages(qs, order, limit)
         cache.set('Pages:%s' % cachestr, pages)
     items = qs[page*limit:(page+1)*limit]
-    return {'list': items, 'link': link, 'cachestr': cachestr, 'cachetime': 600,
+    return {'list': items, 'link': link, 'cachestr': cachestr,
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
 
-@render_to('anime/list.html')
+@render_to('anime/search.html')
 def search(request, string=None, field=None, order=None, page=0):
     limit = 20
     link = 'search/'
     items = None
     pages = None
+    string = string or request.POST.get('string') 
+    field = field or request.POST.get('field')
+    order = order or request.POST.get('sort')
+    page = page or request.POST.get('page', 0)
     if string:
         link += string + '/'
     if field:
-        link += '/field/%s/' % field
+        link += 'field/%s/' % field
     if order: #FIXME: 2 caches: /sort/title/ and /
         link += 'sort/%s/' % order
     else:
@@ -89,8 +93,8 @@ def search(request, string=None, field=None, order=None, page=0):
             cache.set('search:%s' % cachestr, {'pages': pages, 'items': items})
     else:
         cachestr = 'badsearch'
-    return {'list': items, 'link': link, 'cachestr': cachestr, 'cachetime': 600,
-            'pages': pages, 'page': {'number': page, 'start': page*limit}}
+    return {'list': items, 'link': link, 'cachestr': cachestr, 'pages': pages,
+            'string': string or '', 'page': {'number': page, 'start': page*limit}}
 
 @render_to('anime/card.html')
 def card(request, animeId=0):
@@ -120,6 +124,8 @@ def card(request, animeId=0):
     try:
         links = anime.links.get()
     except AnimeLinks.DoesNotExist:
+        links = None
+    except AttributeError:
         links = None
     return {'anime': anime, 'bundles': bundles, 'animelinks': links}
 

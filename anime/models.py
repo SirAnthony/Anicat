@@ -138,10 +138,10 @@ class AnimeItem(models.Model):
         try:
             if self.endedAt:
                 return ' - '.join([
-                    self.releasedAt.strftime(DATE_FORMATS[self.releasedKnown]), 
-                    self.endedAt.strftime(DATE_FORMATS[self.endedKnown])
+                    self.releasedAt.strftime(DATE_FORMATS[self.releasedKnown]) if self.releasedKnown != 7 else '?', 
+                    self.endedAt.strftime(DATE_FORMATS[self.endedKnown]) if self.endedKnown != 7 else '?' 
                 ])
-            return self.releasedAt.strftime(DATE_FORMATS[self.releasedKnown])
+            return self.releasedAt.strftime(DATE_FORMATS[self.releasedKnown]) if self.releasedKnown != 7 else '?'
         except ValueError:
             return 'Bad value'
     

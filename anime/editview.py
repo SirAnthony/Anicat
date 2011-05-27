@@ -4,27 +4,23 @@ from django.http import HttpResponseRedirect
 from annoying.decorators import render_to
 import anime.edit as editMethods
 
-@render_to('anime/add.html')
+@render_to('anime/edit.html')
 def add(request):
-    result = editMethods.addAnimeItem(request)
-    try:
-        return HttpResponseRedirect('/card/%s/' % result['id'])
-    except KeyError:
-        #form = result['form']
-        pass
-    result.update(csrf(request))
-    return result
+    res = editMethods.edit(request)
+    if res.get('status', None):
+        rid = res.get('id')
+        return HttpResponseRedirect('/card/%s/' % (rid or 0))
+    res.update(csrf(request))
+    return res
 
 @render_to('anime/edit.html')
 def edit(request, itemId, model='anime', field=None):
     res = editMethods.edit(request, itemId, model, field)
     if res.get('status', None):
+        rid = res.get('id')
         if model in ['anime', 'name', 'links', 'status']:
-            return HttpResponseRedirect('/card/%s/' % itemId)
+            return HttpResponseRedirect('/card/%s/' % (rid or 0))
         elif model == 'bundle':
-            rid = res.get('id')
-            if rid == None:
-                rid = 0
-            return HttpResponseRedirect('/edit/bundle/%s/' % rid)
+            return HttpResponseRedirect('/edit/bundle/%s/' % (rid or 0))
     else:
         return res

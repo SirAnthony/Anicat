@@ -32,7 +32,7 @@ def addAnimeItem(request):
     response['form'] = form or AnimeForm()
     return response
 
-def edit(request, itemId, modelname='anime', field=None):
+def edit(request, itemId=0, modelname='anime', field=None):
     if not modelname:
         modelname = 'anime'
     response = {'model': modelname, 'id': itemId}
@@ -51,6 +51,10 @@ def edit(request, itemId, modelname='anime', field=None):
         fields = None
         retid = None
         model = EDIT_MODELS[modelname]
+        try:
+            itemId = int(itemId)
+        except:
+            return {'text': 'Bad id passed.'}
         if field:
             try:
                 fields = field.split(',')
@@ -96,11 +100,13 @@ def edit(request, itemId, modelname='anime', field=None):
                 response['text'] = 'Bad id passed.'
             else:
                 obj, created = model.objects.get_or_create(anime=anime)
+            retid = itemId
         elif modelname == 'name':
             try:
                 obj = AnimeItem.objects.get(id=itemId)
             except AnimeItem.DoesNotExist:
                 response['text'] = 'Bad id passed.'
+            retid = itemId
         else:
             try:
                 obj = model.objects.get(id=itemId)
@@ -118,10 +124,17 @@ def edit(request, itemId, modelname='anime', field=None):
                     if modelname == 'name':
                         _saveAnimeNames(form, obj)
                     else:
+                        if modelname == 'anime' and not itemId:
+                            if not fields:
+                                obj.save()
+                            else:
+                                raise ValueError('Cannot save new instance without all required fields.')
                         for fieldname in form.cleaned_data.keys():
                             if fieldname != obj._meta.pk.name:
                                 setattr(obj, fieldname, form.cleaned_data[fieldname])
                         obj.save()
+                        if modelname == 'anime':
+                            updateMainCaches(USER_STATUS[0][0])
                 except Exception, e:
                     response['text'] = str(e)
                     form.addError('Error "%s" has occured.' % e)

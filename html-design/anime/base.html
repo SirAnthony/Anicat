@@ -23,12 +23,22 @@
 </head>
 <body>
 	<div id="header" class="thdtbl">
-		<div class="leftmenu">{% block mainlink %}&nbsp;<a class="nurl" href="/">Main</a>&nbsp;|{% endblock %}
-			&nbsp;<a class="nurl" onclick="searcher.toggle();">Search</a>
-			|&nbsp;<a class="nurl" href="/faq/">FAQ</a>
-			|&nbsp;<a class="nurl" href="/card/" rel="nofollow">Random</a>
+		<div class="leftmenu">
+			{% block mainlink %}
+			<a class="nurl" href="/">Main</a>
+			<span class="delimiter">|</span>
+			{% endblock %}
+			{% block searchlink %}
+			<a class="nurl" href="/search/" rel="nofollow" onclick="searcher.toggle(); return false;">Search</a>
+			<span class="delimiter">|</span>
+			{% endblock %}
+			<a class="nurl" href="/faq/">FAQ</a><span class="delimiter">|</span>
+			<a class="nurl" href="/card/" rel="nofollow">Random</a>
 		{% if user.is_authenticated %}
-			{% block addLink %}|&nbsp;<a class="nurl" href="/add/" onclick="add.toggle(); return false;">Add</a>{% endblock %}
+			{% block addLink %}
+			<span class="delimiter">|</span>
+			<a class="nurl" href="/add/" rel="nofollow" onclick="add.toggle(); return false;">Add</a>
+			{% endblock %}
 		</div>
 		<div id="logdiv" class="rightmenu">
 			<span><a href="/settings/" title="User settings">{{ user.username }}</a></span>
@@ -69,27 +79,16 @@
 		{% endif %}
 	</div>
 	<br />
-	<div id="srch">
-		<form method="POST" action="/" id="srchp" onsubmit="searcher.send(); return false;">
+	{% block search %}
+	<div id="srch" class="hidden">
+		<form method="POST" action="/search/" id="srchp" onsubmit="searcher.send(); return false;">
 		{% csrf_token %}
-		{% comment %}
-			<!--<p id="chtext"><input type="checkbox" id="chsrch" onClick="searcher.showAdvance();" />Advanced Search</p>-->
-			<!--<select id="advsrch" class="advsrch">
-				<option value="null" selected="selected">Find by:</option>
-				<option value="genre">Genre</option>
-			</select>
-			<select id="sortsrch" class="advsrch">
-				<option value="null" selected="selected">Sort by:</option>
-				<option value="genre">Genre</option>
-			</select>
-			-->
-			<!--<input type="text" onkeyup="app.acomp(this, 'catalog', event);" /><br/>-->
-		{% endcomment %}
-			<input id="sin" type="text"/>
+			<input id="sin" name="string" type="text"/>
 			<input type="submit" value="Search" />
 		</form>
 		<div id="srchres"></div>
 	</div>
+	{% endblock %}
 	{% block main %}
 	{% endblock %}
 	<div class="cont_men" id="menu">
@@ -98,7 +97,7 @@
 	<div class="cont_men" id="popup">
 		<span id="popups" class="mnspan"></span>
 	</div>	
-	<div class="footer" id="">v. <a href="/changes/" style="font-size: 10pt; color: rgb(0, 0, 129);">3.0.99.702</a>.</div>
+	<div class="footer">v. <a href="/changes/" style="font-size: 10pt; color: rgb(0, 0, 129);">3.0.99.702</a>.</div>
 	{% block addForm %}
 	{% if user.is_authenticated %}
 	<form id="addform" class="addform cont_men" action="/add/" method="post" enctype="multipart/form-data"
