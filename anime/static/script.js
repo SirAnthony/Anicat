@@ -495,10 +495,6 @@ function setshow(){
 }
 
 
-//##############################################################################
-//###############################	Меню   ####################################
-//##############################################################################
-
 //################# Отсюда берется положение менюшки
 
 function mousePageXY(event){
@@ -539,7 +535,7 @@ function mv(){
 
 //################# Get menu with info
 
-function cnt(tag, num, e) {
+function cnt(tag, num, e){
 
 	message.toEventPosition();
 	var qw = {'id': num}
@@ -558,6 +554,71 @@ function cnt(tag, num, e) {
 	}
 	ajax.loadXMLDoc(url+'get/', qw);
 
+}
+
+function createStatusForm(id, selected, select, all, completed){
+	select = select ? select : {"0": "none", "1": "want", "2": "now", "3": "ok",
+								"4": "dropped", "5": "partially watched"};
+	var sp = element.create('form', {'id': 'EditForm', name: 'status'});
+	var sel = element.create('select', {name: 'status',
+		onchange: function(){
+			var noe = document.getElementById('stnum');
+			if(this.value != 2 && this.value != 4){
+				element.remove(noe);
+			}else{
+				if(!noe)
+					element.appendChild(this.parentNode, [{'input':
+						{'type': 'hidden', name: 'count', value: 1}}]);
+			}
+			edit.send();
+		}
+	});
+	element.addOption(sel, select);
+	if(selected){
+		for(var i in sel.childNodes){
+			if( sel.childNodes[i].value == selected){
+				sel.childNodes[i].selected = true;
+				break;
+			}
+		}
+	}
+	if(all){
+		var sall = element.create('select', {id: 'stnum', name: 'count',
+			onchange: function(){ edit.send(); }});
+		var arr = new Array();
+		for(var i=1; i<=all; i++){arr[i] = i;}//Пиздец, а не способ!
+		element.addOption(sall, arr);
+		if(completed && sall.childNodes[completed]){
+			var el = completed;
+			sall.childNodes[el].selected = true;
+		}else{sall.childNodes[0].selected = true;}
+		sall.removeChild(sall.firstChild);
+	}
+	element.appendChild(sp, [
+			{'input': {'type': 'hidden', name: 'id', 'value': id}},
+			{'input': {'type': 'hidden', name: 'model', 'value': 'status'}},
+			sel, sall]);
+	return sp;
+}
+
+//################# Status change for cards
+function cardstatus(id){
+	var statusdiv = document.getElementById('card_userstatus');
+	if(!statusdiv) return;
+	var inputs = statusdiv.getElementsByTagName('input');
+	if(!inputs.length) return;
+	var status = inputs[0].value;
+	var count = 0;
+	if(inputs.length > 1)
+		count = inputs[1].value;
+	var form = createStatusForm(id, status, null, (function(){
+			var n = document.getElementsByName('episodesCount');
+			for(var i in n){if(n[i].tagName == "SPAN") return n[i].innerText;}})(), count);
+	element.remove((function(x){
+		var a = new Array(); for(var i in x)
+			if(x[i].tagName == "SPAN" || x[i].tagName == "FORM") a.push(x[i]); return a;
+	})(statusdiv.childNodes));
+	element.appendChild(statusdiv, [form]);
 }
 
 // Cross-browser event handlers.

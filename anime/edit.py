@@ -6,32 +6,6 @@ from anime.models import AnimeItem, AnimeName, USER_STATUS, EDIT_MODELS
 from anime.functions import updateMainCaches
 from datetime import datetime
 
-def addAnimeItem(request):
-    response = {}
-    form = None
-    if request.method != 'POST':
-        response['text'] = 'Only POST method allowed.'
-    elif not request.user.is_authenticated():
-        response['text'] = 'You must be logged in.'
-    else:
-        form = AnimeForm(request.POST, request.FILES)
-        if form.is_valid():
-            if (datetime.now() - request.user.date_joined).days < 15:
-                form.addError("You cannot doing this now")
-            else:
-                try:
-                    model = form.save(commit=False)
-                    model.title = model.title.strip()
-                    model.save()
-                    form.save_m2m()
-                    #Not watched and main need to be reloaded
-                    updateMainCaches(USER_STATUS[0][0])
-                    response['id'] = model.id
-                except Exception, e:
-                    form.addError("Error %s has occured. Please make sure that the addition was successful." % e)
-    response['form'] = form or AnimeForm()
-    return response
-
 def edit(request, itemId=0, modelname='anime', field=None):
     if not modelname:
         modelname = 'anime'

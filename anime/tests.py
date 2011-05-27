@@ -59,7 +59,7 @@ class NormalTest(TestCase):
         #test blank input
         response = self.client.post(add_link, {})
         self.assertEquals(response.status_code, 200)
-        print response.context
+        print response.content
         #['close', 'context', 'cookies', 'csrf_processing_done', 'delete_cookie', 'flush', 'get', 'has_header', 'items', 'next', 'request', 'set_cookie', 'status_code', 'tell', 'template', 'templates', 'write']
 
         self.assertEquals(len(getError(response.content).keys()), len(params.keys()) - 1)

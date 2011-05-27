@@ -172,46 +172,8 @@ var ajax = new (function(){
 									continue;
 								}
 							}
-							sp = element.create('form', {'id': 'EditForm', name: 'status'});
-							var sel = element.create('select', {name: 'status',
-								onchange: function(){
-									var noe = document.getElementById('stnum');
-									if(this.value != 2 && this.value != 4){
-										element.remove(noe);
-									}else{
-										if(!noe)
-											element.appendChild(this.parentNode, [{'input':
-												{'type': 'hidden', name: 'count', value: 1}}]);
-									}
-									edit.send();
-								}
-							});
-							cld.push(element.create('input', {'type': 'hidden', name: 'id',
-													 'value': resp.text.id}));
-							cld.push(element.create('input', {'type': 'hidden', name: 'model',
-													 'value': 'status'}));
-							element.addOption(sel, current.select);
-							if(current.selected){
-								for(var i in sel.childNodes){
-									if( sel.childNodes[i].value == current.selected)
-										sel.childNodes[i].selected = true
-								}
-							}
-							cld.push(sel);
-							if(current.all){
-								sel = element.create('select', {id: 'stnum', name: 'count',
-									onchange: function(){ edit.send(); }});
-								var arr = new Array();
-								for(var i=1; i<=current.all; i++){arr[i] = i;}//Пиздец, а не способ!
-								element.addOption(sel, arr);
-								if(current.completed && sel.childNodes[current.completed]){
-									var el = current.completed;
-									sel.childNodes[el].selected = true;
-								}else{sel.childNodes[0].selected = true;}
-								sel.removeChild(sel.firstChild);
-								cld.push(sel);
-							}
-							sel.focus();
+							sp = createStatusForm(resp.text.id, current.selected,
+													current.select, current.all, current.completed);
 						}else if(isString(current)){
 							sp.innerText = current;
 						}else{

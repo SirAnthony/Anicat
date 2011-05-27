@@ -127,7 +127,15 @@ def card(request, animeId=0):
         links = None
     except AttributeError:
         links = None
-    return {'anime': anime, 'bundles': bundles, 'animelinks': links}
+    userstatus = None
+    if request.user.is_authenticated():
+        try:
+            userstatus = anime.statusbundles.values('status', 'count').get(user=request.user)
+        except UserStatusBundle.DoesNotExist:
+            pass
+        else:
+            userstatus['statusName'] = USER_STATUS[userstatus['status'] or 0][1]
+    return {'anime': anime, 'bundles': bundles, 'animelinks': links, 'userstatus': userstatus}
 
 #@condition(last_modified_func=latestStatus)
 @render_to('anime/stat.html')

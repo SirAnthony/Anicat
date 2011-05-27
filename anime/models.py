@@ -259,6 +259,18 @@ class UserStatusBundle(models.Model):
     changed = models.DateTimeField(auto_now=True)
     
     objects = StatusManager()
+    
+    def save(self, *args, **kwargs):
+        if self.status in (2, 4):
+            if self.count < 1:
+                self.count = 1
+            else:
+                limit = self.anime.episodesCount
+                if self.count > self.anime.episodesCount:
+                    self.count = self.anime.episodesCount
+        else:
+            self.count = None
+        super(UserStatusBundle, self).save(*args, **kwargs)
 
     class Meta:
         unique_together = ("anime", "user")
