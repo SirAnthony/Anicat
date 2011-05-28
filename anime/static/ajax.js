@@ -58,6 +58,19 @@ var ajax = new (function(){
 			}
 		}
 	}
+	
+	this.processGetRequest = function(opts){
+		setRequest();
+		processingResult({'response': 'getok', 'text': opts});
+		message.unlock()
+	}
+	
+	this.processSetRequest = function(opts){
+		setRequest();
+		opts.response = 'edit';
+		processingResult(opts);
+		message.unlock()
+	}
 
 	var setRequest = function(){
 		message.create('Processing Request');
@@ -197,6 +210,9 @@ var ajax = new (function(){
 											innerText: 'Enable local storage to use catalog anonymously.'}}]);
 									continue;
 								}
+							}else{
+								if(typeof user_storage != "undefined" && user_storage.loaded)
+									if(user_storage.enabled) user_storage.disable();
 							}
 							sp = createStatusForm(resp.text.id, current.selected,
 													current.select, current.all, current.completed);

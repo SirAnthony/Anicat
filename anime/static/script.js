@@ -537,6 +537,9 @@ function mv(){
 
 function cnt(tag, num, e){
 
+	if(!e) var e = window.event;
+	e.cancelBubble = true;
+	if(e.stopPropagation) e.stopPropagation();
 	message.toEventPosition();
 	var qw = {'id': num}
 	switch (tag){
@@ -547,7 +550,12 @@ function cnt(tag, num, e){
 			qw['field'] = ['bundle','duration'];
 		break;
 		case 'id':
-			qw['field'] = 'state';
+			if(typeof user_storage != "undefined" && user_storage.enabled){
+				ajax.processGetRequest({'id': num, 'order': ["state"], 'state': '1'});
+				return
+			}else{
+				qw['field'] = 'state';
+			}
 		break;
 		default:
 			qw['field'] = tag;
@@ -570,7 +578,15 @@ function createStatusForm(id, selected, select, all, completed){
 					element.appendChild(this.parentNode, [{'input':
 						{'type': 'hidden', name: 'count', value: 1}}]);
 			}
-			edit.send();
+			if(typeof user_storage != "undefined" && user_storage.enabled){
+				var opts = {'returned': this.value};
+				element.downTree((function(elm){if(elm && elm.tagName == 'INPUT')
+					opts[elm.name] = elm.value;}), this.parentNode);
+				ajax.processSetRequest(opts);
+				//{"returned": "2", "text": "You must be logged in.", "model": "status", "response": "edit", "id": 1212}
+			}else{
+				edit.send();
+			}
 		}
 	});
 	element.addOption(sel, select);
@@ -584,7 +600,7 @@ function createStatusForm(id, selected, select, all, completed){
 	}
 	if(completed){
 		var sall = element.create('select', {id: 'stnum', name: 'count',
-			onchange: function(){ edit.send(); }});
+			onchange: function(){ edit.send(); /*FIXME: through server, anyway not supported for anons*/ }});
 		var arr = new Array();
 		for(var i=1; i<=all; i++){arr[i] = i;}//Пиздец, а не способ!
 		element.addOption(sall, arr);

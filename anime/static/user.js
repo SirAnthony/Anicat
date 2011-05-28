@@ -56,6 +56,8 @@ var user = new( function(){
 											{'input': {id: 'id_password', type: 'password', name: 'password'}},
 											{'input': {type: 'submit', value: 'Login'}},
 											{'p': {id: 'logininfo', className: 'error'}}]]]);
+		if(typeof user_storage != "undefined" && user_storage.loaded)
+			user_storage.disable();	
 		window.location.replace('/logout/'); //Возможно, когда-нибудь будет без релоада, только зачем?
 	}
 
@@ -85,6 +87,8 @@ var user = new( function(){
 		element.appendChild(document.getElementsByTagName("head")[0], [
 		    {'script': {'type': 'text/javascript', 'src': '/static/ae.js'}}
 		]);
+		if(typeof user_storage != "undefined" && user_storage.loaded)
+			user_storage.disable();
 	}
 
 	this.loginFail = function(text){

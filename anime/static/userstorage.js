@@ -6,15 +6,18 @@ var user_storage = new (function(){
 	this.init = function(){
 		user_storage.loaded = !isUndef(localStorage);
 		updateListFromStorage();
+		this.enabled = user_storage.getItem('enabled') ? true : false;
 	}
 
 	this.enable = function(){
 		if(!this.loaded) return;
 		this.enabled = true;
+		this.addItem('enabled', true);
 	}
 	
 	this.disable = function(){
 		this.enabled = false;
+		this.removeItem('enabled');
 	}
 
 	this.getKeys = function(subkey){
