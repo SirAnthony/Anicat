@@ -557,8 +557,8 @@ function cnt(tag, num, e){
 }
 
 function createStatusForm(id, selected, select, all, completed){
-	select = select ? select : {"0": "none", "1": "want", "2": "now", "3": "ok",
-								"4": "dropped", "5": "partially watched"};
+	select = select ? select : {"0": "None", "1": "Want", "2": "Now", "3": "Ok",
+								"4": "Dropped", "5": "Partially watched"};
 	var sp = element.create('form', {'id': 'EditForm', name: 'status'});
 	var sel = element.create('select', {name: 'status',
 		onchange: function(){
@@ -582,7 +582,7 @@ function createStatusForm(id, selected, select, all, completed){
 			}
 		}
 	}
-	if(all){
+	if(completed){
 		var sall = element.create('select', {id: 'stnum', name: 'count',
 			onchange: function(){ edit.send(); }});
 		var arr = new Array();
@@ -607,16 +607,15 @@ function cardstatus(id){
 	if(!statusdiv) return;
 	var inputs = statusdiv.getElementsByTagName('input');
 	if(!inputs.length) return;
-	var status = inputs[0].value;
-	var count = 0;
-	if(inputs.length > 1)
-		count = inputs[1].value;
+	var get_input = function(ar, n){for(var i in ar){if(ar[i] && ar[i].name == n) return inputs[i].value;}};
+	var status = get_input(inputs, 'card_userstatus_input');
+	var count = get_input(inputs, 'card_usercount_input');
 	var form = createStatusForm(id, status, null, (function(){
 			var n = document.getElementsByName('episodesCount');
 			for(var i in n){if(n[i].tagName == "SPAN") return n[i].innerText;}})(), count);
 	element.remove((function(x){
 		var a = new Array(); for(var i in x)
-			if(x[i].tagName == "SPAN" || x[i].tagName == "FORM") a.push(x[i]); return a;
+			if(x[i] && (x[i].tagName == "SPAN" || x[i].tagName == "FORM")) a.push(x[i]); return a;
 	})(statusdiv.childNodes));
 	element.appendChild(statusdiv, [form]);
 }
