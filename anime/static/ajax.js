@@ -126,6 +126,37 @@ var ajax = new (function(){
 							}
 						}
 						message.hide();
+						var statusdiv = document.getElementById('card_userstatus');
+						if(statusdiv){
+							var statusname = (function(x, n){
+								var e = document.getElementsByName('status');
+								for(var i in e){
+									if(e[i].tagName == 'SELECT')
+										return element.downTree((function(n){return function(elm){
+												if(elm.value == n) return elm.innerText;}})(n),
+											e[i]);
+								}
+							})(statusdiv, resp.text.status);
+							element.remove((function(x){
+								var a = new Array();
+								for(var i in x)
+									if(x[i] && (x[i].tagName == "SPAN" || x[i].tagName == "FORM"
+										|| x[i].tagName == "INPUT")) a.push(x[i]);
+								return a;
+							})(statusdiv.childNodes));
+							element.insert(statusdiv.lastChild, {'span': {innerText: statusname}}, 1);
+							if(resp.text.count){
+								element.insert(statusdiv.lastChild, {'span':
+									{innerText: resp.text.count + '/' + (function(){
+										var n = document.getElementsByName('episodesCount');
+										for(var i in n)
+											if(n[i].tagName == "SPAN") return n[i].innerText;
+										})(),
+									className: 'right'}}, 1);
+							}
+							element.insert(statusdiv.lastChild, {'input': 
+											{type: 'hidden', value: resp.text.status}}, 1);
+						}
 						var rs = getStylesheetRule('.rs'+resp.text.status, 'background-color');
 						rs = rs ? rs : '#FFF';
 						var as = getStylesheetRule('.as'+resp.text.status, 'background-color');
