@@ -165,14 +165,14 @@ var searcher = new ( function(){
 										],
 									{'td': {'id': 'id' + elem.id, className: 'id',
 									onclick: (  function(i, j){ 
-													return function(){ cnt(i, j); };
+													return function(e){ cnt(i, j, e); };
 												})('id', elem.id),
 											 innerText: Number(i) + 1 + rs.items.length * rs.page }},
 									]);
 				for(var column in elem){
 					if(column == 'air' || column == 'id') continue;
 					element.appendChild(row, [{'td': {'id': column + elem.id, className: column, 
-								onclick: (function(i, j){ return function(){ cnt(i, j); };})(column, elem.id),
+								onclick: (function(i, j){ return function(e){ cnt(i, j, e); };})(column, elem.id),
 									innerText: encd(elem[column])}}]);
 				}
 				/*if(elem.job){

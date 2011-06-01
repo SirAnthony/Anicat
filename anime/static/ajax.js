@@ -58,13 +58,13 @@ var ajax = new (function(){
 			}
 		}
 	}
-	
+
 	this.processGetRequest = function(opts){
 		setRequest();
 		processingResult({'response': 'getok', 'text': opts});
 		message.unlock()
 	}
-	
+
 	this.processSetRequest = function(opts){
 		setRequest();
 		opts.response = 'edit';

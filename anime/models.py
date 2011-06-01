@@ -122,7 +122,7 @@ class AnimeItem(models.Model):
     genre = models.ManyToManyField(Genre)
     releaseType = models.IntegerField(choices=ANIME_TYPES)
     episodesCount = models.IntegerField()
-    duration = models.IntegerField()    
+    duration = models.IntegerField()
     releasedAt = models.DateTimeField()
     releasedKnown = models.SmallIntegerField(blank=True, default=0)
     endedAt = models.DateTimeField(blank=True, null=True)
@@ -133,7 +133,7 @@ class AnimeItem(models.Model):
 
     def _getReleaseTypeString(self):
         return ANIME_TYPES[self.releaseType][1]
-    
+
     def _getTranslation(self):
         try:
             if self.endedAt:
@@ -144,7 +144,7 @@ class AnimeItem(models.Model):
             return self.releasedAt.strftime(DATE_FORMATS[self.releasedKnown]) if self.releasedKnown != 7 else '?'
         except ValueError:
             return 'Bad value'
-    
+
     releaseTypeS = property(_getReleaseTypeString)
     translation = property(_getTranslation)
     
@@ -259,7 +259,7 @@ class UserStatusBundle(models.Model):
     changed = models.DateTimeField(auto_now=True)
     
     objects = StatusManager()
-    
+
     def save(self, *args, **kwargs):
         if self.status in (2, 4):
             if self.count < 1:

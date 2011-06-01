@@ -151,7 +151,7 @@ class CalendarWidget(TextInput):
     def __init__(self, attrs={}):
         self._known = 0
         super(CalendarWidget, self).__init__(attrs={'class': 'vDateField', 'size': '10'})
-        
+
     def render(self, name, value, attrs=None):
         if isinstance(value, datetime.date):
             try:
@@ -168,7 +168,7 @@ class UnknownDateField(DateField):
     def __init__(self, *args, **kwargs):
         super(UnknownDateField, self).__init__(*args, **kwargs)
         self.input_formats = DATE_FORMATS + INPUT_FORMATS
-    
+
     #Not needed if changeset > 16137
     def to_python(self, value):
         """

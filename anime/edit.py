@@ -13,7 +13,7 @@ def edit(request, itemId=0, modelname='anime', field=None):
     if not request.user.is_authenticated():
         response['text'] = 'You must be logged in.'
         if modelname == 'status':
-        	response.update({'response': 'edit', 'returned': request.POST.get('status')})
+            response.update({'response': 'edit', 'returned': request.POST.get('status')})
     elif modelname != 'status' and (datetime.now() - request.user.date_joined).days < 15:
         response['text'] = 'You cannot doing this now.'
     elif modelname not in EDIT_MODELS:
