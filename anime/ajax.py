@@ -128,12 +128,11 @@ def search(request):
         {'page': request.POST.get('page', 0), 'order': request.POST.get('sort')}
     )
     if response.has_key('response'):
-        #FIXME: no cache
-        qs = response['text']['items']
-        page = response['text']['page']
-        #FUUUUUUSHENKIFUFU
+        del response['text']['link']
+        del response['text']['cachestr']
+        del response['text']['pages']
+        items = response['text'].pop('items')
         response['text']['items'] = [{'name': x.title, 'type': x.releaseTypeS,
             'numberofep': x.episodesCount, 'id': x.id, 'translation': x.translation,
-            'air': x.air } for x in qs[page*limit:(page+1)*limit]]
-        response['text']['count'] = qs.count()
+            'air': x.air } for x in items]
     return response

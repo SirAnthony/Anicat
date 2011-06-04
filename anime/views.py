@@ -61,40 +61,19 @@ def index(request, order='title', page=0, status=None):
 @render_to('anime/search.html')
 def search(request, string=None, field=None, order=None, page=0):
     limit = 20
-    link = 'search/'
-    items = None
-    pages = None
-    string = string or request.POST.get('string') 
+    string = string or request.POST.get('string') or ''
     field = field or request.POST.get('field')
     order = order or request.POST.get('sort')
-    page = page or request.POST.get('page', 0)
-    if string:
-        link += string + '/'
-    if field:
-        link += 'field/%s/' % field
-    if order: #FIXME: 2 caches: /sort/title/ and /
-        link += 'sort/%s/' % order
-    else:
-        order = 'title'
-    if not page:
-        page = 0
-    response = coreMethods.search(field, string, request, {'page': page, 'order': order})
+    ret = {'cachestr': 'badsearch', 'link': 'search/', 'string': string}
+    response = coreMethods.search(field, string, request, {
+                    'page': page or request.POST.get('page'), 'order': order})
     if response.has_key('response'):
-        cachestr = link + str(page)
-        page = response['text']['page']
-        cached = cache.get('search:%s' % cachestr)
-        if cached:
-            pages = cached['pages']
-            items = cached['items']
-        else:
-            qs = response['text']['items']
-            pages = createPages(qs, order, limit)
-            items = qs[page*limit:(page+1)*limit]
-            cache.set('search:%s' % cachestr, {'pages': pages, 'items': items})
+        ret.update(response['text'])
+        page = ret['page']
+        ret['page'] = {'number': page, 'start': page*limit}
     else:
-        cachestr = 'badsearch'
-    return {'list': items, 'link': link, 'cachestr': cachestr, 'pages': pages,
-            'string': string or '', 'page': {'number': page, 'start': page*limit}}
+        ret['page'] = {'number': 0, 'start': 0}
+    return ret 
 
 @render_to('anime/card.html')
 def card(request, animeId=0):
