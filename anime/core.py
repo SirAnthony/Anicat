@@ -27,7 +27,7 @@ def search(field, string, request, attrs={}):
         page = int(attrs.get('page', 0))
     except:
         page = 0
-    cachestr = sha1(link + str(page)).hexdigest()
+    cachestr = sha1(link.encode('utf-8') + str(page)).hexdigest()
     cached = cache.get('search:%s' % cachestr)
     if cached:
         try:
