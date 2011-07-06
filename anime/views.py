@@ -49,11 +49,11 @@ def index(request, order='title', page=0, status=None):
             raise Exception
     except Exception:
         status = None
-    (link, cachestr) = cleanTableCache(order, status, page, request.user)
-    pages = cache.get('Pages:' + cachestr)
+    (link, cachestr) = cleanTableCache(order, status, page, request.user)    
+    pages = cache.get('Pages:' + link)
     if not pages:
         pages = createPages(qs, order, limit)
-        cache.set('Pages:%s' % cachestr, pages)
+        cache.set('Pages:%s' % link, pages)
     items = qs[page*limit:(page+1)*limit]
     return {'list': items, 'link': link, 'cachestr': cachestr,
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
@@ -111,6 +111,8 @@ def card(request, animeId=0):
         try:
             userstatus = anime.statusbundles.values('status', 'count').get(user=request.user)
         except UserStatusBundle.DoesNotExist:
+            pass
+        except AttributeError:
             pass
         else:
             userstatus['statusName'] = USER_STATUS[userstatus['status'] or 0][1]

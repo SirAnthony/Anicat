@@ -10,7 +10,8 @@ ANIME_TYPES = [
     (3, u'TV-Sp'),
     (4, u'SMovie'),
     (5, u'ONA'),
-    (6, u'AMV')
+    (6, u'AMV'),
+    (7, u'Other')
     ]
 
 USER_STATUS = [
@@ -33,6 +34,9 @@ class Genre(models.Model):
     
     def __unicode__(self):
         return self.name
+    
+    class Meta:
+        ordering = ["name"]
 
 class Credit(models.Model):
     title = models.CharField(max_length=200, unique=True)
@@ -254,7 +258,7 @@ class StatusManager(models.Manager):
 class UserStatusBundle(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="statusbundles")
     user = models.ForeignKey(User)
-    status = models.IntegerField(choices=USER_STATUS)
+    state = models.IntegerField(choices=USER_STATUS)
     count = models.IntegerField(blank=True, null=True)
     changed = models.DateTimeField(auto_now=True)
     
@@ -286,5 +290,5 @@ EDIT_MODELS = {
     #'organisationbundle': OrganisationBundle,
     #'people': People,
     #'peoplebundle': PeopleBundle,
-    'status': UserStatusBundle
+    'state': UserStatusBundle
 }

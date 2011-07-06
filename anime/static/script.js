@@ -567,8 +567,8 @@ function cnt(tag, num, e){
 function createStatusForm(id, selected, select, all, completed){
 	select = select ? select : {"0": "None", "1": "Want", "2": "Now", "3": "Ok",
 								"4": "Dropped", "5": "Partially watched"};
-	var sp = element.create('form', {'id': 'EditForm', name: 'status'});
-	var sel = element.create('select', {name: 'status',
+	var sp = element.create('form', {'id': 'EditForm', name: 'state'});
+	var sel = element.create('select', {name: 'state',
 		onchange: function(){
 			var noe = document.getElementById('stnum');
 			if(this.value != 2 && this.value != 4){
@@ -583,7 +583,7 @@ function createStatusForm(id, selected, select, all, completed){
 				element.downTree((function(elm){if(elm && elm.tagName == 'INPUT')
 					opts[elm.name] = elm.value;}), this.parentNode);
 				ajax.processSetRequest(opts);
-				//{"returned": "2", "text": "You must be logged in.", "model": "status", "response": "edit", "id": 1212}
+				//{"returned": "2", "text": "You must be logged in.", "model": "state", "response": "edit", "id": 1212}
 			}else{
 				edit.send();
 			}
@@ -612,7 +612,7 @@ function createStatusForm(id, selected, select, all, completed){
 	}
 	element.appendChild(sp, [
 			{'input': {'type': 'hidden', name: 'id', 'value': id}},
-			{'input': {'type': 'hidden', name: 'model', 'value': 'status'}},
+			{'input': {'type': 'hidden', name: 'model', 'value': 'state'}},
 			sel, sall]);
 	return sp;
 }

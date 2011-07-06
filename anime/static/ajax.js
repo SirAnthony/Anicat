@@ -128,10 +128,10 @@ var ajax = new (function(){
 				break;
 
 				case 'edit':
-					if(resp.model == 'status'){
+					if(resp.model == 'state'){
 						if(!resp.status){
 							if(resp.returned && typeof user_storage != "undefined" && user_storage.enabled){
-								resp.text = {'status': resp.returned};
+								resp.text = {'state': resp.returned};
 								user_storage.addItem('list.'+resp.id, resp.returned);
 							}else{
 								throw new Error(resp.text);
@@ -142,7 +142,7 @@ var ajax = new (function(){
 						var statusdiv = document.getElementById('card_userstatus');
 						if(statusdiv){
 							var statusname = ({"0": "None", "1": "Want", "2": "Now", "3": "Ok",
-								 "4": "Dropped", "5": "Partially watched"})[resp.text.status]
+								 "4": "Dropped", "5": "Partially watched"})[resp.text.state]
 							element.remove((function(x){
 								var a = new Array();
 								for(var i in x)
@@ -152,7 +152,7 @@ var ajax = new (function(){
 							})(statusdiv.childNodes));
 							element.insert(statusdiv.lastChild, {'span': {innerText: statusname}}, 1);
 							element.insert(statusdiv.lastChild, {'input': {type: 'hidden', 
-											 name: 'card_userstatus_input', value: resp.text.status}}, 1);
+											 name: 'card_userstatus_input', value: resp.text.state}}, 1);
 							if(resp.text.count){
 								element.insert(statusdiv.lastChild, {'span':
 									{innerText: resp.text.count + '/' + (function(){
@@ -165,9 +165,9 @@ var ajax = new (function(){
 											 name: 'card_usercount_input', value: resp.text.count}}, 1);
 							}
 						}
-						var rs = getStylesheetRule('.rs'+resp.text.status, 'background-color');
+						var rs = getStylesheetRule('.rs'+resp.text.state, 'background-color');
 						rs = rs ? rs : '#FFF';
-						var as = getStylesheetRule('.as'+resp.text.status, 'background-color');
+						var as = getStylesheetRule('.as'+resp.text.state, 'background-color');
 						as = as ? as : '#FFF';
 						var rules = [['.r'+resp.id, ['background-color', rs]],
 									['.a'+resp.id, ['background-color', as]]];
@@ -183,7 +183,7 @@ var ajax = new (function(){
 					}
 				break;
 
-				case 'getok':
+				case 'get':
 					element.removeAllChilds(mspn);
 					for(var i in resp.text.order){
 						var curname = resp.text.order[i];
@@ -231,7 +231,8 @@ var ajax = new (function(){
 									var p = (curname == 'bundle') ? element.create('p',{name: cur.elemid}) :
 																		element.create('p',{'name': g});
 									var s = (curname == 'bundle') ? element.create('span',{name: 'name'}) :
-												element.create('span',{name: 'name', innerText: encd(cur.name)});
+												element.create('span',{name: 'name', 
+												               innerText: encd(cur.title ? cur.title : cur.name)});
 									cld.push(p, [s]);
 									if(curname == 'bundle'){
 										element.appendChild(s, [{'a':

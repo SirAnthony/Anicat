@@ -12,9 +12,9 @@ def edit(request, itemId=0, modelname='anime', field=None):
     response = {'model': modelname, 'id': itemId}
     if not request.user.is_authenticated():
         response['text'] = 'You must be logged in.'
-        if modelname == 'status':
-            response.update({'response': 'edit', 'returned': request.POST.get('status')})
-    elif modelname != 'status' and (datetime.now() - request.user.date_joined).days < 15:
+        if modelname == 'state':
+            response.update({'response': 'edit', 'returned': request.POST.get('state')})
+    elif modelname != 'state' and (datetime.now() - request.user.date_joined).days < 15:
         response['text'] = 'You cannot doing this now.'
     elif modelname not in EDIT_MODELS:
         response['text'] = 'Bad model name passed.'
@@ -36,7 +36,7 @@ def edit(request, itemId=0, modelname='anime', field=None):
             except FieldDoesNotExist:
                 return {'text': 'Bad fields passed.'}
         formobject = createFormFromModel(model, fields)
-        if modelname == 'status':
+        if modelname == 'state':
             try:
                 anime = AnimeItem.objects.get(id=itemId)
             except AnimeItem.DoesNotExist:
@@ -45,10 +45,10 @@ def edit(request, itemId=0, modelname='anime', field=None):
                 try:
                     obj = model.objects.get(user=request.user, anime=anime)
                 except model.DoesNotExist:
-                    obj = model(user=request.user, anime=anime, status=0)
-                oldstatus = obj.status
+                    obj = model(user=request.user, anime=anime, state=0)
+                oldstatus = obj.state
                 try:
-                    status = int(request.POST.get('status'))
+                    status = int(request.POST.get('state'))
                     if not -1 < status < len(USER_STATUS):
                         raise ValueError
                 except:

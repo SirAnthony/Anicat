@@ -1,0 +1,54 @@
+API:
+Ajax requests must be sent to /ajax/$target.
+Response is a json structure with 3 mandatory fields:
+    response - string, type of response,
+    status - bool, result of request process,
+    text - different, body of response.
+
+Login:
+    Request type: Post
+    Request target: login/
+    Request params:
+        username
+        password
+    Response:
+        response: "login"
+        text: {
+            name: Name of logged user
+        }
+
+Search:
+    Request type: Post
+    Request target: search/
+    Request params:
+        field - Search field. Avaliable choises: [name]
+        string - Search string
+        page - int, result page. Default: 0
+    Response:
+        response: search
+        text: {
+            count: int, count of found items,
+            items: [],
+            page: int, current page
+    }
+
+Add:
+    Request type: Post
+    Request target: add/
+    Request params:
+        Add form
+    Response:
+        response: add
+        text: int, new record id
+
+Get:
+    Request type: Post
+    Request target: get/
+    Request params:
+        id: int, anime id
+        field: field name; You can specify this parameter several times to pass multiple fields
+    Response:
+        response: get
+        order: array, fields order
+        text:
+        
