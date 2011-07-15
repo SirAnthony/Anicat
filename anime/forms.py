@@ -266,7 +266,7 @@ class AnimeNameForm(DynamicModelForm):
         self.setFields(fields)
         self.setData(data)
 
-class UserStatusForm(ModelForm):
+class UserStatusForm(ErrorModelForm):
     class Meta:
         model = UserStatusBundle
         exclude = ('anime', 'user')

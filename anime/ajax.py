@@ -3,7 +3,6 @@ from django.http import HttpResponse
 from django.core.cache import cache
 from django.utils import simplejson
 from anime.functions import getVal, getAttr, updateMainCaches
-from anime.models import AnimeItem, AnimeName, AnimeLinks, UserStatusBundle, USER_STATUS
 import anime.core as coreMethods
 import anime.edit as editMethods
 import anime.user as userMethods
@@ -19,62 +18,6 @@ def ajaxResponse(fn):
 @ajaxResponse
 def get(request):
     response = coreMethods.get(request)
-    #fields = []
-    #if request.method != 'POST':
-    #    return {'text': 'Only POST method allowed.'}
-    #try:
-    #    aid = int(request.POST.get('id', 0))
-    #    anime = AnimeItem.objects.get(id=aid)
-    #except Exception, e:
-    #    return {'text': 'Invalid id.'  + str(e)}
-    #try:
-    #    fields.extend(request.POST.getlist('field'))
-    #except Exception, e:
-    #    return {'text': 'Bad request fields: ' + str(e)}
-    #response = {'id': aid, 'order': fields}
-    #for field in fields:
-        #FIXME: so bad
-    #    if field == 'state':
-    #        if not request.user.is_authenticated():
-    #            response[field] = 'Anonymous users have no statistics.'
-    #            continue
-    #        else:
-    #            try:
-    #                bundle = UserStatusBundle.objects.get(anime=anime, user=request.user)
-    #                status = int(bundle.status)
-    #            except Exception:
-    #                status = 0
-    #            response[field] = {'selected': status, 'select': dict(USER_STATUS)}
-    #            if status == 2 or status == 4:
-    #                response[field].update({'completed': bundle.count, 'all': anime.episodesCount})
-    #    elif field == 'name':
-            #FIXME: cruve
-    #        response[field] = map(lambda n: {'name': str(n)}, AnimeName.objects.filter(anime=anime))
-    #    elif field == 'genre':
-    #        response[field] = ', '.join(map(lambda n: str(n), anime.genre.all()))
-    #    elif field == 'links':
-    #        try:
-    #            response[field] = AnimeLinks.objects.filter(anime=anime).values('AniDB','ANN', 'MAL')[0]
-    #        except:
-    #            pass
-    #    elif field == 'type':
-    #        response[field] = anime.releaseTypeS
-    #    elif field == 'bundle':
-    #        if anime.bundle:
-    #            items = anime.bundle.animeitems.all().order_by('releasedAt')
-    #            status = UserStatusBundle.objects.get_for_user(items, request.user.id)
-    #            response[field] = map(lambda x: {'name': x.title, 'elemid': x.id,
-    #                                             'job': getAttr(getVal(x.id, status, None), 'status', 0, )},
-    #                                  items)
-    #    else:
-    #        try:
-    #            response[field] = getattr(anime, field)
-    #        except Exception, e:
-    #            response[field] = 'Error: ' + str(e)
-    #response = {'response': 'getok', 'text': response}
-    #if (datetime.now() - request.user.date_joined).days > 20:
-    #    response['edt'] = True
-
     return response
 
 @ajaxResponse

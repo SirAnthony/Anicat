@@ -76,9 +76,9 @@
         {% endif %}
         {% if user.is_authenticated %}
         <div id="card_userstatus">
-            <a href="/edit/status/{{ anime.id }}/" onclick="cardstatus({{ anime.id }}); return false;" class="right">Edit</a>
+            <a href="/edit/state/{{ anime.id }}/" onclick="cardstatus({{ anime.id }}); return false;" class="right">Edit</a>
             <b>State:</b><br/><span>{% if userstatus.statusName %}{{ userstatus.statusName|capfirst }}{% else %}None{% endif %}</span>
-            <input type="hidden" name="card_userstatus_input" value="{{ userstatus.status }}">
+            <input type="hidden" name="card_userstatus_input" value="{{ userstatus.state }}">
             {% if userstatus.count %}
             	<span class="right">{{ userstatus.count }}/{{ anime.episodesCount }}</span>
             	<input type="hidden" name="card_usercount_input" value="{{ userstatus.count }}">

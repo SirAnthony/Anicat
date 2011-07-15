@@ -142,14 +142,14 @@ def addInBase(user, animeList, rewrite=True):
         for anime in animeList[key]:
             try:
                 ub = UserStatusBundle.objects.get(anime=anime['object'], user=user)
-                if rewrite and not anime['my_status'] == ub.status:
-                    ub.status = anime['my_status']
+                if rewrite and not anime['my_status'] == ub.state:
+                    ub.state = anime['my_status']
                     ub.count = anime['my_watched_episodes']
                     ub.changed = anime['my_finish_date']
                     ub.save()
             except UserStatusBundle.DoesNotExist:
                 ub = UserStatusBundle(anime=anime['object'], user=user, changed = anime['my_finish_date'],
-                                        status=anime['my_status'], count=anime['my_watched_episodes'])
+                                        state=anime['my_status'], count=anime['my_watched_episodes'])
                 ub.save()
             anime['object'] = {'name': anime['object'].title, 'id': anime['object'].id}
     cache.delete('mainTable:%s' % user.id)

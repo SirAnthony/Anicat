@@ -265,7 +265,7 @@ class UserStatusBundle(models.Model):
     objects = StatusManager()
 
     def save(self, *args, **kwargs):
-        if self.status in (2, 4):
+        if self.state in (2, 4):
             if self.count < 1:
                 self.count = 1
             else:

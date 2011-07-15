@@ -240,7 +240,7 @@ def moveUserStatus():
         try:
             anime = AnimeItem.objects.get(id=element['mainid'])
             user = User.objects.get(id=element['elemid'])
-            record = UserStatusBundle(anime=anime, user=user, status=element['job'],
+            record = UserStatusBundle(anime=anime, user=user, state=element['job'],
                         count=element['comm'], changed=element['changed'])
             record.save()
         except Exception, e:

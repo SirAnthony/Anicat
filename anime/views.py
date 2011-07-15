@@ -39,11 +39,11 @@ def index(request, order='title', page=0, status=None):
         if request.user.is_authenticated():
             if status:
                 ids = map(lambda x: x[0], UserStatusBundle.objects.filter(
-                        user=request.user, status=status).values_list('anime'))
+                        user=request.user, state=status).values_list('anime'))
                 qs = qs.filter(id__in=ids)
             else:
                 ids = map(lambda x: x[0], UserStatusBundle.objects.filter(
-                        user=request.user, status__gte=1).values_list('anime'))
+                        user=request.user, state__gte=1).values_list('anime'))
                 qs = qs.exclude(id__in=ids)
         else:
             raise Exception
@@ -97,7 +97,7 @@ def card(request, animeId=0):
         bundles = anime.bundle.animeitems.all().order_by('releasedAt')
         if request.user.is_authenticated():
             status = UserStatusBundle.objects.get_for_user(bundles, request.user.id)
-            bundles = map(lambda x: (x, getAttr(status[x.id], 'status', 0)), bundles)
+            bundles = map(lambda x: (x, getAttr(status[x.id], 'state', 0)), bundles)
         else:
             bundles = map(lambda x: (x,  0), bundles)
     try:
@@ -109,13 +109,13 @@ def card(request, animeId=0):
     userstatus = None
     if request.user.is_authenticated():
         try:
-            userstatus = anime.statusbundles.values('status', 'count').get(user=request.user)
+            userstatus = anime.statusbundles.values('state', 'count').get(user=request.user)
         except UserStatusBundle.DoesNotExist:
             pass
         except AttributeError:
             pass
         else:
-            userstatus['statusName'] = USER_STATUS[userstatus['status'] or 0][1]
+            userstatus['statusName'] = USER_STATUS[userstatus['state'] or 0][1]
     return {'anime': anime, 'bundles': bundles, 'animelinks': links, 'userstatus': userstatus}
 
 #@condition(last_modified_func=latestStatus)
@@ -138,7 +138,7 @@ def stat(request, userId=0):
             tuser = []
             total = {'name': 'Total', 'full': 0, 'count': 0, 'custom': 0}
             for status in USER_STATUS[1::]:
-                arr = UserStatusBundle.objects.filter(user=user.id, status=status[0]).extra(
+                arr = UserStatusBundle.objects.filter(user=user.id, state=status[0]).extra(
                     select = {'full': 'SUM(anime_animeitem.episodesCount*anime_animeitem.duration)',
                               'custom': 'SUM(anime_animeitem.duration*anime_userstatusbundle.count)',
                               'count': 'COUNT(*)'}
@@ -164,9 +164,9 @@ def generateCss(request):
     if not styles:
         styles = [[] for i in range(0,len(USER_STATUS))]
         if request.user.is_authenticated():
-            statuses = UserStatusBundle.objects.filter(user=request.user).exclude(status=0).values('anime','status')
+            statuses = UserStatusBundle.objects.filter(user=request.user).exclude(state=0).values('anime','state')
             for status in statuses:
-                styles[status['status']].append(str(status['anime']))
+                styles[status['state']].append(str(status['anime']))
             styles = [[',.r'.join(style), ',.a'.join(style)] for style in styles]
         cache.set('userCss:%s' % request.user.id, styles)
     return {'style': styles}
