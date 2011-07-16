@@ -19,7 +19,7 @@
         {% if user.is_authenticated %}
         <a href="/edit/bundle/{% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}0{% endif %}/" class="right">Edit</a>
         {%endif%}
-        <b>Bundled with:</b><br/>
+        <h4>Bundled with:</h4>
         <!-- Это все нужно переверстать -->
         <table>
             {% for bundle in bundles %}
@@ -36,33 +36,33 @@
     <div id="main" class="cardcol">
         <div>
             {% if user.is_authenticated %}<a href="/edit/name/{{ anime.id }}/" class="right">Edit</a>{%endif%}
-            <b>Name:</b><br/>
-            {% for name in anime.animenames.values %}{{ name.title }}<br/>{% endfor %}
+            <h4>Name:</h4>
+            {% for name in anime.animenames.values %}{% if name.title == anime.title %}<i>{{ name.title }}</i>{% else %}{{ name.title }}{% endif %}<br/>{% endfor %}
         </div>
         <div>
             {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releaseType/" class="right">Edit</a>{%endif%}
-            <b>Type:</b><br/>{{ anime.releaseTypeS }}
+            <h4>Type:</h4>{{ anime.releaseTypeS }}
         </div>
         <div>
             {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/genre/" class="right">Edit</a>{%endif%}
-            <b>Genre:</b><br/>{{ anime.genre.all|join:", " }}
+            <h4>Genre:</h4>{{ anime.genre.all|join:", " }}
         </div>
         <div>
             {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/episodesCount/" class="right">Edit</a>{%endif%}
-            <b>Episodes:</b><br/><span name="episodesCount">{{ anime.episodesCount }}</span>
+            <h4>Episodes:</h4><span name="episodesCount">{{ anime.episodesCount }}</span>
         </div>
         <div>
             {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/duration/" class="right">Edit</a>{%endif%}
-            <b>Duration:</b><br/>{{ anime.duration }} min.
+            <h4>Duration:</h4>{{ anime.duration }} min.
         </div>
         <div>
             {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releasedAt,endedAt/" class="right">Edit</a>{%endif%}
-            <b>Translation:</b><br/>{{ anime.translation }}
+            <h4>Translation:</h4>{{ anime.translation }}
         </div>
         {% if animelinks or user.is_authenticated %}
         <div>
             {% if user.is_authenticated %}<a href="/edit/links/{{ anime.id }}/" class="right">Edit</a>{%endif%}
-            <b>Links:</b><br />
+            <h4>Links:</h4>
             {% if animelinks.AniDB %}
             <a rel="nofollow" target="_blank" href="http://anidb.net/perl-bin/animedb.pl?show=anime&aid={{ animelinks.AniDB }}" >AniDB</a>&nbsp;
             {% endif %}
@@ -77,7 +77,7 @@
         {% if user.is_authenticated %}
         <div id="card_userstatus">
             <a href="/edit/state/{{ anime.id }}/" onclick="cardstatus({{ anime.id }}); return false;" class="right">Edit</a>
-            <b>State:</b><br/><span>{% if userstatus.statusName %}{{ userstatus.statusName|capfirst }}{% else %}None{% endif %}</span>
+            <h4>State:</h4><span>{% if userstatus.statusName %}{{ userstatus.statusName|capfirst }}{% else %}None{% endif %}</span>
             <input type="hidden" name="card_userstatus_input" value="{{ userstatus.state }}">
             {% if userstatus.count %}
             	<span class="right">{{ userstatus.count }}/{{ anime.episodesCount }}</span>

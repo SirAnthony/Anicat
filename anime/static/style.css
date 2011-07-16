@@ -364,7 +364,8 @@ color: HighlightText;
     min-width: 125px;
 }
 .cardcol div{
-    margin-right: 10px; 
+    margin-right: 10px;
+    margin-top: 3px;
 }
 .cardcol a.right {
     color: #000;
