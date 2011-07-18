@@ -1,8 +1,7 @@
 
 from django.http import HttpResponse
-from django.core.cache import cache
+#from django.core.cache import cache
 from django.utils import simplejson
-from anime.functions import getVal, getAttr, updateMainCaches
 import anime.core as coreMethods
 import anime.edit as editMethods
 import anime.user as userMethods

@@ -6,7 +6,8 @@ from django.forms import Form, ModelForm, TextInput, FileField, DateField, Boole
 from django.forms.forms import BoundField
 from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
-from anime.models import AnimeBundle, AnimeItem, AnimeName, UserStatusBundle, AnimeLinks, DATE_FORMATS
+from anime.models import AnimeBundle, AnimeItem, AnimeName, UserStatusBundle, AnimeLinks, \
+                         AnimeItemRequest, AnimeImageRequest, AnimeFeedbackRequest, DATE_FORMATS
 import datetime
 import time
 
@@ -306,6 +307,7 @@ EDIT_FORMS = {
     AnimeName: AnimeNameForm,
     UserStatusBundle: UserStatusForm,
     AnimeLinks: LinksForm,
+    #AnimeRequest: RequestForm,
 }
 
 def createFormFromModel(model, fields=None):

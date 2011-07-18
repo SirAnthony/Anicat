@@ -29,18 +29,31 @@ DATE_FORMATS = (
     "%d.??.??", "??.??.??",
 )
 
+REQUEST_TYPE = [
+    (0, u'Anime'),
+    (1, u'Image'),
+    (2, u'Feedback'),
+]
+
+REQUEST_STATUS = [
+    (0, u'Opened'),
+    (1, u'Rejected'),
+    (2, u'Accepted'),
+    (3, u'Done'),
+]
+
 class Genre(models.Model):
     name = models.CharField(max_length=200, db_index=True, unique=True)
-    
+
     def __unicode__(self):
         return self.name
-    
+
     class Meta:
         ordering = ["name"]
 
 class Credit(models.Model):
     title = models.CharField(max_length=200, unique=True)
-    
+
     def __unicode__(self):
         return self.title
 
@@ -54,13 +67,13 @@ class AnimeBundle(models.Model):
                 self.tied.append(value)
             return
         super(AnimeBundle, self).__setattr__(name, value)
-    
+
     def loadOldItems(self):
         if not self.id:
             return
         for animeitem in self.animeitems.all():
             setattr(self, 'bundle', animeitem)
-    
+
     def save(self):
         '''
         WARNING! This function removes links from all items
@@ -97,7 +110,7 @@ class AnimeBundle(models.Model):
             one.bundle = two.bundle = bundle
             one.save()
             two.save()
-    
+
     @classmethod
     def untie(cls, item):
         if not item:
@@ -107,7 +120,7 @@ class AnimeBundle(models.Model):
             item.bundle = None
             item.save()
             removeLast(bundle)
-    
+
     @classmethod
     def removeLast(cls, bundle):
         if not bundle or not bundle.id:
@@ -151,7 +164,7 @@ class AnimeItem(models.Model):
 
     releaseTypeS = property(_getReleaseTypeString)
     translation = property(_getTranslation)
-    
+
     def save(self, *args, **kwargs):
         try:
             last = self.audit_log.latest('action_date')
@@ -183,10 +196,10 @@ class AnimeEpisode(models.Model):
     title = models.CharField(max_length=200, db_index=True)
     anime = models.ForeignKey(AnimeItem, related_name="animeepisodes")
     audit_log = AuditLog()
-    
+
     def __unicode__(self):
         return '%s [%s]' % (self.title, self.anime.title)
-    
+
     class Meta:
         unique_together = ("title", "anime")
 
@@ -194,10 +207,10 @@ class AnimeName(models.Model):
     title = models.CharField(max_length=200)
     anime = models.ForeignKey(AnimeItem, related_name="animenames")
     audit_log = AuditLog()
-    
+
     def __unicode__(self):
         return self.title
-    
+
     class Meta:
         ordering = ["title"]
         unique_together = ("title", "anime")
@@ -208,11 +221,11 @@ class AnimeLinks(models.Model):
     ANN = models.IntegerField(blank=True, null=True)
     MAL = models.IntegerField(unique=True, blank=True, null=True)
     audit_log = AuditLog()
-  
+
 class Organisation(models.Model):
     name = models.CharField(max_length=200, unique=True)
     audit_log = AuditLog()
-    
+
     def __unicode__(self):
         return self.name
 
@@ -230,7 +243,7 @@ class OrganisationBundle(models.Model):
 class People(models.Model):
     name = models.CharField(max_length=200, unique=True)
     audit_log = AuditLog()
-    
+
     def __unicode__(self):
         return self.name
 
@@ -261,7 +274,7 @@ class UserStatusBundle(models.Model):
     state = models.IntegerField(choices=USER_STATUS)
     count = models.IntegerField(blank=True, null=True)
     changed = models.DateTimeField(auto_now=True)
-    
+
     objects = StatusManager()
 
     def save(self, *args, **kwargs):
@@ -279,6 +292,26 @@ class UserStatusBundle(models.Model):
     class Meta:
         unique_together = ("anime", "user")
 
+class AnimeRequest(models.Model):
+    user = models.ForeignKey(User)
+    anime = models.ForeignKey(AnimeItem, related_name="requests", blank=True, null=True)
+    requestType = models.IntegerField(choices=REQUEST_TYPE)
+    text = models.CharField(max_length=5000)
+    status = models.IntegerField(choices=REQUEST_STATUS)
+    reason = models.CharField(max_length=1000)
+
+class AnimeItemRequest(AnimeRequest):
+    class Meta:
+        proxy = True
+
+class AnimeImageRequest(AnimeRequest):
+    class Meta:
+        proxy = True
+
+class AnimeFeedbackRequest(AnimeRequest):
+    class Meta:
+        proxy = True
+
 
 EDIT_MODELS = {
     'anime': AnimeItem,
@@ -290,5 +323,8 @@ EDIT_MODELS = {
     #'organisationbundle': OrganisationBundle,
     #'people': People,
     #'peoplebundle': PeopleBundle,
-    'state': UserStatusBundle
+    'state': UserStatusBundle,
+    'animerequest': AnimeItemRequest,
+    'image': AnimeImageRequest,
+    'feedback': AnimeFeedbackRequest,
 }

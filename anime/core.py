@@ -2,6 +2,7 @@
 from anime.models import AnimeItem, EDIT_MODELS, USER_STATUS, UserStatusBundle
 from django.core.cache import cache
 from anime.functions import createPages
+from anime.functions import getVal, getAttr, updateMainCaches
 from hashlib import sha1 
 
 def get(request):    
@@ -54,7 +55,7 @@ def get(request):
                 items = anime.bundle.animeitems.all().order_by('releasedAt')
                 status = UserStatusBundle.objects.get_for_user(items, request.user.id)
                 response[field] = map(lambda x: {'name': x.title, 'elemid': x.id,
-                                                 'job': getAttr(getVal(x.id, status, None), 'status', 0, )},
+                                                 'job': getAttr(getVal(x.id, status, None), 'state', 0, )},
                                       items)
         else:
             try:

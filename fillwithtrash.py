@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from random import choice, randint
-from anime.models import Genre, AnimeItem, AnimeName, ANIME_TYPES
+from anime.models import Genre, AnimeItem, AnimeName, AnimeBundle, ANIME_TYPES
 from datetime import date
 
 charlist = [u'bcdfgklmnprstxz', u'aejioqvuwy']
@@ -18,7 +18,7 @@ def CreateRecords():
     enddate = date(2020, 1, 1).toordinal()
     genres = Genre.objects.all()
     genrecount = len(genres)
-    
+
     for i in range(0, 10000):
         a = AnimeItem(title=randname(),
                   releaseType=ANIME_TYPES[randint(0,6)][0], episodesCount=randint(1, 400), 
@@ -33,6 +33,14 @@ def CreateRecords():
                 n.save()
             except:
                 pass
+    #make bundles
+    acount = AnimeItem.objects.count()
+    for i in range(0, 5000):
+        one = AnimeItem.objects.get(id=randint(0, acount))
+        two = AnimeItem.objects.get(id=randint(0, acount))
+        while two == one:
+            two = AnimeItem.objects.get(id=randint(0, 10000))
+        AnimeBundle.tie(one, two)
 
 def FillWithTrash():
     CreateGenres()
