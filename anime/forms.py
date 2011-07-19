@@ -262,7 +262,7 @@ class AnimeNameForm(DynamicModelForm):
         if not instance or not instance.id:
             raise ValueError('Record not exist.')
         if not isinstance(instance, AnimeItem):
-            raise TypeError('%s is not AnimeName instance.' % type(instance).__name__)
+            raise TypeError('%s is not AnimeItem instance.' % type(instance).__name__)
         super(AnimeNameForm, self).__init__(data, *args, **kwargs)
         fields = {}
         items = instance.animenames.all()
@@ -301,13 +301,52 @@ class LinksForm(ErrorModelForm):
     class Meta:
         exclude = ('anime')
 
+class RequestForm(ErrorModelForm):
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        instance = kwargs.get('instance', None)
+        super(RequestForm, self).__init__(*args, **kwargs)
+        if instance and user:
+            instance.user = user
+
+    class Meta:
+        exclude = ('user', 'status')
+
+class AnimeItemRequestForm(RequestForm):
+    class Meta:
+        exclude = ('user', 'anime', 'requestType', 'reason', 'status')
+
+class ImageRequestForm(RequestForm):
+    text = FileField(max_length=200, label='File')
+    def __init__(self, *args, **kwargs):
+        anime = kwargs.pop('instance', None)
+        if not anime or not anime.id:
+            raise ValueError('Record not exist.')
+        if not isinstance(anime, AnimeItem):
+            raise TypeError('%s is not AnimeItem instance.' % type(anime).__name__)
+        instance = AnimeImageRequest(anime=anime)
+        super(ImageRequestForm, self).__init__(*args, instance=instance, **kwargs)
+        files = kwargs.get('files', None)
+        if files:
+            
+            raise Exception
+
+    class Meta:
+        exclude = ('user', 'anime', 'requestType', 'reason', 'status')
+
+class FeedbackForm(RequestForm):
+    class Meta:
+        exclude = ('user', 'anime', 'requestType', 'reason', 'status')
+
 EDIT_FORMS = {
     AnimeBundle: AnimeBundleForm,
     AnimeItem: AnimeForm,
     AnimeName: AnimeNameForm,
     UserStatusBundle: UserStatusForm,
     AnimeLinks: LinksForm,
-    #AnimeRequest: RequestForm,
+    AnimeItemRequest: AnimeItemRequestForm,
+    AnimeImageRequest: ImageRequestForm,
+    AnimeFeedbackRequest: FeedbackForm,
 }
 
 def createFormFromModel(model, fields=None):
