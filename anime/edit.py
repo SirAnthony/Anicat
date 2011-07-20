@@ -90,7 +90,6 @@ def edit(request, itemId=0, modelname='anime', field=None):
             try:
                 form = formobject(instance=obj)
             except Exception, e:
-                raise
                 response['text'] = str(e)
         else:
             #FIXME: AnimeNameForm throw exceptions here but nobody catch
@@ -105,8 +104,6 @@ def edit(request, itemId=0, modelname='anime', field=None):
                                 obj.save()
                             else:
                                 raise ValueError('Cannot save new instance without all required fields.')
-                        d = form.cleaned_data
-                        raise Exception
                         for fieldname in form.cleaned_data.keys():
                             if fieldname != obj._meta.pk.name:
                                 setattr(obj, fieldname, form.cleaned_data[fieldname])
@@ -114,7 +111,6 @@ def edit(request, itemId=0, modelname='anime', field=None):
                         if modelname == 'anime':
                             updateMainCaches(USER_STATUS[0][0])
                 except Exception, e:
-                    raise
                     response['text'] = str(e)
                     form.addError('Error "%s" has occured.' % e)
                 else:

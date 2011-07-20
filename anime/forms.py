@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
@@ -10,6 +11,7 @@ from anime.models import AnimeBundle, AnimeItem, AnimeName, UserStatusBundle, An
                          AnimeItemRequest, AnimeImageRequest, AnimeFeedbackRequest, DATE_FORMATS
 import datetime
 import time
+import os
 
 #dirty but works
 INPUT_FORMATS = (
@@ -326,10 +328,34 @@ class ImageRequestForm(RequestForm):
             raise TypeError('%s is not AnimeItem instance.' % type(anime).__name__)
         instance = AnimeImageRequest(anime=anime)
         super(ImageRequestForm, self).__init__(*args, instance=instance, **kwargs)
-        files = kwargs.get('files', None)
-        if files:
+        self.files = kwargs.get('files', None)
+
+    def _clean_fields(self):
+        name = 'text'
+        super(ImageRequestForm, self)._clean_fields()
+        if name in self.errors:
+            return
+        image = self.files.get(name)
+        f = self.__dict__
+        try:
+            if not image:
+                raise ValidationError('This field is required.')
+            filename = os.path.join(settings.MEDIA_ROOT, str(image.size)+image.name)
+            if os.path.exists(filename):
+                raise ValidationError('This file already loaded.')
             
+            try:
+                fileobj = open(filename, 'wb+')
+                for chunk in file.chunks():
+                    fileobj.write(chunk)
+                fileobj.close()
+            except Exception, e:
+                raise ValidationError(e)
             raise Exception
+        except ValidationError, e:
+            self._errors[name] = self.error_class(e.messages)
+            if name in self.cleaned_data:
+                del self.cleaned_data[name]
 
     class Meta:
         exclude = ('user', 'anime', 'requestType', 'reason', 'status')
