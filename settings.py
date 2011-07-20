@@ -51,6 +51,11 @@ MEDIA_ROOT = os.path.join(os.getcwd(), 'files')
 
 IMAGES_ROOT = os.path.join(os.getcwd(), 'images')
 
+FILE_UPLOAD_HANDLERS = (
+    'django.core.files.uploadhandler.MemoryFileUploadHandler',
+    'anime.classes.QuotaUploadHandler',
+)
+
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"

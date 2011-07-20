@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.core.validators import EMPTY_VALUES
-from django.forms import Form, ModelForm, TextInput, FileField, DateField, BooleanField, CharField
+from django.forms import Form, ModelForm, TextInput, FileField, ImageField, DateField, BooleanField, CharField
 from django.forms.forms import BoundField
 from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
@@ -21,6 +21,9 @@ INPUT_FORMATS = (
     '%B %d %Y', '%B %d, %Y',
     '%d %B %Y', '%d %B, %Y',
 )
+
+
+
 
 class ErrorForm(Form):
     def addError(self, text):
@@ -318,8 +321,76 @@ class AnimeItemRequestForm(RequestForm):
     class Meta:
         exclude = ('user', 'anime', 'requestType', 'reason', 'status')
 
+class CardImageField(ImageField):
+
+    def to_python(self, data):
+        """
+        Checks that the file-upload field data contains a valid image (GIF, JPG,
+        PNG). Resize image if it is biggest than allowed.
+        """
+        f = super(ImageField, self).to_python(data)
+        if f is None:
+            return None
+        # Try to import PIL in either of the two ways it can end up installed.
+        try:
+            from cStringIO import StringIO
+        except ImportError:
+            from StringIO import StringIO
+        try:
+            from PIL import Image
+        except ImportError:
+            import Image
+        # We need to get a file object for PIL. We might have a path or we might
+        # have to read the data into memory.
+        if hasattr(data, 'temporary_file_path'):
+            file = data.temporary_file_path()
+        else:
+            if hasattr(data, 'read'):
+                file = StringIO(data.read())
+            else:
+                file = StringIO(data['content'])
+        try:
+            # verify() is the only method that can spot a corrupt PNG,
+            #  but it must be called immediately after the constructor
+            trial_image = Image.open(file)
+            trial_image.verify()
+            # Since we're about to use the file again we have to reset the
+            # file object if possible.
+            if hasattr(file, 'reset'):
+                file.reset()
+            # load() is the only method that can spot a truncated JPEG,
+            #  but it cannot be called sanely after verify()
+            trial_image = Image.open(file)
+            trial_image.load()
+            if trial_image.format not in ('PNG', 'JPEG', 'GIF'):
+                raise ValueError('Only PNG, JPEG and GIF formats are accepted.')
+            #rewrite this shit
+            w,h = trial_image.size
+            resize = False
+            if w > 400:
+                resize = True
+                h = (float(h)/float(w))*400
+                w = 400
+            if h > 500:
+                resize = True
+                w = (float(w)/float(h))*500
+                h = 500
+            if resize:
+                new_image = trial_image.resize((w, h))
+                
+        except ImportError:
+            # Under PyPy, it is possible to import PIL. However, the underlying
+            # _imaging C module isn't available, so an ImportError will be
+            # raised. Catch and re-raise.
+            raise
+        except Exception: # Python Imaging Library doesn't recognize it as an image
+            raise ValidationError(self.error_messages['invalid_image'])
+        if hasattr(f, 'seek') and callable(f.seek):
+            f.seek(0)
+        return f
+
 class ImageRequestForm(RequestForm):
-    text = FileField(max_length=200, label='File')
+    text = CardImageField(max_length=200, label='File')
     def __init__(self, *args, **kwargs):
         anime = kwargs.pop('instance', None)
         if not anime or not anime.id:
@@ -332,25 +403,27 @@ class ImageRequestForm(RequestForm):
 
     def _clean_fields(self):
         name = 'text'
+        f = self.__dict__
+        raise Exception
         super(ImageRequestForm, self)._clean_fields()
         if name in self.errors:
             return
         image = self.files.get(name)
         f = self.__dict__
+        raise Exception
         try:
             if not image:
                 raise ValidationError('This field is required.')
             filename = os.path.join(settings.MEDIA_ROOT, str(image.size)+image.name)
             if os.path.exists(filename):
                 raise ValidationError('This file already loaded.')
-            
-            try:
-                fileobj = open(filename, 'wb+')
-                for chunk in file.chunks():
-                    fileobj.write(chunk)
-                fileobj.close()
-            except Exception, e:
-                raise ValidationError(e)
+            #try:
+            #    fileobj = open(filename, 'wb+')
+            #    for chunk in image.chunks():
+            #        fileobj.write(chunk)
+            #    fileobj.close()
+            #except Exception, e:
+            #    raise ValidationError(e)
             raise Exception
         except ValidationError, e:
             self._errors[name] = self.error_class(e.messages)
