@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.core.validators import EMPTY_VALUES
-from django.forms import Form, ModelForm, TextInput, FileField, ImageField, DateField, BooleanField, CharField
+from django.forms import Form, ModelForm, TextInput, Textarea, FileField, ImageField, DateField, \
+                         BooleanField, CharField
 from django.forms.forms import BoundField
 from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
@@ -200,17 +201,17 @@ class UnknownDateField(DateField):
         #date = super(UnknownDateField, self).strptime(self, value, format)
         label = self.label.lower()
         try:
-            dindex = DATE_FORMATS.index(format)            
+            dindex = DATE_FORMATS.index(format)
             self.cleaned_data[label + 'Known'] = dindex
-            if label == 'ended':                
-                date = self.get_last_date(date, dindex)                
-            for field in ('released', 'ended'):                
+            if label == 'ended':
+                date = self.get_last_date(date, dindex)
+            for field in ('released', 'ended'):
                 if field == label:
                     self.cleaned_data[u'air'] = True if date >= date.today() else False
         except ValueError:
             self.cleaned_data[label + 'Known'] = 0
         return date
-    
+
     def get_last_date(self, date, format_index):
         if format_index & 4: # year
             date = date.replace(year=date.max.year)
@@ -223,7 +224,7 @@ class UnknownDateField(DateField):
 class AnimeForm(ErrorModelForm):
     releasedAt = UnknownDateField(label='Released')
     endedAt = UnknownDateField(label='Ended', required=False)
-    
+
     def __init__(self, *args, **kwargs):
         super(AnimeForm, self).__init__(*args, **kwargs)
         if self.instance.id:
@@ -315,9 +316,10 @@ class RequestForm(ErrorModelForm):
             instance.user = user
 
     class Meta:
-        exclude = ('user', 'status')
+        exclude = ('user', 'anime', 'status')
 
 class AnimeItemRequestForm(RequestForm):
+    text = CharField(label="Request anime", widget=Textarea)
     class Meta:
         exclude = ('user', 'anime', 'requestType', 'reason', 'status')
 
@@ -421,6 +423,7 @@ class ImageRequestForm(RequestForm):
         exclude = ('user', 'anime', 'requestType', 'reason', 'status')
 
 class FeedbackForm(RequestForm):
+    text = CharField(label='Please tell about your suffering', widget=Textarea)
     class Meta:
         exclude = ('user', 'anime', 'requestType', 'reason', 'status')
 
