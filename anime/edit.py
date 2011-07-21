@@ -1,7 +1,7 @@
 
 from django.core.cache import cache
 from django.db.models.fields import FieldDoesNotExist
-from anime.forms import AnimeForm, UserStatusForm, createFormFromModel
+from anime.forms import createFormFromModel
 from anime.models import AnimeItem, AnimeName, USER_STATUS, EDIT_MODELS
 from anime.functions import updateMainCaches
 from datetime import datetime
@@ -104,6 +104,8 @@ def edit(request, itemId=0, modelname='anime', field=None):
                                 obj.save()
                             else:
                                 raise ValueError('Cannot save new instance without all required fields.')
+                        elif modelname == 'image': #FUUU
+                        	obj = form.instance
                         for fieldname in form.cleaned_data.keys():
                             if fieldname != obj._meta.pk.name:
                                 setattr(obj, fieldname, form.cleaned_data[fieldname])

@@ -299,16 +299,36 @@ class AnimeRequest(models.Model):
     text = models.CharField(max_length=5000)
     status = models.IntegerField(choices=REQUEST_STATUS)
     reason = models.CharField(max_length=1000)
+    
+    def __init__(self, *args, **kwargs):
+        if not kwargs.has_key('status'):
+            kwargs['status'] = 0
+        super(AnimeRequest, self).__init__(*args, **kwargs)
 
 class AnimeItemRequest(AnimeRequest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs['requestType'] = 0
+        super(AnimeItemRequest, self).__init__(*args, **kwargs)
+
     class Meta:
         proxy = True
 
 class AnimeImageRequest(AnimeRequest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs['requestType'] = 1
+        super(AnimeImageRequest, self).__init__(*args, **kwargs)
+
     class Meta:
         proxy = True
 
 class AnimeFeedbackRequest(AnimeRequest):
+
+    def __init__(self, *args, **kwargs):
+        kwargs['requestType'] = 2
+        super(AnimeFeedbackRequest, self).__init__(*args, **kwargs)
+
     class Meta:
         proxy = True
 

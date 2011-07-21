@@ -350,47 +350,35 @@ class CardImageField(ImageField):
             else:
                 file = StringIO(data['content'])
         try:
-            # verify() is the only method that can spot a corrupt PNG,
-            #  but it must be called immediately after the constructor
-            trial_image = Image.open(file)
-            trial_image.verify()
-            # Since we're about to use the file again we have to reset the
-            # file object if possible.
-            if hasattr(file, 'reset'):
-                file.reset()
             # load() is the only method that can spot a truncated JPEG,
             #  but it cannot be called sanely after verify()
             trial_image = Image.open(file)
             trial_image.load()
             if trial_image.format not in ('PNG', 'JPEG', 'GIF'):
                 raise ValueError('Only PNG, JPEG and GIF formats are accepted.')
-            #rewrite this shit
-            w,h = trial_image.size
-            resize = False
-            if w > 400:
-                resize = True
-                h = (float(h)/float(w))*400
-                w = 400
-            if h > 500:
-                resize = True
-                w = (float(w)/float(h))*500
-                h = 500
-            if resize:
-                new_image = trial_image.resize((w, h))
-                
+            if max(trial_image.size) >= 800:
+                raise ValueError('Image too big.')
+            # Since we're about to use the file again we have to reset the
+            # file object if possible.
+            if hasattr(file, 'reset'):
+                file.reset()
+            # verify() is the only method that can spot a corrupt PNG,
+            #  but it must be called immediately after the constructor
+            trial_image = Image.open(file)
+            trial_image.verify()
         except ImportError:
             # Under PyPy, it is possible to import PIL. However, the underlying
             # _imaging C module isn't available, so an ImportError will be
             # raised. Catch and re-raise.
             raise
-        except Exception: # Python Imaging Library doesn't recognize it as an image
-            raise ValidationError(self.error_messages['invalid_image'])
+        except Exception, e: # Python Imaging Library doesn't recognize it as an image
+            raise ValidationError(self.error_messages['invalid_image'] + ' ' + str(e))
         if hasattr(f, 'seek') and callable(f.seek):
             f.seek(0)
         return f
 
 class ImageRequestForm(RequestForm):
-    text = CardImageField(max_length=200, label='File')
+    text = CardImageField(max_length=150, label='File')
     def __init__(self, *args, **kwargs):
         anime = kwargs.pop('instance', None)
         if not anime or not anime.id:
@@ -403,28 +391,27 @@ class ImageRequestForm(RequestForm):
 
     def _clean_fields(self):
         name = 'text'
-        f = self.__dict__
-        raise Exception
+        #f = self.__dict__
+        #raise Exception
         super(ImageRequestForm, self)._clean_fields()
         if name in self.errors:
             return
         image = self.files.get(name)
-        f = self.__dict__
-        raise Exception
         try:
             if not image:
                 raise ValidationError('This field is required.')
-            filename = os.path.join(settings.MEDIA_ROOT, str(image.size)+image.name)
-            if os.path.exists(filename):
+            filename = str(image.size)+image.name
+            fullfilename = os.path.join(settings.MEDIA_ROOT, filename)
+            if os.path.exists(fullfilename):
                 raise ValidationError('This file already loaded.')
-            #try:
-            #    fileobj = open(filename, 'wb+')
-            #    for chunk in image.chunks():
-            #        fileobj.write(chunk)
-            #    fileobj.close()
-            #except Exception, e:
-            #    raise ValidationError(e)
-            raise Exception
+            try:
+                fileobj = open(fullfilename, 'wb+')
+                for chunk in image.chunks():
+                    fileobj.write(chunk)
+                fileobj.close()
+            except Exception, e:
+                raise ValidationError(e)
+            self.cleaned_data[name] = filename
         except ValidationError, e:
             self._errors[name] = self.error_class(e.messages)
             if name in self.cleaned_data:
