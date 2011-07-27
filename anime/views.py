@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
-from anime.models import AnimeItem, AnimeLinks, UserStatusBundle, USER_STATUS
+from anime.models import AnimeItem, AnimeLinks, UserStatusBundle, AnimeRequest, USER_STATUS
 from anime.functions import getAttr, createPages, cleanTableCache, updateMainCaches
 import anime.core as coreMethods
 from random import randint
@@ -175,6 +175,16 @@ def generateCss(request):
 @render_to('anime/blank.html', 'text/css')
 def blank(request):
     return {}
+
+@render_to('anime/requests.html')
+def requests(request, status=None, rtype=None):
+    if not status:
+        req = AnimeRequest.objects.exclude(status=3)
+    else:
+        req = AnimeRequest.objects.filter(status=status)
+    if rtype:
+        req.filter(requestType=rtype)
+    return {'requests': req}   
 
 @render_to('anime/history.html')
 def history(request, field=None, page=0):

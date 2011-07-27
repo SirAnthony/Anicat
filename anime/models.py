@@ -344,6 +344,7 @@ EDIT_MODELS = {
     #'people': People,
     #'peoplebundle': PeopleBundle,
     'state': UserStatusBundle,
+    'request': AnimeRequest,
     'animerequest': AnimeItemRequest,
     'image': AnimeImageRequest,
     'feedback': AnimeFeedbackRequest,

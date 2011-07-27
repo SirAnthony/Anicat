@@ -11,6 +11,7 @@ urlpatterns = patterns(
     (r'^faq/$', direct_to_template, {'template': 'anime/faq.html'}),
     (r'^card/(?P<animeId>\d+)?/?$', 'card'),
     (r'^stat/(?P<userId>\d+)?/?$', 'stat'),
+    (r'^requests/(?P<status>\d+)?/?(?P<rtype>\d+)?/?$', 'requests'),
     (r'^css/$', 'generateCss'),
     (r'^test/$', 'test'),
     (r'^history/add/?/?(f/(?P<field>\w+))?/?(?P<page>\d+)?/$', 'history'),

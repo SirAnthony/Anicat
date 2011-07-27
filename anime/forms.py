@@ -8,7 +8,7 @@ from django.forms import Form, ModelForm, TextInput, Textarea, FileField, ImageF
 from django.forms.forms import BoundField
 from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
-from anime.models import AnimeBundle, AnimeItem, AnimeName, UserStatusBundle, AnimeLinks, \
+from anime.models import AnimeBundle, AnimeItem, AnimeName, UserStatusBundle, AnimeLinks, AnimeRequest, \
                          AnimeItemRequest, AnimeImageRequest, AnimeFeedbackRequest, DATE_FORMATS
 import datetime
 import time
@@ -22,9 +22,6 @@ INPUT_FORMATS = (
     '%B %d %Y', '%B %d, %Y',
     '%d %B %Y', '%d %B, %Y',
 )
-
-
-
 
 class ErrorForm(Form):
     def addError(self, text):
@@ -393,8 +390,6 @@ class ImageRequestForm(RequestForm):
 
     def _clean_fields(self):
         name = 'text'
-        #f = self.__dict__
-        #raise Exception
         super(ImageRequestForm, self)._clean_fields()
         if name in self.errors:
             return
@@ -433,6 +428,7 @@ EDIT_FORMS = {
     AnimeName: AnimeNameForm,
     UserStatusBundle: UserStatusForm,
     AnimeLinks: LinksForm,
+    AnimeRequest: RequestForm,
     AnimeItemRequest: AnimeItemRequestForm,
     AnimeImageRequest: ImageRequestForm,
     AnimeFeedbackRequest: FeedbackForm,
