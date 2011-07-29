@@ -298,7 +298,7 @@ class AnimeRequest(models.Model):
     requestType = models.IntegerField(choices=REQUEST_TYPE)
     text = models.CharField(max_length=5000)
     status = models.IntegerField(choices=REQUEST_STATUS)
-    reason = models.CharField(max_length=1000)
+    reason = models.CharField(max_length=1000, blank=True, null=True)
     
     def __init__(self, *args, **kwargs):
         if not kwargs.has_key('status'):

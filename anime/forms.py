@@ -315,6 +315,21 @@ class RequestForm(ErrorModelForm):
     class Meta:
         exclude = ('user', 'anime', 'status')
 
+class PureRequestForm(RequestForm):
+    def __init__(self, *args, **kwargs):
+        user = kwargs.get('user', None)
+        if not user or not user.is_staff:
+            self.__readonly__ = True
+        super(PureRequestForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        if hasattr(self, '__readonly__') and self.__readonly__:
+            raise ValidationError('This form is readonly for you.')
+        return super(PureRequestForm, self).clean()
+    
+    class Meta:
+        exclude = ('user', 'anime', 'text', 'requestType',)
+
 class AnimeItemRequestForm(RequestForm):
     text = CharField(label="Request anime", widget=Textarea)
     class Meta:
@@ -428,7 +443,7 @@ EDIT_FORMS = {
     AnimeName: AnimeNameForm,
     UserStatusBundle: UserStatusForm,
     AnimeLinks: LinksForm,
-    AnimeRequest: RequestForm,
+    AnimeRequest: PureRequestForm,
     AnimeItemRequest: AnimeItemRequestForm,
     AnimeImageRequest: ImageRequestForm,
     AnimeFeedbackRequest: FeedbackForm,
