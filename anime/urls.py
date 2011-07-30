@@ -26,6 +26,7 @@ urlpatterns += patterns('anime.userviews',
 
 urlpatterns += patterns('anime.editview',
     (r'^add/$', 'add'),
+    (r'^request/(?P<requestId>\d+)/?$', 'request_item'),
     (r'^edit/(?P<model>[a-zA-Z_]+)?/?(?P<itemId>\d+)/?(?P<field>[a-zA-Z_,]+)?/?$', 'edit'),
 )
 

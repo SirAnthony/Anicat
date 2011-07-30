@@ -23,6 +23,24 @@ INPUT_FORMATS = (
     '%d %B %Y', '%d %B, %Y',
 )
 
+class ReadOnlyModelForm(ModelForm):
+    
+    def __init__(self, *args, **kwargs):
+        self.__readonly__ = False
+        super(ReadOnlyModelForm, self).__init__(*args, **kwargs)
+
+    def readonly(self):
+        self.__readonly__ = True
+    
+    def writeable(self):
+        self.__readonly__ = False
+
+    def clean(self):
+        if hasattr(self, '__readonly__') and self.__readonly__:
+            raise ValidationError('This form is readonly for you.')
+        return super(ReadOnlyModelForm, self).clean()
+    
+
 class ErrorForm(Form):
     def addError(self, text):
         self.errors['__all__'] = self.error_class([text])
@@ -315,18 +333,13 @@ class RequestForm(ErrorModelForm):
     class Meta:
         exclude = ('user', 'anime', 'status')
 
-class PureRequestForm(RequestForm):
+class PureRequestForm(ReadOnlyModelForm, RequestForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.get('user', None)
-        if not user or not user.is_staff:
-            self.__readonly__ = True
         super(PureRequestForm, self).__init__(*args, **kwargs)
+        if not user or not user.is_staff:
+            self.readonly()
 
-    def clean(self):
-        if hasattr(self, '__readonly__') and self.__readonly__:
-            raise ValidationError('This form is readonly for you.')
-        return super(PureRequestForm, self).clean()
-    
     class Meta:
         exclude = ('user', 'anime', 'text', 'requestType',)
 

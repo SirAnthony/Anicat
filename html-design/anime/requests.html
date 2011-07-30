@@ -3,7 +3,7 @@
 {% block main %}
 {% for request in requests %}
     <div>
-    <span><a href="/edit/request/{{ request.id }}/">{{ request.id }}</a></span>
+    <span><a href="/request/{{ request.id }}/">{{ request.id }}</a></span>
     <span><b>User:</b>{{ request.user }}</span>
     <span>{% if request.anime %}
         <a href="/card/{{ request.anime.id }}/">{{ request.anime }}</a>
@@ -12,6 +12,7 @@
     <span><b>Type:</b>{{ request.get_requestType_display }}</span>
     <p>{{ request.text }}</p>
     <p><b>Status:</b>{{ request.get_status_display }}</p>
+    <p><b>Comment:</b>{{ request.reason }}</p>
     </div>
 {% endfor %}
 {% endblock %}

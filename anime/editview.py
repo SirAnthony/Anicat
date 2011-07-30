@@ -13,6 +13,11 @@ def add(request):
     res.update(csrf(request))
     return res
 
+@render_to('anime/request.html')
+def request_item(request, requestId):
+    form = editMethods.edit(request, requestId, 'request')
+    return form
+
 @render_to('anime/edit.html')
 def edit(request, itemId, model='anime', field=None):
     res = editMethods.edit(request, itemId, model, field)

@@ -1,0 +1,34 @@
+{% extends "anime/base.html" %}
+
+    {% block main %}
+    {% if user.is_authenticated %}
+    {% if not form or not form.fields %}
+    {% if text %}
+    <div>{{ text }}</div>
+    {% else %}
+    <div>Bad parameters passed.</div>
+    {% endif %}
+    {# Костыли, костыли everywhere #}
+    {% else %}
+    {{ form.instance.user }}
+    {{ form.instance.anime }}
+    {{ form.instance.get_requestType_display }}
+    {{ form.instance.text }}
+    <form class="addform{% if form.fields|length < 2 %} addfrmoc{% endif %}" action="" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mainerror">
+            {{ form.non_field_errors }}
+        </div>
+        {% for field in form %}
+        <div {% if forloop.counter0|divisibleby:2 %}class="clear"{% endif %}>
+            {{ field.label_tag }}: {{ field }}
+            {{ field.errors }}
+        </div>
+        {% endfor %}
+        <input type="submit" class="right" value="Save" />
+    </form>
+    {% endif %}
+    {% else %}
+    <div>Pool's closed.</div>
+    {% endif %}
+    {% endblock %}
