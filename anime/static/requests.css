@@ -1,0 +1,24 @@
+
+div.request {
+    margin-bottom: 20px;
+    width: 550px;
+}
+
+div.request span {
+    padding-right: 5px;
+}
+
+div.request span b, div.request p b {
+    margin-right: 3px;
+}
+
+div.request .request-body {
+    margin: 2px 0px;
+    padding-left: 5px;
+    width: 100%;
+}
+
+div.request div.request-body img{
+    margin: 0 auto;
+    display: block;
+}
