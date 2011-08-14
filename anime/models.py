@@ -1,7 +1,9 @@
 import collections
+import os
+from audit_log.models.managers import AuditLog
 from django.db import models, IntegrityError
 from django.contrib.auth.models import User
-from audit_log.models.managers import AuditLog
+from settings import MEDIA_ROOT, IMAGES_ROOT
 
 ANIME_TYPES = [
     (0, u'TV'),
@@ -77,7 +79,7 @@ class AnimeBundle(models.Model):
     def save(self):
         '''
         WARNING! This function removes links from all items
-        which is not in tied array. For linking single items 
+        which is not in tied array. For linking single items
         use tie classmethod instead.
         '''
         super(AnimeBundle, self).save()
@@ -155,8 +157,8 @@ class AnimeItem(models.Model):
         try:
             if self.endedAt:
                 return ' - '.join([
-                    self.releasedAt.strftime(DATE_FORMATS[self.releasedKnown]) if self.releasedKnown != 7 else '?', 
-                    self.endedAt.strftime(DATE_FORMATS[self.endedKnown]) if self.endedKnown != 7 else '?' 
+                    self.releasedAt.strftime(DATE_FORMATS[self.releasedKnown]) if self.releasedKnown != 7 else '?',
+                    self.endedAt.strftime(DATE_FORMATS[self.endedKnown]) if self.endedKnown != 7 else '?'
                 ])
             return self.releasedAt.strftime(DATE_FORMATS[self.releasedKnown]) if self.releasedKnown != 7 else '?'
         except ValueError:
@@ -299,11 +301,27 @@ class AnimeRequest(models.Model):
     text = models.CharField(max_length=5000)
     status = models.IntegerField(choices=REQUEST_STATUS)
     reason = models.CharField(max_length=1000, blank=True, null=True)
-    
+
     def __init__(self, *args, **kwargs):
         if not kwargs.has_key('status'):
             kwargs['status'] = 0
         super(AnimeRequest, self).__init__(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        if self.requestType == 1 and self.status and self.text != "0.png":
+            if not self.anime:
+                raise IntegrityError("Anime name cannot be null for image request.")
+            filename = os.path.join(MEDIA_ROOT, self.text)
+            if not os.path.exists(filename):
+                raise OSError('File does not exists.')
+            if self.status > 1:
+                ext = filename.rsplit('.', 1)[-1]
+                os.rename(filename, os.path.join(IMAGES_ROOT, '%s.%s' % (self.anime.id, ext)))
+                self.status = 3
+            else:
+                os.unlink(filename)
+            self.text = "0.png"
+        super(AnimeRequest, self).save(*args, **kwargs)
 
 class AnimeItemRequest(AnimeRequest):
 

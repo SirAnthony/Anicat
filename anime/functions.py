@@ -35,8 +35,6 @@ def invalidateCacheKey(fragment_name, *variables):
    cache_key = 'template.cache.%s.%s' % (fragment_name, args.hexdigest())
    cache.delete(cache_key)
 
-#All shit in one place
-#TODO: fix it later
 def cleanTableCache(order, status, page, user):
     link = ''
     if status is not None:
@@ -50,37 +48,51 @@ def cleanTableCache(order, status, page, user):
     if status is not None and user.is_authenticated():
         maintablekey = 'mainTable:%s' % user.id
     else:
-        maintablekey = 'mainTable'        
-    maintable = cache.get(maintablekey)
-    if maintable is None:
-        maintable = {}
-    cached = True
-    if status is not None:
-        try:
-            currenttable = maintable[status]
-        except:
-            currenttable = {}
-    else:
-        currenttable = maintable
-    try:
-        currenttable[order].index(page)
-    except KeyError:
-        currenttable[order] = [page]
-    except ValueError:
-        currenttable[order].append(page)
-    except Exception, e:
-        currenttable = {order: [page]}
-    else:
-        cached = False
-    if cached:
-        if status is not None:
-            maintable[status] = currenttable
-        else:
-            maintable = currenttable
-        cache.delete('Pages:' + cachestr)
-        invalidateCacheKey('mainTable', cachestr)
-        cache.set(maintablekey, maintable)
+        maintablekey = 'mainTable'
+    _cleanCache(maintablekey, status, order, page, cachestr, 'Pages', 'mainTable')
     return link, cachestr
+
+def cleanRequestsCache(status, rtype, page):
+    link = ''
+    if status is not None:
+        link += 'status/%s/' % status
+    if rtype is not None:
+        link += 'type/%s/' % rtype
+    cachestr = link + str(page)
+    _cleanCache('requests', status, rtype, page, cachestr, 'requestPages')
+    return link, cachestr
+
+def _cleanCache(cachekey, first, second, third, cachestr, pagekey, ckey=None):
+    #cache = {first: {second: [third,]]}} or {second: [third,]]}
+    ccontent = cache.get(cachekey)
+    if ccontent is None:
+        ccontent = {}
+    cached = False
+    if first is not None:
+        try:
+            firstcontent = ccontent[first]
+        except KeyError:
+            firstcontent = {}
+    else:
+        firstcontent = ccontent
+    try:
+        firstcontent[second].index(third)
+    except KeyError:
+        firstcontent[second] = [third]
+    except ValueError:
+        firstcontent[second].append(third)
+    except Exception, e:
+        firstcontent = {second: [third]}
+    else:
+        cached = True
+    if not cached:
+        if first is not None:
+            ccontent[first] = firstcontent
+        else:
+            ccontent = firstcontent
+        cache.delete('%s:%s' % (pagekey, cachestr))
+        invalidateCacheKey(ckey or cachekey, cachestr)
+        cache.set(cachekey, ccontent)
 
 def updateMainCaches(status=None):
     for id in map(lambda x: x[0], User.objects.all().values_list('id')):
@@ -93,3 +105,4 @@ def updateMainCaches(status=None):
                 t = {}
         cache.set('mainTable:%s' % id, t)
     cache.set('mainTable', {})
+

@@ -11,7 +11,7 @@ urlpatterns = patterns(
     (r'^faq/$', direct_to_template, {'template': 'anime/faq.html'}),
     (r'^card/(?P<animeId>\d+)?/?$', 'card'),
     (r'^stat/(?P<userId>\d+)?/?$', 'stat'),
-    (r'^requests/(?P<status>\d+)?/?(?P<rtype>\d+)?/?$', 'requests'),
+    (r'^requests/(status/(?P<status>\d+))?/?(type/(?P<rtype>\d+))?/?(?P<page>\d+)?/?$', 'requests'),
     (r'^css/$', 'generateCss'),
     (r'^test/$', 'test'),
     (r'^history/add/?/?(f/(?P<field>\w+))?/?(?P<page>\d+)?/$', 'history'),
@@ -43,3 +43,12 @@ urlpatterns += patterns('',
     (r'^jsi18n/(?P<packages>\S+?)?/?$', 'django.views.i18n.javascript_catalog'),
 )
 #
+
+if settings.DEBUG:
+    urlpatterns += patterns('', url(r'^media/(.*)$',
+        'django.views.static.serve', kwargs={
+        'document_root': settings.MEDIA_ROOT}),
+                                url(r'^images/(.*)$',
+        'django.views.static.serve', kwargs={
+        'document_root': settings.IMAGES_ROOT}), )
+

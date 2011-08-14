@@ -1,18 +1,50 @@
 {% extends "anime/base.html" %}
 
+{% load cache %}
+
+{% block customScripts %}<link rel="stylesheet" href="/static/requests.css" />{% endblock %}
+
 {% block main %}
+{% if user.is_authenticated %}
+{% cache 600 requests cachestr %}
 {% for request in requests %}
-    <div>
-    <span><a href="/request/{{ request.id }}/">{{ request.id }}</a></span>
-    <span><b>User:</b>{{ request.user }}</span>
-    <span>{% if request.anime %}
-        <a href="/card/{{ request.anime.id }}/">{{ request.anime }}</a>
-    {% endif %}
-    </span>
-    <span><b>Type:</b>{{ request.get_requestType_display }}</span>
-    <p>{{ request.text }}</p>
-    <p><b>Status:</b>{{ request.get_status_display }}</p>
-    <p><b>Comment:</b>{{ request.reason }}</p>
+    <div class="request">
+        <div class="header">
+            <span><b>№:</b><a href="/request/{{ request.id }}/">{{ request.id }}</a></span>
+            <span class="right"><b>Type:</b>{{ request.get_requestType_display }}</span>
+            {% if request.anime %}
+            <br/>
+            <span>
+                <b>Anime:</b>
+                <a href="/card/{{ request.anime.id }}/">{{ request.anime }}</a>
+            </span>
+            {% endif %}
+        </div>
+        <p class="request-body">
+            {% ifequal request.requestType 1 %}
+            <img src="{{ MEDIA_URL }}{{ request.text }}" height="150" alt="" />
+            {% else %}
+            {{ request.text }}
+            {% endifequal %}
+        </p>
+        <p><b>Status:</b>{{ request.get_status_display }}</p>
+        {% if request.reason %}
+        <p><b>Comment:</b>{{ request.reason }}</p>
+        {% endif %}
     </div>
 {% endfor %}
+    <div id="pg">
+        {% for pname in pages %}
+            {% ifequal page.number forloop.counter0 %}
+                <span id="spanl">[{{ pname }}]</span>
+            {% else %}
+                <a href="/{{ link }}{% ifnotequal forloop.counter0 0 %}{{forloop.counter0}}/{% endifnotequal %}">{{ pname }}</a>
+            {% endifequal %}
+        {% endfor %}
+    </div>
+{% endcache %}
+{% else %}
+    <div>Pool's closed.</div>
+{% endif %}
 {% endblock %}
+

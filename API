@@ -9,27 +9,34 @@ Login:
     Request type: Post
     Request target: login/
     Request params:
-        username
-        password
+        username: string
+        password: string
     Response:
         response: "login"
         text: {
-            name: Name of logged user
+            name: string // Name of logged user
         }
 
 Search:
     Request type: Post
     Request target: search/
     Request params:
-        field - Search field. Avaliable choises: [name]
-        string - Search string
-        page - int, result page. Default: 0
+        field: string // Search field. Avaliable choises: [name]
+        string: string // Search string
+        page: int // Result page. Default: 0
     Response:
-        response: search
+        response: "search"
         text: {
-            count: int, count of found items,
-            items: [],
-            page: int, current page
+            count: int // Count of found items,
+            items: [{
+                    id: int
+                    name: string,
+                    type: string,
+                    numberofep: int, // Count of episodes
+                    translation: string,
+                    air: bool
+            }],
+            page: int // Current page
     }
 
 Add:
@@ -38,17 +45,19 @@ Add:
     Request params:
         Add form
     Response:
-        response: add
-        text: int, new record id
+        response: "add"
+        text: int // New record id
 
 Get:
     Request type: Post
     Request target: get/
     Request params:
-        id: int, anime id
-        field: field name; You can specify this parameter several times to pass multiple fields
+        id: int // Anime id
+        field: string // Field name.
+                      // You can specify this parameter several times to pass multiple fields
+        limit: int // May be passed to get another count of results. Maximum is 30.
     Response:
-        response: get
-        order: array, fields order
-        text:
+        response: "get"
+        order: array // Fields order
+        text: object // Result depends on which fields was requested.
         

@@ -105,13 +105,15 @@ def edit(request, itemId=0, modelname='anime', field=None):
                             else:
                                 raise ValueError('Cannot save new instance without all required fields.')
                         elif modelname == 'image': #FUUU
-                        	obj = form.instance
+                            obj = form.instance
                         for fieldname in form.cleaned_data.keys():
                             if fieldname != obj._meta.pk.name:
                                 setattr(obj, fieldname, form.cleaned_data[fieldname])
                         obj.save()
                         if modelname == 'anime':
                             updateMainCaches(USER_STATUS[0][0])
+                        elif modelname in ['animerequest', 'image', 'feedback', 'request']:
+                            cache.delete('requests')
                 except Exception, e:
                     response['text'] = str(e)
                     form.addError('Error "%s" has occured.' % e)

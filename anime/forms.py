@@ -24,14 +24,14 @@ INPUT_FORMATS = (
 )
 
 class ReadOnlyModelForm(ModelForm):
-    
+
     def __init__(self, *args, **kwargs):
         self.__readonly__ = False
         super(ReadOnlyModelForm, self).__init__(*args, **kwargs)
 
     def readonly(self):
         self.__readonly__ = True
-    
+
     def writeable(self):
         self.__readonly__ = False
 
@@ -39,13 +39,18 @@ class ReadOnlyModelForm(ModelForm):
         if hasattr(self, '__readonly__') and self.__readonly__:
             raise ValidationError('This form is readonly for you.')
         return super(ReadOnlyModelForm, self).clean()
-    
+
 
 class ErrorForm(Form):
     def addError(self, text):
         self.errors['__all__'] = self.error_class([text])
 
 class ErrorModelForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        #FUUUU
+        kwargs.pop('user', None)
+        super(ErrorModelForm, self).__init__(*args, **kwargs)
+
     def addError(self, text):
         self.errors['__all__'] = self.error_class([text])
 
@@ -339,6 +344,12 @@ class PureRequestForm(ReadOnlyModelForm, RequestForm):
         super(PureRequestForm, self).__init__(*args, **kwargs)
         if not user or not user.is_staff:
             self.readonly()
+
+    def clean_status(self):
+        if self.instance.requestType == 1 and self.instance.status > 0:
+            if 'status' in self._get_changed_data():
+                raise ValidationError('You cannot change it anymore.')
+        return self.cleaned_data['status']
 
     class Meta:
         exclude = ('user', 'anime', 'text', 'requestType',)

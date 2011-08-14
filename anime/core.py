@@ -75,6 +75,12 @@ def search(field, string, request, attrs={}):
     if not field:
         field = 'name'
     limit = attrs.get('limit', 20)
+    try:
+        limit = int(limit)
+    except:
+        limit = 20
+    if limit > 30:
+        limit = 30
     qs = None
     link = 'search/'
     if string:

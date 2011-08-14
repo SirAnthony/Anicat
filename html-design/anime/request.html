@@ -1,33 +1,65 @@
 {% extends "anime/base.html" %}
 
+    {% block customScripts %}<link rel="stylesheet" href="/static/requests.css" />{% endblock %}
+
     {% block main %}
     {% if user.is_authenticated %}
-    {% if not form or not form.fields %}
-    {% if text %}
+        {% if not form or not form.fields %}
+            {% if text %}
     <div>{{ text }}</div>
-    {% else %}
+            {% else %}
     <div>Bad parameters passed.</div>
-    {% endif %}
-    {# Костыли, костыли everywhere #}
-    {% else %}
-    {{ form.instance.user }}
-    {{ form.instance.anime }}
-    {{ form.instance.get_requestType_display }}
-    {{ form.instance.text }}
-    <form class="addform{% if form.fields|length < 2 %} addfrmoc{% endif %}" action="" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="mainerror">
-            {{ form.non_field_errors }}
+            {% endif %}
+        {# Костыли, костыли everywhere #}
+        {% else %}
+    <div><a href="/requests/">All</a></div>
+    <div class="request">
+        <div class="title">
+            <p>
+                <span><b>№:</b>{{ form.instance.id }}</span>
+                <span class="right"><b>Type:</b>{{ form.instance.get_requestType_display }}</span>
+                <span><b>User:</b>{% if user.is_staff %}{{ form.instance.user }}{% else %}Anonymous{% endif %}</span>
+            </p>
+            {% if form.instance.anime %}
+            <p>
+                <span>
+                    <b>Related to:</b>
+                    <a href="/card/{{ form.instance.anime.id }}/">{{ form.instance.anime }}</a>
+                </span>
+            </p>
+            {% endif %}
         </div>
-        {% for field in form %}
-        <div {% if forloop.counter0|divisibleby:2 %}class="clear"{% endif %}>
-            {{ field.label_tag }}: {{ field }}
-            {{ field.errors }}
+        <div class="request-body">
+            {% ifequal form.instance.requestType 1 %}
+            <img src="{{ MEDIA_URL }}{{ form.instance.text }}" alt="" >
+            {% else %}
+            <p>{{ form.instance.text }}</p>
+            {% endifequal %}
         </div>
-        {% endfor %}
-        <input type="submit" class="right" value="Save" />
-    </form>
-    {% endif %}
+            {% if user.is_staff %}
+        <form class="addform" action="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mainerror">
+                {{ form.non_field_errors }}
+            </div>
+            <div class="clear">
+                {{ form.status.label_tag }}: {{ form.status }}
+                {{ form.status.errors }}
+            </div>
+            <div>
+                {{ form.reason.label_tag }}: {{ form.reason }}
+                {{ form.reason.errors }}
+            </div>
+            <input type="submit" class="right" value="Save" />
+        </form>
+            {% else %}
+        <p><b>Status:</b>{{ form.get_status_display }}</p>
+                {% if form.reason %}
+        <p><b>Comment:</b>{{ form.reason }}</p>
+                {% endif %}
+            {% endif %}
+    </div>
+        {% endif %}
     {% else %}
     <div>Pool's closed.</div>
     {% endif %}

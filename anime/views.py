@@ -1,13 +1,14 @@
 
+import anime.core as coreMethods
 from django.contrib.auth.models import User
 from django.core.cache import cache
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
 from anime.models import AnimeItem, AnimeLinks, UserStatusBundle, AnimeRequest, USER_STATUS
-from anime.functions import getAttr, createPages, cleanTableCache, updateMainCaches
-import anime.core as coreMethods
+from anime.functions import getAttr, createPages, cleanTableCache, cleanRequestsCache
 from random import randint
 
 
@@ -23,14 +24,13 @@ def latestStatus(request, userId=0):
 @render_to('anime/list.html')
 def index(request, order='title', page=0, status=None):
     try:
-        page = int(page)
+        page = int(page or request.REQUEST.get('page'))
     except:
         page = 0
-    page = int(request.REQUEST.get('page', page))
     limit = 100
     try:
         AnimeItem._meta.get_field(order)
-    except Exception:
+    except:
         order = 'title'
     qs = AnimeItem.objects.order_by(order)
     try:
@@ -47,15 +47,38 @@ def index(request, order='title', page=0, status=None):
                 qs = qs.exclude(id__in=ids)
         else:
             raise Exception
-    except Exception:
+    except:
         status = None
-    (link, cachestr) = cleanTableCache(order, status, page, request.user)    
+    (link, cachestr) = cleanTableCache(order, status, page, request.user)
     pages = cache.get('Pages:' + link)
     if not pages:
         pages = createPages(qs, order, limit)
         cache.set('Pages:%s' % link, pages)
     items = qs[page*limit:(page+1)*limit]
     return {'list': items, 'link': link, 'cachestr': cachestr,
+            'pages': pages, 'page': {'number': page, 'start': page*limit}}
+
+@render_to('anime/requests.html')
+def requests(request, status=None, rtype=None, page=0):
+    limit = 30
+    qs = AnimeRequest.objects.order_by("-id")
+    try:
+        page = int(page or request.REQUEST.get('page'))
+    except:
+        page = 0
+    if not status:
+        qs = qs.exclude(Q(status=1) | Q(status=3))
+    else:
+        qs = qs.filter(status=status)
+    if rtype:
+        qs = qs.filter(requestType=rtype)
+    (link, cachestr) = cleanRequestsCache(status, rtype, page)
+    pages = cache.get('requestPages:' + link)
+    if not pages:
+        pages = createPages(qs, '-id', limit)
+        cache.set('requestPages:%s' % link, pages)
+    items = qs[page*limit:(page+1)*limit]
+    return {'requests': items, 'cachestr': cachestr, 'link': link,
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
 
 @render_to('anime/search.html')
@@ -73,7 +96,7 @@ def search(request, string=None, field=None, order=None, page=0):
         ret['page'] = {'number': page, 'start': page*limit}
     else:
         ret['page'] = {'number': 0, 'start': 0}
-    return ret 
+    return ret
 
 @render_to('anime/card.html')
 def card(request, animeId=0):
@@ -175,16 +198,6 @@ def generateCss(request):
 @render_to('anime/blank.html', 'text/css')
 def blank(request):
     return {}
-
-@render_to('anime/requests.html')
-def requests(request, status=None, rtype=None):
-    if not status:
-        req = AnimeRequest.objects.exclude(status=3)
-    else:
-        req = AnimeRequest.objects.filter(status=status)
-    if rtype:
-        req.filter(requestType=rtype)
-    return {'requests': req}   
 
 @render_to('anime/history.html')
 def history(request, field=None, page=0):

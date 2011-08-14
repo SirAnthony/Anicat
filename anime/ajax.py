@@ -73,7 +73,8 @@ def search(request):
     limit = 20
     response = coreMethods.search(request.POST.get('field', 'name'), 
         request.POST.get('string'), request,
-        {'page': request.POST.get('page', 0), 'order': request.POST.get('sort')}
+        {'page': request.POST.get('page', 0), 'order': request.POST.get('sort'), 
+         'limit': request.POST.get('limit', limit)}
     )
     if response.has_key('response'):
         del response['text']['link']
