@@ -35,7 +35,7 @@ input, select {
 }
 
 .hidden {
-	display: none;
+    display: none;
 }
 
 /* Trash */
@@ -59,7 +59,7 @@ border-top: none;
 margin-left: 2px;
 margin-right: 3px;
 }
-.tbl{ 
+.tbl{
     line-height: 23px;
 }
 .thdtbl{
@@ -103,12 +103,12 @@ width: 55px !important;
 width: 200px !important;
 }
 .footer{
-	margin-top: 10px;
-	clear: both;
+    margin-top: 10px;
+    clear: both;
 }
 
 /* контент для меню */
-.cont_men { 
+.cont_men {
 padding: 7px 10px;
 border:1px solid;
 border-color: #FFFFFF #FFFFFF #808080 #808080;
@@ -153,7 +153,7 @@ border: none;
 
 
 /* Ссылки*/
-.leftmenu, #login a:link, .nurl,  
+.leftmenu, #login a:link, .nurl,
 .thdtbl a:link, .thdtbl a:visited, .thdtbl a:active, .thdtbl a:hover{
 font-weight: bold;
 text-decoration: none;
@@ -179,7 +179,7 @@ z-index: 15;
 padding: 5px;
 clear: both;
 border: 1px #808080 solid;
-border-top: none; 
+border-top: none;
 }
 #edit>div input[type=button]{
 margin: 5px 5px 0px 5px;
@@ -213,7 +213,7 @@ background-color:#bfe0fe;
 background-color:#D4D0C8;
 border-color: #808080 #808080 #D4D0C8 #808080;
 cursor: default;
-} 
+}
 #edtcont div{
 max-height: 500px;
 overflow: auto;
@@ -259,7 +259,7 @@ width: 150px;
 }
 
 #register label{
-    float:left; 
+    float:left;
     clear: left;
     width:100px;
 }
@@ -347,7 +347,7 @@ font-size: 16px;
 overflow: hidden;
 }
 /*.app_div span {
-font-weight: bold;	
+font-weight: bold;
 }*/
 .app_over {
 background-color: Highlight;
@@ -371,21 +371,21 @@ color: HighlightText;
     color: #000;
     font-size: 10pt;
 }
-#staff.cardcol{ 
-clear: left; 
+#staff.cardcol{
+clear: left;
 }
-#main.cardcol{ 
-max-width: 600px;  
+#main.cardcol{
+max-width: 600px;
 }
 #imagebun.cardcol{
 max-width: 400px;
-margin-bottom: 30px !important; 
+margin-bottom: 30px !important;
 }
 #imagebun img{
-max-width: 400px; 
+max-width: 400px;
 }
 .elemlbl{
-font-weight: bold; 
+font-weight: bold;
 }
 
 #id_genre {
@@ -397,7 +397,7 @@ font-weight: bold;
 #id_genre:hover {
     position: absolute;
     height: 30em;
-    width: 200px;    
+    width: 200px;
 }
 
 .calendarbox {
@@ -463,6 +463,11 @@ font-weight: bold;
     width: 192px;
     margin: 3px 0;
 }
+.addform div textarea {
+    margin: 3px 0;
+    padding: 5px 2px;
+    font-size: 11pt;
+}
 .addform div select {
     width: 100%;
     margin: 3px 0;
@@ -475,15 +480,15 @@ font-weight: bold;
 .addform div.mainerror {
     float: none;
     width: 100%;
-    min-height: 0px; 
+    min-height: 0px;
 }
 
 .fileform {
-	margin-bottom: 10px;
+    margin-bottom: 10px;
 }
 
 .fileform div {
-	margin-bottom: 5px;
+    margin-bottom: 5px;
 }
 
 .helpText {
@@ -513,8 +518,8 @@ font-weight: bold;
 }
 
 .column ul {
-	margin-left: 15px;
-	margin-bottom: 7px;
+    margin-left: 15px;
+    margin-bottom: 7px;
 }
 
 /* Id's */
@@ -525,8 +530,8 @@ font-weight: bold;
 
 /* Specific things */
 .malresult p.s3, .malresult .error{
-	margin-top: 5px;
-	font-size: 12pt !important;
+    margin-top: 5px;
+    font-size: 12pt !important;
 }
 
 /*Some ie hacks */

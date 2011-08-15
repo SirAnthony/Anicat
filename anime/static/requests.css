@@ -22,3 +22,17 @@ div.request div.request-body img{
     margin: 0 auto;
     display: block;
 }
+
+div#requests {
+    width: 280px;
+}
+
+div#requests h4 {
+    margin-bottom: 10px;
+}
+
+div#requests div.request {
+    margin-bottom: 0px;
+    margin-top: 3px;
+    width: 100%;
+}

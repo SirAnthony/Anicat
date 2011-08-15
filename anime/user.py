@@ -1,9 +1,9 @@
 
 from django.contrib import auth
-from django.contrib.auth.forms import AuthenticationForm
 from django.core.cache import cache
-from anime.forms import UploadMalListForm, UserCreationFormMail
+from anime.forms import UploadMalListForm, UserCreationFormMail, NotActiveAuthenticationForm
 from anime.malconvert import passFile
+from anime.models import AnimeRequest
 from datetime import datetime
 
 def login(request):
@@ -14,12 +14,12 @@ def login(request):
     elif request.user.is_authenticated():
         response['text'] = 'Already logged in.'
     else:
-        form = AuthenticationForm(data=request.POST)
+        form = NotActiveAuthenticationForm(data=request.POST)
         if form.is_valid():
             user = form.get_user()
             auth.login(request, user)
             response.update({'response': True, 'text': {'name': user.username}})
-    response['form'] = form or AuthenticationForm()
+    response['form'] = form or NotActiveAuthenticationForm()
     return response
 
 def register(request):
@@ -61,3 +61,18 @@ def loadMalList(request):
     else:
         form = UploadMalListForm()
     return {'mallistform': form, 'mallist': lastLoad}
+
+def getRequests(user, *keys):
+    try:
+        qs = AnimeRequest.objects.filter(user=user).order_by("-id")
+        if keys:
+            qs = qs.values(*keys)
+        try:
+            types = AnimeRequest._meta.get_field('requestType').choices
+        except:
+            pass
+        return {'requests': list(qs),
+                'requestTypes': types}
+    except:
+        pass
+

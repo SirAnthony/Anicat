@@ -12,7 +12,7 @@
             {% endif %}
         {# Костыли, костыли everywhere #}
         {% else %}
-    <div><a href="/requests/">All</a></div>
+    <div style="margin-bottom: 5px;"><a href="/requests/">All requests</a></div>
     <div class="request">
         <div class="title">
             <p>
@@ -53,9 +53,9 @@
             <input type="submit" class="right" value="Save" />
         </form>
             {% else %}
-        <p><b>Status:</b>{{ form.get_status_display }}</p>
-                {% if form.reason %}
-        <p><b>Comment:</b>{{ form.reason }}</p>
+        <p><b>Status:</b>{{ form.instance.get_status_display }}</p>
+                {% if form.reason.value %}
+        <p><b>Comment:</b>{{ form.reason.value }}</p>
                 {% endif %}
             {% endif %}
     </div>

@@ -19,13 +19,31 @@ def request_item(request, requestId):
     return form
 
 @render_to('anime/edit.html')
+def feedback(request):
+    res = editMethods.edit(request, 0, 'feedback')
+    if res.get('status', None):
+        rid = res.get('id')
+        return HttpResponseRedirect('/request/%s/' % (rid or 0))
+    res.update(csrf(request))
+    return res
+
+@render_to('anime/edit.html')
+def anime_request(request):
+    res = editMethods.edit(request, 0, 'animerequest')
+    if res.get('status', None):
+        rid = res.get('id')
+        return HttpResponseRedirect('/request/%s/' % (rid or 0))
+    res.update(csrf(request))
+    return res
+
+@render_to('anime/edit.html')
 def edit(request, itemId, model='anime', field=None):
     res = editMethods.edit(request, itemId, model, field)
     if res.get('status', None):
         rid = res.get('id')
         if model == 'bundle':
             return HttpResponseRedirect('/edit/bundle/%s/' % (rid or 0))
-        else: #('anime', 'name', 'links', 'state')
+        else:
             return HttpResponseRedirect('/card/%s/' % (rid or 0))
     else:
         return res

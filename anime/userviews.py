@@ -23,11 +23,12 @@ def register(request):
 
 @render_to('anime/settings.html')
 def settings(request):
-    mallist = userMethods.loadMalList(request)
+    response = userMethods.loadMalList(request)
     try:
-        if mallist['mallist']['updated']:
+        if response['mallist']['updated']:
             return HttpResponseRedirect('/settings/')
     except:
         pass
+    response.update(userMethods.getRequests(request.user))
     #many other things here later
-    return mallist
+    return response

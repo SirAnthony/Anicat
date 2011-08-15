@@ -6,6 +6,12 @@ from anime.models import AnimeItem, AnimeName, USER_STATUS, EDIT_MODELS
 from anime.functions import updateMainCaches
 from datetime import datetime
 
+EDIBLE_LIST = [
+    'state',
+    'animerequest',
+    'feedback'
+]
+
 def edit(request, itemId=0, modelname='anime', field=None):
     if not modelname:
         modelname = 'anime'
@@ -14,10 +20,12 @@ def edit(request, itemId=0, modelname='anime', field=None):
         response['text'] = 'You must be logged in.'
         if modelname == 'state':
             response.update({'response': 'edit', 'returned': request.POST.get('state')})
-    elif modelname != 'state' and (datetime.now() - request.user.date_joined).days < 15:
-        response['text'] = 'You cannot doing this now.'
     elif modelname not in EDIT_MODELS:
         response['text'] = 'Bad model name passed.'
+    elif not request.user.is_active and modelname != 'state': # :cf:
+        response['text'] = 'You cannot doing this.'
+    elif modelname not in EDIBLE_LIST and (datetime.now() - request.user.date_joined).days < 15:
+        response['text'] = 'You cannot doing this now.'
     else:
         form = None
         obj = None
@@ -118,9 +126,17 @@ def edit(request, itemId=0, modelname='anime', field=None):
                     response['text'] = str(e)
                     form.addError('Error "%s" has occured.' % e)
                 else:
-                    response.update({'response': 'edit', 'status': True, 'id': retid or obj.id, 'text': form.cleaned_data})
+                    response.update({
+                        'response': 'edit',
+                        'status': True,
+                        'id': retid or obj.id,
+                        'text': form.cleaned_data
+                    })
                     if lastfunc:
-                        lastfunc()
+                        try:
+                            lastfunc()
+                        except:
+                            pass
             else:
                 response['text'] = form.errors
         response['form'] = form
