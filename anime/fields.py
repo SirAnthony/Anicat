@@ -1,7 +1,8 @@
 import datetime
 import time
-from anime.models import DATE_FORMATS
+from anime.models import AnimeItem, AnimeName, DATE_FORMATS
 from django.core.exceptions import ValidationError
+from django.core.validators import EMPTY_VALUES
 from django.forms import CharField, TextInput, DateField, ImageField
 
 #dirty but works
@@ -41,7 +42,7 @@ class TextToAnimeNameField(CharField):
             raise ValidationError('AnimeItem not set.')
         try:
             value, create = AnimeName.objects.get_or_create(anime=self._animeobject, title=value)
-        except:
+        except Exception, e:
             raise ValidationError(e)
         return value
 

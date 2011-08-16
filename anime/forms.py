@@ -3,7 +3,6 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ValidationError
-from django.core.validators import EMPTY_VALUES
 from django.forms import Form, ModelForm, Textarea, FileField, \
                          BooleanField, CharField
 from django.forms.forms import BoundField
