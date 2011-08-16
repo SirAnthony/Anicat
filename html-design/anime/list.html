@@ -7,57 +7,57 @@
 
 {% block main %}
 {% cache 600 mainTable cachestr %}
-	<div id="dvid">
-		<table id="tbl" cellspacing="0" class="tbl">
-			<thead class="thdtbl">
-				<tr id="wtr">
-					<th class="link" id="link">
-						<a rel="nofollow" href=""></a>
-					</th>
-					<th class="id" id="id">
-						<a rel="nofollow" href="/">№</a>
-					</th>
-					<th class="name" id="name">
-						<a rel="nofollow" href="/">Name</a>
-					</th>
-					<th class="numberofep" id="numberofep">
-						<a rel="nofollow" href="/sort/episodesCount/">Episodes</a>
-					</th>
-					<th class="translation" id="translation">
-						<a rel="nofollow" href="/sort/releasedAt/">Translation</a>
-					</th>
-					<th class="type" id="type">
-						<a rel="nofollow" href="/sort/releaseType/">Type</a>
-					</th>
-				</tr>
-			</thead>
-			<tbody id="tbdid">
-				{% for title in list %}
-				<tr class="{% if title.air %}air a{% else %}r{% endif %}{{ title.id }}">
-					<td id="link{{ title.id }}" class="link">
-						<a target="_blank" class="cardurl" href="/card/{{ title.id }}/">
-							<img alt="Go" src="/static/arrow.gif">
-						</a>
-					</td>
-					<td onclick="cnt('id', '{{ title.id }}', event);" id="id{{ title.id }}" class="id">{{ forloop.counter|add:page.start }}</td>
-					<td onclick="cnt('name', '{{ title.id }}', event);" id="name{{ title.id }}" class="name left">{{ title.title }}</td>
-					<td onclick="cnt('numberofep', '{{ title.id }}', event);" id="numberofep{{ title.id }}" class="numberofep">{% if title.1.count %}{{ title.1.count }}/{% endif %}{{ title.episodesCount }}</td>
-					<td onclick="cnt('translation', '{{ title.id }}', event);" id="translation{{ title.id }}" class="translation">{{ title.translation }}</td>
-					<td onclick="cnt('type', '{{ title.id }}', event);" id="type{{ title.id }}" class="type">{{ title.releaseTypeS }}</td>
-					{# custom fields #}
-				{% endfor %}
-				</tr>
-			</tbody>
-		</table>
-	</div>
-	<div id="pg">
-		{% for pname in pages %}
-			{% ifequal page.number forloop.counter0 %}
-				<span id="spanl">[{{ pname }}]</span>
-			{% else %}
-				<a href="/{{ link }}{% ifnotequal forloop.counter0 0 %}{{forloop.counter0}}/{% endifnotequal %}">{{ pname }}</a>
-			{% endifequal %}
-		{% endfor %}
-	</div>
+    <div id="dvid">
+        <table id="tbl" cellspacing="0" class="tbl">
+            <thead class="thdtbl">
+                <tr id="wtr">
+                    <th class="link" id="link">
+                        <a rel="nofollow" href=""></a>
+                    </th>
+                    <th class="id" id="id">
+                        <a rel="nofollow" href="/">№</a>
+                    </th>
+                    <th class="name" id="name">
+                        <a rel="nofollow" href="/">Name</a>
+                    </th>
+                    <th class="numberofep" id="numberofep">
+                        <a rel="nofollow" href="/sort/episodesCount/">Episodes</a>
+                    </th>
+                    <th class="translation" id="translation">
+                        <a rel="nofollow" href="/sort/releasedAt/">Translation</a>
+                    </th>
+                    <th class="type" id="type">
+                        <a rel="nofollow" href="/sort/releaseType/">Type</a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="tbdid">
+                {% for title in list %}
+                <tr class="{% if title.air %}air a{% else %}r{% endif %}{{ title.id }}">
+                    <td id="link{{ title.id }}" class="link">
+                        <a target="_blank" class="cardurl" href="/card/{{ title.id }}/">
+                            <img alt="Go" src="/static/arrow.gif">
+                        </a>
+                    </td>
+                    <td onclick="cnt('id', '{{ title.id }}', event);" id="id{{ title.id }}" class="id">{{ forloop.counter|add:page.start }}</td>
+                    <td onclick="cnt('name', '{{ title.id }}', event);" id="name{{ title.id }}" class="name left">{{ title.title }}</td>
+                    <td onclick="cnt('numberofep', '{{ title.id }}', event);" id="numberofep{{ title.id }}" class="numberofep">{% if title.1.count %}{{ title.1.count }}/{% endif %}{{ title.episodesCount }}</td>
+                    <td onclick="cnt('translation', '{{ title.id }}', event);" id="translation{{ title.id }}" class="translation">{{ title.translation }}</td>
+                    <td onclick="cnt('type', '{{ title.id }}', event);" id="type{{ title.id }}" class="type">{{ title.releaseTypeS }}</td>
+                    {# custom fields #}
+                {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="pg">
+        {% for pname in pages %}
+            {% ifequal page.number forloop.counter0 %}
+                <span id="spanl">[{{ pname }}]</span>
+            {% else %}
+                <a href="/{{ link }}{% ifnotequal forloop.counter0 0 %}{{forloop.counter0}}/{% endifnotequal %}">{{ pname }}</a>
+            {% endifequal %}
+        {% endfor %}
+    </div>
 {% endcache %}
 {% endblock %}

@@ -87,12 +87,15 @@
     {% if requests %}
     <div id="requests">
         {% if requestTypes %}
-        <select id="requestDisplay" class="right">
-            <option value="all" selected>All</option>
-            {% for opt in requestTypes %}
-                <option value="{{ opt.0 }}">{{ opt.1 }}</option>
-            {% endfor %}
-        </select>
+        <div class="right select">
+            <select id="requestDisplay">
+                <option value="all" selected>All</option>
+                {% for opt in requestTypes %}
+                    <option value="{{ opt.0 }}">{{ opt.1 }}</option>
+                {% endfor %}
+            </select>
+            <span>Requests&nbsp;&nbsp;⇵</span>
+        </div>
         {% endif %}
         <h4>Requests:</h4>
         {% for request in requests %}

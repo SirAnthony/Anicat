@@ -3,116 +3,121 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
-	<title>Anime catalog{% block title %}{% endblock %}</title>
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-	<meta name="description" content="Simple anime catalog. An easy way to create and manage your anime lists. {% block description %}{% endblock %}">
-	<meta name="Keywords" content="anime, anime catalog,  anicat, {% block keywords %}animelist, anime list{% endblock %}">
-	<link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
-	<link rel="search" type="application/opensearchdescription+xml" title="Anime catalog" href="/static/srch.xml" />
-	<link href="/static/style.css" type="text/css" rel="stylesheet" />
-	<link href="/css/" type="text/css" rel="stylesheet" />
-	<script type="text/javascript" src="/jsi18n/"></script>
-	<script type="text/javascript" src="/static/element.js"></script>
-	<script type="text/javascript" src="/static/script.js"></script>
-	<script type="text/javascript" src="/static/ajax.js"></script>
-	<script type="text/javascript" src="/static/user.js"></script>
-	<script type="text/javascript" src="/static/ae.js"></script>
-	{% if not user.is_authenticated %}<script type="text/javascript" src="/static/userstorage.js"></script>{% endif %}
-	{% block customScripts %}{% endblock %}
-	{% if user.is_authenticated %}{{ AddForm.media.render }}{% endif %}
+    <title>Anime catalog{% block title %}{% endblock %}</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta name="description" content="Simple anime catalog. An easy way to create and manage your anime lists. {% block description %}{% endblock %}">
+    <meta name="Keywords" content="anime, anime catalog,  anicat, {% block keywords %}animelist, anime list{% endblock %}">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+    <link rel="search" type="application/opensearchdescription+xml" title="Anime catalog" href="/static/srch.xml" />
+    <link href="/static/style.css" type="text/css" rel="stylesheet" />
+    <link href="/css/" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="/jsi18n/"></script>
+    <script type="text/javascript" src="/static/element.js"></script>
+    <script type="text/javascript" src="/static/script.js"></script>
+    <script type="text/javascript" src="/static/ajax.js"></script>
+    <script type="text/javascript" src="/static/user.js"></script>
+    <script type="text/javascript" src="/static/ae.js"></script>
+    {% if not user.is_authenticated %}<script type="text/javascript" src="/static/userstorage.js"></script>{% endif %}
+    {% block customScripts %}{% endblock %}
+    {% if user.is_authenticated %}{{ AddForm.media.render }}{% endif %}
 </head>
 <body>
-	<div id="header" class="thdtbl">
-		<div class="leftmenu">
-			{% block mainlink %}
-			<a class="nurl" href="/">Main</a>
-			<span class="delimiter">|</span>
-			{% endblock %}
-			{% block searchlink %}
-			<a class="nurl" href="/search/" rel="nofollow" onclick="searcher.toggle(); return false;">Search</a>
-			<span class="delimiter">|</span>
-			{% endblock %}
-			<a class="nurl" href="/faq/">FAQ</a><span class="delimiter">|</span>
-			<a class="nurl" href="/card/" rel="nofollow">Random</a>
-		{% if user.is_authenticated %}
-			{% block addLink %}
-			<span class="delimiter">|</span>
-			<a class="nurl" href="/add/" rel="nofollow" onclick="add.toggle(); return false;">Add</a>
-			{% endblock %}
-		</div>
-		<div id="logdiv" class="rightmenu">
-			<span><a href="/settings/" title="User settings">{{ user.username }}</a></span>
-			<a href="/logout/" class="nurl" onclick="user.logout();  return false;">Logout</a>	
-		</div>
-		<div class="rightmenu">
-			<a href="/stat/" class="nurl">Statistics</a>
-			{% block selectView %}
-			<select id="show" onChange="setshow();">
-			{# Это можно в какой-нибудь лист ужать #}
-				<option value="" selected>Display Mode</option>
-				<option value="a">All</option>
-				<option value="0">None</option>
-				<option value="1">Want</option>
-				<option value="2">Now</option>
-				<option value="3">Watched</option>
-				<option value="4">Dropped</option>
-				<option value="5">Partially watched</option>
-			</select>
-			{% endblock %}
-		</div>
-		{% else %}
-		</div>
-		<div id="logdiv" class="rightmenu">
-			<a onclick="user.toggle();" class="nurl">Account</a>
-		</div>
-		<div id="logdv" class="right">
-			<form method="POST" action="/login/" id="login" class="thdtbl" onsubmit="user.login(); return false;">
-				{% csrf_token %}
-				<a onclick="user.quickreg();" class="nurl">Registration</a>
-				{% loginForm %}
-				{{ LoginForm.username }}
-				{{ LoginForm.password }}
-				<input type="submit" value="Login" />
-				<p id="logininfo" class="error"></p>
-			</form>
-		</div>
-		{% endif %}
-	</div>
-	<br />
-	{% block search %}
-	<div id="srch" class="hidden">
-		<form method="POST" action="/search/" id="srchp" onsubmit="searcher.send(); return false;">
-		{% csrf_token %}
-			<input id="sin" name="string" type="text"/>
-			<input type="submit" value="Search" />
-		</form>
-		<div id="srchres"></div>
-	</div>
-	{% endblock %}
-	{% block main %}
-	{% endblock %}
-	<div class="cont_men" id="menu">
-		<span id="mspan" class="mnspan"></span>
-	</div>
-	<div class="cont_men" id="popup">
-		<span id="popups" class="mnspan"></span>
-	</div>	
-	<div class="footer">v. <a href="/changes/" style="font-size: 10pt; color: rgb(0, 0, 129);">3.0.99.801</a>.</div>
-	{% block addForm %}
-	{% if user.is_authenticated %}
-	<form id="addform" class="addform cont_men" action="/add/" method="post" enctype="multipart/form-data"
-		onsubmit="return false;">
-		{% csrf_token %}
-		<div class="mainerror">{{ AddForm.non_field_errors }}</div>
-		{% for field in AddForm %}
-		<div {% if forloop.counter0|divisibleby:2 %}class="clear"{% endif %}>
-			{{ field.label_tag }}: {{ field }}
-			{{ field.errors }}
-		</div>
-		{% endfor %}
-		<input type="submit" class="right" value="Add" onclick="add.sendForm(event); return false;" />
-	</form>
-	{% endif %}
-	{% endblock %}
+    <div id="header" class="thdtbl">
+        <div class="leftmenu">
+            {% block mainlink %}
+            <a class="nurl" href="/">Main</a>
+            <span class="delimiter">|</span>
+            {% endblock %}
+            {% block searchlink %}
+            <a class="nurl" href="/search/" rel="nofollow" onclick="searcher.toggle(); return false;">Search</a>
+            <span class="delimiter">|</span>
+            {% endblock %}
+            <a class="nurl" href="/faq/">FAQ</a><span class="delimiter">|</span>
+            <a class="nurl" href="/card/" rel="nofollow">Random</a>
+        {% if user.is_authenticated %}
+            {% block addLink %}
+            <span class="delimiter">|</span>
+            <a class="nurl" href="/add/" rel="nofollow" onclick="add.toggle(); return false;">Add</a>
+            {% endblock %}
+        </div>
+        <div id="logdiv" class="rightmenu">
+            <span class="delimiter">|</span>
+            <span><a href="/settings/" title="User settings">{{ user.username }}</a></span>
+            <span class="delimiter">|</span>
+            <a href="/logout/" class="nurl" onclick="user.logout();  return false;">Logout</a>
+        </div>
+        <div class="rightmenu">
+            <a href="/stat/" class="nurl">Statistics</a>
+            {% block selectView %}
+            <span class="delimiter">|</span>
+            <div class="select">
+                <select id="show" onChange="setshow();">
+                {# Это можно в какой-нибудь лист ужать #}
+                    <option value="a">All</option>
+                    <option value="0">None</option>
+                    <option value="1">Want</option>
+                    <option value="2">Now</option>
+                    <option value="3">Watched</option>
+                    <option value="4">Dropped</option>
+                    <option value="5">Partially watched</option>
+                </select>
+                <span class="nurl">Display Mode&nbsp;&nbsp;⇵</span>
+            </div>
+            {% endblock %}
+        </div>
+        {% else %}
+        </div>
+        <div id="logdiv" class="rightmenu">
+            <a onclick="user.toggle();" class="nurl">Account</a>
+        </div>
+        <div id="logdv" class="right">
+            <form method="POST" action="/login/" id="login" class="thdtbl" onsubmit="user.login(); return false;">
+                <a class="nurl inurl" onclick="user.quickreg();">Registration⇣</a>
+                {% csrf_token %}
+                {% loginForm %}
+                {{ LoginForm.username }}
+                {{ LoginForm.password }}
+                <input type="submit" value="Login" />
+                <p id="logininfo" class="error"></p>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    <br />
+    {% block search %}
+    <div id="srch" class="hidden">
+        <form method="POST" action="/search/" id="srchp" onsubmit="searcher.send(); return false;">
+        {% csrf_token %}
+            <input id="sin" name="string" type="text"/>
+            <input type="submit" value="Search" />
+        </form>
+        <div id="srchres"></div>
+    </div>
+    {% endblock %}
+    {% block main %}
+    {% endblock %}
+    <div class="cont_men" id="menu">
+        <span id="mspan" class="mnspan"></span>
+    </div>
+    <div class="cont_men" id="popup">
+        <span id="popups" class="mnspan"></span>
+    </div>
+    <div class="footer">v. <a href="/changes/" style="font-size: 10pt;">3.0.99.820</a>.</div>
+    {% block addForm %}
+    {% if user.is_authenticated %}
+    <form id="addform" class="addform cont_men" action="/add/" method="post" enctype="multipart/form-data"
+        onsubmit="return false;">
+        {% csrf_token %}
+        <div class="mainerror">{{ AddForm.non_field_errors }}</div>
+        {% for field in AddForm %}
+        <div {% if forloop.counter0|divisibleby:2 %}class="clear"{% endif %}>
+            {{ field.label_tag }}: {{ field }}
+            {{ field.errors }}
+        </div>
+        {% endfor %}
+        <input type="submit" class="right" value="Add" onclick="add.sendForm(event); return false;" />
+    </form>
+    {% endif %}
+    {% endblock %}
 </body>
 {% endspaceless %}

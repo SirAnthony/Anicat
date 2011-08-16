@@ -42,26 +42,41 @@ input, select {
 
 /* Classes */
 .delimiter {
-    margin: 0px 3px;
+    margin: 0px 4px 0px 3px;
+    color: #063;
+    font-weight: bold;
+}
+
+.select {
+    display: inline;
+}
+
+.select select {
+    position: absolute;
+    opacity: 0;
 }
 
 #dvid{
-clear: both;
-overflow: auto;
+    clear: both;
+    overflow: auto;
 }
+
 #header{
-width: 100%;
-height: 24px;
-border: solid black 1px;
-border-top: none;
+    width: 100%;
+    height: 24px;
+    border: solid black 1px;
+    border-top: none;
 }
+
 #header a{
-margin-left: 2px;
-margin-right: 3px;
+    margin-left: 2px;
+    margin-right: 3px;
 }
+
 .tbl{
     line-height: 23px;
 }
+
 .thdtbl{
 background-color: #339966;
 border: none;
@@ -111,7 +126,7 @@ width: 200px !important;
 .cont_men {
 padding: 7px 10px;
 border:1px solid;
-border-color: #FFFFFF #FFFFFF #808080 #808080;
+border-color: #F0F0F0 #808080 #808080 #F0F0F0;
 background-color: #D4D0C8;
 position:absolute;
 top:100px; /* начальные координаты */
@@ -128,16 +143,17 @@ display: none;
 /*Спан, и шрифт для ссылок*/
 a:link, a:visited, a:active, a:hover{
     text-decoration: none;
-    color: #0068ef;
+    color: #009966; /*#0068ef;*/
 }
 
 
 #pg a, #spanl{
-    font: bold 14pt "verdana",sans-serif;
+    font: bold 12pt sans-serif;
 }
 
 #pg * {
     margin-right: 7px;
+    color: #339966;
 }
 
 #spanl{
@@ -155,12 +171,15 @@ border: none;
 /* Ссылки*/
 .leftmenu, #login a:link, .nurl,
 .thdtbl a:link, .thdtbl a:visited, .thdtbl a:active, .thdtbl a:hover{
-font-weight: bold;
-text-decoration: none;
-color: #000081;
+    font-weight: bold;
+    text-decoration: none;
+    color: #FFFFCC;
 }
 .nurl{
-cursor: pointer;
+    cursor: pointer;
+}
+.inurl, a.inurl:hover, a.inurl:active, a.inurl:visited{
+    color: #339966;
 }
 
 /*Редактор(инпут), менюшки, etc.*/
@@ -229,7 +248,7 @@ overflow: auto;
     float: right;
     margin-bottom: 10px;
     margin-top: 2px;
-    margin-right: 6px;
+    margin-right: 2px;
 }
 
 #login{
@@ -239,11 +258,13 @@ overflow: auto;
 #logdv{
     display: none;
     clear: right;
+    margin-right: 6px;
 }
 
-#show{
-    height: 20px;
-    margin-left: 3px;
+#show {
+    padding: 0px;
+    margin-left: -7px;
+    margin-top: 1px;
 }
 
 #lname, #lpasswd{
