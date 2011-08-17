@@ -231,8 +231,11 @@ class RequestForm(ErrorModelForm):
         user = kwargs.pop('user', None)
         instance = kwargs.get('instance', None)
         super(RequestForm, self).__init__(*args, **kwargs)
-        if instance and not instance.user and user:
-            instance.user = user
+        if instance and user:
+            try:
+                instance.user
+            except:
+                instance.user = user
 
     class Meta:
         exclude = ('user', 'anime', 'status')

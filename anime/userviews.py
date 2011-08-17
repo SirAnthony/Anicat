@@ -27,6 +27,10 @@ def settings(request):
     try:
         if response['mallist']['updated']:
             return HttpResponseRedirect('/settings/')
+
+    except:
+        pass
+    try:
         response.update(userMethods.getRequests(request.user))
     except:
         pass
