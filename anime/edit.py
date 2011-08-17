@@ -95,10 +95,10 @@ def edit(request, itemId=0, modelname='anime', field=None):
             except model.DoesNotExist:
                 obj = model()
         if request.method != 'POST':
-            #try:
+            try:
                 form = formobject(instance=obj)
-            #except Exception, e:
-                #response['text'] = str(e)
+            except Exception, e:
+                response['text'] = str(e)
         else:
             #FIXME: AnimeNameForm throw exceptions here but nobody catch
             form = formobject(request.POST, files=request.FILES, user=request.user, instance=obj)
