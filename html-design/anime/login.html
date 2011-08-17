@@ -14,9 +14,9 @@
         </tr>
         {% if field.errors %}
         <tr>
-            <td colspan="2">field.errors</td>
+            <td colspan="2">{{ field.errors }}</td>
         </tr>
-        {% endif %}        
+        {% endif %}
         {% endfor %}
         <tr><td><input type="submit" value="Login" /></td></tr>
         </table>

@@ -3,13 +3,13 @@ from anime.models import AnimeItem, EDIT_MODELS, USER_STATUS, UserStatusBundle
 from django.core.cache import cache
 from anime.functions import createPages
 from anime.functions import getVal, getAttr, updateMainCaches
-from hashlib import sha1 
+from hashlib import sha1
 
-def get(request):    
+def get(request):
     fields = []
     if request.method != 'POST':
         return {'text': 'Only POST method allowed.'}
-    try:        
+    try:
         aid = int(request.POST.get('id', 0))
         anime = AnimeItem.objects.get(id=aid)
     except Exception, e:
@@ -32,7 +32,7 @@ def get(request):
             else:
                 try:
                     bundle = model.objects.get(anime=anime, user=request.user)
-                    status = int(bundle.status)
+                    status = int(bundle.state)
                 except Exception:
                     status = 0
                 response[field] = {'selected': status, 'select': dict(USER_STATUS)}

@@ -8,6 +8,7 @@ from django.forms import Form, ModelForm, Textarea, FileField, \
 from django.forms.forms import BoundField
 from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
+from django.utils.translation import ugettext_lazy as _
 from anime.fields import TextToAnimeItemField, TextToAnimeNameField, UnknownDateField, \
                           CardImageField
 from anime.models import AnimeBundle, AnimeItem, AnimeName, UserStatusBundle, AnimeLinks, AnimeRequest, \
@@ -30,7 +31,7 @@ class NotActiveAuthenticationForm(AuthenticationForm):
         if username and password:
             self.user_cache = authenticate(username=username, password=password)
             if self.user_cache is None:
-                raise forms.ValidationError(_("Please enter a correct username and password. Note that both fields are case-sensitive."))
+                raise ValidationError(_("Please enter a correct username and password. Note that both fields are case-sensitive."))
         self.check_for_test_cookie()
         return self.cleaned_data
 
@@ -56,7 +57,7 @@ class ReadOnlyModelForm(ModelForm):
 
     def clean(self):
         if hasattr(self, '__readonly__') and self.__readonly__:
-            raise ValidationError('This form is readonly for you.')
+            raise ValidationError(_('This form is readonly for you.'))
         return super(ReadOnlyModelForm, self).clean()
 
 class ErrorModelForm(ModelForm):
@@ -198,7 +199,7 @@ class AnimeNameForm(DynamicModelForm):
     def __init__(self, data=None, *args, **kwargs):
         instance = kwargs.pop('instance', None)
         if not instance or not instance.id:
-            raise ValueError('Record not exist.')
+            raise ValueError(_('Record not exist.'))
         if not isinstance(instance, AnimeItem):
             raise TypeError('%s is not AnimeItem instance.' % type(instance).__name__)
         super(AnimeNameForm, self).__init__(data, *args, **kwargs)
@@ -250,7 +251,7 @@ class PureRequestForm(ReadOnlyModelForm, RequestForm):
     def clean_status(self):
         if self.instance.requestType == 1 and self.instance.status > 0:
             if 'status' in self._get_changed_data():
-                raise ValidationError('You cannot change it anymore.')
+                raise ValidationError(_('You cannot change it anymore.'))
         return self.cleaned_data['status']
 
     class Meta:
@@ -266,7 +267,7 @@ class ImageRequestForm(RequestForm):
     def __init__(self, *args, **kwargs):
         anime = kwargs.pop('instance', None)
         if not anime or not anime.id:
-            raise ValueError('Record not exist.')
+            raise ValueError(_('Record not exist.'))
         if not isinstance(anime, AnimeItem):
             raise TypeError('%s is not AnimeItem instance.' % type(anime).__name__)
         instance = AnimeImageRequest(anime=anime)
@@ -281,11 +282,11 @@ class ImageRequestForm(RequestForm):
         image = self.files.get(name)
         try:
             if not image:
-                raise ValidationError('This field is required.')
+                raise ValidationError(_('This field is required.'))
             filename = str(image.size)+image.name
             fullfilename = os.path.join(settings.MEDIA_ROOT, filename)
             if os.path.exists(fullfilename):
-                raise ValidationError('This file already loaded.')
+                raise ValidationError(_('This file already loaded.'))
             try:
                 fileobj = open(fullfilename, 'wb+')
                 for chunk in image.chunks():
