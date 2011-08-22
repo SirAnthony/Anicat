@@ -153,7 +153,7 @@ class AnimeItem(models.Model):
     def _getReleaseTypeString(self):
         return ANIME_TYPES[self.releaseType][1]
 
-    def _getTranslation(self):
+    def _getRelease(self):
         try:
             if self.endedAt:
                 return ' - '.join([
@@ -165,7 +165,7 @@ class AnimeItem(models.Model):
             return 'Bad value'
 
     releaseTypeS = property(_getReleaseTypeString)
-    translation = property(_getTranslation)
+    release = property(_getRelease)
 
     def save(self, *args, **kwargs):
         try:

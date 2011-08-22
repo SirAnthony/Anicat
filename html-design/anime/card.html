@@ -6,6 +6,10 @@
     {% block description %}{% if anime %}Name: {{ anime.title }}. Type: {{ anime.releaseTypeS }}{% endif %}{% endblock %}
     {% block keywords %}{% if anime %}{{ anime.title }}, {{ anime.releaseTypeS }}{% endif %}{% endblock %}
 
+    {% block customScripts %}
+    <script type="text/javascript" src="/static/card.js"></script>
+    {% endblock %}
+
     {% block main %}
     {% if not anime %}
     <div id="nocard">
@@ -14,24 +18,28 @@
     {% else %}
     <div id="imagebun" class="cardcol">
         <div id="cimg">
-            <img src="/images/{{ anime.id }}/" />
+            {% if user.is_authenticated %}<a href="/edit/image/{{ anime.id }}/" class="right">Edit</a>{%endif%}
+            <img src="http://anicat.net/images/{{ anime.id }}/" />
         </div>
+        <div>
         {% if user.is_authenticated %}
-        <a href="/edit/bundle/{% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}0{% endif %}/" class="right">Edit</a>
+            <a href="/edit/bundle/{% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}0{% endif %}/" class="right">Edit</a>
         {%endif%}
-        <h4>Bundled with:</h4>
-        <!-- Это все нужно переверстать -->
-        <table>
+
+            <h4>Bundled with:</h4>
+            <!-- Это все нужно переверстать -->
+            <table>
             {% for bundle in bundles %}
-            <tr>
-                <td>{% ifequal bundle.0.id anime.id %}►{% endifequal %}</td>
-                <td align="right">{{ forloop.counter }}</td>
-                <td>
-                    <a href="/card/{{ bundle.0.id }}" class="s{{ bundle.1 }}" >{{ bundle.0.title }}</a>
-                </td>
-            </tr>
+                <tr>
+                    <td>{% ifequal bundle.0.id anime.id %}►{% endifequal %}</td>
+                    <td align="right">{{ forloop.counter }}</td>
+                    <td>
+                        <a href="/card/{{ bundle.0.id }}" class="s{{ bundle.1 }}" >{{ bundle.0.title }}</a>
+                    </td>
+                </tr>
             {% endfor %}
-        </table>
+            </table>
+        </div>
     </div>
     <div id="main" class="cardcol">
         <div>
@@ -57,7 +65,7 @@
         </div>
         <div>
             {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releasedAt,endedAt/" class="right">Edit</a>{%endif%}
-            <h4>Translation:</h4>{{ anime.translation }}
+            <h4>Released:</h4>{{ anime.release }}
         </div>
         {% if animelinks or user.is_authenticated %}
         <div>
@@ -80,8 +88,8 @@
             <h4>State:</h4><span>{% if userstatus.statusName %}{{ userstatus.statusName|capfirst }}{% else %}None{% endif %}</span>
             <input type="hidden" name="card_userstatus_input" value="{{ userstatus.state }}">
             {% if userstatus.count %}
-            	<span class="right">{{ userstatus.count }}/{{ anime.episodesCount }}</span>
-            	<input type="hidden" name="card_usercount_input" value="{{ userstatus.count }}">
+                <span class="right">{{ userstatus.count }}/{{ anime.episodesCount }}</span>
+                <input type="hidden" name="card_usercount_input" value="{{ userstatus.count }}">
             {% endif %}
         </div>
         {%endif%}

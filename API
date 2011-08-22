@@ -33,7 +33,7 @@ Search:
                     name: string,
                     type: string,
                     numberofep: int, // Count of episodes
-                    translation: string,
+                    release: string, // Release dates
                     air: bool
             }],
             page: int // Current page
@@ -60,4 +60,3 @@ Get:
         response: "get"
         order: array // Fields order
         text: object // Result depends on which fields was requested.
-        

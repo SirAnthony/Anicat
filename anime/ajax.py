@@ -82,7 +82,7 @@ def search(request):
         del response['text']['pages']
         items = response['text'].pop('items')
         response['text']['items'] = [{'name': x.title, 'type': x.releaseTypeS,
-            'numberofep': x.episodesCount, 'id': x.id, 'translation': x.translation,
+            'numberofep': x.episodesCount, 'id': x.id, 'release': x.release,
             'air': x.air } for x in items]
     response['status'] = True
     return response

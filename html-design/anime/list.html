@@ -23,8 +23,8 @@
                     <th class="numberofep" id="numberofep">
                         <a rel="nofollow" href="/sort/episodesCount/">Episodes</a>
                     </th>
-                    <th class="translation" id="translation">
-                        <a rel="nofollow" href="/sort/releasedAt/">Translation</a>
+                    <th class="release" id="release">
+                        <a rel="nofollow" href="/sort/releasedAt/">Released</a>
                     </th>
                     <th class="type" id="type">
                         <a rel="nofollow" href="/sort/releaseType/">Type</a>
@@ -42,7 +42,7 @@
                     <td onclick="cnt('id', '{{ title.id }}', event);" id="id{{ title.id }}" class="id">{{ forloop.counter|add:page.start }}</td>
                     <td onclick="cnt('name', '{{ title.id }}', event);" id="name{{ title.id }}" class="name left">{{ title.title }}</td>
                     <td onclick="cnt('numberofep', '{{ title.id }}', event);" id="numberofep{{ title.id }}" class="numberofep">{% if title.1.count %}{{ title.1.count }}/{% endif %}{{ title.episodesCount }}</td>
-                    <td onclick="cnt('translation', '{{ title.id }}', event);" id="translation{{ title.id }}" class="translation">{{ title.translation }}</td>
+                    <td onclick="cnt('release', '{{ title.id }}', event);" id="release{{ title.id }}" class="release">{{ title.release }}</td>
                     <td onclick="cnt('type', '{{ title.id }}', event);" id="type{{ title.id }}" class="type">{{ title.releaseTypeS }}</td>
                     {# custom fields #}
                 {% endfor %}
