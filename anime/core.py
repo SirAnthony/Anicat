@@ -62,7 +62,8 @@ def get(request):
                 response[field] = getattr(anime, field)
             except Exception, e:
                 response[field] = 'Error: ' + str(e)
-    response = {'response': 'get', 'status': True, 'text': response}
+    r = 'card' if request.POST.get('card') else 'get'
+    response = {'response': r, 'status': True, 'text': response}
     #if (datetime.now() - request.user.date_joined).days > 20:
     #    response['edt'] = True
 

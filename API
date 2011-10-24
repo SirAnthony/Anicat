@@ -24,6 +24,7 @@ Search:
         field: string // Search field. Avaliable choises: [name]
         string: string // Search string
         page: int // Result page. Default: 0
+        limit: int // May be passed to get another count of results. Maximum is 30.
     Response:
         response: "search"
         text: {
@@ -55,7 +56,6 @@ Get:
         id: int // Anime id
         field: string // Field name.
                       // You can specify this parameter several times to pass multiple fields
-        limit: int // May be passed to get another count of results. Maximum is 30.
     Response:
         response: "get"
         order: array // Fields order
