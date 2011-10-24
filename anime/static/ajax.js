@@ -165,12 +165,16 @@ var ajax = new (function(){
                                              name: 'card_usercount_input', value: resp.text.count}}, 1);
                             }
                         }
+
                         var rs = getStylesheetRule('.rs'+resp.text.state, 'background-color');
                         rs = rs ? rs : '#FFF';
                         var as = getStylesheetRule('.as'+resp.text.state, 'background-color');
                         as = as ? as : '#FFF';
+                        var sl = getStylesheetRule('.sl'+resp.text.state, 'color');
+                        sl = sl ? sl : '#000';
                         var rules = [['.r'+resp.id, ['background-color', rs]],
-                                    ['.a'+resp.id, ['background-color', as]]];
+                                    ['.a'+resp.id, ['background-color', as]],
+                                    ['.s'+resp.id, ['color', sl, true]]];
                         addStylesheetRules(rules);
                     }
                 break;
@@ -237,7 +241,7 @@ var ajax = new (function(){
                                     if(curname == 'bundle'){
                                         element.appendChild(s, [{'a':
                                             {href: '/card/'+cur.elemid+'/', innerText: encd(cur.name),
-                                            className: 's' + (cur.job ? cur.job : 0)}}]);
+                                            className: 's s' + cur.elemid}}]);
                                     }
                                     if(cur.role){
                                         element.appendChild(p, [

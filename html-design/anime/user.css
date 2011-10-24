@@ -1,60 +1,55 @@
 {% spaceless %}
 .air {
-	background-color: yellow;
+    background-color: yellow;
 }
-.sNone, .s0, .s {
-	font: normal 14pt "times new roman",serif !important;
-	color: #000 !important;
+.sNone, .sl0, .s {
+    font: normal 14pt "times new roman",serif !important;
+    color: #000 !important;
 }
-.s1 {
-	font: normal 14pt "times new roman",serif !important;
-	color: MediumBlue !important;
+.sl1{% if style.1.2 %},.s{{ style.1.2 }}{% endif %} {
+    color: MediumBlue !important;
 }
-.s2 {
-	font: normal 14pt "times new roman",serif !important;
-	color: DarkTurquoise !important;
+.sl2{% if style.2.2 %},.s{{ style.2.2 }}{% endif %} {
+    color: DarkTurquoise !important;
 }
-.s3 {
-	font: normal 14pt "times new roman",serif !important;
-	color: SeaGreen !important;
+.sl3{% if style.3.2 %},.s{{ style.3.2 }}{% endif %} {
+    color: SeaGreen !important;
 }
-.s4 {
-	font: normal 14pt "times new roman",serif !important;
-	color: red !important;
+.sl4{% if style.4.2 %},.s{{ style.4.2 }}{% endif %} {
+    color: red !important;
 }
-.s5 {
-	font: normal 14pt "times new roman",serif !important;
-	color: #F0F0F0 !important;
+.sl5{% if style.5.2 %},.s{{ style.5.2 }}{% endif %} {
+    color: #F0F0F0 !important;
 }
 {% if style.0 %}{% endif %}
-.rs1{% if style.1.0 %}, .r{{ style.1.0 }}{% endif %} {
-	background-color: DeepSkyBlue;
+.rs1{% if style.1.0 %},.r{{ style.1.0 }}{% endif %} {
+    background-color: DeepSkyBlue;
 }
-.as1{% if style.1.0 %}, .a{{ style.1.1 }}{% endif %} {
-	background-color: #FF69B4;
+.as1{% if style.1.0 %},.a{{ style.1.1 }}{% endif %} {
+    background-color: #FF69B4;
 }
-.rs2{% if style.2.0 %}, .r{{ style.2.0 }}{% endif %} {
-	background-color: cyan;
+.rs2{% if style.2.0 %},.r{{ style.2.0 }}{% endif %} {
+    background-color: cyan;
 }
-.as2{% if style.2.0 %}, .a{{ style.2.1 }}{% endif %} {
-	background-color: #FFD700;
+.as2{% if style.2.0 %},.a{{ style.2.1 }}{% endif %} {
+    background-color: #FFD700;
 }
-.rs3{% if style.3.0 %}, .r{{ style.3.0 }}{% endif %} {
-	background-color: #ccffcc;
+.rs3{% if style.3.0 %},.r{{ style.3.0 }}{% endif %} {
+    background-color: #ccffcc;
 }
-.as3{% if style.3.0 %}, .a{{ style.3.1 }}{% endif %} {
-	background-color: #f2f696;
+.as3{% if style.3.0 %},.a{{ style.3.1 }}{% endif %} {
+    background-color: #f2f696;
 }
-.rs4{% if style.4.0 %}, .r{{ style.4.0 }}{% endif %} {
-	background-color: red;
+.rs4{% if style.4.0 %},.r{{ style.4.0 }}{% endif %} {
+    background-color: red;
 }
-.as4{% if style.4.0 %}, .a{{ style.4.1 }}{% endif %} {
-	background-color: #ffb300;
+.as4{% if style.4.0 %},.a{{ style.4.1 }}{% endif %} {
+    background-color: #ffb300;
 }
-.as5{% if style.5.0 %}, .a{{ style.5.1 }}{% endif %}{
-	background-color: #FFFFCC;
+.as5{% if style.5.0 %},.a{{ style.5.1 }}{% endif %}{
+    background-color: #FFFFCC;
 }
-.rs5{% if style.5.0 %}, .r{{ style.5.0 }}{% endif %} {
-	background-color: #F0F0F0;
+.rs5{% if style.5.0 %},.r{{ style.5.0 }}{% endif %} {
+    background-color: #F0F0F0;
 }
 {% endspaceless %}

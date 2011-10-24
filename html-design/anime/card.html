@@ -31,10 +31,10 @@
             <table>
             {% for bundle in bundles %}
                 <tr>
-                    <td>{% ifequal bundle.0.id anime.id %}►{% endifequal %}</td>
+                    <td>{% ifequal bundle.id anime.id %}►{% endifequal %}</td>
                     <td align="right">{{ forloop.counter }}</td>
                     <td>
-                        <a href="/card/{{ bundle.0.id }}" class="s{{ bundle.1 }}" >{{ bundle.0.title }}</a>
+                        <a href="/card/{{ bundle.id }}" class="s s{{ bundle.id }}" >{{ bundle.title }}</a>
                     </td>
                 </tr>
             {% endfor %}
@@ -45,7 +45,7 @@
         <div>
             {% if user.is_authenticated %}<a href="/edit/name/{{ anime.id }}/" class="right">Edit</a>{%endif%}
             <h4>Name:</h4>
-            {% for name in anime.animenames.values %}{% if name.title == anime.title %}<i>{{ name.title }}</i>{% else %}{{ name.title }}{% endif %}<br/>{% endfor %}
+            {% for name in names %}{% if name.title == anime.title %}<i>{{ name.title }}</i>{% else %}{{ name.title }}{% endif %}<br/>{% endfor %}
         </div>
         <div>
             {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releaseType/" class="right">Edit</a>{%endif%}

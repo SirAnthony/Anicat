@@ -12,6 +12,8 @@ EDIBLE_LIST = [
     'feedback'
 ]
 
+# This shit needs refactoring
+
 def edit(request, itemId=0, modelname='anime', field=None):
     if not modelname:
         modelname = 'anime'
@@ -114,14 +116,20 @@ def edit(request, itemId=0, modelname='anime', field=None):
                                 raise ValueError('Cannot save new instance without all required fields.')
                         elif modelname == 'image': #FUUU
                             obj = form.instance
+                            retid = obj.id
                         for fieldname in form.cleaned_data.keys():
                             if fieldname != obj._meta.pk.name:
                                 setattr(obj, fieldname, form.cleaned_data[fieldname])
                         obj.save()
                         if modelname == 'anime':
                             updateMainCaches(USER_STATUS[0][0])
-                        elif modelname in ['animerequest', 'image', 'feedback', 'request']:
-                            cache.delete('requests')
+                    if modelname in ['animerequest', 'image', 'feedback', 'request']:
+                        cache.delete('requests')
+                    elif modelname == 'bundle':
+                        for item in obj.animeitems.values_list('id').all():
+                            cache.delete('card:%s' % item[0])
+                    elif modelname != 'state':
+                        cache.delete('card:%s' % itemId)
                 except Exception, e:
                     response['text'] = str(e)
                     form.addError('Error "%s" has occured.' % e)

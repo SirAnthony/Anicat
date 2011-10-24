@@ -106,3 +106,5 @@ def updateMainCaches(status=None):
         cache.set('mainTable:%s' % id, t)
     cache.set('mainTable', {})
 
+def updateCardCache(rid):
+    invalidateCacheKey('card', rid)

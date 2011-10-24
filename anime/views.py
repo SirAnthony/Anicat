@@ -106,42 +106,45 @@ def card(request, animeId=0):
         try:
             anime = AnimeItem.objects.all()[animeId]
         except:
-            pass
+            return {}
         else:
             #fixme double job
             return HttpResponseRedirect('/card/%s/' % animeId)
-    else:
+    ret = cache.get('card:%s' % animeId)
+    if not ret:
         try:
             anime = AnimeItem.objects.get(id=animeId)
         except:
-            pass
-    bundles = None
-    if anime and anime.bundle:
-        bundles = anime.bundle.animeitems.all().order_by('releasedAt')
-        if request.user.is_authenticated():
-            status = UserStatusBundle.objects.get_for_user(bundles, request.user.id)
-            bundles = map(lambda x: (x, getAttr(status[x.id], 'state', 0)), bundles)
-        else:
-            bundles = map(lambda x: (x,  0), bundles)
-    try:
-        links = anime.links.get()
-    except AnimeLinks.DoesNotExist:
-        links = None
-    except AttributeError:
-        links = None
-    userstatus = None
-    if request.user.is_authenticated():
+            return {}
+        bundles = None
+        names = None
+        if anime:
+            names = anime.animenames.values()
+            if anime.bundle:
+                bundles = anime.bundle.animeitems.values('id', 'title').all().order_by('releasedAt')
         try:
-            userstatus = anime.statusbundles.values('state', 'count').get(user=request.user)
+            links = anime.links.get()
+        except AnimeLinks.DoesNotExist:
+            links = None
+        except AttributeError:
+            links = None
+        ret = {'anime': anime, 'bundles': bundles, 'animelinks': links,
+                'names': names}
+        cache.set('card:%s' % animeId, ret)
+    if request.user.is_authenticated():
+        userstatus = None
+        try:
+            userstatus = ret['anime'].statusbundles.values('state', 'count').get(user=request.user)
         except UserStatusBundle.DoesNotExist:
             pass
         except AttributeError:
             pass
         else:
             userstatus['statusName'] = USER_STATUS[userstatus['state'] or 0][1]
-    return {'anime': anime, 'bundles': bundles, 'animelinks': links, 'userstatus': userstatus}
+        ret['userstatus'] = userstatus
+    return ret
 
-#@condition(last_modified_func=latestStatus)
+@condition(last_modified_func=latestStatus)
 @render_to('anime/stat.html')
 def stat(request, userId=0):
     user = None
@@ -180,7 +183,7 @@ def stat(request, userId=0):
     return {'username': username, 'stat': tuser}
 
 @cache_control(private=True, no_cache=True)
-@condition(last_modified_func=latestStatus)
+#@condition(last_modified_func=latestStatus)
 @render_to('anime/user.css', 'text/css')
 def generateCss(request):
     styles = cache.get('userCss:%s' % request.user.id)
@@ -190,7 +193,7 @@ def generateCss(request):
             statuses = UserStatusBundle.objects.filter(user=request.user).exclude(state=0).values('anime','state')
             for status in statuses:
                 styles[status['state']].append(str(status['anime']))
-            styles = [[',.r'.join(style), ',.a'.join(style)] for style in styles]
+            styles = [[',.r'.join(style), ',.a'.join(style), ',.s'.join(style)] for style in styles]
         cache.set('userCss:%s' % request.user.id, styles)
     return {'style': styles}
 
