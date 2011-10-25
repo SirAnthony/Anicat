@@ -160,7 +160,7 @@ var searcher = new ( function(){
                             {'a': {className: 'cardurl', 'target': '_blank',
                                 'href': '/card/'+elem.id+'/',
                                 onclick: ( function(id){
-                                            return function(){card(id); return false;};
+                                            return function(){return getCard(id);};
                                         })(elem.id)}}, [
                                 {'img': {'src': '/static/arrow.gif', 'alt': 'Go'}},
                             ]
@@ -484,6 +484,9 @@ function rsemicolon(prm){
     return astr;
 }
 
+function capitalise(string){
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
 //Режимы отображения
 
@@ -567,10 +570,22 @@ function cnt(tag, num, e){
 
 }
 
-function card(id){
-    ajax.loadXMLDoc(url+'get/', {'id': id, 'card': true, 'field': [
-        'id', 'bundle', 'name', 'type', 'genre', 'episodesCount',
-        'duration', 'release', 'links', 'state']});
+function getCard(id){
+    var card = document.getElementById("card");
+    if(card){
+        var dvid = document.getElementById("dvid");
+        var tbl = document.getElementById("tbl");
+        var w = dvid.clientWidth - tbl.clientWidth - 100;
+        element.removeAllChilds(card);
+        card.style.width = w + 'px';
+        if(w >= 500){
+            ajax.loadXMLDoc(url+'get/', {'id': id, 'card': true, 'field': [
+                'id', 'bundle', 'name', 'type', 'genre', 'episodesCount',
+                'duration', 'release', 'links', 'state']});
+            return false;
+        }
+    }
+    return true;
 }
 
 function createStatusForm(id, selected, select, all, completed){

@@ -150,19 +150,17 @@ var ajax = new (function(){
                                         || x[i].tagName == "INPUT")) a.push(x[i]);
                                 return a;
                             })(statusdiv.childNodes));
-                            element.insert(statusdiv.lastChild, {'span': {innerText: statusname}}, 1);
-                            element.insert(statusdiv.lastChild, {'input': {type: 'hidden',
-                                             name: 'card_userstatus_input', value: resp.text.state}}, 1);
+                            element.appendChild(statusdiv, [{'span': {innerText: statusname}},
+                                {'input': {type: 'hidden', name: 'card_userstatus_input', value: resp.text.state}}]);
                             if(resp.text.count){
-                                element.insert(statusdiv.lastChild, {'span':
+                                element.appendChild(statusdiv, [{'span':
                                     {innerText: resp.text.count + '/' + (function(){
                                         var n = document.getElementsByName('episodesCount');
                                         for(var i in n)
                                             if(n[i].tagName == "SPAN") return n[i].innerText;
                                         })(),
-                                    className: 'right'}}, 1);
-                                element.insert(statusdiv.lastChild, {'input': {type: 'hidden',
-                                             name: 'card_usercount_input', value: resp.text.count}}, 1);
+                                    className: 'right'}}, {'input': {type: 'hidden',
+                                             name: 'card_usercount_input', value: resp.text.count}}]);
                             }
                         }
 
@@ -284,50 +282,95 @@ var ajax = new (function(){
                 case 'card':
                     message.hide();
                     var card = document.getElementById("card");
-                    element.removeAllChilds(card);
                     var res = resp.text;
-                    var names = Array();
-                    names.push(element.create('h4', {innerText: 'Name:'}));
-                    for(var name in res.name){
-                        names.push(element.create('', {innerText: res.name[name].title}));
-                        names.push(element.create('br', {}));
+                    var data = new Array();
+                    var fields = ['name', 'type', 'genre', 'episodesCount',
+                                'duration', 'release', 'links', 'state']
+                    for(var i in fields){
+                        var field = res[fields[i]];
+                        var n;
+                        switch(i){
+                            case 3: n = 'episodes:'; break;
+                            case 5: n = 'released:'; break;
+                            default: n = fields[i] + ':'; break;
+                        }
+                        var d = element.create('div', null, {'h4': {innerText: capitalise(n)}});
+                        data.push(d);
+                        if(fields[i] == 'name'){
+                            var names = new Array();
+                            for(var name in field){
+                                names.push(element.create('', {innerText: field[name].title}));
+                                names.push(element.create('br', {}));
+                            }
+                            element.appendChild(d, names)
+                        }else if(fields[i] == 'state'){
+                            element.appendChild(d, [{'span': {innerText: capitalise(field.select[field.selected])}},
+                                {'input': {'type': 'hidden', 'name': 'card_userstatus_input', 'value': field.selected}}]);
+                            if(field.completed && field.all){
+                                element.appendChild(d, [{'span': {className: 'right',
+                                    innerText: field.completed + '/' + field.all}},
+                                {'input': {'type': 'hidden', 'name': 'card_usercount_input', 'value': field.completed}}]);
+                            }
+                        }else if(fields[i] == 'links'){
+                            if(!field) continue;
+                            if(field.AniDB)
+                                element.appendChild(d, [{'a': {'target': '_blank', innerText: 'AniDB',
+                                    'href': 'http://www.animenewsnetwork.com/encyclopedia/anime.php?id=' + field.AniDB}},
+                                    {'': {innerText: ' '}}]);
+                            if(field.ANN)
+                                element.appendChild(d, [{'a': {'target': '_blank', innerText: 'ANN',
+                                    'href': 'http://anidb.net/perl-bin/animedb.pl?show=anime&aid=' + field.ANN}},
+                                    {'': {innerText: ' '}}]);
+                            if(field.MAL)
+                                element.appendChild(d, {'a': {'target': '_blank', innerText: 'MAL',
+                                    'href': 'http://myanimelist.net/anime/' + field.ANN}});
+                        }else{
+                            element.appendChild(d, {'': {innerText: field ? field : 'None'}});
+                        }
                     }
                     element.appendChild(card, [
                         {'div': {'id': 'imagebun', 'className': 'cardcol'}}, [
                             {'div': {'id': 'cimg'}}, [
-                                {'img': {'src': '/images/' + res.id + '/'}}],
-                            {'div': {}}, [
+                                {'img': {'src': 'http://anicat.net/images/' + res.id + '/'}}],
+                            'div', [
                                 {'h4': {innerText: 'Bundled with:'}},
-                                {'table': {}}, (function(bn){
+                                'table', (function(bn){
                                     if(!bn) return;
                                     var b = new Array();
                                     var num = numHash(bn);
                                     for(var i=0; i<=num; i++){
                                         var cur = bn[i]
                                         b.push(element.create('tr', {}, [
+                                            {'td': {innerText: (cur.elemid == res.id) ? '►' : ''}},
                                             {'td': {'text-align': 'right', innerText: i+1}},
-                                            {'td': {}}, [ {'a': {href: '/card/'+cur.elemid+'/',
+                                            'td', [{'a': {'target': '_blank',
+                                                href: '/card/'+cur.elemid+'/',
                                                 innerText: encd(cur.name),
-                                                className: 's s' + cur.elemid}}]
+                                                className: 's s' + cur.elemid,
+                                                onclick: (function(id){
+                                                    return function(){return getCard(id);};
+                                                })(cur.elemid)}}]
                                         ]));
                                     }
                                     return b;
                                 })(res.bundle)
                             ]
                         ],
-                        {'div': {'id': 'main', 'className': 'cardcol'}}, [
-                            {'div': {}}, names,
-                            {'div': {}}, [{'h4': {innerText: 'Type:'}}, {'': {innerText: res.type}}],
-                            {'div': {}}, [{'h4': {innerText: 'Genre:'}}, {'': {innerText: res.genre}}],
-                            {'div': {}}, [{'h4': {innerText: 'Episodes:'}}, {'': {innerText: res.episodesCount}}],
-                            {'div': {}}, [{'h4': {innerText: 'Duration:'}}, {'': {innerText: res.duration}}],
-                            {'div': {}}, [{'h4': {innerText: 'Released:'}}, {'': {innerText: res.release}}],
-                            {'div': {}}, [{'h4': {innerText: 'Links:'}}, {'': {innerText: 'later'}}],
-                            {'div': {'id': 'card_userstatus'}}, [{'h4': {innerText: 'State:'}},
-                                {'span': {innerText: res.state.select[res.state.selected]}},
-                                {'input': {'type': 'hidden', 'name': 'card_userstatus_input', 'value': res.state.selected}}],
-                        ]
+                        {'div': {'id': 'main', 'className': 'cardcol'}}, data
+
                     ]);
+                    var soffsety = (document.documentElement.scrollTop || document.body.scrollTop) - document.documentElement.clientTop;
+                    card.style.top = soffsety + ((soffsety > card.parentNode.offsetTop) ? 5 : 40) + 'px';
+                    var imgbun;
+                    if(card.clientWidth < 750){
+                        imgbun = (card.clientWidth < 600) ? 200 : 300;
+                        card.firstChild.style.maxWidth = imgbun + 'px';
+                        card.firstChild.firstChild.firstChild.style.maxWidth = imgbun + 'px';
+                        imgbun += 40;
+                    }else{
+                        imgbun = card.firstChild.clientWidth + 40;
+                    }
+                    card.lastChild.style.maxWidth = card.clientWidth - imgbun + 'px';
                 break;
 
                 case 'login':

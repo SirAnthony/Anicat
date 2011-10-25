@@ -399,6 +399,11 @@ color: HighlightText;
 .cardcol a.right:hover {
     color: #0068ef;
 }
+#card {
+    position: absolute;
+    right: 0px;
+    background: #FFF;
+}
 #staff.cardcol{
 clear: left;
 }
