@@ -77,15 +77,7 @@ def edit(request, itemId=0, modelname='anime', field=None):
                         cache.delete('Stat:%s' % user.id)
                     return _f
                 lastfunc = st(status, oldstatus, request.user)
-        elif modelname == 'links':
-            try:
-                anime = AnimeItem.objects.get(id=itemId)
-            except AnimeItem.DoesNotExist:
-                response['text'] = 'Bad id passed.'
-            else:
-                obj, created = model.objects.get_or_create(anime=anime)
-            retid = itemId
-        elif modelname == 'name' or modelname == 'image':
+        elif modelname in ['name', 'links', 'image']:
             try:
                 obj = AnimeItem.objects.get(id=itemId)
             except AnimeItem.DoesNotExist:
@@ -108,6 +100,8 @@ def edit(request, itemId=0, modelname='anime', field=None):
                 try:
                     if modelname == 'name':
                         _saveAnimeNames(form, obj)
+                    elif modelname == 'links':
+                        _saveAnimeLinks(form, obj)
                     else:
                         if modelname == 'anime' and not itemId:
                             if not fields:
@@ -131,6 +125,7 @@ def edit(request, itemId=0, modelname='anime', field=None):
                     elif modelname != 'state':
                         cache.delete('card:%s' % itemId)
                 except Exception, e:
+                    raise
                     response['text'] = str(e)
                     form.addError('Error "%s" has occured.' % e)
                 else:
@@ -177,3 +172,10 @@ def _saveAnimeNames(form, obj):
             name.save()
     for name in newNames:
         name.save()
+
+def _saveAnimeLinks(form, obj):
+    if not obj or not obj.id:
+        raise ValueError('%s not exists.' % type(obj).__name__)
+    links = obj.links.all()
+    cleaned = form.cleaned_data
+    raise

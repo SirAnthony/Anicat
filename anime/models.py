@@ -88,7 +88,7 @@ class AnimeBundle(models.Model):
 
     def save(self):
         '''
-        WARNING! This function removes links from all items
+        WARNING! This function removes bundles from all items
         which is not in tied array. For linking single items
         use tie classmethod instead.
         '''

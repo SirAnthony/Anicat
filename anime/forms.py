@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.forms import Form, ModelForm, Textarea, FileField, \
-                         BooleanField, CharField
+                         BooleanField, CharField, URLField, ChoiceField
 from django.forms.forms import BoundField
 from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
@@ -12,7 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 from anime.fields import TextToAnimeItemField, TextToAnimeNameField, UnknownDateField, \
                           CardImageField
 from anime.models import AnimeBundle, AnimeItem, AnimeName, UserStatusBundle, AnimeLinks, AnimeRequest, \
-                         AnimeItemRequest, AnimeImageRequest, AnimeFeedbackRequest
+                         AnimeItemRequest, AnimeImageRequest, AnimeFeedbackRequest, LINKS_TYPES
 import os
 from hashlib import sha1
 
@@ -195,7 +195,7 @@ class AnimeForm(ErrorModelForm):
         model = AnimeItem
         exclude = ('bundle', 'locked', 'releasedKnown', 'endedKnown')
 
-
+#TODO: inherit from YobaDynamicModelForm
 class AnimeNameForm(DynamicModelForm):
     def __init__(self, data=None, *args, **kwargs):
         instance = kwargs.pop('instance', None)
@@ -219,14 +219,40 @@ class AnimeNameForm(DynamicModelForm):
         self.setFields(fields)
         self.setData(data)
 
+class AnimeLinksForm(DynamicModelForm):
+    def __init__(self, data=None, *args, **kwargs):
+        instance = kwargs.pop('instance', None)
+        if not instance or not instance.id:
+            raise ValueError(_('Record not exist.'))
+        if not isinstance(instance, AnimeItem):
+            raise TypeError('%s is not AnimeItem instance.' % type(instance).__name__)
+        super(AnimeLinksForm, self).__init__(data, *args, **kwargs)
+        fields = {}
+        items = instance.links.all()
+        for i in range(len(items) + 3):
+            try:
+                link = items[i].link.strip()
+                ltype = items[i].linkType
+            except:
+                link = None
+                ltype = 0
+            field_link = URLField(initial=link, required=False)
+            field_type = ChoiceField(choices=LINKS_TYPES, initial=ltype)
+            #field._animeobject = instance
+            fields['Link %i' % i] = field_link
+            fields['Link type %i' % i] = field_type
+        for fieldname in self.fields.keys():
+            del self.fields[fieldname]
+        self.setFields(fields)
+        self.setData(data)
+
+    class Meta:
+        exclude = ('anime')
+
 class UserStatusForm(ErrorModelForm):
     class Meta:
         model = UserStatusBundle
         exclude = ('anime', 'user')
-
-class LinksForm(ErrorModelForm):
-    class Meta:
-        exclude = ('anime')
 
 class RequestForm(ErrorModelForm):
     def __init__(self, *args, **kwargs):
@@ -315,8 +341,8 @@ EDIT_FORMS = {
     AnimeBundle: AnimeBundleForm,
     AnimeItem: AnimeForm,
     AnimeName: AnimeNameForm,
+    AnimeLinks: AnimeLinksForm,
     UserStatusBundle: UserStatusForm,
-    AnimeLinks: LinksForm,
     AnimeRequest: PureRequestForm,
     AnimeItemRequest: AnimeItemRequestForm,
     AnimeImageRequest: ImageRequestForm,
