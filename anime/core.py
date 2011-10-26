@@ -1,5 +1,5 @@
 
-from anime.models import AnimeItem, EDIT_MODELS, USER_STATUS, UserStatusBundle
+from anime.models import AnimeItem, LINKS_TYPES, EDIT_MODELS, USER_STATUS, UserStatusBundle
 from django.core.cache import cache
 from anime.functions import createPages
 from anime.functions import getVal, getAttr, updateMainCaches
@@ -44,10 +44,8 @@ def get(request):
         elif field == 'genre':
             response[field] = ', '.join(anime.genre.values_list('name', flat=True))
         elif field == 'links':
-            try:
-                response[field] = model.objects.filter(anime=anime).values('AniDB','ANN', 'MAL')[0]
-            except:
-                pass
+            response[field] = dict([(LINKS_TYPES[x[0]][-1], x[1]) \
+                for x in model.objects.filter(anime=anime).values_list('linkType', 'link')])
         elif field == 'type':
             response[field] = anime.releaseTypeS
         elif field == 'bundle':
@@ -71,6 +69,7 @@ def get(request):
 
 def search(field, string, request, attrs={}):
     #Rewrite this
+    string = string.strip()
     if not string:
         return {'text': 'Empty query.'}
     if not field:

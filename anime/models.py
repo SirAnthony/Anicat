@@ -14,7 +14,17 @@ ANIME_TYPES = [
     (5, u'ONA'),
     (6, u'AMV'),
     (7, u'Other')
-    ]
+]
+
+LINKS_TYPES = [
+    (0, u'Auto'),
+    (1, u'AniDB'),
+    (2, u'ANN'),
+    (3, u'MAL'),
+    (4, u'Wikipedia'),
+    (6, u'Official page'),
+    (15, u'Other')
+]
 
 USER_STATUS = [
     (0, u'none'),
@@ -219,6 +229,20 @@ class AnimeName(models.Model):
 
 class AnimeLinks(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="links")
+    link = models.URLField(max_length=100)
+    linkType = models.IntegerField(choices=LINKS_TYPES)
+    audit_log = AuditLog()
+
+    def save(self, *args, **kwargs):
+        if self.linkType == 0:
+            self.linkType = LINKS_TYPES[-1][0]
+        super(AnimeLinks, self).save(*args, **kwargs)
+
+    class Meta:
+        unique_together = ("link", "anime")
+
+class AnimeLinks_old(models.Model):
+    anime = models.ForeignKey(AnimeItem, related_name="links1")
     AniDB = models.IntegerField(blank=True, null=True)
     ANN = models.IntegerField(blank=True, null=True)
     MAL = models.IntegerField(unique=True, blank=True, null=True)

@@ -123,7 +123,7 @@ def card(request, animeId=0):
             if anime.bundle:
                 bundles = anime.bundle.animeitems.values('id', 'title').all().order_by('releasedAt')
         try:
-            links = anime.links.get()
+            links = anime.links.all()
         except AnimeLinks.DoesNotExist:
             links = None
         except AttributeError:

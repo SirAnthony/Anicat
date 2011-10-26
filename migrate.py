@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from time import time, strftime, gmtime 
+# This script helps to migrate from 3.0.x version to 3.0.99+
+
+from time import time, strftime, gmtime
 from anime.models import *
 import re
 
@@ -106,7 +108,7 @@ def moveAll():
     moveCredit()
     movePeople()
     movePeopleBundles()
-    moveOrganisation()    
+    moveOrganisation()
     moveOrganisationBundles()
     moveUserStatus()
 
@@ -210,7 +212,7 @@ def moveOrganisation():
     sql = Sql(db='tempcat', user='catman', passwd='catpass')
     res = sql.executeQuery('SELECT * FROM `organisation` ORDER BY id')
     for element in res:
-        try: 
+        try:
             record = Organisation(id=element['id'], name=unicode(encd(element['name']), 'utf-8'))
             record.save()
         except Exception, e:

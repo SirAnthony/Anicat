@@ -6,6 +6,7 @@ import mimetypes
 import xml.dom.minidom as xmlp
 from django.core.cache import cache
 from django.conf import settings
+from django.db.models import Q
 from anime.models import AnimeLinks, AnimeName, UserStatusBundle
 from datetime import datetime
 
@@ -76,7 +77,7 @@ def process(user, filename, rewrite=True):
             l.append(anime)
         addInBase(user, result, rewrite)
     except Exception, e:
-        result = {'error': e}
+        result = {'error': str(e)}
 
     addToCache(user, result)
 
@@ -106,10 +107,12 @@ def searchAnime(obj):
     if anime['my_status'] not in [2, 4]:
         anime['my_watched_episodes'] = None
     try:
-        link = AnimeLinks.objects.get(MAL=int(anime['series_animedb_id']))
+        link = AnimeLinks.objects.filter(Q(linkType=3) & (
+            Q(link=u'http://myanimelist.net/anime/%s' % anime['series_animedb_id']) |
+            Q(link__contains=u'http://myanimelist.net/anime/%s/' % anime['series_animedb_id'])))[0]
         anime['object'] = link.anime
         state = 1
-    except AnimeLinks.DoesNotExist:
+    except IndexError:
         matchedTitles = []
         unmatchedTitles = []
         names = AnimeName.objects.filter(title__iexact=anime['series_title'])
@@ -119,7 +122,7 @@ def searchAnime(obj):
         for name in names:
             title = name.anime
             if title not in matchedTitles and title not in unmatchedTitles:
-                if title.releaseType == anime['series_type'] or ( 
+                if title.releaseType == anime['series_type'] or (
                     anime['series_type'] == 1 and title.releaseType == 4):
                     matchedTitles.append(title)
                 else:

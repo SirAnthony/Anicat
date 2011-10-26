@@ -14,6 +14,7 @@ from anime.fields import TextToAnimeItemField, TextToAnimeNameField, UnknownDate
 from anime.models import AnimeBundle, AnimeItem, AnimeName, UserStatusBundle, AnimeLinks, AnimeRequest, \
                          AnimeItemRequest, AnimeImageRequest, AnimeFeedbackRequest
 import os
+from hashlib import sha1
 
 class UserCreationFormMail(UserCreationForm):
     def __init__(self, *args, **kwargs):
@@ -280,10 +281,12 @@ class ImageRequestForm(RequestForm):
         if name in self.errors:
             return
         image = self.files.get(name)
+        fname, ext = image.name.rsplit('.', 1)
+        image.name = sha1(fname.encode('utf-8')).hexdigest()
         try:
             if not image:
                 raise ValidationError(_('This field is required.'))
-            filename = str(image.size)+image.name
+            filename = u'%s%s.%s' % (image.size, image.name, ext)
             fullfilename = os.path.join(settings.MEDIA_ROOT, filename)
             if os.path.exists(fullfilename):
                 raise ValidationError(_('This file already loaded.'))

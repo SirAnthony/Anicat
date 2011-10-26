@@ -250,22 +250,12 @@ var ajax = new (function(){
                                         var s = new Array();
                                         for(var link in current){
                                             if(!current[link]) continue;
-                                            var l;
-                                            switch(link){
-                                                case 'AniDB':
-                                                    l = "http://anidb.net/perl-bin/animedb.pl?show=anime&aid=";
-                                                break;
-                                                case 'ANN':
-                                                    l = "http://www.animenewsnetwork.com/encyclopedia/anime.php?id=";
-                                                break;
-                                                case 'MAL':
-                                                    l = "http://myanimelist.net/anime/";
-                                                break;
-                                            }
-                                            s.push(element.create('a', {className: 's0', href: l+current[link],
+                                            s.push(element.create('a', {className: 's0', href: current[link],
                                                                         innerText: link}));
                                             s.push(element.create('', {innerText: '\240'}));
                                         }
+                                        if(!s.length)
+                                            s.push(element.create('', {innerText: 'None'}));
                                         cld.push(element.create('p'), s);
                                     }else{
                                         if(curname == 'duration') current += ' min.';
@@ -313,17 +303,9 @@ var ajax = new (function(){
                             }
                         }else if(fields[i] == 'links'){
                             if(!field) continue;
-                            if(field.AniDB)
-                                element.appendChild(d, [{'a': {'target': '_blank', innerText: 'AniDB',
-                                    'href': 'http://www.animenewsnetwork.com/encyclopedia/anime.php?id=' + field.AniDB}},
-                                    {'': {innerText: ' '}}]);
-                            if(field.ANN)
-                                element.appendChild(d, [{'a': {'target': '_blank', innerText: 'ANN',
-                                    'href': 'http://anidb.net/perl-bin/animedb.pl?show=anime&aid=' + field.ANN}},
-                                    {'': {innerText: ' '}}]);
-                            if(field.MAL)
-                                element.appendChild(d, {'a': {'target': '_blank', innerText: 'MAL',
-                                    'href': 'http://myanimelist.net/anime/' + field.ANN}});
+                            for(var link in field)
+                                element.appendChild(d, [{'a': {'target': '_blank', innerText: link,
+                                    'href': field[link]}}, {'': {innerText: ' '}}]);
                         }else{
                             element.appendChild(d, {'': {innerText: field ? field : 'None'}});
                         }
