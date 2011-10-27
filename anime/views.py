@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
-from anime.models import AnimeItem, AnimeLinks, UserStatusBundle, AnimeRequest, USER_STATUS
+from anime.models import AnimeItem, AnimeLink, UserStatusBundle, AnimeRequest, USER_STATUS
 from anime.functions import getAttr, createPages, cleanTableCache, cleanRequestsCache
 from random import randint
 
@@ -124,7 +124,7 @@ def card(request, animeId=0):
                 bundles = anime.bundle.animeitems.values('id', 'title').all().order_by('releasedAt')
         try:
             links = anime.links.all()
-        except AnimeLinks.DoesNotExist:
+        except AnimeLink.DoesNotExist:
             links = None
         except AttributeError:
             links = None

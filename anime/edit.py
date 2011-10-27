@@ -1,8 +1,8 @@
 
 from django.core.cache import cache
 from django.db.models.fields import FieldDoesNotExist
-from anime.forms import createFormFromModel
-from anime.models import AnimeItem, AnimeName, USER_STATUS, EDIT_MODELS
+from anime.forms.create import createFormFromModel
+from anime.models import AnimeItem, AnimeName, AnimeLink, USER_STATUS, EDIT_MODELS
 from anime.functions import updateMainCaches
 from datetime import datetime
 
@@ -176,6 +176,45 @@ def _saveAnimeNames(form, obj):
 def _saveAnimeLinks(form, obj):
     if not obj or not obj.id:
         raise ValueError('%s not exists.' % type(obj).__name__)
-    links = obj.links.all()
+    links = list(obj.links.all())
     cleaned = form.cleaned_data
-    raise
+    cleanlinks = [0] * (len(form.cleaned_data)/2)
+    cleantypes = [0] * (len(form.cleaned_data)/2)
+    oldLinks = []
+    for name, value in cleaned.items():
+        s = name.rsplit(None, 1)[-1]
+        if name.find('type') >= 0:
+            cleantypes[int(s)] = int(value)
+        else:
+            cleanlinks[int(s)] = value
+    for link in links[:]:
+        if link.link in cleanlinks:
+            i = cleanlinks.index(link.link)
+            if cleantypes[i] and link.linkType != cleantypes[i]:
+                link.linkType = cleantypes[i]
+            else:
+                links.remove(link)
+            cleanlinks.pop(i)
+            cleantypes.pop(i)
+        else:
+            oldLinks.append(links.pop(links.index(link)))
+    # Now in links only modified links,
+    # in cleanlinks - links that must be added to db,
+    # in oldlinks - links that must be removed
+    for link in cleanlinks[:]:
+        i = cleanlinks.index(link)
+        if not link:
+            cleanlinks.pop(i)
+            cleantypes.pop(i)
+            continue
+        if len(oldLinks):
+            l = oldLinks.pop()
+            l.link = cleanlinks.pop(i)
+            l.linkType = cleantypes.pop(i)
+            links.append(l)
+        else:
+            links.append(AnimeLink(anime=obj, link=cleanlinks.pop(i), linkType=cleantypes.pop(i)))
+    for link in oldLinks:
+        link.delete()
+    for l in links:
+        l.save()

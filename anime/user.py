@@ -1,7 +1,8 @@
 
 from django.contrib import auth
 from django.core.cache import cache
-from anime.forms import UploadMalListForm, UserCreationFormMail, NotActiveAuthenticationForm
+from anime.forms.Error import UploadMalListForm
+from anime.forms.User import UserCreationFormMail, NotActiveAuthenticationForm
 from anime.malconvert import passFile
 from anime.models import AnimeRequest
 from datetime import datetime

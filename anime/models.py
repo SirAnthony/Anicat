@@ -227,7 +227,7 @@ class AnimeName(models.Model):
         ordering = ["title"]
         unique_together = ("title", "anime")
 
-class AnimeLinks(models.Model):
+class AnimeLink(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="links")
     link = models.URLField(max_length=100)
     linkType = models.IntegerField(choices=LINKS_TYPES)
@@ -236,12 +236,12 @@ class AnimeLinks(models.Model):
     def save(self, *args, **kwargs):
         if self.linkType == 0:
             self.linkType = LINKS_TYPES[-1][0]
-        super(AnimeLinks, self).save(*args, **kwargs)
+        super(AnimeLink, self).save(*args, **kwargs)
 
     class Meta:
         unique_together = ("link", "anime")
 
-class AnimeLinks_old(models.Model):
+class AnimeLinks(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="links1")
     AniDB = models.IntegerField(blank=True, null=True)
     ANN = models.IntegerField(blank=True, null=True)
@@ -380,7 +380,7 @@ EDIT_MODELS = {
     #'episode': AnimeEpisode,
     'bundle': AnimeBundle,
     'name': AnimeName,
-    'links': AnimeLinks,
+    'links': AnimeLink,
     #'organisation': Organisation,
     #'organisationbundle': OrganisationBundle,
     #'people': People,

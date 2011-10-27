@@ -294,12 +294,16 @@ var ajax = new (function(){
                             }
                             element.appendChild(d, names)
                         }else if(fields[i] == 'state'){
-                            element.appendChild(d, [{'span': {innerText: capitalise(field.select[field.selected])}},
-                                {'input': {'type': 'hidden', 'name': 'card_userstatus_input', 'value': field.selected}}]);
-                            if(field.completed && field.all){
-                                element.appendChild(d, [{'span': {className: 'right',
-                                    innerText: field.completed + '/' + field.all}},
-                                {'input': {'type': 'hidden', 'name': 'card_usercount_input', 'value': field.completed}}]);
+                            if(field.selected){
+                                element.appendChild(d, [{'span': {innerText: capitalise(field.select[field.selected])}},
+                                    {'input': {'type': 'hidden', 'name': 'card_userstatus_input', 'value': field.selected}}]);
+                                if(field.completed && field.all){
+                                    element.appendChild(d, [{'span': {className: 'right',
+                                        innerText: field.completed + '/' + field.all}},
+                                    {'input': {'type': 'hidden', 'name': 'card_usercount_input', 'value': field.completed}}]);
+                                }
+                            }else{
+                                element.appendChild(d, {'span': {innerText: 'Not availiable for anonymous yet'}});
                             }
                         }else if(fields[i] == 'links'){
                             if(!field) continue;

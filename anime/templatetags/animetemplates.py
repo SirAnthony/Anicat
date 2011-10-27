@@ -1,11 +1,11 @@
-from anime.forms import AnimeForm
+from anime.forms.ModelError import AnimeForm
 from django.contrib.auth.forms import AuthenticationForm
 from django import template
 
 register = template.Library()
 
 def addForm(parser, token):
-    return AddFormNode() 
+    return AddFormNode()
 
 class AddFormNode(template.Node):
     def render(self, context):
@@ -13,7 +13,7 @@ class AddFormNode(template.Node):
         return ''
 
 def loginForm(parser, token):
-    return loginFormNode() 
+    return loginFormNode()
 
 class loginFormNode(template.Node):
     def render(self, context):

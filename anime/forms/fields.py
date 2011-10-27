@@ -1,9 +1,11 @@
 import datetime
+import re
 import time
 from anime.models import AnimeItem, AnimeName, DATE_FORMATS
 from django.core.exceptions import ValidationError
 from django.core.validators import EMPTY_VALUES
-from django.forms import CharField, TextInput, DateField, ImageField
+from django.forms import CharField, TextInput, URLField, DateField, ImageField
+from django.utils.translation import ugettext_lazy as _
 
 #dirty but works
 INPUT_FORMATS = (
@@ -13,6 +15,28 @@ INPUT_FORMATS = (
     '%B %d %Y', '%B %d, %Y',
     '%d %B %Y', '%d %B, %Y',
 )
+
+LINKS_URLS = [
+    (0, None, None),
+    (1, re.compile(u'^(?:http|ftp)s?://anidb\.net/(?:perl-bin/animedb\.pl\?show=anime\&aid=|a)(\d+)'),
+        u'http://anidb.net/a'),
+    (2, re.compile(u'^(?:http|ftp)s?://www\.animenewsnetwork\.com/encyclopedia/anime\.php\?id=(\d+)'),
+        u'http://www.animenewsnetwork.com/encyclopedia/anime.php?id='),
+    (3, re.compile(u'^(?:http|ftp)s?://myanimelist\.net/anime/(\d+)'),
+        u'http://myanimelist.net/anime/'),
+    (4, re.compile(u'^(?:http|ftp)s?://[a-z]{2}\.wikipedia\.org/wiki/(.+)#?'), None),
+    (5, None, None),
+    (6, None, None),
+    (7, None, None),
+    (8, None, None),
+    (9, None, None),
+    (10, None, None),
+    (11, None, None),
+    (12, None, None),
+    (13, None, None),
+    (14, None, None),
+    (15, None, None)
+]
 
 class TextToAnimeItemField(CharField):
     def to_python(self, value):
@@ -27,7 +51,7 @@ class TextToAnimeItemField(CharField):
             except AnimeItem.DoesNotExist, e:
                 raise ValidationError(e)
             except AnimeItem.MultipleObjectsReturned, e:
-                raise ValidationError('Too many items with such title, try to use id instead title.')
+                raise ValidationError(_('Too many items with such title, try to use id instead title.'))
         return value
 
 class TextToAnimeNameField(CharField):
@@ -39,14 +63,41 @@ class TextToAnimeNameField(CharField):
         except:
             return None
         if not self._animeobject:
-            raise ValidationError('AnimeItem not set.')
+            raise ValidationError(_('AnimeItem not set.'))
         try:
             value, create = AnimeName.objects.get_or_create(anime=self._animeobject, title=value)
         except Exception, e:
             raise ValidationError(e)
         return value
 
+class TextToAnimeLinkField(URLField):
+    _linktype = None
 
+    def to_python(self, value):
+        if self._linktype is None:
+            raise ValidationError(_('Type for this field is not set.'))
+        try:
+            value = value.strip()
+            if not value:
+                raise ValueError
+        except:
+            return None
+        if self._linktype == 0:
+            for t, r, l in LINKS_URLS[1:]:
+                if r:
+                    m = r.match(value)
+                    if m:
+                        self._linktype = t
+                        if l:
+                            value = l + m.groups()[-1]
+            if not self._linktype:
+                self._linktype = 15
+        if self._linktype in (1, 2, 3) and value.isdecimal():
+            value = LINKS_URLS[self._linktype][2] + value
+        m = LINKS_URLS[self._linktype][1]
+        if m and not m.match(value):
+            raise ValidationError(_('Bad link type choosen.'))
+        return super(TextToAnimeLinkField, self).to_python(value)
 
 class CalendarWidget(TextInput):
     class Media:
@@ -152,9 +203,9 @@ class CardImageField(ImageField):
             trial_image = Image.open(file)
             trial_image.load()
             if trial_image.format not in ('PNG', 'JPEG', 'GIF'):
-                raise ValueError('Only PNG, JPEG and GIF formats are accepted.')
+                raise ValueError(_('Only PNG, JPEG and GIF formats are accepted.'))
             if max(trial_image.size) >= 800:
-                raise ValueError('Image too big.')
+                raise ValueError(_('Image too big.'))
             # Since we're about to use the file again we have to reset the
             # file object if possible.
             if hasattr(file, 'reset'):

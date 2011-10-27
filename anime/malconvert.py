@@ -7,7 +7,7 @@ import xml.dom.minidom as xmlp
 from django.core.cache import cache
 from django.conf import settings
 from django.db.models import Q
-from anime.models import AnimeLinks, AnimeName, UserStatusBundle
+from anime.models import AnimeLink, AnimeName, UserStatusBundle
 from datetime import datetime
 
 
@@ -107,7 +107,7 @@ def searchAnime(obj):
     if anime['my_status'] not in [2, 4]:
         anime['my_watched_episodes'] = None
     try:
-        link = AnimeLinks.objects.filter(Q(linkType=3) & (
+        link = AnimeLink.objects.filter(Q(linkType=3) & (
             Q(link=u'http://myanimelist.net/anime/%s' % anime['series_animedb_id']) |
             Q(link__contains=u'http://myanimelist.net/anime/%s/' % anime['series_animedb_id'])))[0]
         anime['object'] = link.anime
