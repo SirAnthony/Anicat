@@ -30,7 +30,7 @@ USER_STATUS = [
     (0, u'none'),
     (1, u'want'),
     (2, u'now'),
-    (3, u'ok'),
+    (3, u'done'),
     (4, u'dropped'),
     (5, u'partially watched'),
 ]
@@ -325,6 +325,7 @@ class AnimeRequest(models.Model):
     text = models.CharField(max_length=5000)
     status = models.IntegerField(choices=REQUEST_STATUS)
     reason = models.CharField(max_length=1000, blank=True, null=True)
+    changed = models.DateTimeField(auto_now=True)
 
     def __init__(self, *args, **kwargs):
         if not kwargs.has_key('status'):

@@ -1,11 +1,12 @@
 
 from django.contrib import auth
 from django.core.cache import cache
+from django.db.models import Q
 from anime.forms.Error import UploadMalListForm
 from anime.forms.User import UserCreationFormMail, NotActiveAuthenticationForm
 from anime.malconvert import passFile
 from anime.models import AnimeRequest
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def login(request):
     response = {}
@@ -65,7 +66,11 @@ def loadMalList(request):
 
 def getRequests(user, *keys):
     try:
-        qs = AnimeRequest.objects.filter(user=user).order_by("-id")
+        qs = AnimeRequest.objects.filter(user=user).order_by('status', '-id')
+        qs = qs.exclude(Q(status__gt=2) & Q(changed__lte=datetime.now()-timedelta(days=20)))
+        c = qs.filter(status__gt=2).count()
+        if c > 20:
+            qs = qs[:qs.count() - (c - 10)]
         if keys:
             qs = qs.values(*keys)
         try:
@@ -76,4 +81,3 @@ def getRequests(user, *keys):
                 'requestTypes': types}
     except:
         pass
-

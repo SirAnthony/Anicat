@@ -24,7 +24,7 @@ MAL_STATUS = [
 MAL_STATUS_CONVERT_LIST = [
     0, #none
     2, #watching => now
-    3, #completed => ok
+    3, #completed => done
     2, #onhold => now
     4, #dropped => dropped
     0, #none

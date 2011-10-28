@@ -4,8 +4,6 @@ import anime.user as userMethods
 from django.contrib import auth
 from django.http import HttpResponseRedirect
 from annoying.decorators import render_to
-from anime.forms import UserCreationFormMail
-
 
 @render_to('anime/login.html')
 def login(request):

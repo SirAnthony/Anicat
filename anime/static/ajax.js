@@ -141,7 +141,7 @@ var ajax = new (function(){
                         message.hide();
                         var statusdiv = document.getElementById('card_userstatus');
                         if(statusdiv){
-                            var statusname = ({"0": "None", "1": "Want", "2": "Now", "3": "Ok",
+                            var statusname = ({"0": "None", "1": "Want", "2": "Now", "3": "Done",
                                  "4": "Dropped", "5": "Partially watched"})[resp.text.state]
                             element.remove((function(x){
                                 var a = new Array();
@@ -204,7 +204,7 @@ var ajax = new (function(){
                                     if(!user_storage.enabled) user_storage.enable();
                                     var list = user_storage.getItem('list.'+resp.text.id);
                                     current = {"selected": ((list) ? list : 0), "select": {
-                                        "0": "none", "1": "want", "2": "now", "3": "ok",
+                                        "0": "none", "1": "want", "2": "now", "3": "done",
                                         "4": "dropped", "5": "partially watched"}};
                                 }else{
                                     sp.innerText = current;
