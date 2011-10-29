@@ -589,7 +589,7 @@ function getCard(id){
 }
 
 function createStatusForm(id, selected, select, all, completed){
-    select = select ? select : {"0": "None", "1": "Want", "2": "Now", "3": "Ok",
+    select = select ? select : {"0": "None", "1": "Want", "2": "Now", "3": "Done",
                                 "4": "Dropped", "5": "Partially watched"};
     var sp = element.create('form', {'id': 'EditForm', name: 'state'});
     var sel = element.create('select', {name: 'state',

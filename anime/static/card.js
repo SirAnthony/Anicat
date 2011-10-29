@@ -1,6 +1,8 @@
 
 function hideEdits(){
-    var h = document.getElementsByTagName('h4');
+    var p = document.getElementById('card');
+    if(!p) p = document;
+    var h = p.getElementsByTagName('h4');
     h[h.length] = document.getElementById("cimg").lastChild;
     for(var element in h){
         var c = h[element].previousSibling;
@@ -16,3 +18,5 @@ function hideEdits(){
 }
 
 addEvent(window, 'load', hideEdits);
+if(document.readyState == "complete")
+    hideEdits();

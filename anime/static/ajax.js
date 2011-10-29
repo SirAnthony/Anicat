@@ -200,12 +200,8 @@ var ajax = new (function(){
                         if(curname == 'state'){
                             //Ненадежно это все
                             if(isString(current)){
-                                if(typeof user_storage != "undefined" && user_storage.loaded){
-                                    if(!user_storage.enabled) user_storage.enable();
-                                    var list = user_storage.getItem('list.'+resp.text.id);
-                                    current = {"selected": ((list) ? list : 0), "select": {
-                                        "0": "none", "1": "want", "2": "now", "3": "done",
-                                        "4": "dropped", "5": "partially watched"}};
+                                if(catalog_storage.enable()){
+                                    current = catalog_storage.getStatus(resp.text.id);
                                 }else{
                                     sp.innerText = current;
                                     element.appendChild(mspn, [label, sp,{'p': {
@@ -213,8 +209,7 @@ var ajax = new (function(){
                                     continue;
                                 }
                             }else{
-                                if(typeof user_storage != "undefined" && user_storage.loaded)
-                                    if(user_storage.enabled) user_storage.disable();
+                                catalog_storage.disable();
                             }
                             sp = createStatusForm(resp.text.id, current.selected,
                                                     current.select, current.all, current.completed);
@@ -285,6 +280,13 @@ var ajax = new (function(){
                             default: n = fields[i] + ':'; break;
                         }
                         var d = element.create('div', null, {'h4': {innerText: capitalise(n)}});
+                        if(edit)
+                            element.insert(d.firstChild, {'a': {className: 'right',
+                                'href': edit.getFieldName(resp.text.id, fields[i]),
+                                innerText: 'Edit', target: '_blank',
+                                onclick: ((fields[i] == 'state') ? function(){
+                                    cardstatus(resp.text.id);
+                                    return false;} : undefined)}});
                         data.push(d);
                         if(fields[i] == 'name'){
                             var names = new Array();
@@ -294,16 +296,27 @@ var ajax = new (function(){
                             }
                             element.appendChild(d, names)
                         }else if(fields[i] == 'state'){
-                            if(field.selected){
-                                element.appendChild(d, [{'span': {innerText: capitalise(field.select[field.selected])}},
-                                    {'input': {'type': 'hidden', 'name': 'card_userstatus_input', 'value': field.selected}}]);
-                                if(field.completed && field.all){
-                                    element.appendChild(d, [{'span': {className: 'right',
-                                        innerText: field.completed + '/' + field.all}},
-                                    {'input': {'type': 'hidden', 'name': 'card_usercount_input', 'value': field.completed}}]);
-                                }
+                            d.id = 'card_userstatus'
+                            var state = {'selected': null, 'value': null};
+                            if(!isString(field)){
+                                catalog_storage.disable();
+                                state.value = field.select[field.selected];
+                                state.selected = field.selected;
                             }else{
-                                element.appendChild(d, {'span': {innerText: 'Not availiable for anonymous yet'}});
+                                if(!catalog_storage.enable()){
+                                    element.appendChild(d, {'span': {
+                                        innerText: 'Enable local storage to use catalog anonymously.'}});
+                                    continue;
+                                }else{
+                                    state = catalog_storage.getStatus(resp.text.id);
+                                }
+                            }
+                            element.appendChild(d, [{'span': {innerText: capitalise(state.value)}},
+                                    {'input': {'type': 'hidden', 'name': 'card_userstatus_input', 'value': state.selected}}]);
+                            if(field && field.completed && field.all){
+                                element.appendChild(d, [{'span': {className: 'right',
+                                    innerText: field.completed + '/' + field.all}},
+                                {'input': {'type': 'hidden', 'name': 'card_usercount_input', 'value': field.completed}}]);
                             }
                         }else if(fields[i] == 'links'){
                             if(!field) continue;
@@ -319,6 +332,9 @@ var ajax = new (function(){
                             {'div': {'id': 'cimg'}}, [
                                 {'img': {'src': 'http://anicat.net/images/' + res.id + '/'}}],
                             'div', [
+                                (edit ? {'a': {className: 'right',
+                                'href': edit.getFieldName(resp.text.id, 'bundle'),
+                                innerText: 'Edit', target: '_blank'}} : undefined ),
                                 {'h4': {innerText: 'Bundled with:'}},
                                 'table', (function(bn){
                                     if(!bn) return;
@@ -357,6 +373,11 @@ var ajax = new (function(){
                         imgbun = card.firstChild.clientWidth + 40;
                     }
                     card.lastChild.style.maxWidth = card.clientWidth - imgbun + 'px';
+                    if(typeof hideEdits == 'undefined')
+                        element.appendChild(document.getElementsByTagName("head")[0],
+                            {'script': {'type': 'text/javascript', 'src': '/static/card.js'}});
+                    else
+                        hideEdits();
                 break;
 
                 case 'login':
