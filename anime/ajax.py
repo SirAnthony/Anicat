@@ -25,15 +25,15 @@ def change(request):
         aid = int(request.POST.get('id', 0))
     except Exception, e:
         return {'text': 'Invalid id.'  + str(e)}
-    response = editMethods.edit(request, aid, request.POST.get('model', None), request.POST.get('fields', None))
+    response = editMethods.edit(request, aid, request.POST.get('model', None),
+                                request.POST.get('field', None),
+                                request.POST.get('set', None))
     if response.has_key('form'):
-        if response.get('status', None): #logged
+        try:
+            response['form'] = response['form'].as_json()
+        except Exception, e:
             del response['form']
-        else:
-            try:
-                response['form'] = response['form'].as_json()
-            except:
-                del response['form']
+            response.update({'status': False, 'text': str(e)})
     return response
 
 @ajaxResponse

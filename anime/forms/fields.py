@@ -58,7 +58,7 @@ class TextToAnimeNameField(CharField):
     def to_python(self, value):
         try:
             value = value.strip()
-            if not value:
+            if value in EMPTY_VALUES:
                 raise ValueError
         except:
             return None
@@ -78,7 +78,7 @@ class TextToAnimeLinkField(URLField):
             raise ValidationError(_('Type for this field is not set.'))
         try:
             value = value.strip()
-            if not value:
+            if value in EMPTY_VALUES:
                 raise ValueError
         except:
             return None
@@ -130,7 +130,11 @@ class UnknownDateField(DateField):
         Validates that the input can be converted to a date. Returns a Python
         datetime.date object.
         """
-        if value in EMPTY_VALUES:
+        try:
+            value = value.strip()
+            if value in EMPTY_VALUES:
+                raise ValueError
+        except:
             return None
         if isinstance(value, datetime.datetime):
             return value.date()

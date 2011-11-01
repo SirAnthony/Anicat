@@ -75,7 +75,7 @@ def requests(request, status=None, rtype=None, page=0):
     (link, cachestr) = cleanRequestsCache(status, rtype, page)
     pages = cache.get('requestPages:' + link)
     if not pages:
-        pages = createPages(qs, '-id', limit)
+        pages = createPages(qs, 'id', limit)
         cache.set('requestPages:%s' % link, pages)
     items = qs[page*limit:(page+1)*limit]
     return {'requests': items, 'cachestr': cachestr, 'link': link,
@@ -123,7 +123,7 @@ def card(request, animeId=0):
             if anime.bundle:
                 bundles = anime.bundle.animeitems.values('id', 'title').all().order_by('releasedAt')
         try:
-            links = anime.links.all()
+            links = anime.links.order_by('linkType').all()
         except AnimeLink.DoesNotExist:
             links = None
         except AttributeError:

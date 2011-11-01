@@ -60,3 +60,19 @@ Get:
         response: "get"
         order: array // Fields order
         text: object // Result depends on which fields was requested.
+
+Set:
+    Request type: Post
+    Request target: set/
+    Request params:
+        id: int // Object id
+        model: string // Model name
+        field: string // Field name if needed.
+        set: bool // Unset this parameter to obtain a blank form.
+    Response:
+        response: 'edit'
+        id: id // Id of
+        form:  object // Form if set in request set to true.
+        text:
+
+

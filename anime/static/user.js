@@ -182,7 +182,7 @@ var catalog_storage = new (function(){
         if(typeof user_storage != "undefined" && user_storage.loaded){
             this.enable()
             num = user_storage.getItem('list.'+id);
-            if(num === null) num = 0;
+            if(!num) num = 0;
             value = types[num];
         }else{
             value = 'Enable local storage to use catalog anonymously.';

@@ -43,24 +43,24 @@ class ErrorModelForm(ModelForm):
             html_class_attr = None
             bf = BoundField(self, field, name)
             bf_errors = self.error_class([conditional_escape(error) for error in bf.errors])
+            tag = 'input'
+            children = []
             fieldobj = {
                 'id': bf.auto_id,
-                'name': bf.name,
-                'value': bf.value(),
-                'tag': 'input',
+                'name': force_unicode(bf.name),
+                'value': force_unicode(bf.value()),
             }
             if bf.is_hidden:
                 if bf_errors:
                     top_errors.extend([u'(Hidden field %s) %s' % (name, force_unicode(e)) for e in bf_errors])
                 fieldobj['type'] = 'hidden'
+                fieldobj = {tag: fileobj}
             else:
-                if hasattr(field.widget, 'choises'):
-                    fieldobj['tag'] = 'select'
-                    fieldobj['type'] = 'select'
-                    sel = {}
-                    for c in field.widget.choises:
-                        sel[c.pk] = force_unicode(c)
-                    fieldobj['select'] = sel
+                if hasattr(field.widget, 'choices'):
+                    tag = 'select'
+                    for c in field.widget.choices:
+                        prop = {'value': force_unicode(c[0]), 'innerText': force_unicode(c[1])}
+                        children.append({'option': prop})
                 else:
                     try:
                         fieldobj['type'] = field.widget.input_type
@@ -76,12 +76,16 @@ class ErrorModelForm(ModelForm):
                 else:
                     help_text = None
 
-                output.append({
-                    'errors': bf_errors,
-                    'field': fieldobj,
-                    'help_text': help_text,
-                    'html_class_attr': html_class_attr
-                })
+                o = {tag: fieldobj}
+                if bf_errors:
+                    o['errors'] = bf_errors
+                if help_text:
+                    o['help_text'] = help_text
+                if html_class_attr:
+                    o['html_class_attr'] = html_class_attr
+                output.append(o)
+                if children:
+                    output.append(children)
 
         if top_errors:
             output.extend(0, top_errors)

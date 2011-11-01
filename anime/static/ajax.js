@@ -20,7 +20,7 @@ var ajax = new (function(){
         if(!(/^http:.*/.test(url) || /^https:.*/.test(url)))
             qry['csrfmiddlewaretoken'] = cookie.get('csrftoken');
 
-        for(item in qry){
+        for(var item in qry){
             if(!qry[item]) continue;
             if(request)
                 request += '&';

@@ -588,6 +588,11 @@ function getCard(id){
     return true;
 }
 
+function gef(sender, id, model, field){
+    ajax.loadXMLDoc(url+'set/', {'id': id, 'model': model, 'field': field});
+    return false;
+}
+
 function createStatusForm(id, selected, select, all, completed){
     select = select ? select : {"0": "None", "1": "Want", "2": "Now", "3": "Done",
                                 "4": "Dropped", "5": "Partially watched"};

@@ -14,7 +14,7 @@ EDIBLE_LIST = [
 
 # This shit needs refactoring
 
-def edit(request, itemId=0, modelname='anime', field=None):
+def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
     if not modelname:
         modelname = 'anime'
     response = {'model': modelname, 'id': itemId}
@@ -88,9 +88,16 @@ def edit(request, itemId=0, modelname='anime', field=None):
                 obj = model.objects.get(id=itemId)
             except model.DoesNotExist:
                 obj = model()
-        if request.method != 'POST':
+        if request.method != 'POST' or not ajaxSet:
             try:
-                form = formobject(instance=obj)
+                response['form'] = formobject(instance=obj)
+                if request.method == 'POST':
+                    response.update({
+                        'status': True,
+                        'response': 'edit',
+                        'id': retid or obj.id,
+                        'text': ''
+                    })
             except Exception, e:
                 response['text'] = str(e)
         else:
@@ -125,9 +132,9 @@ def edit(request, itemId=0, modelname='anime', field=None):
                     elif modelname != 'state':
                         cache.delete('card:%s' % itemId)
                 except Exception, e:
-                    raise
                     response['text'] = str(e)
                     form.addError('Error "%s" has occured.' % e)
+                    response['form'] = form
                 else:
                     response.update({
                         'response': 'edit',
@@ -142,7 +149,7 @@ def edit(request, itemId=0, modelname='anime', field=None):
                             pass
             else:
                 response['text'] = form.errors
-        response['form'] = form
+                response['form'] = form
     return response
 
 
