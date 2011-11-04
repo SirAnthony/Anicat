@@ -2,6 +2,7 @@
 from django.http import HttpResponse
 #from django.core.cache import cache
 from django.utils import simplejson
+from django.utils.encoding import force_unicode
 import anime.core as coreMethods
 import anime.edit as editMethods
 import anime.user as userMethods
@@ -33,7 +34,15 @@ def change(request):
             response['form'] = response['form'].as_json()
         except Exception, e:
             del response['form']
-            response.update({'status': False, 'text': str(e)})
+            response.update({'response': 'error', 'status': False, 'text': str(e)})
+    if response['text']:
+        t = response['text'].copy()
+        if type(t) is dict:
+            for key, value in t.iteritems():
+                if not t[key]:
+                    del response['text'][key]
+                else:
+                    response['text'][key] = force_unicode(t[key])
     return response
 
 @ajaxResponse

@@ -395,6 +395,7 @@ color: HighlightText;
 .cardcol a.right {
     color: #000;
     font-size: 10pt;
+    cursor: pointer;
 }
 .cardcol a.right:hover {
     color: #0068ef;
@@ -423,6 +424,7 @@ font-weight: bold;
 
 #id_genre {
     height: 22px;
+    width: 100%;
     padding-top: 2px;
     display: block;
 }
@@ -557,9 +559,13 @@ font-weight: bold;
 }
 
 /* Id's */
-#addform{
+#addform {
     top: 30px;
     left: 30px;
+}
+
+#id_releaseType {
+    width: 100%;
 }
 
 /* Specific things */

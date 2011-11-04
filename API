@@ -69,10 +69,9 @@ Set:
         model: string // Model name
         field: string // Field name if needed.
         set: bool // Unset this parameter to obtain a blank form.
+    //If set in request set to true
     Response:
         response: 'edit'
-        id: id // Id of
-        form:  object // Form if set in request set to true.
-        text:
-
-
+        id: id // Id of model.
+        form: object // Form for processing by element.js.
+        text: none

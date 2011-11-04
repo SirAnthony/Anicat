@@ -174,6 +174,8 @@ var user = new( function(){
 
 var catalog_storage = new (function(){
 
+    this.enabled = false;
+
     this.getStatus = function(id){
         var types = {"0": "none", "1": "want", "2": "now", "3": "done",
                     "4": "dropped", "5": "partially watched"};
@@ -193,11 +195,13 @@ var catalog_storage = new (function(){
     this.enable = function(){
         if(typeof user_storage != "undefined" && user_storage.loaded){
             if(!user_storage.enabled) user_storage.enable();
+            this.enabled = true;
             return true;
         }
     }
 
     this.disable = function(){
+        this.enabled = false;
         if(typeof user_storage != "undefined" && user_storage.loaded){
             if(user_storage.enabled) user_storage.disable();
             return true;

@@ -18,17 +18,16 @@
     {% else %}
     <div id="imagebun" class="cardcol">
         <div id="cimg">
-            {% if user.is_authenticated %}<a href="/edit/image/{{ anime.id }}/" class="right">Edit</a>{%endif%}
+            {% if user.is_authenticated %}<a href="/edit/image/{{ anime.id }}/" onclick="return edit.rf({{ anime.id }}, 'image');" class="right">Edit</a>{%endif%}
             <img src="http://anicat.net/images/{{ anime.id }}/" />
         </div>
         <div>
         {% if user.is_authenticated %}
-            <a href="/edit/bundle/{% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}0{% endif %}/" class="right">Edit</a>
+            <a href="/edit/bundle/{% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}0{% endif %}/" onclick="edit.rf({{ anime.id }}, 'bundle');" class="right">Edit</a>
         {%endif%}
-
             <h4>Bundled with:</h4>
             <!-- Это все нужно переверстать -->
-            <table>
+            <table class="bundle{{ anime.id }}">
             {% for bundle in bundles %}
                 <tr>
                     <td>{% ifequal bundle.id anime.id %}►{% endifequal %}</td>
@@ -43,37 +42,44 @@
     </div>
     <div id="main" class="cardcol">
         <div>
-            {% if user.is_authenticated %}<a href="/edit/name/{{ anime.id }}/" class="right">Edit</a>{%endif%}
+            {% if user.is_authenticated %}<a href="/edit/name/{{ anime.id }}/" onclick="return edit.rf({{ anime.id }}, 'name');" class="right">Edit</a>{%endif%}
             <h4>Name:</h4>
-            {% for name in names %}{% if name.title == anime.title %}<i>{{ name.title }}</i>{% else %}{{ name.title }}{% endif %}<br/>{% endfor %}
+            <span class="name{{ anime.id }}">{% for name in names %}{% if name.title == anime.title %}<i>{{ name.title }}</i>{% else %}{{ name.title }}{% endif %}<br/>{% endfor %}</span>
         </div>
         <div>
-            {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releaseType/" class="right">Edit</a>{%endif%}
-            <h4>Type:</h4>{{ anime.releaseTypeS }}
+            {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releaseType/" onclick="return edit.rf({{ anime.id }}, 'type');" class="right">Edit</a>{%endif%}
+            <h4>Type:</h4>
+            <span class="type{{ anime.id }}">{{ anime.releaseTypeS }}</span>
         </div>
         <div>
-            {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/genre/" class="right">Edit</a>{%endif%}
-            <h4>Genre:</h4>{{ anime.genre.all|join:", " }}
+            {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/genre/" onclick="return edit.rf({{ anime.id }}, 'genre');" class="right">Edit</a>{%endif%}
+            <h4>Genre:</h4>
+            <span class="genre{{ anime.id }}">{{ anime.genre.all|join:", " }}</span>
         </div>
         <div>
-            {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/episodesCount/" class="right">Edit</a>{%endif%}
-            <h4>Episodes:</h4><span name="episodesCount">{{ anime.episodesCount }}</span>
+            {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/episodesCount/" onclick="return edit.rf({{ anime.id }}, 'episodesCount');" class="right">Edit</a>{%endif%}
+            <h4>Episodes:</h4>
+            <span class="episodesCount{{ anime.id }}">{{ anime.episodesCount }}</span>
         </div>
         <div>
-            {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/duration/" class="right">Edit</a>{%endif%}
-            <h4>Duration:</h4>{{ anime.duration }} min.
+            {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/duration/" onclick="return edit.rf({{ anime.id }}, 'duration');" class="right">Edit</a>{%endif%}
+            <h4>Duration:</h4>
+            <span class="duration{{ anime.id }}">{{ anime.duration }} min.</span>
         </div>
         <div>
-            {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releasedAt,endedAt/" class="right">Edit</a>{%endif%}
-            <h4>Released:</h4>{{ anime.release }}
+            {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releasedAt,endedAt/" onclick="return edit.rf({{ anime.id }}, 'release');" class="right">Edit</a>{%endif%}
+            <h4>Released:</h4>
+            <span class="release{{ anime.id }}">{{ anime.release }}</span>
         </div>
         {% if animelinks or user.is_authenticated %}
         <div>
-            {% if user.is_authenticated %}<a href="/edit/links/{{ anime.id }}/" class="right">Edit</a>{%endif%}
+            {% if user.is_authenticated %}<a href="/edit/links/{{ anime.id }}/" onclick="return edit.rf({{ anime.id }}, 'links');" class="right">Edit</a>{%endif%}
             <h4>Links:</h4>
+            <span class="links{{ anime.id }}">
             {% for link in animelinks %}
-            <a rel="nofollow" target="_blank" href="{{ link.link }}" >{{link.get_linkType_display}}</a>&nbsp;
+                <a rel="nofollow" target="_blank" href="{{ link.link }}" >{{link.get_linkType_display}}</a>&nbsp;
             {% endfor %}
+            </span>
         </div>
         {% endif %}
         {% if user.is_authenticated %}

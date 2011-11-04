@@ -96,8 +96,27 @@ var edit = new (function edit_class(){
     this.edits = {'name': '/name', 'bundle': '/bundle',
                  'type': 'releaseType', 'release': 'releasedAt,endedAt',
                  'links': '/links', 'state': '/state'};
+    this.fields = {'releaseType': 'type', 'releasedAt,endedAt': 'release'};
 
-    this.getFieldName = function(id, name){
+    this.rf = function(id, field, e){
+        this.requestForm(id, field);
+        return false;
+    }
+
+    this.requestForm = function(id, field){
+        var m = 'anime';
+        if(this.edits[field]){
+            if(this.edits[field].charAt(0) == '/'){
+                m = this.edits[field].slice(1);
+                field = undefined;
+            }else{
+                field = this.edits[field];
+            }
+        }
+        ajax.loadXMLDoc(url+'set/', {'id': id, 'model': m, 'field': field});
+    }
+
+    this.getFieldLink = function(id, name){
         if(this.edits[name]){
             if(this.edits[name].charAt(0) == '/')
                 return '/edit' + this.edits[name] + '/' + id + '/';
@@ -112,16 +131,102 @@ var edit = new (function edit_class(){
         edit.loaded = true;
     }
 
-    this.getForm = function(){
-        return document.getElementById('EditForm');
-    }
-
-    this.send = function(){
-        var form = this.getForm();
-        if(!form || !form.name)
+    this.send = function(form){
+        if(!form)
             return;
         var formData = getFormData(form);
+        formData['set'] = true;
         ajax.loadXMLDoc(url+'set/', formData);
+    }
+
+    this.processResponse = function(resp){
+        if(!resp.status){
+            if(resp.model == 'state' && resp.returned && catalog_storage.enabled){
+                resp.text = {'state': resp.returned};
+                user_storage.addItem('list.'+resp.id, resp.returned);
+            }else{
+                throw new Error(resp.text);
+            }
+        }
+
+        message.hide();
+
+        var field = (resp.field ? resp.field : resp.model);
+        if(this.fields[field]) field = this.fields[field];
+
+        if(resp.form){
+            var spans = getElementsByClassName(field+resp.id, null, 'span');
+            resp.form.push({'input': {type: 'hidden', name: 'id', value: resp.id}});
+            resp.form.push({'input': {type: 'hidden', name: 'model', value: resp.model}});
+            if(resp.field)
+                resp.form.push({'input': {type: 'hidden', name: 'field', value: resp.field}});
+            for(var i = 0; i < spans.length; i++){
+                var s = element.create('div', {className: 'editDiv edit_' + field + resp.id}, resp.form);
+                s.style.width = (field != 'links') ? '190px' : '300px';
+                element.insert(spans[i].parentNode.firstChild, {'a': {className: 'right',
+                        innerText: 'Save', onclick: function(){ edit.send(this.parentNode); }}}, true);
+                element.remove(spans[i].parentNode.firstChild);
+                element.insert(spans[i], s);
+                element.remove(spans[i]);
+            }
+            return;
+        }
+
+        switch(resp.model){
+
+            case 'state':
+                var statusdiv = document.getElementById('card_userstatus');
+                if(statusdiv){
+                    var statusname = ({"0": "None", "1": "Want", "2": "Now", "3": "Done",
+                        "4": "Dropped", "5": "Partially watched"})[resp.text.state]
+                    element.remove((function(x){
+                        var a = new Array();
+                        for(var i in x)
+                            if(x[i] && (x[i].tagName == "SPAN" || x[i].tagName == "FORM"
+                                || x[i].tagName == "INPUT")) a.push(x[i]);
+                        return a;
+                    })(statusdiv.childNodes));
+                    element.appendChild(statusdiv, [{'span': {innerText: statusname}},
+                        {'input': {type: 'hidden', name: 'card_userstatus_input', value: resp.text.state}}]);
+                    if(resp.text.count){
+                        element.appendChild(statusdiv, [{'span':
+                            {innerText: resp.text.count + '/' + (function(){
+                                var n = document.getElementsByName('episodesCount');
+                                for(var i in n)
+                                    if(n[i].tagName == "SPAN") return n[i].innerText;
+                                })(),
+                            className: 'right'}}, {'input': {type: 'hidden',
+                                        name: 'card_usercount_input', value: resp.text.count}}]);
+                    }
+                }
+
+                var rs = getStylesheetRule('.rs'+resp.text.state, 'background-color');
+                rs = rs ? rs : '#FFF';
+                var as = getStylesheetRule('.as'+resp.text.state, 'background-color');
+                as = as ? as : '#FFF';
+                var sl = getStylesheetRule('.sl'+resp.text.state, 'color');
+                sl = sl ? sl : '#000';
+                var rules = [['.r'+resp.id, ['background-color', rs]],
+                            ['.a'+resp.id, ['background-color', as]],
+                            ['.s'+resp.id, ['color', sl, true]]];
+                addStylesheetRules(rules);
+            break;
+
+            default:
+                var divs = getElementsByClassName('edit_' + field + resp.id, null, 'div');
+                for(var i = 0; i < divs.length; i++){
+                    var v = (resp.text[resp.field] ? resp.text[resp.field] : resp.text);
+                    var s = element.create('span', {className: field + resp.id}, createFieldContent(field, v, resp.id));
+                    element.insert(divs[i].parentNode.firstChild, {'a': {className: 'right',
+                        'href': this.getFieldLink(resp.id, field), innerText: 'Edit',
+                        target: '_blank', onclick: ((field == 'state') ? function(){
+                        cardstatus(resp.text.id); return false;} : undefined)}}, true);
+                    element.remove(divs[i].parentNode.firstChild);
+                    element.insert(divs[i], s);
+                    element.remove(divs[i]);
+                }
+            break;
+        }
     }
 
 })();

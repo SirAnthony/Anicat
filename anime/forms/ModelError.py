@@ -2,6 +2,7 @@
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 from django.forms.forms import BoundField
+from django.forms.widgets import Select, SelectMultiple
 from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
 from django.utils.translation import ugettext_lazy as _
@@ -40,7 +41,6 @@ class ErrorModelForm(ModelForm):
         output, hidden_fields = [], []
 
         for name, field in self.fields.items():
-            html_class_attr = None
             bf = BoundField(self, field, name)
             bf_errors = self.error_class([conditional_escape(error) for error in bf.errors])
             tag = 'input'
@@ -48,41 +48,54 @@ class ErrorModelForm(ModelForm):
             fieldobj = {
                 'id': bf.auto_id,
                 'name': force_unicode(bf.name),
-                'value': force_unicode(bf.value()),
+                'value': bf.value(),
             }
             if bf.is_hidden:
                 if bf_errors:
                     top_errors.extend([u'(Hidden field %s) %s' % (name, force_unicode(e)) for e in bf_errors])
                 fieldobj['type'] = 'hidden'
-                fieldobj = {tag: fileobj}
+                if fieldobj.has_key('value'):
+                    fieldobj['value'] = force_unicode(fieldobj['value'])
+                hidden_fields.append({tag: fieldobj})
             else:
                 if hasattr(field.widget, 'choices'):
                     tag = 'select'
+                    values = []
+                    if isinstance(field.widget, Select):
+                        values = fieldobj.pop('value')
+                        if isinstance(field.widget, SelectMultiple):
+                            fieldobj['multiple'] = 'multiple'
                     for c in field.widget.choices:
                         prop = {'value': force_unicode(c[0]), 'innerText': force_unicode(c[1])}
+                        if c[0] == values or (type(values) is list and c[0] in values):
+                            prop['selected'] = 'selected'
                         children.append({'option': prop})
                 else:
                     try:
                         fieldobj['type'] = field.widget.input_type
                     except AttributeError:
                         pass
+
                 try:
-                    html_class_attr = bf.css_classes().split()
+                    fieldobj['className'] = bf.css_classes()
                 except:
                     pass
+                else:
+                    if not fieldobj['className']:
+                        del fieldobj['className']
 
                 if field.help_text:
-                    help_text = force_unicode(field.help_text)
-                else:
-                    help_text = None
+                    fieldobj['title'] = force_unicode(field.help_text)
+
+                if fieldobj.has_key('value'):
+                    if fieldobj['value']:
+                        fieldobj['value'] = force_unicode(fieldobj['value'])
+                    else:
+                        del fieldobj['value']
 
                 o = {tag: fieldobj}
                 if bf_errors:
                     o['errors'] = bf_errors
-                if help_text:
-                    o['help_text'] = help_text
-                if html_class_attr:
-                    o['html_class_attr'] = html_class_attr
                 output.append(o)
                 if children:
                     output.append(children)
@@ -90,8 +103,7 @@ class ErrorModelForm(ModelForm):
         if top_errors:
             output.extend(0, top_errors)
         if hidden_fields: # Insert any hidden fields in the last row.
-            for field in hidden_fields:
-                output.append(field)
+            output.extend(hidden_fields)
         return output
 
     class Meta:

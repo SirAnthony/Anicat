@@ -588,17 +588,63 @@ function getCard(id){
     return true;
 }
 
-function gef(sender, id, model, field){
-    ajax.loadXMLDoc(url+'set/', {'id': id, 'model': model, 'field': field});
-    return false;
+function createFieldContent(fieldname, field, id){
+    var ret;
+
+    switch(fieldname){
+
+        case 'name':
+            ret = new Array();
+            for(var name in field){
+                var t = (field[name].title ? field[name].title : field[name]);
+                ret.push(element.create('', {innerText:  t}));
+                ret.push(element.create('br', {}));
+            }
+        break;
+
+        case 'state':
+            var state = {'selected': null, 'value': null};
+            if(!isString(field)){
+                catalog_storage.disable();
+                state.value = field.select[field.selected];
+                state.selected = field.selected;
+            }else{
+                if(!catalog_storage.enable()){
+                    ret = {'span': {innerText: 'Enable local storage to use catalog anonymously.'}}
+                    break;
+                }else{
+                    state = catalog_storage.getStatus(id);
+                }
+            }
+            ret = [ {'span': {innerText: capitalise(state.value)}},
+                    {'input': {'type': 'hidden', 'name': 'card_userstatus_input', 'value': state.selected}}];
+            if(field && field.completed && field.all){
+                ret.push({'span': {className: 'right', innerText: field.completed + '/' + field.all}});
+                ret.push({'input': {'type': 'hidden', 'name': 'card_usercount_input', 'value': field.completed}});
+            }
+        break;
+
+        case 'links':
+            ret = new Array();
+            for(var link in field)
+                ret.push({'a': {'target': '_blank', innerText: link,
+                        'href': field[link]}}, {'': {innerText: ' '}});
+        break;
+
+        default:
+            ret = {'': {innerText: field ? field : 'None'}};
+        break;
+    }
+
+    return ret;
 }
 
 function createStatusForm(id, selected, select, all, completed){
     select = select ? select : {"0": "None", "1": "Want", "2": "Now", "3": "Done",
                                 "4": "Dropped", "5": "Partially watched"};
-    var sp = element.create('form', {'id': 'EditForm', name: 'state'});
+    var sp = element.create('form', {name: 'state'});
     var sel = element.create('select', {name: 'state',
-        onchange: function(){
+        onchange: (function(el){ return function(){
             var noe = document.getElementById('stnum');
             if(this.value != 2 && this.value != 4){
                 element.remove(noe);
@@ -614,9 +660,9 @@ function createStatusForm(id, selected, select, all, completed){
                 ajax.processSetRequest(opts);
                 //{"returned": "2", "text": "You must be logged in.", "model": "state", "response": "edit", "id": 1212}
             }else{
-                edit.send();
+                edit.send(el);
             }
-        }
+        };})(sp)
     });
     element.addOption(sel, select);
     if(selected){

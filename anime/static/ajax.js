@@ -128,53 +128,7 @@ var ajax = new (function(){
                 break;
 
                 case 'edit':
-                    if(resp.model == 'state'){
-                        if(!resp.status){
-                            if(resp.returned && typeof user_storage != "undefined" && user_storage.enabled){
-                                resp.text = {'state': resp.returned};
-                                user_storage.addItem('list.'+resp.id, resp.returned);
-                            }else{
-                                throw new Error(resp.text);
-                                break;
-                            }
-                        }
-                        message.hide();
-                        var statusdiv = document.getElementById('card_userstatus');
-                        if(statusdiv){
-                            var statusname = ({"0": "None", "1": "Want", "2": "Now", "3": "Done",
-                                 "4": "Dropped", "5": "Partially watched"})[resp.text.state]
-                            element.remove((function(x){
-                                var a = new Array();
-                                for(var i in x)
-                                    if(x[i] && (x[i].tagName == "SPAN" || x[i].tagName == "FORM"
-                                        || x[i].tagName == "INPUT")) a.push(x[i]);
-                                return a;
-                            })(statusdiv.childNodes));
-                            element.appendChild(statusdiv, [{'span': {innerText: statusname}},
-                                {'input': {type: 'hidden', name: 'card_userstatus_input', value: resp.text.state}}]);
-                            if(resp.text.count){
-                                element.appendChild(statusdiv, [{'span':
-                                    {innerText: resp.text.count + '/' + (function(){
-                                        var n = document.getElementsByName('episodesCount');
-                                        for(var i in n)
-                                            if(n[i].tagName == "SPAN") return n[i].innerText;
-                                        })(),
-                                    className: 'right'}}, {'input': {type: 'hidden',
-                                             name: 'card_usercount_input', value: resp.text.count}}]);
-                            }
-                        }
-
-                        var rs = getStylesheetRule('.rs'+resp.text.state, 'background-color');
-                        rs = rs ? rs : '#FFF';
-                        var as = getStylesheetRule('.as'+resp.text.state, 'background-color');
-                        as = as ? as : '#FFF';
-                        var sl = getStylesheetRule('.sl'+resp.text.state, 'color');
-                        sl = sl ? sl : '#000';
-                        var rules = [['.r'+resp.id, ['background-color', rs]],
-                                    ['.a'+resp.id, ['background-color', as]],
-                                    ['.s'+resp.id, ['color', sl, true]]];
-                        addStylesheetRules(rules);
-                    }
+                    edit.processResponse(resp);
                 break;
 
                 case 'error':
@@ -282,50 +236,15 @@ var ajax = new (function(){
                         var d = element.create('div', null, {'h4': {innerText: capitalise(n)}});
                         if(edit)
                             element.insert(d.firstChild, {'a': {className: 'right',
-                                'href': edit.getFieldName(resp.text.id, fields[i]),
+                                'href': edit.getFieldLink(resp.text.id, fields[i]),
                                 innerText: 'Edit', target: '_blank',
                                 onclick: ((fields[i] == 'state') ? function(){
                                     cardstatus(resp.text.id);
                                     return false;} : undefined)}});
                         data.push(d);
-                        if(fields[i] == 'name'){
-                            var names = new Array();
-                            for(var name in field){
-                                names.push(element.create('', {innerText: field[name].title}));
-                                names.push(element.create('br', {}));
-                            }
-                            element.appendChild(d, names)
-                        }else if(fields[i] == 'state'){
+                        element.appendChild(d, createFieldContent(fields[i], field, resp.text.id));
+                        if(fields[i] == 'state')
                             d.id = 'card_userstatus'
-                            var state = {'selected': null, 'value': null};
-                            if(!isString(field)){
-                                catalog_storage.disable();
-                                state.value = field.select[field.selected];
-                                state.selected = field.selected;
-                            }else{
-                                if(!catalog_storage.enable()){
-                                    element.appendChild(d, {'span': {
-                                        innerText: 'Enable local storage to use catalog anonymously.'}});
-                                    continue;
-                                }else{
-                                    state = catalog_storage.getStatus(resp.text.id);
-                                }
-                            }
-                            element.appendChild(d, [{'span': {innerText: capitalise(state.value)}},
-                                    {'input': {'type': 'hidden', 'name': 'card_userstatus_input', 'value': state.selected}}]);
-                            if(field && field.completed && field.all){
-                                element.appendChild(d, [{'span': {className: 'right',
-                                    innerText: field.completed + '/' + field.all}},
-                                {'input': {'type': 'hidden', 'name': 'card_usercount_input', 'value': field.completed}}]);
-                            }
-                        }else if(fields[i] == 'links'){
-                            if(!field) continue;
-                            for(var link in field)
-                                element.appendChild(d, [{'a': {'target': '_blank', innerText: link,
-                                    'href': field[link]}}, {'': {innerText: ' '}}]);
-                        }else{
-                            element.appendChild(d, {'': {innerText: field ? field : 'None'}});
-                        }
                     }
                     element.appendChild(card, [
                         {'div': {'id': 'imagebun', 'className': 'cardcol'}}, [
@@ -333,7 +252,7 @@ var ajax = new (function(){
                                 {'img': {'src': 'http://anicat.net/images/' + res.id + '/'}}],
                             'div', [
                                 (edit ? {'a': {className: 'right',
-                                'href': edit.getFieldName(resp.text.id, 'bundle'),
+                                'href': edit.getFieldLink(resp.text.id, 'bundle'),
                                 innerText: 'Edit', target: '_blank'}} : undefined ),
                                 {'h4': {innerText: 'Bundled with:'}},
                                 'table', (function(bn){

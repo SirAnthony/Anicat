@@ -96,13 +96,14 @@ def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
                         'status': True,
                         'response': 'edit',
                         'id': retid or obj.id,
+                        'field': field,
                         'text': ''
                     })
             except Exception, e:
                 response['text'] = str(e)
         else:
             #FIXME: AnimeNameForm throw exceptions here but nobody catch
-            form = formobject(request.POST, files=request.FILES, user=request.user, instance=obj)
+            form = formobject(request.POST.copy(), files=request.FILES, user=request.user, instance=obj)
             if obj and form.is_valid():
                 try:
                     if modelname == 'name':
@@ -140,6 +141,7 @@ def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
                         'response': 'edit',
                         'status': True,
                         'id': retid or obj.id,
+                        'field': field,
                         'text': form.cleaned_data
                     })
                     if lastfunc:
