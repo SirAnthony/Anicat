@@ -5,12 +5,14 @@ from django.views.generic.simple import direct_to_template
 urlpatterns = patterns(
     'anime.views',
     (r'^$', 'index'),
+    # TODO Split regexp
     (r'^(show/(?P<status>\d+))?/?(sort/(?P<order>\w+))?/?(?P<page>\d+)?/$', 'index'),
     (r'^search/(?P<string>[^/]+)?/?(field/(?P<field>\w+))?/?(sort/(?P<order>\w+))?/?(?P<page>\d+)?/?$', 'search'),
     (r'^changes/$', direct_to_template, {'template': 'anime/changes.html'}),
     (r'^faq/$', direct_to_template, {'template': 'anime/faq.html'}),
     (r'^card/(?P<animeId>\d+)?/?$', 'card'),
     (r'^stat/(?P<userId>\d+)?/?$', 'stat'),
+    # TODO Split regexp
     (r'^requests/(status/(?P<status>\d+))?/?(type/(?P<rtype>\d+))?/?(?P<page>\d+)?/?$', 'requests'),
     (r'^css/$', 'generateCss'),
     (r'^test/$', 'test'),
@@ -42,9 +44,9 @@ urlpatterns += patterns('anime.ajax',
 )
 
 urlpatterns += patterns('',
-    (r'^jsi18n/(?P<packages>\S+?)?/?$', 'django.views.i18n.javascript_catalog'),
+    (r'^jsi18n/(?P<packages>\S+?)?/?$',
+        'django.views.i18n.javascript_catalog'),
 )
-#
 
 if settings.DEBUG:
     urlpatterns += patterns('', url(r'^media/(.*)$',
@@ -53,4 +55,3 @@ if settings.DEBUG:
                                 url(r'^images/(.*)$',
         'django.views.static.serve', kwargs={
         'document_root': settings.IMAGES_ROOT}), )
-

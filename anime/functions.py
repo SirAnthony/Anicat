@@ -5,16 +5,19 @@ from django.utils.http import urlquote
 from django.contrib.auth.models import User
 from models import AnimeItem
 
-def getVal(val, obj = None, default = ''):
-    if obj and obj.has_key(val):
+
+def getVal(val, obj=None, default=''):
+    if obj and val in obj:
         return obj[val]
     return default
 
-def getAttr(obj, val, default = ''):
+
+def getAttr(obj, val, default=''):
     try:
         return getattr(obj, val)
     except AttributeError:
         return default
+
 
 def createPages(qs, order, limit=20):
     pages = []
@@ -24,16 +27,19 @@ def createPages(qs, order, limit=20):
             if not i:
                 s = (qs.only(order)[i],)
             else:
-                s = qs.only(order)[i-1:i+1]
-            pages.extend(map(lambda x: unicode(getattr(x, order)).strip()[:4], s))
-        pages.append(unicode(getattr(qs.order_by('-'+order).only(order)[0], order)).strip()[:4])
-        pages = [a+' - '+b for a,b in zip(pages[::2], pages[1::2])]
+                s = qs.only(order)[i - 1:i + 1]
+            pages.extend(unicode(getattr(x, order)).strip()[:4] for x in s)
+        pages.append(unicode(getattr(qs.order_by('-' + order).only(order)[0],
+                            order)).strip()[:4])
+        pages = [a + ' - ' + b for a, b in zip(pages[::2], pages[1::2])]
     return pages
 
+
 def invalidateCacheKey(fragment_name, *variables):
-   args = md5_constructor(u':'.join([urlquote(var) for var in variables]))
-   cache_key = 'template.cache.%s.%s' % (fragment_name, args.hexdigest())
-   cache.delete(cache_key)
+    args = md5_constructor(u':'.join([urlquote(var) for var in variables]))
+    cache_key = 'template.cache.%s.%s' % (fragment_name, args.hexdigest())
+    cache.delete(cache_key)
+
 
 def cleanTableCache(order, status, page, user):
     link = ''
@@ -49,8 +55,10 @@ def cleanTableCache(order, status, page, user):
         maintablekey = 'mainTable:%s' % user.id
     else:
         maintablekey = 'mainTable'
-    _cleanCache(maintablekey, status, order, page, cachestr, 'Pages', 'mainTable')
+    _cleanCache(maintablekey, status, order,
+            page, cachestr, 'Pages', 'mainTable')
     return link, cachestr
+
 
 def cleanRequestsCache(status, rtype, page):
     link = ''
@@ -61,6 +69,7 @@ def cleanRequestsCache(status, rtype, page):
     cachestr = link + str(page)
     _cleanCache('requests', status, rtype, page, cachestr, 'requestPages')
     return link, cachestr
+
 
 def _cleanCache(cachekey, first, second, third, cachestr, pagekey, ckey=None):
     #cache = {first: {second: [third,]]}} or {second: [third,]]}
@@ -94,6 +103,7 @@ def _cleanCache(cachekey, first, second, third, cachestr, pagekey, ckey=None):
         invalidateCacheKey(ckey or cachekey, cachestr)
         cache.set(cachekey, ccontent)
 
+
 def updateMainCaches(status=None):
     for id in map(lambda x: x[0], User.objects.all().values_list('id')):
         t = {}
@@ -105,6 +115,7 @@ def updateMainCaches(status=None):
                 t = {}
         cache.set('mainTable:%s' % id, t)
     cache.set('mainTable', {})
+
 
 def updateCardCache(rid):
     invalidateCacheKey('card', rid)

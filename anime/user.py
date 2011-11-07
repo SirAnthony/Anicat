@@ -8,6 +8,7 @@ from anime.malconvert import passFile
 from anime.models import AnimeRequest
 from datetime import datetime, timedelta
 
+
 def login(request):
     response = {}
     form = None
@@ -23,6 +24,7 @@ def login(request):
             response.update({'response': True, 'text': {'name': user.username}})
     response['form'] = form or NotActiveAuthenticationForm()
     return response
+
 
 def register(request):
     response = {}
@@ -40,6 +42,7 @@ def register(request):
             response.update({'response': True, 'text': {'name': user.username}})
     response['form'] = form or UserCreationFormMail()
     return response
+
 
 def loadMalList(request):
     lastLoad = cache.get('MalList:%s' % request.user.id)
@@ -64,10 +67,11 @@ def loadMalList(request):
         form = UploadMalListForm()
     return {'mallistform': form, 'mallist': lastLoad}
 
+
 def getRequests(user, *keys):
     try:
         qs = AnimeRequest.objects.filter(user=user).order_by('status', '-id')
-        qs = qs.exclude(Q(status__gt=2) & Q(changed__lte=datetime.now()-timedelta(days=20)))
+        qs = qs.exclude(Q(status__gt=2) & Q(changed__lte=datetime.now() - timedelta(days=20)))
         c = qs.filter(status__gt=2).count()
         if c > 20:
             qs = qs[:qs.count() - (c - 10)]

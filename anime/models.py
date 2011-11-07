@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import collections
 import os
 from audit_log.models.managers import AuditLog
@@ -54,6 +55,7 @@ REQUEST_STATUS = [
     (3, u'Done'),
 ]
 
+
 class Genre(models.Model):
     name = models.CharField(max_length=200, db_index=True, unique=True)
 
@@ -63,11 +65,13 @@ class Genre(models.Model):
     class Meta:
         ordering = ["name"]
 
+
 class Credit(models.Model):
     title = models.CharField(max_length=200, unique=True)
 
     def __unicode__(self):
         return self.title
+
 
 class AnimeBundle(models.Model):
 
@@ -146,8 +150,8 @@ class AnimeBundle(models.Model):
 
 
 class AnimeItem(models.Model):
-
-    title = models.CharField(max_length=200, db_index=True, unique_for_date='releasedAt')
+    title = models.CharField(max_length=200,
+            db_index=True, unique_for_date='releasedAt')
     genre = models.ManyToManyField(Genre)
     releaseType = models.IntegerField(choices=ANIME_TYPES)
     episodesCount = models.IntegerField()
@@ -156,14 +160,24 @@ class AnimeItem(models.Model):
     releasedKnown = models.SmallIntegerField(blank=True, default=0)
     endedAt = models.DateTimeField(blank=True, null=True)
     endedKnown = models.SmallIntegerField(blank=True, default=0)
-    bundle = models.ForeignKey(AnimeBundle, related_name='animeitems', null=True, blank=True)
+    bundle = models.ForeignKey('AnimeBundle',
+            related_name='animeitems', null=True, blank=True)
     air = models.BooleanField()
     audit_log = AuditLog()
+
+    class Meta:
+        ordering = ["title"]
+
+    def __unicode__(self):
+        if self.id:
+            return '%s [%s]' % (self.title, ANIME_TYPES[self.releaseType][1])
+        return ''
 
     def _getReleaseTypeString(self):
         return ANIME_TYPES[self.releaseType][1]
 
     def _getRelease(self):
+        #FIXME ЧЗХ
         try:
             if self.endedAt:
                 return ' - '.join([
@@ -188,44 +202,41 @@ class AnimeItem(models.Model):
                 title = last.title
             else:
                 title = self.title
-            name, created = AnimeName.objects.get_or_create(anime=self, title=title)
+            name, created = AnimeName.objects.get_or_create(
+                                        anime=self, title=title)
             if not created:
                 name.title = self.title
             try:
                 name.save()
-            except IntegrityError: #Already exists
+            except IntegrityError:
+                # Already exists
                 pass
 
-    def __unicode__(self):
-        if self.id:
-            return '%s [%s]' % (self.title, ANIME_TYPES[self.releaseType][1])
-        return ''
-
-    class Meta:
-        ordering = ["title"]
 
 class AnimeEpisode(models.Model):
     title = models.CharField(max_length=200, db_index=True)
     anime = models.ForeignKey(AnimeItem, related_name="animeepisodes")
     audit_log = AuditLog()
 
+    class Meta:
+        unique_together = ("title", "anime")
+
     def __unicode__(self):
         return '%s [%s]' % (self.title, self.anime.title)
 
-    class Meta:
-        unique_together = ("title", "anime")
 
 class AnimeName(models.Model):
     title = models.CharField(max_length=200)
     anime = models.ForeignKey(AnimeItem, related_name="animenames")
     audit_log = AuditLog()
 
-    def __unicode__(self):
-        return self.title
-
     class Meta:
         ordering = ["title"]
         unique_together = ("title", "anime")
+
+    def __unicode__(self):
+        return self.title
+
 
 class AnimeLink(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="links")
@@ -233,13 +244,14 @@ class AnimeLink(models.Model):
     linkType = models.IntegerField(choices=LINKS_TYPES)
     audit_log = AuditLog()
 
+    class Meta:
+        unique_together = ("link", "anime")
+
     def save(self, *args, **kwargs):
         if self.linkType == 0:
             self.linkType = LINKS_TYPES[-1][0]
         super(AnimeLink, self).save(*args, **kwargs)
 
-    class Meta:
-        unique_together = ("link", "anime")
 
 class AnimeLinks(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="links1")
@@ -248,6 +260,7 @@ class AnimeLinks(models.Model):
     MAL = models.IntegerField(unique=True, blank=True, null=True)
     audit_log = AuditLog()
 
+
 class Organisation(models.Model):
     name = models.CharField(max_length=200, unique=True)
     audit_log = AuditLog()
@@ -255,9 +268,11 @@ class Organisation(models.Model):
     def __unicode__(self):
         return self.name
 
+
 class OrganisationBundle(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="organisationbundles")
-    organisation = models.ForeignKey(Organisation, related_name="organisationbundles")
+    organisation = models.ForeignKey(Organisation,
+            related_name="organisationbundles")
     job = models.ForeignKey(Credit)
     role = models.CharField(max_length=30, blank=True)
     comment = models.CharField(max_length=100, blank=True)
@@ -266,12 +281,14 @@ class OrganisationBundle(models.Model):
     class Meta:
         unique_together = ("anime", "organisation", "job", "role")
 
+
 class People(models.Model):
     name = models.CharField(max_length=200, unique=True)
     audit_log = AuditLog()
 
     def __unicode__(self):
         return self.name
+
 
 class PeopleBundle(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="peoplebundles")
@@ -288,11 +305,13 @@ class PeopleBundle(models.Model):
 class StatusManager(models.Manager):
     def get_for_user(self, items, user):
         #TODO: Think about .values()
-        statuses = self.filter(anime__in=[anime.id for anime in items], user=user)
+        statuses = self.filter(
+                anime__in=[anime.id for anime in items], user=user)
         status_dict = collections.defaultdict(lambda: None)
         for status in statuses:
             status_dict[status.anime_id] = status
         return status_dict
+
 
 class UserStatusBundle(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="statusbundles")
@@ -302,6 +321,9 @@ class UserStatusBundle(models.Model):
     changed = models.DateTimeField(auto_now=True)
 
     objects = StatusManager()
+
+    class Meta:
+        unique_together = ("anime", "user")
 
     def save(self, *args, **kwargs):
         if self.state in (2, 4):
@@ -315,12 +337,11 @@ class UserStatusBundle(models.Model):
             self.count = None
         super(UserStatusBundle, self).save(*args, **kwargs)
 
-    class Meta:
-        unique_together = ("anime", "user")
 
 class AnimeRequest(models.Model):
     user = models.ForeignKey(User)
-    anime = models.ForeignKey(AnimeItem, related_name="requests", blank=True, null=True)
+    anime = models.ForeignKey(AnimeItem,
+            related_name="requests", blank=True, null=True)
     requestType = models.IntegerField(choices=REQUEST_TYPE)
     text = models.CharField(max_length=5000)
     status = models.IntegerField(choices=REQUEST_STATUS)
@@ -328,7 +349,7 @@ class AnimeRequest(models.Model):
     changed = models.DateTimeField(auto_now=True)
 
     def __init__(self, *args, **kwargs):
-        if not kwargs.has_key('status'):
+        if 'status' not in kwargs:
             kwargs['status'] = 0
         super(AnimeRequest, self).__init__(*args, **kwargs)
 
@@ -341,39 +362,44 @@ class AnimeRequest(models.Model):
                 raise OSError('File does not exists.')
             if self.status > 1:
                 ext = filename.rsplit('.', 1)[-1]
-                os.rename(filename, os.path.join(IMAGES_ROOT, '%s.%s' % (self.anime.id, ext)))
+                os.rename(filename,
+                        os.path.join(IMAGES_ROOT,
+                            '%s.%s' % (self.anime_id, ext)))
                 self.status = 3
             else:
                 os.unlink(filename)
             self.text = "0.png"
         super(AnimeRequest, self).save(*args, **kwargs)
 
+
 class AnimeItemRequest(AnimeRequest):
+
+    class Meta:
+        proxy = True
 
     def __init__(self, *args, **kwargs):
         kwargs['requestType'] = 0
         super(AnimeItemRequest, self).__init__(*args, **kwargs)
 
-    class Meta:
-        proxy = True
 
 class AnimeImageRequest(AnimeRequest):
+
+    class Meta:
+        proxy = True
 
     def __init__(self, *args, **kwargs):
         kwargs['requestType'] = 1
         super(AnimeImageRequest, self).__init__(*args, **kwargs)
 
-    class Meta:
-        proxy = True
 
 class AnimeFeedbackRequest(AnimeRequest):
+
+    class Meta:
+        proxy = True
 
     def __init__(self, *args, **kwargs):
         kwargs['requestType'] = 2
         super(AnimeFeedbackRequest, self).__init__(*args, **kwargs)
-
-    class Meta:
-        proxy = True
 
 
 EDIT_MODELS = {
