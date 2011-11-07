@@ -2,6 +2,8 @@
 
 import os
 
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -47,9 +49,9 @@ USE_L10N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = os.path.join(os.getcwd(), 'files/')
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'files')
 
-IMAGES_ROOT = os.path.join(os.getcwd(), 'images')
+IMAGES_ROOT = os.path.join(PROJECT_ROOT, 'images')
 
 FILE_UPLOAD_HANDLERS = (
     'django.core.files.uploadhandler.MemoryFileUploadHandler',
