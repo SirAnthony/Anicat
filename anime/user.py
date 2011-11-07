@@ -21,7 +21,8 @@ def login(request):
         if form.is_valid():
             user = form.get_user()
             auth.login(request, user)
-            response.update({'response': True, 'text': {'name': user.username}})
+            response.update({'response': True,
+                'text': {'name': user.username}})
     response['form'] = form or NotActiveAuthenticationForm()
     return response
 
@@ -58,7 +59,8 @@ def loadMalList(request):
             if lastLoad and timeLeft > 0:
                 form.addError('You doing it too often. Try again in %s minutes.' % timeLeft)
             else:
-                status, error = passFile(request.FILES['file'], request.user, form.cleaned_data['rewrite'])
+                status, error = passFile(request.FILES['file'],
+                        request.user, form.cleaned_data['rewrite'])
                 if not status:
                     form.addError(error)
                 else:
