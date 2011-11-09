@@ -27,7 +27,7 @@ def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
     elif modelname not in EDIT_MODELS:
         response['text'] = 'Bad model name passed.'
     elif not request.user.is_active and modelname != 'state':
-        response['text'] = 'You cannot doing this.'
+        response['text'] = 'You cannot do this.'
     elif modelname not in EDIBLE_LIST and (datetime.now() - request.user.date_joined).days < 15:
         response['text'] = 'You cannot do this now. Please wait for {0} days.'.format(
                 (datetime.now() - request.user.date_joided).days
@@ -121,7 +121,7 @@ def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
                             if not fields:
                                 obj.save()
                             else:
-                                raise ValueError('Cannot save new instance without all required fields.')
+                                raise ValueError(_('Cannot save new instance without all required fields.'))
                         elif modelname == 'image':
                             obj = form.instance
                             retid = obj.id

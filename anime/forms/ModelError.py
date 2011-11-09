@@ -7,7 +7,7 @@ from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
 from django.utils.translation import ugettext_lazy as _
 from anime.forms.fields import  UnknownDateField
-from anime.models import AnimeItem, UserStatusBundle
+from anime.models import AnimeItem, AnimeName, UserStatusBundle
 
 class ReadOnlyModelForm(ModelForm):
 
@@ -129,6 +129,17 @@ class AnimeForm(ErrorModelForm):
                 self.cleaned_data.update(getattr(field, 'cleaned_data'))
             except AttributeError:
                 pass
+        if not self.instance.id:
+            title = self.cleaned_data.get('title')
+            release = self.cleaned_data.get('releasedAt')
+            names = AnimeName.objects.filter(title=title)
+            for name in names:
+                if name.anime.releasedAt.date() == release:
+                    self.addError(
+                        _('Anime record already exists: "%s" (%s).' % (
+                            name.anime.title, name.anime.id)))
+                    return
+
 
     class Meta():
         model = AnimeItem
