@@ -1,6 +1,6 @@
 
 from django.core.exceptions import ValidationError
-from django.forms import ModelForm, ChoiceField
+from django.forms import ModelForm
 from django.forms.forms import BoundField
 from django.forms.widgets import Select, SelectMultiple
 from django.utils.encoding import force_unicode
@@ -136,17 +136,6 @@ class AnimeForm(ErrorModelForm):
 
 
 class UserStatusForm(ErrorModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(UserStatusForm, self).__init__(*args, **kwargs)
-        if self.instance.state != 3:
-            del self.fields['rating']
-        if self.instance.state not in (2, 4) or self.instance.anime.episodesCount == 1:
-            del self.fields['count']
-        else:
-            self.fields['count'] = ChoiceField(choices=(
-                (i, str(i)) for i in range(1, self.instance.anime.episodesCount+1)))
-
     class Meta:
         model = UserStatusBundle
         exclude = ('anime', 'user')

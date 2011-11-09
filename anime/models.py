@@ -177,10 +177,7 @@ class AnimeItem(models.Model):
         return ANIME_TYPES[self.releaseType][1]
 
     def _getRelease(self):
-        # This function returns date as "releasedAt - endedAt" in format
-        # "dd.mm.yy" for each. If date is not known (i.e. xKnown field
-        # is 7), "?" returns instead "??.??.??"
-        # If endedAt is None, only releasedAt will be returned.
+        #FIXME ЧЗХ
         try:
             if self.endedAt:
                 return ' - '.join([
@@ -321,8 +318,6 @@ class UserStatusBundle(models.Model):
     user = models.ForeignKey(User)
     state = models.IntegerField(choices=USER_STATUS)
     count = models.IntegerField(blank=True, null=True)
-    rating = models.IntegerField(default=6,
-                choices=((i, str(i)) for i in range(1, 11)))
     changed = models.DateTimeField(auto_now=True)
 
     objects = StatusManager()
