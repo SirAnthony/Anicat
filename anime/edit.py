@@ -14,6 +14,7 @@ EDIBLE_LIST = [
     'feedback'
 ]
 
+# This shit needs refactoring
 
 def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
     if not modelname:
@@ -28,7 +29,9 @@ def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
     elif not request.user.is_active and modelname != 'state':
         response['text'] = 'You cannot doing this.'
     elif modelname not in EDIBLE_LIST and (datetime.now() - request.user.date_joined).days < 15:
-        response['text'] = 'You cannot doing this now.'
+        response['text'] = 'You cannot do this now. Please wait for {0} days.'.format(
+                (datetime.now() - request.user.date_joided).days
+            )
     else:
         form = None
         obj = None
@@ -160,7 +163,7 @@ def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
 
 def _saveAnimeNames(form, obj):
     if not obj or not obj.id:
-        raise ValueError('%s not exists.' % type(obj).__name__)
+        raise ValueError('%s does not exists.' % type(obj).__name__)
     names = obj.animenames.all()
     cleaned = form.cleaned_data.values()
     newNames = filter(lambda x: x and x not in names, cleaned)
@@ -190,7 +193,7 @@ def _saveAnimeNames(form, obj):
 
 def _saveAnimeLinks(form, obj):
     if not obj or not obj.id:
-        raise ValueError('%s not exists.' % type(obj).__name__)
+        raise ValueError('%s does not exists.' % type(obj).__name__)
     links = list(obj.links.all())
     cleaned = form.cleaned_data
     cleanlinks = [0] * (len(form.cleaned_data) / 2)
