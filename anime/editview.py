@@ -1,8 +1,9 @@
-
+# -*- coding: utf-8 -*-
 from django.core.context_processors import csrf
 from django.http import HttpResponseRedirect
 from annoying.decorators import render_to
 import anime.edit as editMethods
+
 
 @render_to('anime/edit.html')
 def add(request):
@@ -13,10 +14,12 @@ def add(request):
     res.update(csrf(request))
     return res
 
+
 @render_to('anime/request.html')
 def request_item(request, requestId):
     form = editMethods.edit(request, requestId, 'request')
     return form
+
 
 @render_to('anime/edit.html')
 def feedback(request):
@@ -27,6 +30,7 @@ def feedback(request):
     res.update(csrf(request))
     return res
 
+
 @render_to('anime/edit.html')
 def anime_request(request):
     res = editMethods.edit(request, 0, 'animerequest')
@@ -35,6 +39,7 @@ def anime_request(request):
         return HttpResponseRedirect('/request/%s/' % (rid or 0))
     res.update(csrf(request))
     return res
+
 
 @render_to('anime/edit.html')
 def edit(request, itemId, model='anime', field=None):

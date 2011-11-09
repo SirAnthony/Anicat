@@ -22,13 +22,13 @@ MAL_STATUS = [
     ]
 
 MAL_STATUS_CONVERT_LIST = [
-    0, #none
-    2, #watching => now
-    3, #completed => done
-    2, #onhold => now
-    4, #dropped => dropped
-    0, #none
-    1, #plantowatch => want
+    0,  # none
+    2,  # watching => now
+    3,  # completed => done
+    2,  # onhold => now
+    4,  # dropped => dropped
+    0,  # none
+    1,  # plantowatch => want
 ]
 
 MAL_TYPE_CONVERT_LIST = [
@@ -40,6 +40,7 @@ MAL_TYPE_CONVERT_LIST = [
     (5, u'ONA'),
     (6, u'Music')
 ]
+
 
 def getData(filename):
     try:
@@ -60,10 +61,12 @@ def getData(filename):
         os.remove(filename)
     return file_content
 
+
 def process(user, filename, rewrite=True):
     try:
         doc = xmlp.parseString(getData(filename))
-        animelist = doc.getElementsByTagName('myanimelist')[0].getElementsByTagName('anime')
+        animelist = doc.getElementsByTagName('myanimelist'
+                )[0].getElementsByTagName('anime')
         result = {'withMal': [], 'withNames': [], 'notFound': []}
         for anime in animelist:
             state, anime = searchAnime(anime)
@@ -80,6 +83,7 @@ def process(user, filename, rewrite=True):
         result = {'error': str(e)}
 
     addToCache(user, result)
+
 
 def searchAnime(obj):
     anime = {}
@@ -118,7 +122,8 @@ def searchAnime(obj):
         names = AnimeName.objects.filter(title__iexact=anime['series_title'])
         if anime['series_title'].find('The ') == 0:
             names = list(names)
-            names.extend(AnimeName.objects.filter(title__iexact=re.sub('^The\s+', '', anime['series_title'])))
+            names.extend(AnimeName.objects.filter(
+                title__iexact=re.sub('^The\s+', '', anime['series_title'])))
         for name in names:
             title = name.anime
             if title not in matchedTitles and title not in unmatchedTitles:
@@ -129,16 +134,19 @@ def searchAnime(obj):
                     unmatchedTitles.append(title)
         if len(matchedTitles) > 0:
             anime['object'] = matchedTitles[:1][0]
-            unmatchedTitles = matchedTitles[1:] #Report about
+            unmatchedTitles = matchedTitles[1:]
             state = -1
-        else: #Nothing found but we try to found similar
-            names = AnimeName.objects.filter(title__icontains=anime['series_title'])
+        else:
+            #Nothing found but we try to found similar
+            names = AnimeName.objects.filter(
+                    title__icontains=anime['series_title'])
             for name in names:
                 title = name.anime
                 if title not in unmatchedTitles:
                     unmatchedTitles.append(title)
-        anime['unmatched'] = map(lambda x: {'name': x.title, 'id': x.id}, unmatchedTitles) #Report about
+        anime['unmatched'] = map(lambda x: {'name': x.title, 'id': x.id}, unmatchedTitles)
     return (state, anime)
+
 
 def addInBase(user, animeList, rewrite=True):
     for key in ['withMal', 'withNames']:
@@ -151,21 +159,25 @@ def addInBase(user, animeList, rewrite=True):
                     ub.changed = anime['my_finish_date']
                     ub.save()
             except UserStatusBundle.DoesNotExist:
-                ub = UserStatusBundle(anime=anime['object'], user=user, changed = anime['my_finish_date'],
-                                        state=anime['my_status'], count=anime['my_watched_episodes'])
+                ub = UserStatusBundle(anime=anime['object'],
+                        user=user, changed=anime['my_finish_date'],
+                        state=anime['my_status'], count=anime['my_watched_episodes'])
                 ub.save()
             anime['object'] = {'name': anime['object'].title, 'id': anime['object'].id}
     cache.delete('mainTable:%s' % user.id)
     cache.delete('userCss:%s' % user.id)
     cache.delete('Stat:%s' % user.id)
 
+
 def addToCache(user, animeList):
     lastload = {'list': animeList, 'date': datetime.now()}
     cache.set('MalList:%s' % user.id, lastload)
 
+
 def passFile(file, user, rewrite=True):
-    cache.set('MalList:%s' % user.id, {'list': {'updated': 1}, 'date': datetime.now()}, 1800)
-    filename = os.path.join(settings.MEDIA_ROOT, str(file.size)+file.name)
+    cache.set('MalList:%s' % user.id,
+            {'list': {'updated': 1}, 'date': datetime.now()}, 1800)
+    filename = os.path.join(settings.MEDIA_ROOT, str(file.size) + file.name)
     if os.path.exists(filename):
         return False, 'File already loading.'
     try:
@@ -179,4 +191,3 @@ def passFile(file, user, rewrite=True):
     t.setDaemon(True)
     t.start()
     return True, None
-

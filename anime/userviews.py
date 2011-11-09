@@ -5,19 +5,23 @@ from django.contrib import auth
 from django.http import HttpResponseRedirect
 from annoying.decorators import render_to
 
+
 @render_to('anime/login.html')
 def login(request):
     res = userMethods.login(request)
-    return HttpResponseRedirect('/') if res.has_key('response') else res
+    return HttpResponseRedirect('/') if 'response' in res else res
+
 
 def logout(request):
     auth.logout(request)
     return HttpResponseRedirect("/")
 
+
 @render_to('anime/register.html')
 def register(request):
     res = userMethods.register(request)
-    return HttpResponseRedirect('/') if res.has_key('response') else res
+    return HttpResponseRedirect('/') if 'response' in res else res
+
 
 @render_to('anime/settings.html')
 def settings(request):

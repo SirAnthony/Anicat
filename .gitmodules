@@ -1,0 +1,3 @@
+[submodule "anime/static/js"]
+	path = anime/static/js
+	url = https://github.com/SirAnthony/element.js

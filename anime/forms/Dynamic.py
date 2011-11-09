@@ -4,9 +4,11 @@ from django.forms import ChoiceField
 from django.utils.translation import ugettext_lazy as _
 from anime.forms.ModelError import ErrorModelForm
 from anime.forms.fields import TextToAnimeItemField, TextToAnimeNameField, TextToAnimeLinkField
-from anime.models import AnimeBundle, AnimeItem, AnimeName, LINKS_TYPES
+from anime.models import AnimeBundle, AnimeItem, LINKS_TYPES
+
 
 class DynamicModelForm(ErrorModelForm):
+
     def setFields(self, kwds):
         keys = kwds.keys()
         keys.sort(cmp=lambda x, y: cmp(int(x.rsplit(None, 1)[1]), int(y.rsplit(None, 1)[1])))
@@ -21,6 +23,7 @@ class DynamicModelForm(ErrorModelForm):
         for name,field in self.fields.items():
             self.data[name] = field.widget.value_from_datadict(kwds, self.files, self.add_prefix(name))
         self.is_bound = True
+
 
 class AnimeBundleForm(DynamicModelForm):
 
@@ -48,6 +51,8 @@ class AnimeBundleForm(DynamicModelForm):
             self.setData(data)
 
 #TODO: inherit from YobaDynamicModelForm
+
+
 class AnimeNameForm(DynamicModelForm):
     def __init__(self, data=None, *args, **kwargs):
         instance = kwargs.pop('instance', None)
@@ -71,7 +76,12 @@ class AnimeNameForm(DynamicModelForm):
         self.setFields(fields)
         self.setData(data)
 
+
 class AnimeLinksForm(DynamicModelForm):
+
+    class Meta:
+        exclude = ('anime')
+
     def __init__(self, data=None, *args, **kwargs):
         instance = kwargs.pop('instance', None)
         if not instance or not instance.id:
@@ -121,5 +131,3 @@ class AnimeLinksForm(DynamicModelForm):
                 self.data[name] = field._linkfield._linktype
                 self.cleaned_data[name] = str(field._linkfield._linktype)
 
-    class Meta:
-        exclude = ('anime')

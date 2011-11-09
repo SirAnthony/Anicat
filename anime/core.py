@@ -1,9 +1,14 @@
-
-from anime.models import AnimeItem, LINKS_TYPES, EDIT_MODELS, USER_STATUS, UserStatusBundle
+# -*- coding: utf-8 -*-
+from anime.models import (
+            AnimeItem,
+            UserStatusBundle,
+            LINKS_TYPES, EDIT_MODELS, USER_STATUS,
+            )
 from django.core.cache import cache
 from anime.functions import createPages
 from anime.functions import getVal, getAttr, updateMainCaches
 from hashlib import sha1
+
 
 def get(request):
     fields = []
@@ -13,7 +18,7 @@ def get(request):
         aid = int(request.POST.get('id', 0))
         anime = AnimeItem.objects.get(id=aid)
     except Exception, e:
-        return {'text': 'Invalid id.'  + str(e)}
+        return {'text': 'Invalid id.' + str(e)}
     try:
         fields.extend(request.POST.getlist('field'))
     except Exception, e:
@@ -35,9 +40,11 @@ def get(request):
                     status = int(bundle.state)
                 except Exception:
                     status = 0
-                response[field] = {'selected': status, 'select': dict(USER_STATUS)}
+                response[field] = {'selected': status,
+                                        'select': dict(USER_STATUS)}
                 if status == 2 or status == 4:
-                    response[field].update({'completed': bundle.count, 'all': anime.episodesCount})
+                    response[field].update({'completed': bundle.count,
+                                                'all': anime.episodesCount})
         elif field == 'name':
             #FIXME: cruve
             response[field] = list(model.objects.filter(anime=anime).values('title'))
@@ -52,9 +59,10 @@ def get(request):
             if anime.bundle:
                 items = anime.bundle.animeitems.all().order_by('releasedAt')
                 status = UserStatusBundle.objects.get_for_user(items, request.user.id)
-                response[field] = map(lambda x: {'name': x.title, 'elemid': x.id,
-                                                 'job': getAttr(getVal(x.id, status, None), 'state', 0, )},
-                                      items)
+                response[field] = [{'name': x.title, 'elemid': x.id, 'job': getAttr(
+                                                            getVal(x.id, status, None),
+                                                                    'state', 0, )}
+                                        for x in  items]
         else:
             try:
                 response[field] = getattr(anime, field)
@@ -62,10 +70,8 @@ def get(request):
                 response[field] = 'Error: ' + str(e)
     r = 'card' if request.POST.get('card') else 'get'
     response = {'response': r, 'status': True, 'text': response}
-    #if (datetime.now() - request.user.date_joined).days > 20:
-    #    response['edt'] = True
-
     return response
+
 
 def search(field, string, request, attrs={}):
     #Rewrite this
@@ -87,7 +93,8 @@ def search(field, string, request, attrs={}):
         link += string + '/'
     if field:
         link += 'field/%s/' % field
-    try: #FIXME: 2 caches: /sort/title/ and /
+    #FIXME: 2 caches: /sort/title/ and /
+    try:
         order = attrs.get('order')
         AnimeItem._meta.get_field(order)
         link += 'sort/%s/' % order
@@ -109,11 +116,12 @@ def search(field, string, request, attrs={}):
             return {'text': 'Cache error occured. Try again.'}
     else:
         if field == 'name':
-            qs = AnimeItem.objects.filter(animenames__title__icontains=string).distinct().order_by(order)
+            qs = AnimeItem.objects.filter(animenames__title__icontains=string)\
+                                        .distinct().order_by(order)
         else:
             return {'text': 'This field not avaliable yet.'}
         pages = createPages(qs, order, limit)
-        items = qs[page*limit:(page+1)*limit]
+        items = qs[page * limit:(page + 1) * limit]
         count = qs.count()
         cache.set('search:%s' % cachestr, {'pages': pages, 'items': items, 'count': count})
     return {'response': 'search', 'text': {'pages': pages, 'items': items,

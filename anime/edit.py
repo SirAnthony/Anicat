@@ -1,8 +1,10 @@
-
+# -*- coding: utf-8 -*-
 from django.core.cache import cache
 from django.db.models.fields import FieldDoesNotExist
 from anime.forms.create import createFormFromModel
-from anime.models import AnimeItem, AnimeName, AnimeLink, USER_STATUS, EDIT_MODELS
+from anime.models import (
+            AnimeItem, AnimeLink,
+            USER_STATUS, EDIT_MODELS)
 from anime.functions import updateMainCaches
 from datetime import datetime
 
@@ -12,7 +14,6 @@ EDIBLE_LIST = [
     'feedback'
 ]
 
-# This shit needs refactoring
 
 def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
     if not modelname:
@@ -24,7 +25,7 @@ def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
             response.update({'response': 'edit', 'returned': request.POST.get('state')})
     elif modelname not in EDIT_MODELS:
         response['text'] = 'Bad model name passed.'
-    elif not request.user.is_active and modelname != 'state': # :cf:
+    elif not request.user.is_active and modelname != 'state':
         response['text'] = 'You cannot doing this.'
     elif modelname not in EDIBLE_LIST and (datetime.now() - request.user.date_joined).days < 15:
         response['text'] = 'You cannot doing this now.'
@@ -64,6 +65,7 @@ def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
                 except:
                     status = 0
                 retid = itemId
+
                 def st(status, oldstatus, user):
                     def _f():
                         stat = cache.get('mainTable:%s' % user.id)
@@ -103,7 +105,8 @@ def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
                 response['text'] = str(e)
         else:
             #FIXME: AnimeNameForm throw exceptions here but nobody catch
-            form = formobject(request.POST.copy(), files=request.FILES, user=request.user, instance=obj)
+            form = formobject(request.POST.copy(),
+                    files=request.FILES, user=request.user, instance=obj)
             if obj and form.is_valid():
                 try:
                     if modelname == 'name':
@@ -116,7 +119,7 @@ def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
                                 obj.save()
                             else:
                                 raise ValueError('Cannot save new instance without all required fields.')
-                        elif modelname == 'image': #FUUU
+                        elif modelname == 'image':
                             obj = form.instance
                             retid = obj.id
                         for fieldname in form.cleaned_data.keys():
@@ -172,23 +175,26 @@ def _saveAnimeNames(form, obj):
             if obj.title == name.title:
                 newname = obj.animenames.all()[0]
                 obj.title = newname.title
-                super(AnimeItem, obj).save() #Does not check again
+                #Does not check again
+                super(AnimeItem, obj).save()
         else:
             if obj.title == name.title:
                 obj.title = newname.title
-                super(AnimeItem, obj).save() #Does not check again
+                #Does not check again
+                super(AnimeItem, obj).save()
             name.title = newname.title
             name.save()
     for name in newNames:
         name.save()
+
 
 def _saveAnimeLinks(form, obj):
     if not obj or not obj.id:
         raise ValueError('%s not exists.' % type(obj).__name__)
     links = list(obj.links.all())
     cleaned = form.cleaned_data
-    cleanlinks = [0] * (len(form.cleaned_data)/2)
-    cleantypes = [0] * (len(form.cleaned_data)/2)
+    cleanlinks = [0] * (len(form.cleaned_data) / 2)
+    cleantypes = [0] * (len(form.cleaned_data) / 2)
     oldLinks = []
     for name, value in cleaned.items():
         s = name.rsplit(None, 1)[-1]

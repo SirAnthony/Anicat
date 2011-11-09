@@ -3,6 +3,7 @@
 
 from anime.models import AnimeLink, AnimeLinks, LINKS_TYPES
 
+
 def migrate():
     for link in AnimeLinks.objects.all():
         if link.AniDB:

@@ -8,6 +8,7 @@ from anime.malconvert import passFile
 from anime.models import AnimeRequest
 from datetime import datetime, timedelta
 
+
 def login(request):
     response = {}
     form = None
@@ -20,9 +21,11 @@ def login(request):
         if form.is_valid():
             user = form.get_user()
             auth.login(request, user)
-            response.update({'response': True, 'text': {'name': user.username}})
+            response.update({'response': True,
+                'text': {'name': user.username}})
     response['form'] = form or NotActiveAuthenticationForm()
     return response
+
 
 def register(request):
     response = {}
@@ -41,6 +44,7 @@ def register(request):
     response['form'] = form or UserCreationFormMail()
     return response
 
+
 def loadMalList(request):
     lastLoad = cache.get('MalList:%s' % request.user.id)
     if request.method == 'POST':
@@ -55,7 +59,8 @@ def loadMalList(request):
             if lastLoad and timeLeft > 0:
                 form.addError('You doing it too often. Try again in %s minutes.' % timeLeft)
             else:
-                status, error = passFile(request.FILES['file'], request.user, form.cleaned_data['rewrite'])
+                status, error = passFile(request.FILES['file'],
+                        request.user, form.cleaned_data['rewrite'])
                 if not status:
                     form.addError(error)
                 else:
@@ -64,10 +69,11 @@ def loadMalList(request):
         form = UploadMalListForm()
     return {'mallistform': form, 'mallist': lastLoad}
 
+
 def getRequests(user, *keys):
     try:
         qs = AnimeRequest.objects.filter(user=user).order_by('status', '-id')
-        qs = qs.exclude(Q(status__gt=2) & Q(changed__lte=datetime.now()-timedelta(days=20)))
+        qs = qs.exclude(Q(status__gt=2) & Q(changed__lte=datetime.now() - timedelta(days=20)))
         c = qs.filter(status__gt=2).count()
         if c > 20:
             qs = qs[:qs.count() - (c - 10)]
