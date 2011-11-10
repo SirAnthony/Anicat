@@ -21,6 +21,8 @@ def latestStatus(request, userId=0):
         return
 
 # TODO: Pager here
+
+
 @render_to('anime/list.html')
 def index(request, order='title', page=0, status=None):
     try:
@@ -54,9 +56,10 @@ def index(request, order='title', page=0, status=None):
     if not pages:
         pages = createPages(qs, order, limit)
         cache.set('Pages:%s' % link, pages)
-    items = qs[page*limit:(page+1)*limit]
+    items = qs[page * limit:(page + 1) * limit]
     return {'list': items, 'link': link, 'cachestr': cachestr,
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
+
 
 @render_to('anime/requests.html')
 def requests(request, status=None, rtype=None, page=0):
@@ -81,6 +84,7 @@ def requests(request, status=None, rtype=None, page=0):
     return {'requests': items, 'cachestr': cachestr, 'link': link,
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
 
+
 @render_to('anime/search.html')
 def search(request, string=None, field=None, order=None, page=0):
     limit = 20
@@ -97,6 +101,7 @@ def search(request, string=None, field=None, order=None, page=0):
     else:
         ret['page'] = {'number': 0, 'start': 0}
     return ret
+
 
 @render_to('anime/card.html')
 def card(request, animeId=0):
@@ -144,6 +149,7 @@ def card(request, animeId=0):
         ret['userstatus'] = userstatus
     return ret
 
+
 @condition(last_modified_func=latestStatus)
 @render_to('anime/stat.html')
 def stat(request, userId=0):
@@ -182,8 +188,8 @@ def stat(request, userId=0):
             cache.set('Stat:%s' % user.id, tuser)
     return {'username': username, 'stat': tuser}
 
+
 @cache_control(private=True, no_cache=True)
-#@condition(last_modified_func=latestStatus)
 @render_to('anime/user.css', 'text/css')
 def generateCss(request):
     styles = cache.get('userCss:%s' % request.user.id)
@@ -197,10 +203,12 @@ def generateCss(request):
         cache.set('userCss:%s' % request.user.id, styles)
     return {'style': styles}
 
+
 @condition(last_modified_func=latestStatus)
 @render_to('anime/blank.html', 'text/css')
 def blank(request):
     return {}
+
 
 @render_to('anime/history.html')
 def history(request, field=None, page=0):
@@ -246,6 +254,8 @@ def history(request, field=None, page=0):
     }
 
 #@render_to('anime/add.html')
+
+
 def test(request):
     ctx = {}
     return ctx
