@@ -10,9 +10,71 @@ from anime.functions import getVal, getAttr, updateMainCaches
 from hashlib import sha1
 
 
+class FieldExplorer(object):
+    def __init__(self, field):
+        self.field = field
+
+    def get_field(self):
+        field = getattr(self, self.field, None)
+        if callable(field):
+            return field
+        return None
+
+    def get_model(self, field_name):
+        try:
+            model = EDIT_MODELS[self.field]
+        except KeyError:
+            model = None
+        return model
+
+    def state(self, anime, request):
+        if not request.user.is_authenticated():
+            return 'Anonymous users have no statistics.'
+        try:
+            bundle = self.get_model().objects.get(anime=anime, user=request.user)
+            status = int(bundle.state)
+        except Exception:
+            status = 0
+
+        response = {'selected': status,
+                                'select': dict(USER_STATUS)}
+        # Магические числа, охуенно
+        if status == 2 or status == 4:
+            response.update({'completed': bundle.count,
+                                        'all': anime.episodesCount})
+        return response
+
+    def rating(self, anime, request):
+        return {'selected': 0, 'select': {'1': '2'}}
+
+    def name(self, anime, request):
+        return list(self.get_model().objects.filter(anime=anime).values('title'))
+
+    def genre(self, anime, request):
+        return ', '.join(anime.genre.values_list('name', flat=True))
+
+    def links(self, anime, request):
+        return dict([(LINKS_TYPES[x[0]][-1], x[1]) \
+                for x in self.get_model().objects.filter(anime=anime).values_list('linkType', 'link')])
+
+    def type(self, anime, request):
+        return anime.releaseTypeS
+
+    def bundle(self, anime, request):
+        if anime.bundle:
+            items = anime.bundle.animeitems.all().order_by('releasedAt')
+            status = UserStatusBundle.objects.get_for_user(items, request.user.id)
+            return [{'name': x.title, 'elemid': x.id,
+                'job': getAttr( getVal(x.id, status, None), 'state', 0, )}
+                                                            for x in  items]
+        return None
+
+
+
 def get(request):
     fields = []
     if request.method != 'POST':
+        # XXX: Антипаттерн, имя функции - get, но разрешен только пост
         return {'text': 'Only POST method allowed.'}
     try:
         aid = int(request.POST.get('id', 0))
@@ -26,48 +88,17 @@ def get(request):
     response = {'id': aid, 'order': fields}
     for field in fields:
         #FIXME: so bad
-        try:
-            model = EDIT_MODELS[field]
-        except KeyError:
-            model = None
-        if field == 'state':
-            if not request.user.is_authenticated():
-                response[field] = 'Anonymous users have no statistics.'
-                continue
-            else:
-                try:
-                    bundle = model.objects.get(anime=anime, user=request.user)
-                    status = int(bundle.state)
-                except Exception:
-                    status = 0
-                response[field] = {'selected': status,
-                                        'select': dict(USER_STATUS)}
-                if status == 2 or status == 4:
-                    response[field].update({'completed': bundle.count,
-                                                'all': anime.episodesCount})
-        elif field == 'name':
-            #FIXME: cruve
-            response[field] = list(model.objects.filter(anime=anime).values('title'))
-        elif field == 'genre':
-            response[field] = ', '.join(anime.genre.values_list('name', flat=True))
-        elif field == 'links':
-            response[field] = dict([(LINKS_TYPES[x[0]][-1], x[1]) \
-                for x in model.objects.filter(anime=anime).values_list('linkType', 'link')])
-        elif field == 'type':
-            response[field] = anime.releaseTypeS
-        elif field == 'bundle':
-            if anime.bundle:
-                items = anime.bundle.animeitems.all().order_by('releasedAt')
-                status = UserStatusBundle.objects.get_for_user(items, request.user.id)
-                response[field] = [{'name': x.title, 'elemid': x.id, 'job': getAttr(
-                                                            getVal(x.id, status, None),
-                                                                    'state', 0, )}
-                                        for x in  items]
+        field_expl = FieldExplorer(field)
+
+        field_call = field_expl.get_field()
+        if field_call:
+            response[field] = field_call(anime, request)
         else:
             try:
                 response[field] = getattr(anime, field)
             except Exception, e:
                 response[field] = 'Error: ' + str(e)
+
     r = 'card' if request.POST.get('card') else 'get'
     response = {'response': r, 'status': True, 'text': response}
     return response

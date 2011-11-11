@@ -127,6 +127,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'anime',
+    'south',
     'debug_toolbar',
     'django_extensions',
 )
