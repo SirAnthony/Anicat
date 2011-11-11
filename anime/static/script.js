@@ -589,57 +589,6 @@ function getCard(id){
     return true;
 }
 
-function createFieldContent(fieldname, field, id){
-    var ret;
-
-    switch(fieldname){
-
-        case 'name':
-            ret = new Array();
-            for(var name in field){
-                var t = (field[name].title ? field[name].title : field[name]);
-                ret.push(element.create('', {innerText:  t}));
-                ret.push(element.create('br', {}));
-            }
-        break;
-
-        case 'state':
-            var state = {'selected': null, 'value': null};
-            if(!isString(field)){
-                catalog_storage.disable();
-                state.value = field.select[field.selected];
-                state.selected = field.selected;
-            }else{
-                if(!catalog_storage.enable()){
-                    ret = {'span': {innerText: 'Enable local storage to use catalog anonymously.'}}
-                    break;
-                }else{
-                    state = catalog_storage.getStatus(id);
-                }
-            }
-            ret = [ {'span': {innerText: capitalise(state.value)}},
-                    {'input': {'type': 'hidden', 'name': 'card_userstatus_input', 'value': state.selected}}];
-            if(field && field.completed && field.all){
-                ret.push({'span': {className: 'right', innerText: field.completed + '/' + field.all}});
-                ret.push({'input': {'type': 'hidden', 'name': 'card_usercount_input', 'value': field.completed}});
-            }
-        break;
-
-        case 'links':
-            ret = new Array();
-            for(var link in field)
-                ret.push({'a': {'target': '_blank', innerText: link,
-                        'href': field[link]}}, {'': {innerText: ' '}});
-        break;
-
-        default:
-            ret = {'': {innerText: field ? field : 'None'}};
-        break;
-    }
-
-    return ret;
-}
-
 function createStatusForm(id, selected, select, all, completed){
     select = select ? select : {"0": "None", "1": "Want", "2": "Now", "3": "Done",
                                 "4": "Dropped", "5": "Partially watched"};

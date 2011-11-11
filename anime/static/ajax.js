@@ -177,7 +177,7 @@ var ajax = new (function(){
                                     cardstatus(resp.text.id);
                                     return false;} : undefined)}});
                         data.push(d);
-                        element.appendChild(d, createFieldContent(fields[i], field, resp.text.id));
+                        element.appendChild(d, forms.getField(fields[i], field, resp.id));
                         if(fields[i] == 'state')
                             d.id = 'card_userstatus'
                     }
