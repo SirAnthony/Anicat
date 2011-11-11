@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 import re
 
+
 def getError(data):
     errors = {}
     mainerrors = re.findall(u'class="mainerror"[^>]*>([^>]*)<', data, re.M & re.U)
@@ -13,6 +14,7 @@ def getError(data):
     errors.update(dict(lists))
     #print errors
     return errors
+
 
 class NormalTest(TestCase):
 
