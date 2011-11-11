@@ -16,11 +16,19 @@ class FieldExplorer(object):
 
     def get_field(self):
         field = getattr(self, self.field, None)
-        if callable(field):
-            return field
-        return None
+        return field
 
-    def get_model(self, field_name):
+    def get_value(self, anime, request):
+        field = self.get_field()
+        try:
+            if callable(field):
+                return field(anime, request)
+            else:
+                return getattr(anime, self.field)
+        except Exception, e:
+            return 'Error: ' + str(e)
+
+    def get_model(self):
         try:
             model = EDIT_MODELS[self.field]
         except KeyError:
@@ -54,8 +62,10 @@ class FieldExplorer(object):
         return ', '.join(anime.genre.values_list('name', flat=True))
 
     def links(self, anime, request):
-        return dict([(LINKS_TYPES[x[0]][-1], x[1]) \
-                for x in self.get_model().objects.filter(anime=anime).values_list('linkType', 'link')])
+        model = self.get_model()
+        if model:
+            return dict([(LINKS_TYPES[x[0]][-1], x[1]) \
+                for x in model.objects.filter(anime=anime).values_list('linkType', 'link')])
 
     def type(self, anime, request):
         return anime.releaseTypeS
@@ -63,10 +73,7 @@ class FieldExplorer(object):
     def bundle(self, anime, request):
         if anime.bundle:
             items = anime.bundle.animeitems.all().order_by('releasedAt')
-            status = UserStatusBundle.objects.get_for_user(items, request.user.id)
-            return [{'name': x.title, 'elemid': x.id,
-                'job': getAttr( getVal(x.id, status, None), 'state', 0, )}
-                                                            for x in  items]
+            return [{'name': x.title, 'elemid': x.id} for x in  items]
         return None
 
 
@@ -87,17 +94,8 @@ def get(request):
         return {'text': 'Bad request fields: ' + str(e)}
     response = {'id': aid, 'order': fields}
     for field in fields:
-        #FIXME: so bad
         field_expl = FieldExplorer(field)
-
-        field_call = field_expl.get_field()
-        if field_call:
-            response[field] = field_call(anime, request)
-        else:
-            try:
-                response[field] = getattr(anime, field)
-            except Exception, e:
-                response[field] = 'Error: ' + str(e)
+        response[field] = field_expl.get_value(anime, request)
 
     r = 'card' if request.POST.get('card') else 'get'
     response = {'response': r, 'status': True, 'text': response}

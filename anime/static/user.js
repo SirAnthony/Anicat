@@ -148,7 +148,7 @@ var user = new( function(){
         }else{
             var form = document.getElementById('register');
             var formData = getFormData(form);
-            errors = getElementsByClassName('error', form);
+            var errors = getElementsByClassName('error', form);
             element.remove(errors);
             if(!this.registerForm)
                 this.registerForm = form.parentNode.removeChild(form);

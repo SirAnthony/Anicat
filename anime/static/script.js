@@ -673,7 +673,7 @@ function createStatusForm(id, selected, select, all, completed){
             }
         }
     }
-    if(completed){
+    if(completed && all){
         var sall = element.create('select', {id: 'stnum', name: 'count',
             onchange: function(){ edit.send(); /*FIXME: through server, anyway not supported for anons*/ }});
         var arr = new Array();

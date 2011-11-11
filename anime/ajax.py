@@ -32,6 +32,8 @@ def change(request):
     response = editMethods.edit(request, aid, request.POST.get('model', None),
                                 request.POST.get('field', None),
                                 request.POST.get('set', None))
+    if 'status' in response and not response['status']:
+        del response['form']
     if 'form' in response:
         try:
             response['form'] = response['form'].as_json()
@@ -40,14 +42,14 @@ def change(request):
             response.update({'response': 'error',
                 'status': False, 'text': str(e)})
 
-    if response['text']:
-        t = response['text'].copy()
-        if type(t) is dict:
-            for key, value in t.iteritems():
-                if not t[key]:
-                    del response['text'][key]
-                else:
-                    response['text'][key] = force_unicode(t[key])
+    #if response['text']:
+    #    t = response['text'].copy()
+    #    if type(t) is dict:
+    #        for key, value in t.iteritems():
+    #            if not t[key]:
+    #                del response['text'][key]
+    #            else:
+    #                response['text'][key] = force_unicode(t[key])
     return response
 
 

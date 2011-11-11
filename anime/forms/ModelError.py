@@ -101,7 +101,8 @@ class ErrorModelForm(ModelForm):
                     output.append(children)
 
         if top_errors:
-            output.extend(0, top_errors)
+            top_errors.extend(output)
+            output = top_errors
         if hidden_fields: # Insert any hidden fields in the last row.
             output.extend(hidden_fields)
         return output

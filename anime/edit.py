@@ -139,9 +139,12 @@ def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
                     elif modelname != 'state':
                         cache.delete('card:%s' % itemId)
                 except Exception, e:
-                    response['text'] = str(e)
                     form.addError('Error "%s" has occured.' % e)
-                    response['form'] = form
+                    response.update({
+                        'text': str(e),
+                        'form': form,
+                        'status': False
+                    })
                 else:
                     response.update({
                         'response': 'edit',
@@ -156,8 +159,12 @@ def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
                         except:
                             pass
             else:
-                response['text'] = form.errors
-                response['form'] = form
+                response.update({
+                    'response': 'edit',
+                    'form': form,
+                    'text': form.errors,
+                    'status': False
+                })
     return response
 
 

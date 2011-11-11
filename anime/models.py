@@ -321,7 +321,7 @@ class UserStatusBundle(models.Model):
     user = models.ForeignKey(User)
     state = models.IntegerField(choices=USER_STATUS)
     count = models.IntegerField(blank=True, null=True)
-    rating = models.IntegerField(default=6,
+    rating = models.IntegerField(default=6, blank=True, null=True,
                 choices=((i, str(i)) for i in range(1, 11)))
     changed = models.DateTimeField(auto_now=True)
 
