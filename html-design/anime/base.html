@@ -15,6 +15,7 @@
     <script type="text/javascript" src="/static/js/element.js"></script>
     <script type="text/javascript" src="/static/script.js"></script>
     <script type="text/javascript" src="/static/ajax.js"></script>
+    <script type="text/javascript" src="/static/forms.js"></script>
     <script type="text/javascript" src="/static/user.js"></script>
     <script type="text/javascript" src="/static/ae.js"></script>
     {% if not user.is_authenticated %}<script type="text/javascript" src="/static/userstorage.js"></script>{% endif %}
@@ -96,11 +97,9 @@
     {% endblock %}
     {% block main %}
     {% endblock %}
-    <div class="cont_men" id="menu">
-        <span id="mspan" class="mnspan"></span>
-    </div>
+    <div class="cont_men" id="menu"></div>
     <div class="cont_men" id="popup">
-        <span id="popups" class="mnspan"></span>
+        <span id="popups"></span>
     </div>
     <div class="footer">v. <a href="/changes/" style="font-size: 10pt;">3.0.99.910</a>.</div>
     {% block addForm %}

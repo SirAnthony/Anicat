@@ -58,6 +58,7 @@ Get:
                       // You can specify this parameter several times to pass multiple fields
     Response:
         response: "get"
+        id: int // Returned object id
         order: array // Fields order
         text: object // Result depends on which fields was requested.
 

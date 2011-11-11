@@ -115,7 +115,6 @@ var ajax = new (function(){
     }
 
     var processingResult = function(resp){
-        var mspn = document.getElementById('mspan');
         try{
             switch(resp['response']){
 
@@ -140,82 +139,18 @@ var ajax = new (function(){
                 break;
 
                 case 'get':
-                    element.removeAllChilds(mspn);
+                    message.create();
                     for(var i in resp.text.order){
                         var curname = resp.text.order[i];
-                        if(!curname) continue;
-                        if(!resp.text[curname]) continue;
+                        if(!curname || !resp.text[curname]) continue;
                         var current = resp.text[curname];
-                        var capCurname = curname.substr(0,1).toUpperCase() + curname.substr(1)
-                        var label = element.create('label', { 'for': curname + resp.text.id,
-                                            innerText: capCurname + ':', name: resp.text.id});
-                        var sp = element.create('p', {'id': curname+resp.text.id, 'name': curname});
-                        var cld = new Array();
-                        if(curname == 'state'){
-                            //Ненадежно это все
-                            if(isString(current)){
-                                if(catalog_storage.enable()){
-                                    current = catalog_storage.getStatus(resp.text.id);
-                                }else{
-                                    sp.innerText = current;
-                                    element.appendChild(mspn, [label, sp,{'p': {
-                                            innerText: 'Enable local storage to use catalog anonymously.'}}]);
-                                    continue;
-                                }
-                            }else{
-                                catalog_storage.disable();
-                            }
-                            sp = createStatusForm(resp.text.id, current.selected,
-                                                    current.select, current.all, current.completed);
-                        }else if(isString(current)){
-                            sp.innerText = current;
-                        }else{
-                            var hid = ((current.model) ? current.model : "anime");
-                            hid = element.create('input', {type: 'hidden', name: 'table', value: hid});
-                            //var edt = createElem('span',{className: 'edtl', 'name': i});
-                            /*if(!resp.text.edt && !resp.text[i][0]){continue;}
-                            if(resp.text.edt && !resp.text[i][0]){}else{}*/
-                            var num = numHash(current);
-                            for(var g=0; g<=num; g++){
-                                var cur = current[g];
-                                if(cur && isHash(cur)){
-                                    var p = (curname == 'bundle') ? element.create('p',{name: cur.elemid}) :
-                                                                        element.create('p',{'name': g});
-                                    var s = (curname == 'bundle') ? element.create('span',{name: 'name'}, [
-                                            {'a': {href: '/card/'+cur.elemid+'/', innerText: encd(cur.name),
-                                            className: 's s' + cur.elemid}}]) : element.create('span',{name: 'name',
-                                                               innerText: encd(cur.title ? cur.title : cur.name)});
-                                    cld.push(p, [s]);
-                                    if(cur.role){
-                                        element.appendChild(p, [
-                                            {'span': {name: 'role', innerText: ' as '+encd(cur.role)}}]);
-                                    }
-                                    if(cur.comm){
-                                        element.appendChild(p, [
-                                            {'span': {name: 'comm', innerText: '('+encd(cur.comm)+')'}}]);
-                                    }
-                                }else{
-                                    if(curname == 'links'){
-                                        var s = new Array();
-                                        for(var link in current){
-                                            if(!current[link]) continue;
-                                            s.push(element.create('a', {className: 's0', href: current[link],
-                                                                        innerText: link}));
-                                            s.push(element.create('', {innerText: '\240'}));
-                                        }
-                                        if(!s.length)
-                                            s.push(element.create('', {innerText: 'None'}));
-                                        cld.push(element.create('p'), s);
-                                    }else{
-                                        if(curname == 'duration') current += ' min.';
-                                        var s = element.create('span', {name: 'name', innerText: encd(current)});
-                                        cld.push(element.create('p'), [s]);
-                                    }
-                                }
-                            }
-                        }
-                        element.appendChild(mspn, [label, /*edt,*/ sp, cld]);
+                        var label = element.create('label', { 'for': curname + resp.id,
+                                        innerText: capitalise(curname) + ':'});
+                        var field = forms.getField(curname, current, resp.id);
+                        message.addTree(label);
+                        message.addTree(field);
                     }
+                    message.show();
                 break;
 
                 case 'card':

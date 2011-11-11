@@ -109,7 +109,7 @@ var user = new( function(){
         if( displ == 'block'){
             dv.style.display = 'none';
         }else{
-            var div = document.getElementById('mspan');
+            var div = document.getElementById('menu');
             var register = document.getElementById('register');
             if(!register && this.registerForm){
                 element.removeAllChilds(div);
@@ -158,7 +158,7 @@ var user = new( function(){
 
     this.registerFail = function(error){
         if(!this.loaded || !this.registerForm) return;
-        var div = document.getElementById('mspan');
+        var div = document.getElementById('menu');
         element.removeAllChilds(div);
         element.appendChild(div, [this.registerForm]);
         for(var target in error){

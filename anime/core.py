@@ -56,7 +56,7 @@ class FieldExplorer(object):
         return {'selected': 0, 'select': {'1': '2'}}
 
     def name(self, anime, request):
-        return list(self.get_model().objects.filter(anime=anime).values('title'))
+        return list(self.get_model().objects.filter(anime=anime).values_list('title', flat=True))
 
     def genre(self, anime, request):
         return ', '.join(anime.genre.values_list('name', flat=True))
@@ -92,13 +92,13 @@ def get(request):
         fields.extend(request.POST.getlist('field'))
     except Exception, e:
         return {'text': 'Bad request fields: ' + str(e)}
-    response = {'id': aid, 'order': fields}
+    response = {'order': fields}
     for field in fields:
         field_expl = FieldExplorer(field)
         response[field] = field_expl.get_value(anime, request)
 
     r = 'card' if request.POST.get('card') else 'get'
-    response = {'response': r, 'status': True, 'text': response}
+    response = {'response': r, 'status': True, 'id': aid, 'text': response}
     return response
 
 

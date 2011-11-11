@@ -211,17 +211,20 @@ var message = new (function(){
     this.timeout = null;
     this.closeable = false;
 
-    this.getSpan = function(){
-        if(!this.span)
-            this.span = document.getElementById('mspan');
-        return this.span;
+    this.getMenu = function(){
+        if(!this.menu)
+            this.menu = document.getElementById('menu');
+        return this.menu;
     }
 
     //Clears message box and adds new p.
     this.create = function(str, timeout){
         this.clear();
         this.lock();
-        this.add(str);
+        if(!isString(str) && !isNumber(str) && !isUndef(str))
+            this.addTree(str);
+        else
+            this.add(str);
         this.timeout = timeout;
     }
 
@@ -234,9 +237,7 @@ var message = new (function(){
     //Adds element tree.
     this.addTree = function(elem){
         if(!elem) return;
-        var p = element.create('p');
-        element.appendChild(p, [elem])
-        this.strobj.push(p);
+        this.strobj.push(elem);
     }
 
     //Adds html string to message.
@@ -266,7 +267,7 @@ var message = new (function(){
     }
 
     this.toPosition = function(x, y){
-        if(!this.getSpan())
+        if(!this.getMenu())
             return;
         this.span.parentNode.style.left = x + 'px';
         this.span.parentNode.style.top = y + 'px';
@@ -314,11 +315,11 @@ var message = new (function(){
 
     //Show message.
     this.show = function(time){
-        if(!this.getSpan())
+        if(!this.getMenu())
             return;
-        element.removeAllChilds(this.span);
-        element.appendChild(this.span, this.strobj);
-        this.span.parentNode.style.display = 'block';
+        element.removeAllChilds(this.menu);
+        element.appendChild(this.menu, this.strobj);
+        this.menu.style.display = 'block';
         if(time)
             this.timeout = time;
         if(this.timeout)
@@ -329,9 +330,9 @@ var message = new (function(){
     //Close message.
     this.close = function(e){
         var m = this == document ? message : this;
-        if(!m.closeable || !m.getSpan())
+        if(!m.closeable || !m.getMenu())
             return;
-        var menu = m.span.parentNode;
+        var menu = m.getMenu();
         var target = e ? e.target : event.srcElement;
         var checkParent = function(obj){
             if(!obj) return true;
@@ -347,9 +348,9 @@ var message = new (function(){
 
     //Hide message. No closeable check.
     this.hide = function(){
-        if(!message.getSpan())
+        if(!message.getMenu())
             return;
-        message.span.parentNode.style.display = 'none';
+        message.menu.style.display = 'none';
     }
 
 })();
