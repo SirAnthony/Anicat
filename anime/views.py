@@ -110,6 +110,9 @@ def card(request, animeId=0):
         animeId = randint(1, AnimeItem.objects.count())
         try:
             anime = AnimeItem.objects.all()[animeId]
+            #TODO: Think about:
+            #animeId = AnimeItem.objects.order_by('?')[0].id
+        #except IndexError:
         except:
             return {}
         else:
