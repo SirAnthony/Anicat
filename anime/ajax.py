@@ -5,6 +5,7 @@ from django.utils.encoding import force_unicode
 import anime.core as coreMethods
 import anime.edit as editMethods
 import anime.user as userMethods
+from anime.forms.json import FormSerializer
 
 
 def ajaxResponse(fn):
@@ -36,20 +37,11 @@ def change(request):
         del response['form']
     if 'form' in response:
         try:
-            response['form'] = response['form'].as_json()
+            response['form'] = FormSerializer(response['form'])
         except Exception, e:
             del response['form']
             response.update({'response': 'error',
                 'status': False, 'text': str(e)})
-
-    #if response['text']:
-    #    t = response['text'].copy()
-    #    if type(t) is dict:
-    #        for key, value in t.iteritems():
-    #            if not t[key]:
-    #                del response['text'][key]
-    #            else:
-    #                response['text'][key] = force_unicode(t[key])
     return response
 
 

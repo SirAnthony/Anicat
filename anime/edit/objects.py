@@ -4,6 +4,7 @@ from django.core.cache import cache
 from django.db.models.fields import FieldDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 
+from anime.core import FieldExplorer
 from anime.forms.create import createFormFromModel
 from anime.functions import updateMainCaches
 from anime.models import (AnimeItem, USER_STATUS, EDIT_MODELS)
@@ -41,6 +42,7 @@ class EditableDefault(object):
 
         self.request = request
         self.model = EDIT_MODELS[modelname]
+        self.field = field
         self.retid = None
         self.fields = None
 
@@ -89,7 +91,7 @@ class EditableDefault(object):
         form = formobject(self.request.POST.copy(),
                 files=self.request.FILES, user=self.request.user,
                 instance=self.obj)
-        ret = {'form': form}
+        ret = {}
         try:
             if not self.obj or not form.is_valid():
                 raise EditError
@@ -100,8 +102,13 @@ class EditableDefault(object):
             if unicode(e):
                 form.addError('Error "%s" has occured.' % unicode(e))
             ret['text'] = form.errors
+            ret['form'] = form
         else:
             ret['status'] = True
+            field_expl = FieldExplorer(self.field)
+            anime = AnimeItem.objects.get(id = self.retid or getattr(self.obj, 'id', 0))
+            ret['text'] = field_expl.get_value(anime, self.request)
+
         ret['id'] = self.retid or getattr(self.obj, 'id', 0)
         return ret
 

@@ -12,6 +12,8 @@ from hashlib import sha1
 
 class FieldExplorer(object):
     def __init__(self, field):
+        if field == 'releasedAt,endedAt':
+            field = 'release'
         self.field = field
 
     def get_field(self):

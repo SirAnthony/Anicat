@@ -221,7 +221,7 @@ var message = new (function(){
     this.create = function(str, timeout){
         this.clear();
         this.lock();
-        if(!isString(str) && !isNumber(str) && !isUndef(str))
+        if(!isString(str) && !isNumber(str) && !isUndef(str) && !isError(str))
             this.addTree(str);
         else
             this.add(str);
