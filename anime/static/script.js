@@ -221,6 +221,7 @@ var message = new (function(){
     this.create = function(str, timeout){
         this.clear();
         this.lock();
+        this.toEventPosition();
         if(!isString(str) && !isNumber(str) && !isUndef(str) && !isError(str))
             this.addTree(str);
         else
@@ -551,10 +552,10 @@ function cnt(tag, num, e){
     var qw = {'id': num}
     switch (tag){
         case 'name':
-            qw['field'] = ['name','genre', 'links'];
+            qw['field'] = ['name', 'genre', 'links'];
         break;
         case 'numberofep':
-            qw['field'] = ['bundle','duration'];
+            qw['field'] = ['bundle', 'duration'];
         break;
         case 'id':
             if(typeof user_storage != "undefined" && user_storage.enabled){

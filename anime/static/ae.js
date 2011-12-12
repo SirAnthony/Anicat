@@ -159,7 +159,7 @@ var edit = new (function edit_class(){
         if(resp.status){
 
             if(resp.form){
-                var spans = getElementsByClassName(field+resp.id, null, 'span');
+                var spans = getElementsByClassName(field+resp.id, null);
                 resp.form.push({'input': {type: 'hidden', name: 'id', value: resp.id}});
                 resp.form.push({'input': {type: 'hidden', name: 'model', value: resp.model}});
                 if(resp.field)
@@ -175,6 +175,9 @@ var edit = new (function edit_class(){
                 }
                 return;
             }
+
+            if(!resp.text)
+                throw new Error('Server returned blank response.');
 
             switch(resp.model){
 
@@ -220,7 +223,8 @@ var edit = new (function edit_class(){
                     var divs = getElementsByClassName('edit_' + field + resp.id, null, 'div');
                     for(var i = 0; i < divs.length; i++){
                         var v = (resp.text[resp.field] ? resp.text[resp.field] : resp.text);
-                        var s = element.create('span', {className: field + resp.id}, forms.getField(field, v, resp.id));
+                        var s = forms.getField(field, v, resp.id);
+                        s.className = field + resp.id;
                         element.insert(divs[i].parentNode.firstChild, {'a': {className: 'right',
                             'href': this.getFieldLink(resp.id, field), innerText: 'Edit',
                             target: '_blank', onclick: ((field == 'state') ? function(){

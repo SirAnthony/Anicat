@@ -42,6 +42,7 @@ class EditableDefault(object):
 
         self.request = request
         self.model = EDIT_MODELS[modelname]
+        self.modelname = modelname
         self.field = field
         self.retid = None
         self.fields = None
@@ -105,8 +106,12 @@ class EditableDefault(object):
             ret['form'] = form
         else:
             ret['status'] = True
-            field_expl = FieldExplorer(self.field)
-            anime = AnimeItem.objects.get(id = self.retid or getattr(self.obj, 'id', 0))
+            field_expl = FieldExplorer(self.field or self.modelname)
+            retid = self.retid or getattr(self.obj, 'id', 0)
+            if self.modelname == 'bundle': #FUU
+                anime = AnimeItem.objects.filter(bundle = retid)[1]
+            else:
+                anime = AnimeItem.objects.get(id = retid)
             ret['text'] = field_expl.get_value(anime, self.request)
 
         ret['id'] = self.retid or getattr(self.obj, 'id', 0)

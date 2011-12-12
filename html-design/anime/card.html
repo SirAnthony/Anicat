@@ -23,11 +23,11 @@
         </div>
         <div>
         {% if user.is_authenticated %}
-            <a href="/edit/bundle/{% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}0{% endif %}/" onclick="edit.rf({{ anime.id }}, 'bundle');" class="right">Edit</a>
+            <a href="/edit/bundle/{% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}0{% endif %}/" onclick="return edit.rf({{ anime.bundle.id }}, 'bundle');" class="right">Edit</a>
         {%endif%}
             <h4>Bundled with:</h4>
             <!-- Это все нужно переверстать -->
-            <table class="bundle{{ anime.id }}">
+            <table class="bundle{{ anime.bundle.id }}">
             {% for bundle in bundles %}
                 <tr>
                     <td>{% ifequal bundle.id anime.id %}►{% endifequal %}</td>
@@ -84,13 +84,16 @@
         {% endif %}
         {% if user.is_authenticated %}
         <div id="card_userstatus">
-            <a href="/edit/state/{{ anime.id }}/" onclick="cardstatus({{ anime.id }}); return false;" class="right">Edit</a>
-            <h4>State:</h4><span>{% if userstatus.statusName %}{{ userstatus.statusName|capfirst }}{% else %}None{% endif %}</span>
-            <input type="hidden" name="card_userstatus_input" value="{{ userstatus.state }}">
-            {% if userstatus.count %}
-                <span class="right">{{ userstatus.count }}/{{ anime.episodesCount }}</span>
-                <input type="hidden" name="card_usercount_input" value="{{ userstatus.count }}">
-            {% endif %}
+            <a href="/edit/state/{{ anime.id }}/" onclick="edit.rf({{ anime.id }}, 'state'); return false;" class="right">Edit</a>
+            <h4>State:</h4>
+            <p class="state{{ anime.id }}">
+                <span>{% if userstatus.statusName %}{{ userstatus.statusName|capfirst }}{% else %}None{% endif %}</span>
+                <!--<input type="hidden" name="card_userstatus_input" value="{{ userstatus.state }}">-->
+                {% if userstatus.count %}
+                    <span class="right">{{ userstatus.count }}/{{ anime.episodesCount }}</span>
+                    <!--<input type="hidden" name="card_usercount_input" value="{{ userstatus.count }}">-->
+                {% endif %}
+            </p>
         </div>
         {%endif%}
     </div>

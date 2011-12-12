@@ -72,6 +72,9 @@ class FieldExplorer(object):
     def type(self, anime, request):
         return anime.releaseTypeS
 
+    def releaseType(self, anime, request):
+        return anime.releaseTypeS
+
     def bundle(self, anime, request):
         if anime.bundle:
             items = anime.bundle.animeitems.all().order_by('releasedAt')

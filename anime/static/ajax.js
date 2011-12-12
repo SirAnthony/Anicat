@@ -21,7 +21,7 @@ var ajax = new (function(){
             qry['csrfmiddlewaretoken'] = cookie.get('csrftoken');
 
         for(var item in qry){
-            if(!qry[item]) continue;
+            if(!item || !qry[item]) continue;
             if(request)
                 request += '&';
             if(isArray(qry[item])){
@@ -254,7 +254,7 @@ var ajax = new (function(){
             }
         }catch(e){
             message.create(e);
-            if(resp.text.text != 'notext'){
+            if(resp.text){
                 message.add('Server response:');
                 message.add(resp.text);
             }

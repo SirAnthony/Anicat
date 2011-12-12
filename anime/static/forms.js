@@ -26,7 +26,7 @@ var forms = new (function forms_class(){
             ret.push({'span': {className: 'right', innerText: data.completed + '/' + data.all}},
                      {'input': {'type': 'hidden', 'name': 'card_usercount_input', 'value': data.completed}});
         }
-        return ret
+        return ret;
     }
 
     this.input_state = function(data, id){
@@ -52,20 +52,22 @@ var forms = new (function forms_class(){
         return element.create('div', null, s);
     }
 
-    this.field_bundle = function(data){
+    this.field_bundle = function(data, id){
         var s = new Array();
         var num = numHash(data);
         for(var g=0; g<=num; g++){
             var cur = data[g];
-            s.push('p', ['span', [
-                {'a': {
+            s.push('tr', [
+                {'td': {innerText: (id == cur.elemid ? "►" : "")}},
+                {'td': {innerText: g+1}},
+                'td', [{'a': {
                     href: '/card/' + cur.elemid + '/',
                     innerText: encd(cur.name),
                     className: 's s' + cur.elemid
-                }}
-            ]])
+                }}]
+            ]);
         }
-        return element.create('div', null, s);
+        return element.create('table', null, s);
     }
 
     this.field_links = function(data){
@@ -75,15 +77,15 @@ var forms = new (function forms_class(){
             s.push({'a': {'target': '_blank', href: data[link], innerText: link}},
                    {'': {innerText: '\240'}});
         }
-        return element.create('p', null, s);;
+        return element.create('p', null, s);
     }
 
     this.field_duration = function(data){
-        return {'p': {innerText: data + ' min.'}};
+        return element.create('p', {innerText: data + ' min.'});
     }
 
     this.field_default = function(data){
-        return {'p': {innerText: data}};
+        return element.create('p', {innerText: data});
     }
 
 })();
