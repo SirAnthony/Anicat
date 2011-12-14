@@ -28,12 +28,12 @@ LINKS_TYPES = [
 ]
 
 USER_STATUS = [
-    (0, u'none'),
-    (1, u'want'),
-    (2, u'now'),
-    (3, u'done'),
-    (4, u'dropped'),
-    (5, u'partially watched'),
+    (0, u'None'),
+    (1, u'Want'),
+    (2, u'Now'),
+    (3, u'Done'),
+    (4, u'Dropped'),
+    (5, u'Partially watched'),
 ]
 
 DATE_FORMATS = (

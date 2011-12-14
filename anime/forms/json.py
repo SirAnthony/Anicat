@@ -98,6 +98,23 @@ class FormSerializer(object):
                 if attr:
                     field_dict[attr_name] = attr
 
+        if 'choices' in field_dict:
+            #FIXME: no additional tests
+            try:
+                for elem in field_dict['choices']:
+                    if not elem[0] and elem[1] == '---------':
+                        continue
+                    if int(elem[0]) != int(elem[1]):
+                        raise ValueError
+                if field_dict['choices'][0][0]:
+                    s = field_dict['choices'][0][0]
+                else:
+                    s = field_dict['choices'][1][0]
+                field_dict['choices'] = 'range(%s, %s)' % (
+                    s, field_dict['choices'][-1][0])
+            except (TypeError, ValueError):
+                pass
+
         field_dict['id'] = bound_field.auto_id
         field_dict['name'] = bound_field.html_name
         field_dict['value'] = bound_field.value()

@@ -5,15 +5,19 @@ var forms = new (function forms_class(){
         var func = this['field_'+fieldname];
         if(!func)
             func = this.field_default;
-        return func(data, id);
+        var el = func(data, id);
+        el.className = fieldname + id;
+        return el;
     }
 
     this.field_state = function(data, id){
         var state = {'selected': null, 'value': null};
         if(!isString(data)){
             catalog_storage.disable();
-            state.value = data.select[data.selected];
-            state.selected = data.selected;
+            if(data){
+                state.value = data.select[data.selected];
+                state.selected = data.selected;
+            }
         }else{
             if(!catalog_storage.enable())
                 return {'span': {innerText: 'Enable local storage to use catalog anonymously.'}}
@@ -26,7 +30,7 @@ var forms = new (function forms_class(){
             ret.push({'span': {className: 'right', innerText: data.completed + '/' + data.all}},
                      {'input': {'type': 'hidden', 'name': 'card_usercount_input', 'value': data.completed}});
         }
-        return ret;
+        return element.create('p', null, ret);
     }
 
     this.input_state = function(data, id){

@@ -83,7 +83,7 @@
         </div>
         {% endif %}
         {% if user.is_authenticated %}
-        <div id="card_userstatus">
+        <div <!--id="card_userstatus"-->>
             <a href="/edit/state/{{ anime.id }}/" onclick="edit.rf({{ anime.id }}, 'state'); return false;" class="right">Edit</a>
             <h4>State:</h4>
             <p class="state{{ anime.id }}">

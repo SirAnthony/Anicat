@@ -93,6 +93,8 @@ var edit = new (function edit_class(){
 
     var visible = false;
 
+    this.status_menu_edit = false;
+
     this.edits = {'name': '/name', 'bundle': '/bundle',
                  'type': 'releaseType', 'release': 'releasedAt,endedAt',
                  'links': '/links', 'state': '/state'};
@@ -142,6 +144,7 @@ var edit = new (function edit_class(){
     }
 
     this.processResponse = function(resp){
+
         /*if(!resp.status){
             if(resp.model == 'state' && resp.returned && catalog_storage.enabled){
                 resp.text = {'state': resp.returned};
@@ -159,6 +162,24 @@ var edit = new (function edit_class(){
         if(resp.status){
 
             if(resp.form){
+                if(this.status_menu_edit){
+                    message.create()
+                    message.addTree(element.create('label', {'for': field + resp.id,
+                                    innerText: capitalise(field) + ':'}));
+                    message.addTree(forms.getField(field, null, resp.id));
+                    message.show();
+                }
+                for(var fld in resp.form){
+                    for(var type in resp.form[fld]){
+                        var f = resp.form[fld];
+                        if(type == 'select'){
+                            if(f[type].choices && isString(f[type].choices) && /^range\(/.test(f[type].choices))
+                                resp.form[fld][type].choices = eval(f[type].choices);
+                            if(resp.model == 'state')
+                                resp.form[fld][type].onchange = function(){ edit.send(this.parentNode.parentNode); };
+                        }
+                    }
+                }
                 var spans = getElementsByClassName(field+resp.id, null);
                 resp.form.push({'input': {type: 'hidden', name: 'id', value: resp.id}});
                 resp.form.push({'input': {type: 'hidden', name: 'model', value: resp.model}});
@@ -166,77 +187,48 @@ var edit = new (function edit_class(){
                     resp.form.push({'input': {type: 'hidden', name: 'field', value: resp.field}});
                 for(var i = 0; i < spans.length; i++){
                     var s = element.create('div', {className: 'editDiv edit_' + field + resp.id}, resp.form);
-                    s.style.width = (field != 'links') ? '190px' : '300px';
-                    element.insert(spans[i].parentNode.firstChild, {'a': {className: 'right',
-                        innerText: 'Save', onclick: function(){ edit.send(this.parentNode); }}}, true);
-                    element.remove(spans[i].parentNode.firstChild);
+                    if(!this.status_menu_edit){
+                        s.style.width = (field != 'links') ? '190px' : '300px';
+                        element.insert(spans[i].parentNode.firstChild, {'a': {className: 'right',
+                            innerText: 'Save', onclick: function(){ edit.send(this.parentNode); }}}, true);
+                        element.remove(spans[i].parentNode.firstChild);
+                    }
                     element.insert(spans[i], s);
                     element.remove(spans[i]);
                 }
+                if(!this.status_menu_edit)
+                    this.status_menu_edit = false;
                 return;
             }
 
             if(!resp.text)
                 throw new Error('Server returned blank response.');
 
-            switch(resp.model){
+            var divs = getElementsByClassName('edit_' + field + resp.id, null, 'div');
+            for(var i = 0; i < divs.length; i++){
+                var v = (resp.text[resp.field] ? resp.text[resp.field] : resp.text);
+                var s = forms.getField(field, v, resp.id);
+                //s.className = field + resp.id;
+                element.insert(divs[i].parentNode.firstChild, {'a': {className: 'right',
+                    'href': this.getFieldLink(resp.id, field), innerText: 'Edit',
+                    target: '_blank', onclick: function(){ return edit.rf(resp.id, field); }}},
+                    true);
+                element.remove(divs[i].parentNode.firstChild);
+                element.insert(divs[i], s);
+                element.remove(divs[i]);
+            }
 
-                case 'state':
-                    var statusdiv = document.getElementById('card_userstatus');
-                    if(statusdiv){
-                        var statusname = ({"0": "None", "1": "Want", "2": "Now", "3": "Done",
-                            "4": "Dropped", "5": "Partially watched"})[resp.text.state]
-                        element.remove((function(x){
-                            var a = new Array();
-                            for(var i in x)
-                                if(x[i] && (x[i].tagName == "SPAN" || x[i].tagName == "FORM"
-                                    || x[i].tagName == "INPUT")) a.push(x[i]);
-                            return a;
-                        })(statusdiv.childNodes));
-                        element.appendChild(statusdiv, [{'span': {innerText: statusname}},
-                            {'input': {type: 'hidden', name: 'card_userstatus_input', value: resp.text.state}}]);
-                        if(resp.text.count){
-                            element.appendChild(statusdiv, [{'span':
-                                {innerText: resp.text.count + '/' + (function(){
-                                    var n = document.getElementsByName('episodesCount');
-                                    for(var i in n)
-                                        if(n[i].tagName == "SPAN") return n[i].innerText;
-                                    })(),
-                                className: 'right'}}, {'input': {type: 'hidden',
-                                            name: 'card_usercount_input', value: resp.text.count}}]);
-                        }
-                    }
-
-                    var rs = getStylesheetRule('.rs'+resp.text.state, 'background-color');
-                    rs = rs ? rs : '#FFF';
-                    var as = getStylesheetRule('.as'+resp.text.state, 'background-color');
-                    as = as ? as : '#FFF';
-                    var sl = getStylesheetRule('.sl'+resp.text.state, 'color');
-                    sl = sl ? sl : '#000';
-                    var rules = [['.r'+resp.id, ['background-color', rs]],
-                                ['.a'+resp.id, ['background-color', as]],
-                                ['.s'+resp.id, ['color', sl, true]]];
-                    addStylesheetRules(rules);
-                break;
-
-                default:
-                    var divs = getElementsByClassName('edit_' + field + resp.id, null, 'div');
-                    for(var i = 0; i < divs.length; i++){
-                        var v = (resp.text[resp.field] ? resp.text[resp.field] : resp.text);
-                        var s = forms.getField(field, v, resp.id);
-                        s.className = field + resp.id;
-                        element.insert(divs[i].parentNode.firstChild, {'a': {className: 'right',
-                            'href': this.getFieldLink(resp.id, field), innerText: 'Edit',
-                            target: '_blank', onclick: ((field == 'state') ? function(){
-                            cardstatus(resp.text.id); return false;} : function(){
-                                return edit.rf(resp.id, field);
-                            })}}, true);
-                        element.remove(divs[i].parentNode.firstChild);
-                        element.insert(divs[i], s);
-                        element.remove(divs[i]);
-                    }
-                break;
-
+            if(resp.model == 'state'){
+                var rs = getStylesheetRule('.rs'+resp.text.selected, 'background-color');
+                rs = rs ? rs : '#FFF';
+                var as = getStylesheetRule('.as'+resp.text.selected, 'background-color');
+                as = as ? as : '#FFF';
+                var sl = getStylesheetRule('.sl'+resp.text.selected, 'color');
+                sl = sl ? sl : '#000';
+                var rules = [['.r'+resp.id, ['background-color', rs]],
+                            ['.a'+resp.id, ['background-color', as]],
+                            ['.s'+resp.id, ['color', sl, true]]];
+                addStylesheetRules(rules);
             }
         }else{
             for(var target in resp.text){

@@ -487,7 +487,8 @@ function rsemicolon(prm){
 }
 
 function capitalise(string){
-    return string.charAt(0).toUpperCase() + string.slice(1);
+    if(string)
+        return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 //Режимы отображения
@@ -562,7 +563,9 @@ function cnt(tag, num, e){
                 ajax.processGetRequest({'id': num, 'order': ["state"], 'state': '1'});
                 return
             }else{
-                qw['field'] = 'state';
+                //qw['field'] = 'state';
+                edit.status_menu_edit = true;
+                return edit.rf(num, 'state');
             }
         break;
         default:
@@ -609,7 +612,6 @@ function createStatusForm(id, selected, select, all, completed){
                 element.downTree((function(elm){if(elm && elm.tagName == 'INPUT')
                     opts[elm.name] = elm.value;}), this.parentNode);
                 ajax.processSetRequest(opts);
-                //{"returned": "2", "text": "You must be logged in.", "model": "state", "response": "edit", "id": 1212}
             }else{
                 edit.send(el);
             }
@@ -660,6 +662,16 @@ function cardstatus(id){
             if(x[i] && (x[i].tagName == "SPAN" || x[i].tagName == "FORM")) a.push(x[i]); return a;
     })(statusdiv.childNodes));
     element.appendChild(statusdiv, [form]);
+}
+
+function range(start, end){
+    var s = new Array();
+    if(end >= start){
+        for(var i=start; i <= end; i++){
+            s.push(i);
+        }
+    }
+    return s;
 }
 
 // Cross-browser event handlers.

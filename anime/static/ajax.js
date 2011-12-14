@@ -162,6 +162,7 @@ var ajax = new (function(){
                                 'duration', 'release', 'links', 'state']
                     for(var i in fields){
                         var field = res[fields[i]];
+                        var fld = (resp.field ? resp.field : resp.model);
                         var n;
                         switch(i){
                             case 3: n = 'episodes:'; break;
@@ -173,13 +174,11 @@ var ajax = new (function(){
                             element.insert(d.firstChild, {'a': {className: 'right',
                                 'href': edit.getFieldLink(resp.text.id, fields[i]),
                                 innerText: 'Edit', target: '_blank',
-                                onclick: ((fields[i] == 'state') ? function(){
-                                    cardstatus(resp.text.id);
-                                    return false;} : undefined)}});
+                                onclick: function(){ return edit.rf(resp.id, fld); }}});
                         data.push(d);
                         element.appendChild(d, forms.getField(fields[i], field, resp.id));
-                        if(fields[i] == 'state')
-                            d.id = 'card_userstatus'
+                        //if(fields[i] == 'state')
+                        //    d.id = 'card_userstatus'
                     }
                     element.appendChild(card, [
                         {'div': {'id': 'imagebun', 'className': 'cardcol'}}, [
