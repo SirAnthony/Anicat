@@ -174,7 +174,8 @@ var ajax = new (function(){
                             element.insert(d.firstChild, {'a': {className: 'right',
                                 'href': edit.getFieldLink(resp.text.id, fields[i]),
                                 innerText: 'Edit', target: '_blank',
-                                onclick: function(){ return edit.rf(resp.id, fld); }}});
+                                onclick: (function(i, f){ return function(){
+                                    return edit.rf(i, f); }})(resp.id, fields[i]) }});
                         data.push(d);
                         element.appendChild(d, forms.getField(fields[i], field, resp.id));
                         //if(fields[i] == 'state')
@@ -189,26 +190,7 @@ var ajax = new (function(){
                                 'href': edit.getFieldLink(resp.text.id, 'bundle'),
                                 innerText: 'Edit', target: '_blank'}} : undefined ),
                                 {'h4': {innerText: 'Bundled with:'}},
-                                'table', (function(bn){
-                                    if(!bn) return;
-                                    var b = new Array();
-                                    var num = numHash(bn);
-                                    for(var i=0; i<=num; i++){
-                                        var cur = bn[i]
-                                        b.push(element.create('tr', {}, [
-                                            {'td': {innerText: (cur.elemid == res.id) ? '►' : ''}},
-                                            {'td': {'text-align': 'right', innerText: i+1}},
-                                            'td', [{'a': {'target': '_blank',
-                                                href: '/card/'+cur.elemid+'/',
-                                                innerText: encd(cur.name),
-                                                className: 's s' + cur.elemid,
-                                                onclick: (function(id){
-                                                    return function(){return getCard(id);};
-                                                })(cur.elemid)}}]
-                                        ]));
-                                    }
-                                    return b;
-                                })(res.bundle)
+                                forms.getField('bundle', res.bundle, resp.id)
                             ]
                         ],
                         {'div': {'id': 'main', 'className': 'cardcol'}}, data

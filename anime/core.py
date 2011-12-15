@@ -78,7 +78,9 @@ class FieldExplorer(object):
     def bundle(self, anime, request):
         if anime.bundle:
             items = anime.bundle.animeitems.all().order_by('releasedAt')
-            return [{'name': x.title, 'elemid': x.id} for x in  items]
+            bundles = [{'name': x.title, 'elemid': x.id} for x in  items]
+            bundles.append(anime.bundle.id)
+            return bundles
         return None
 
 

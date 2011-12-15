@@ -1,12 +1,20 @@
 
 var forms = new (function forms_class(){
 
+    this.getTitledField = function(fieldname, data, id){
+        var func = this['title_'+fieldname];
+        if(!func)
+            func = this.title_default;
+        return func(data, id, this.getField(fieldname, data, id));
+    }
+
     this.getField = function(fieldname, data, id){
         var func = this['field_'+fieldname];
         if(!func)
             func = this.field_default;
         var el = func(data, id);
-        el.className = fieldname + id;
+        if(!el.className)
+            el.className = fieldname + id;
         return el;
     }
 
@@ -59,6 +67,10 @@ var forms = new (function forms_class(){
     this.field_bundle = function(data, id){
         var s = new Array();
         var num = numHash(data);
+        if(isString(data[num]) || isNumber(data[num])){
+            var classnm = 'bundle' + data.pop();
+            num -= 1;
+        }
         for(var g=0; g<=num; g++){
             var cur = data[g];
             s.push('tr', [
@@ -71,7 +83,7 @@ var forms = new (function forms_class(){
                 }}]
             ]);
         }
-        return element.create('table', null, s);
+        return element.create('table', {className: classnm}, s);
     }
 
     this.field_links = function(data){
