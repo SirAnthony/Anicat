@@ -26,7 +26,6 @@ def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
         response.update(
             eobj.process('get' if not ajaxSet else request.method.lower()))
     except EditError, e:
-        raise
         response['text'] = unicode(e)
     except Exception, e:
         raise

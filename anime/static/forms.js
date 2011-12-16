@@ -1,18 +1,50 @@
 
 var forms = new (function forms_class(){
 
-    this.getTitledField = function(fieldname, data, id){
+    this.getTitledField = function(fieldname, id, data){
         var func = this['title_'+fieldname];
         if(!func)
             func = this.title_default;
-        return func(data, id, this.getField(fieldname, data, id));
+        return func.call(this, fieldname, id, data);
     }
 
-    this.getField = function(fieldname, data, id){
+    this.title_bundle = function(fieldname, id, data){
+        var num = numHash(data);
+        if(data && (isString(data[num]) || isNumber(data[num])))
+            var bundleid = data[num];
+        var fields = this.getField(fieldname, id, data);
+        return this.titledfield(fieldname, bundleid, fields);
+    }
+
+    this.title_default = function(fieldname, id, data){
+        var fields = this.getField(fieldname, id, data);
+        return this.titledfield(fieldname, id, fields)
+    }
+
+    this.titledfield = function(fieldname, id, fields){
+        var title;
+        switch(fieldname){
+            case 'episodesCount': title = 'episodes:'; break;
+            case 'release': title = 'released:'; break;
+            case 'bundle': title = 'Bundled with:'; break;
+            default: title = fieldname + ':'; break;
+        }
+        var childs = new Array();
+        if(edit)
+            childs.push({'a': {className: 'right',
+                'href': edit.getFieldLink(id, fieldname),
+                innerText: 'Edit', target: '_blank',
+                onclick: (function(i, f){ return function(){
+                    return edit.rf(i, f); }})(id, fieldname) }});
+        childs.push({'h4': {innerText: capitalise(title)}}, fields);
+        return element.create('div', null, childs);
+    }
+
+    this.getField = function(fieldname, id, data){
         var func = this['field_'+fieldname];
         if(!func)
             func = this.field_default;
-        var el = func(data, id);
+        var el = func.call(this, data, id);
         if(!el.className)
             el.className = fieldname + id;
         return el;
@@ -41,20 +73,6 @@ var forms = new (function forms_class(){
         return element.create('p', null, ret);
     }
 
-    this.input_state = function(data, id){
-        if(isString(data)){
-            if(catalog_storage.enable())
-                data = catalog_storage.getStatus(id);
-            else
-                return {'p': {innerText: data}}, {'p': {
-                    innerText: 'Enable local storage to use catalog anonymously.'}};
-        }else{
-            catalog_storage.disable();
-        }
-        return createStatusForm(id, data.selected, data.select,
-                                data.all, data.completed);
-    }
-
     this.field_name = function(data){
         var s = new Array();
         var num = numHash(data);
@@ -67,21 +85,26 @@ var forms = new (function forms_class(){
     this.field_bundle = function(data, id){
         var s = new Array();
         var num = numHash(data);
-        if(isString(data[num]) || isNumber(data[num])){
-            var classnm = 'bundle' + data.pop();
-            num -= 1;
-        }
-        for(var g=0; g<=num; g++){
-            var cur = data[g];
-            s.push('tr', [
-                {'td': {innerText: (id == cur.elemid ? "►" : "")}},
-                {'td': {innerText: g+1}},
-                'td', [{'a': {
-                    href: '/card/' + cur.elemid + '/',
-                    innerText: encd(cur.name),
-                    className: 's s' + cur.elemid
-                }}]
-            ]);
+        if(data){
+            if(isString(data[num]) || isNumber(data[num])){
+                var classnm = 'bundle' + data.pop();
+                num -= 1;
+            }
+            for(var g=0; g<=num; g++){
+                var cur = data[g];
+                s.push('tr', [
+                    {'td': {innerText: (id == cur.elemid ? "►" : "")}},
+                    {'td': {className: "bundle_number", innerText: g+1}},
+                    'td', [{'a': {
+                        href: '/card/' + cur.elemid + '/',
+                        onclick: (function(c){ return function(){ return getCard(c); }})(cur.elemid),
+                        innerText: encd(cur.name),
+                        className: 's s' + cur.elemid
+                    }}]
+                ]);
+            }
+        }else{
+            var classnm = 'bundlenull';
         }
         return element.create('table', {className: classnm}, s);
     }

@@ -139,6 +139,10 @@ class FormSerializer(object):
         for name, attr in field.widget.attrs.items():
             field_dict[name] = attr
 
+        for key in field_dict.keys():
+            if not field_dict[key]:
+                del field_dict[key]
+
         return {field_tag: field_dict}
 
     def form_to_data(self, form_instance):

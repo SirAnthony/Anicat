@@ -28,6 +28,7 @@ a:hover{
 /* Global classes */
 .error, .errorlist{
     color: #cc0000;
+    display: block;
 }
 
 .left {
@@ -142,6 +143,10 @@ width: 200px !important;
     top: 100px; /* начальные координаты */
     left: 100px; /* для наглядности */
     z-index: 5;
+    display: none;
+}
+
+.cont_men td.bundle_number {
     display: none;
 }
 
@@ -383,6 +388,7 @@ color: HighlightText;
     min-width: 125px;
 }
 .cardcol div{
+    clear: right;
     margin-right: 10px;
     margin-top: 3px;
 }

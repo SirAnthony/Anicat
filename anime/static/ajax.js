@@ -146,7 +146,7 @@ var ajax = new (function(){
                         var current = resp.text[curname];
                         var label = element.create('label', { 'for': curname + resp.id,
                                         innerText: capitalise(curname) + ':'});
-                        var field = forms.getField(curname, current, resp.id);
+                        var field = forms.getField(curname, resp.id, current);
                         message.addTree(label);
                         message.addTree(field);
                     }
@@ -161,37 +161,14 @@ var ajax = new (function(){
                     var fields = ['name', 'type', 'genre', 'episodesCount',
                                 'duration', 'release', 'links', 'state']
                     for(var i in fields){
-                        var field = res[fields[i]];
-                        var fld = (resp.field ? resp.field : resp.model);
-                        var n;
-                        switch(i){
-                            case 3: n = 'episodes:'; break;
-                            case 5: n = 'released:'; break;
-                            default: n = fields[i] + ':'; break;
-                        }
-                        var d = element.create('div', null, {'h4': {innerText: capitalise(n)}});
-                        if(edit)
-                            element.insert(d.firstChild, {'a': {className: 'right',
-                                'href': edit.getFieldLink(resp.text.id, fields[i]),
-                                innerText: 'Edit', target: '_blank',
-                                onclick: (function(i, f){ return function(){
-                                    return edit.rf(i, f); }})(resp.id, fields[i]) }});
-                        data.push(d);
-                        element.appendChild(d, forms.getField(fields[i], field, resp.id));
-                        //if(fields[i] == 'state')
-                        //    d.id = 'card_userstatus'
+                        data.push(
+                            forms.getTitledField(fields[i], resp.id, res[fields[i]]));
                     }
                     element.appendChild(card, [
                         {'div': {'id': 'imagebun', 'className': 'cardcol'}}, [
                             {'div': {'id': 'cimg'}}, [
                                 {'img': {'src': 'http://anicat.net/images/' + res.id + '/'}}],
-                            'div', [
-                                (edit ? {'a': {className: 'right',
-                                'href': edit.getFieldLink(resp.text.id, 'bundle'),
-                                innerText: 'Edit', target: '_blank'}} : undefined ),
-                                {'h4': {innerText: 'Bundled with:'}},
-                                forms.getField('bundle', res.bundle, resp.id)
-                            ]
+                            forms.getTitledField('bundle', resp.id, res.bundle)
                         ],
                         {'div': {'id': 'main', 'className': 'cardcol'}}, data
 

@@ -109,7 +109,11 @@ class EditableDefault(object):
             field_expl = FieldExplorer(self.field or self.modelname)
             retid = self.retid or getattr(self.obj, 'id', 0)
             if self.modelname == 'bundle': #FUU
-                anime = AnimeItem.objects.filter(bundle = retid)[1]
+                try:
+                    anime = AnimeItem.objects.filter(bundle = retid)[0]
+                    ret['currentid'] = anime.id
+                except IndexError:
+                    anime = None
             else:
                 anime = AnimeItem.objects.get(id = retid)
             ret['text'] = field_expl.get_value(anime, self.request)

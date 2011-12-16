@@ -21,6 +21,8 @@ class FieldExplorer(object):
         return field
 
     def get_value(self, anime, request):
+        if not anime:
+            return
         field = self.get_field()
         try:
             if callable(field):

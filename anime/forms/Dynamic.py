@@ -36,17 +36,20 @@ class AnimeBundleForm(DynamicModelForm):
             items = ()
             fields = {}
             if instance.id:
-                items = instance.animeitems.all()
-                fieldsCount = len(items) + 1
+                if data:
+                    fieldsCount = max([int(x.split()[-1]) for x in data.keys() if x.startswith('Bundle ')])
+                else:
+                    items = instance.animeitems.all()
+                    fieldsCount = len(items)
             else:
-                fieldsCount = 2
-            for i in range(fieldsCount):
+                fieldsCount = 1
+            for i in range(fieldsCount + 1):
                 try:
                     initial = items[i].title
                 except:
                     initial = None
                 field = TextToAnimeItemField(initial=initial, required=False)
-                fields['bundle %i' % i] = field
+                fields['Bundle %i' % i] = field
             self.setFields(fields)
             self.setData(data)
 
@@ -62,8 +65,12 @@ class AnimeNameForm(DynamicModelForm):
             raise TypeError('%s is not AnimeItem instance.' % type(instance).__name__)
         super(AnimeNameForm, self).__init__(data, *args, **kwargs)
         fields = {}
-        items = instance.animenames.all()
-        for i in range(len(items) + 4):
+        if data:
+            count = max([int(x.split()[-1]) for x in data.keys() if x.startswith('Name ')]) + 1
+        else:
+            items = instance.animenames.all()
+            count = len(items) + 4
+        for i in range(count):
             try:
                 initial = items[i].title.strip()
             except:
@@ -90,8 +97,12 @@ class AnimeLinksForm(DynamicModelForm):
             raise TypeError('%s is not AnimeItem instance.' % type(instance).__name__)
         super(AnimeLinksForm, self).__init__(data, *args, **kwargs)
         fields = {}
-        items = instance.links.all()
-        for i in range(len(items) + 3):
+        if data:
+            count = max([int(x.split()[-1]) for x in data.keys() if x.startswith('Link type ')]) + 1
+        else:
+            items = instance.links.all()
+            count = len(items) + 3
+        for i in range(count):
             try:
                 link = items[i].link.strip()
                 ltype = items[i].linkType

@@ -83,8 +83,8 @@
         </div>
         {% endif %}
         {% if user.is_authenticated %}
-        <div <!--id="card_userstatus"-->>
-            <a href="/edit/state/{{ anime.id }}/" onclick="edit.rf({{ anime.id }}, 'state'); return false;" class="right">Edit</a>
+        <div> <!--id="card_userstatus"-->
+            <a href="/edit/state/{{ anime.id }}/" onclick="return edit.rf({{ anime.id }}, 'state');" class="right">Edit</a>
             <h4>State:</h4>
             <p class="state{{ anime.id }}">
                 <span>{% if userstatus.statusName %}{{ userstatus.statusName|capfirst }}{% else %}None{% endif %}</span>

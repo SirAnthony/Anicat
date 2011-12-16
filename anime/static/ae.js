@@ -166,7 +166,7 @@ var edit = new (function edit_class(){
                     message.create()
                     message.addTree(element.create('label', {'for': field + resp.id,
                                     innerText: capitalise(field) + ':'}));
-                    message.addTree(forms.getField(field, null, resp.id));
+                    message.addTree(forms.getField(field, resp.id));
                     message.show();
                 }
                 for(var fld in resp.form){
@@ -180,9 +180,26 @@ var edit = new (function edit_class(){
                         }
                     }
                 }
+
+                if(field == 'name' || field == 'bundle'){
+                    resp.form.push({'a': {name: 'id', className: 'right', innerText: 'Add field',
+                    onclick: (function(name){ return function(){
+                        var num = (function(el){
+                            var num = 1;
+                            while (el = el.nextSibling)
+                                if(el.tagName == 'INPUT' && el.type == 'text') num += 1;
+                            return num;
+                        })(this.parentNode.firstChild);
+                        var nm = name + ' ' + num;
+                        element.insert(this,
+                            {'input': {'type': 'text', 'id': 'id_'+nm, 'name': nm}});
+                    }})(capitalise(field))}});
+                }
+
                 var spans = getElementsByClassName(field+resp.id, null);
                 resp.form.push({'input': {type: 'hidden', name: 'id', value: resp.id}});
                 resp.form.push({'input': {type: 'hidden', name: 'model', value: resp.model}});
+
                 if(resp.field)
                     resp.form.push({'input': {type: 'hidden', name: 'field', value: resp.field}});
                 for(var i = 0; i < spans.length; i++){
@@ -196,7 +213,7 @@ var edit = new (function edit_class(){
                     element.insert(spans[i], s);
                     element.remove(spans[i]);
                 }
-                if(!this.status_menu_edit)
+                if(this.status_menu_edit)
                     this.status_menu_edit = false;
                 return;
             }
@@ -204,16 +221,24 @@ var edit = new (function edit_class(){
             if(!resp.text)
                 throw new Error('Server returned blank response.');
 
+
             var divs = getElementsByClassName('edit_' + field + resp.id, null, 'div');
+            var id = (resp.currentid ? resp.currentid : resp.id);
             for(var i = 0; i < divs.length; i++){
                 var v = (resp.text[resp.field] ? resp.text[resp.field] : resp.text);
-                var s = forms.getField(field, v, resp.id);
-                //s.className = field + resp.id;
+                var s = forms.getField(field, id, v);
                 element.insert(divs[i].parentNode.firstChild, {'a': {className: 'right',
                     'href': this.getFieldLink(resp.id, field), innerText: 'Edit',
                     target: '_blank', onclick: function(){ return edit.rf(resp.id, field); }}},
                     true);
                 element.remove(divs[i].parentNode.firstChild);
+
+                addEvent(divs[i].parentNode, 'mouseover', (function(c){
+                    return function(){c.style.display = "block";}})(divs[i].parentNode.firstChild));
+                addEvent(divs[i].parentNode, 'mouseout', (function(c){
+                    return function(){c.style.display = "none";}})(divs[i].parentNode.firstChild));
+                divs[i].parentNode.firstChild.style.display = "none"
+
                 element.insert(divs[i], s);
                 element.remove(divs[i]);
             }
