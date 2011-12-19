@@ -28,7 +28,6 @@ def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
     except EditError, e:
         response['text'] = unicode(e)
     except Exception, e:
-        raise
         return {'text': unicode(e)}
     return response
 

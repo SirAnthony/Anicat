@@ -53,6 +53,12 @@ class AnimeBundleForm(DynamicModelForm):
             self.setFields(fields)
             self.setData(data)
 
+    def clean(self):
+        self._validate_unique = True
+        if len(filter(None, self.cleaned_data.itervalues())) < 2:
+            raise ValidationError(_('It must be at least two items to tie.'))
+        return self.cleaned_data
+
 #TODO: inherit from YobaDynamicModelForm
 
 

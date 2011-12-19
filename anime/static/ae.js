@@ -257,7 +257,13 @@ var edit = new (function edit_class(){
             }
         }else{
             for(var target in resp.text){
-                var obj = document.getElementById('id_'+target);
+                var obj;
+                if(target == '__all__'){
+                    obj = document.getElementsByClassName('edit_' + field + resp.id);
+                    if(obj) obj = obj[0].previousSibling;
+                }else{
+                    obj = document.getElementById('id_'+target);
+                }
                 if(!obj) continue;
                 for(var e in resp.text[target]){
                     element.insert(obj.nextSibling, {'span': {

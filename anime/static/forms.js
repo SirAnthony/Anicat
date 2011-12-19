@@ -10,8 +10,9 @@ var forms = new (function forms_class(){
 
     this.title_bundle = function(fieldname, id, data){
         var num = numHash(data);
+        var bundleid = 0;
         if(data && (isString(data[num]) || isNumber(data[num])))
-            var bundleid = data[num];
+            bundleid = data[num];
         var fields = this.getField(fieldname, id, data);
         return this.titledfield(fieldname, bundleid, fields);
     }

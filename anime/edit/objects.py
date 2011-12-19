@@ -70,6 +70,7 @@ class EditableDefault(object):
             raise EditError(_('Bad request type.'))
         r = f(formobject)
         try:
+            #TODO: rename to post_save()?
             self.last()
         except AttributeError:
             pass
@@ -98,26 +99,15 @@ class EditableDefault(object):
                 raise EditError
             self.save(form, self.obj)
         except Exception, e:
-            if not isinstance(e, EditError):
-                raise
+            #if not isinstance(e, EditError):
+            #    pass
             if unicode(e):
                 form.addError('Error "%s" has occured.' % unicode(e))
             ret['text'] = form.errors
             ret['form'] = form
         else:
             ret['status'] = True
-            field_expl = FieldExplorer(self.field or self.modelname)
-            retid = self.retid or getattr(self.obj, 'id', 0)
-            if self.modelname == 'bundle': #FUU
-                try:
-                    anime = AnimeItem.objects.filter(bundle = retid)[0]
-                    ret['currentid'] = anime.id
-                except IndexError:
-                    anime = None
-            else:
-                anime = AnimeItem.objects.get(id = retid)
-            ret['text'] = field_expl.get_value(anime, self.request)
-
+            ret.update(self.explore_result())
         ret['id'] = self.retid or getattr(self.obj, 'id', 0)
         return ret
 
@@ -126,6 +116,12 @@ class EditableDefault(object):
             if fieldname != obj._meta.pk.name:
                 setattr(obj, fieldname, form.cleaned_data[fieldname])
         obj.save()
+
+    def explore_result(self):
+        retid = self.retid or getattr(self.obj, 'id', 0)
+        anime = AnimeItem.objects.get(id=retid)
+        field_expl = FieldExplorer(self.field or self.modelname)
+        return {'text': field_expl.get_value(anime, self.request)}
 
     def last(self):
         cache.delete('card:%s' % self.itemId)
@@ -181,6 +177,18 @@ class State(EditableDefault):
 
 
 class Bundle(EditableDefault):
+
+    def explore_result(self):
+        ret = {}
+        retid = self.retid or getattr(self.obj, 'id', 0)
+        try:
+            anime = AnimeItem.objects.filter(bundle = retid)[0]
+            ret['currentid'] = anime.id
+        except IndexError:
+            anime = None
+        field_expl = FieldExplorer(self.field or self.modelname)
+        ret['text'] = field_expl.get_value(anime, self.request)
+        return ret
 
     def last(self):
         for item in self.obj.animeitems.values_list('id').all():

@@ -57,6 +57,7 @@ class ImageRequestForm(RequestForm):
         super(ImageRequestForm, self).__init__(*args, instance=instance, **kwargs)
         self.files = kwargs.get('files', None)
 
+    #FIXME: It will be better in clean()
     def _clean_fields(self):
         name = 'text'
         super(ImageRequestForm, self)._clean_fields()

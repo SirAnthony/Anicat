@@ -76,7 +76,7 @@ class Credit(models.Model):
 class AnimeBundle(models.Model):
 
     def __setattr__(self, name, value):
-        if name.find('bundle') == 0:
+        if name.find('Bundle') == 0:
             if not hasattr(self, 'tied'):
                 setattr(self, 'tied', [])
             if value and value not in self.tied:
@@ -84,32 +84,38 @@ class AnimeBundle(models.Model):
             return
         super(AnimeBundle, self).__setattr__(name, value)
 
-    def loadOldItems(self):
-        if not self.id:
-            return
-        for animeitem in self.animeitems.all():
-            setattr(self, 'bundle', animeitem)
-
     def save(self):
         '''
         WARNING! This function removes bundles from all items
         which is not in tied array. For linking single items
         use tie classmethod instead.
         '''
-        super(AnimeBundle, self).save()
-        if not hasattr(self, 'tied') or not self.tied:
-            return
-        if self.id:
+        # If bundle have no ties:
+        #   If it has more than 1 element nothing happens.
+        #   Otherwise bundle will be deleted.
+        # else:
+        #   If bundle not exists yet and only one item in tie ValueError will be raised.
+        #   For each current bundle item if it is not in tied array:
+        #       remove its bundle, else remove this from tied array
+        #   For each item in tied array:
+        #       if item have bundle, change it to this object and clear
+        #       previous.
+        if hasattr(self, 'tied') and self.tied:
+            if not self.id and len(self.tied) < 2:
+                raise ValueError('You cannot tie only one item.')
+            super(AnimeBundle, self).save()
+            for animeitem in self.animeitems.all():
+                if animeitem not in self.tied:
+                    animeitem.bundle = None
+                    animeitem.save()
+                else:
+                    self.tied.remove(animeitem)
             for item in self.tied:
                 bundle = item.bundle
                 item.bundle = self
                 item.save()
                 self.removeLast(bundle)
-        for animeitem in self.animeitems.all():
-            if animeitem not in self.tied:
-                animeitem.bundle = None
-                animeitem.save()
-        self.tied = []
+            self.tied = []
         self.removeLast(self)
 
     @classmethod
@@ -141,11 +147,13 @@ class AnimeBundle(models.Model):
     def removeLast(cls, bundle):
         if not bundle or not bundle.id:
             return
-        items = bundle.animeitems.all()
-        if len(items) < 2:
-            for item in items:
-                item.bundle = None
-                item.save()
+        count = bundle.animeitems.count()
+        if count < 2:
+            if count:
+                items = bundle.animeitems.all()
+                for item in items:
+                    item.bundle = None
+                    item.save()
             bundle.delete()
 
 
