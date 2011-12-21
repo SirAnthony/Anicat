@@ -79,7 +79,10 @@ class EditableDefault(object):
     def get(self, formobject):
         if not formobject:
             return {}
-        r = {'form': formobject(instance=self.obj)}
+        data = None
+        if 'currentid' in self.request.POST:
+            data = {'currentid': self.request.POST['currentid']}
+        r = {'form': formobject(data, instance=self.obj)}
         # FIXME: cruve
         if self.request.method == 'POST':
             r.update({
@@ -180,12 +183,17 @@ class Bundle(EditableDefault):
 
     def explore_result(self):
         ret = {}
-        retid = self.retid or getattr(self.obj, 'id', 0)
+        retid = self.request.POST.get('currentid')
         try:
-            anime = AnimeItem.objects.filter(bundle = retid)[0]
-            ret['currentid'] = anime.id
-        except IndexError:
-            anime = None
+            anime = AnimeItem.objects.get(id = retid)
+            ret['currentid'] = retid
+        except (AnimeItem.DoesNotExist, ValueError):
+            retid = self.retid or getattr(self.obj, 'id', 0)
+            try:
+                anime = AnimeItem.objects.filter(bundle = retid)[0]
+                ret['currentid'] = anime.id
+            except IndexError:
+                anime = None
         field_expl = FieldExplorer(self.field or self.modelname)
         ret['text'] = field_expl.get_value(anime, self.request)
         return ret

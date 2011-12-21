@@ -10,6 +10,48 @@ from django.utils.encoding import smart_unicode, force_unicode
 from django.utils.functional import Promise
 
 
+def is_iterator(obj):
+    if isinstance(obj, (list, tuple)):
+        return True
+    try:
+        iter(obj)
+        return True
+    except TypeError:
+        return False
+
+def prepare_data(data, depth=None):
+
+    depth = depth or 7
+
+    if depth <= 0:
+        return smart_unicode(data)
+
+    if isinstance(data, basestring):
+        return smart_unicode(data)
+
+    elif isinstance(data, bool):
+        return data
+
+    elif data is None:
+        return data
+
+    elif isinstance(data, datetime.datetime) or \
+         isinstance(data, datetime.date):
+        return data.strftime(DATE_FORMATS[0])
+
+    elif isinstance(data, Promise):
+        return force_unicode(data)
+
+    elif isinstance(data, dict):
+        return dict((key, prepare_data(value, depth - 1))
+                            for key, value in data.iteritems())
+
+    elif is_iterator(data):
+        return [prepare_data(value, depth - 1) for value in data]
+
+    return smart_unicode(data)
+
+
 class FormSerializer(object):
 
     _instance = None
@@ -18,47 +60,6 @@ class FormSerializer(object):
         if not cls._instance:
             cls._instance = super(FormSerializer, cls).__new__(cls)
         return cls._instance.serialize(form)
-
-    @staticmethod
-    def is_iterator(obj):
-        if isinstance(obj, (list, tuple)):
-            return True
-        try:
-            iter(obj)
-            return True
-        except TypeError:
-            return False
-
-    def prepare_data(self, data, depth=None):
-        depth = depth or 7
-
-        if depth <= 0:
-            return smart_unicode(data)
-
-        if isinstance(data, basestring):
-            return smart_unicode(data)
-
-        elif isinstance(data, bool):
-            return data
-
-        elif data is None:
-            return data
-
-        elif isinstance(data, datetime.datetime) or \
-             isinstance(data, datetime.date):
-            return data.strftime(DATE_FORMATS[0])
-
-        elif isinstance(data, Promise):
-            return force_unicode(data)
-
-        elif isinstance(data, dict):
-            return dict((key, self.prepare_data(value, depth - 1))
-                                    for key, value in data.iteritems())
-
-        elif self.is_iterator(data):
-            return [self.prepare_data(value, depth - 1) for value in data]
-
-        return smart_unicode(data)
 
     def get_field_tag(self, field):
         types = {
@@ -172,7 +173,7 @@ class FormSerializer(object):
         if hidden_fields: # Insert any hidden fields in the last row.
             output.extend(hidden_fields)
 
-        return self.prepare_data(output)
+        return prepare_data(output)
 
     def formset_to_dict(self, formset):
         formset_data = []

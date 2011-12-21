@@ -106,16 +106,19 @@ var edit = new (function edit_class(){
     }
 
     this.requestForm = function(id, field){
-        var m = 'anime';
+        var q = {'id': id, 'model': 'anime', 'field': undefined};
         if(this.edits[field]){
             if(this.edits[field].charAt(0) == '/'){
-                m = this.edits[field].slice(1);
-                field = undefined;
+                q['model'] = this.edits[field].slice(1);
+                if(q['model'] == 'bundle'){
+                    var b = document.getElementById('currentid_b_' + id);
+                    if(b) q['currentid'] = b.value;
+                }
             }else{
-                field = this.edits[field];
+                q['field'] = this.edits[field];
             }
         }
-        ajax.loadXMLDoc(url+'set/', {'id': id, 'model': m, 'field': field});
+        ajax.loadXMLDoc(url+'set/', q);
     }
 
     this.getFieldLink = function(id, name){
@@ -223,6 +226,9 @@ var edit = new (function edit_class(){
 
 
             var divs = getElementsByClassName('edit_' + field + resp.id, null, 'div');
+            if(!divs && field == 'bundle'){
+                divs = getElementsByClassName('edit_bundlenull', null, 'div');
+            }
             var id = (resp.currentid ? resp.currentid : resp.id);
             for(var i = 0; i < divs.length; i++){
                 var v = (resp.text[resp.field] ? resp.text[resp.field] : resp.text);

@@ -14,6 +14,12 @@ var forms = new (function forms_class(){
         if(data && (isString(data[num]) || isNumber(data[num])))
             bundleid = data[num];
         var fields = this.getField(fieldname, id, data);
+        var current = ['tr', ['th', [{'input': {'type': 'hidden',
+              'id': 'currentid_b_' + bundleid, 'value': id}}]]]
+        if(fields.firstChild)
+            element.insert(fields.firstChild, current);
+        else
+            element.appendChild(fields, current);
         return this.titledfield(fieldname, bundleid, fields);
     }
 
@@ -37,7 +43,11 @@ var forms = new (function forms_class(){
                 innerText: 'Edit', target: '_blank',
                 onclick: (function(i, f){ return function(){
                     return edit.rf(i, f); }})(id, fieldname) }});
-        childs.push({'h4': {innerText: capitalise(title)}}, fields);
+        childs.push({'h4': {innerText: capitalise(title)}});
+        if(isArray(fields))
+            childs.push.apply(childs, fields); //lolo
+        else
+            childs.push(fields);
         return element.create('div', null, childs);
     }
 
@@ -108,6 +118,7 @@ var forms = new (function forms_class(){
             var classnm = 'bundlenull';
         }
         return element.create('table', {className: classnm}, s);
+
     }
 
     this.field_links = function(data){

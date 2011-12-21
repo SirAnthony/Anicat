@@ -1,6 +1,7 @@
 
+from collections import defaultdict
 from django.core.exceptions import ValidationError
-from django.forms import ChoiceField
+from django.forms import ChoiceField, CharField, HiddenInput
 from django.utils.translation import ugettext_lazy as _
 from anime.forms.ModelError import ErrorModelForm
 from anime.forms.fields import TextToAnimeItemField, TextToAnimeNameField, TextToAnimeLinkField
@@ -10,8 +11,19 @@ from anime.models import AnimeBundle, AnimeItem, LINKS_TYPES
 class DynamicModelForm(ErrorModelForm):
 
     def setFields(self, kwds):
+        def compare(x, y):
+            try:
+                x = int(x.rsplit(None, 1)[1])
+            except:
+                x = -1
+            try:
+                y = int(y.rsplit(None, 1)[1])
+            except:
+                y = -1
+            return cmp(x, y)
+
         keys = kwds.keys()
-        keys.sort(cmp=lambda x, y: cmp(int(x.rsplit(None, 1)[1]), int(y.rsplit(None, 1)[1])))
+        keys.sort(cmp=compare)
         for k in keys:
             self.fields[k] = kwds[k]
 
@@ -20,7 +32,7 @@ class DynamicModelForm(ErrorModelForm):
             return
         keys = kwds.keys()
         keys.sort()
-        for name,field in self.fields.items():
+        for name, field in self.fields.items():
             self.data[name] = field.widget.value_from_datadict(kwds, self.files, self.add_prefix(name))
         self.is_bound = True
 
@@ -28,7 +40,14 @@ class DynamicModelForm(ErrorModelForm):
 class AnimeBundleForm(DynamicModelForm):
 
     def __init__(self, data=None, *args, **kwargs):
-        instance = kwargs.pop('instance', None)
+        #Fixme: I did not recognize why instance blanked in clean method.
+        self._instance = instance = kwargs.pop('instance', None)
+        try:
+            self._currentid = int(data and data.pop('currentid'))
+            if not data:
+                data = None
+        except:
+            pass
         super(AnimeBundleForm, self).__init__(data, *args, **kwargs)
         if instance:
             if not isinstance(instance, AnimeBundle):
@@ -37,7 +56,7 @@ class AnimeBundleForm(DynamicModelForm):
             fields = {}
             if instance.id:
                 if data:
-                    fieldsCount = max([int(x.split()[-1]) for x in data.keys() if x.startswith('Bundle ')])
+                    fieldsCount = max([int(x.split()[-1]) for x in data.keys() if x.startswith('Bundle ')] or [1,])
                 else:
                     items = instance.animeitems.all()
                     fieldsCount = len(items)
@@ -48,15 +67,34 @@ class AnimeBundleForm(DynamicModelForm):
                     initial = items[i].title
                 except:
                     initial = None
+                    if i == 0 and hasattr(self, "_currentid"):
+                        try:
+                            initial = AnimeItem.objects.get(id=self._currentid).title
+                        except:
+                            pass
                 field = TextToAnimeItemField(initial=initial, required=False)
                 fields['Bundle %i' % i] = field
+            if hasattr(self, "_currentid"):
+                fields['currentid'] = CharField(initial=self._currentid,
+                    widget=HiddenInput(attrs={
+                        "id": "currentid_b_%i" % (instance.id or 0)}))
             self.setFields(fields)
             self.setData(data)
 
     def clean(self):
         self._validate_unique = True
-        if len(filter(None, self.cleaned_data.itervalues())) < 2:
+        if not self._instance.id and len([x for x in self.cleaned_data.itervalues() if x]) == 1:
             raise ValidationError(_('It must be at least two items to tie.'))
+        l = {}
+        for k, v in self.cleaned_data.items():
+            if not v:
+                continue
+            if v in l:
+                if l[v] in self.cleaned_data:
+                    self._errors[l[v]] = self.error_class([_('You cannot tie item to itself.'),])
+                self._errors[k] = self.error_class([_('You cannot tie item to itself.'),])
+            else:
+                l[v] = k
         return self.cleaned_data
 
 #TODO: inherit from YobaDynamicModelForm
@@ -72,7 +110,7 @@ class AnimeNameForm(DynamicModelForm):
         super(AnimeNameForm, self).__init__(data, *args, **kwargs)
         fields = {}
         if data:
-            count = max([int(x.split()[-1]) for x in data.keys() if x.startswith('Name ')]) + 1
+            count = max([int(x.split()[-1]) for x in data.keys() if x.startswith('Name ')] or [4,]) + 1
         else:
             items = instance.animenames.all()
             count = len(items) + 4
@@ -104,7 +142,7 @@ class AnimeLinksForm(DynamicModelForm):
         super(AnimeLinksForm, self).__init__(data, *args, **kwargs)
         fields = {}
         if data:
-            count = max([int(x.split()[-1]) for x in data.keys() if x.startswith('Link type ')]) + 1
+            count = max([int(x.split()[-1]) for x in data.keys() if x.startswith('Link type ')] or [3,]) + 1
         else:
             items = instance.links.all()
             count = len(items) + 3
