@@ -14,12 +14,6 @@ var forms = new (function forms_class(){
         if(data && (isString(data[num]) || isNumber(data[num])))
             bundleid = data[num];
         var fields = this.getField(fieldname, id, data);
-        var current = ['tr', ['th', [{'input': {'type': 'hidden',
-              'id': 'currentid_b_' + bundleid, 'value': id}}]]]
-        if(fields.firstChild)
-            element.insert(fields.firstChild, current);
-        else
-            element.appendChild(fields, current);
         return this.titledfield(fieldname, bundleid, fields);
     }
 
@@ -96,9 +90,11 @@ var forms = new (function forms_class(){
     this.field_bundle = function(data, id){
         var s = new Array();
         var num = numHash(data);
-        if(data){
+        var bundleid = 0;
+        if(data && num){
             if(isString(data[num]) || isNumber(data[num])){
-                var classnm = 'bundle' + data.pop();
+                bundleid = data.pop()
+                var classnm = 'bundle' + bundleid;
                 num -= 1;
             }
             for(var g=0; g<=num; g++){
@@ -117,6 +113,11 @@ var forms = new (function forms_class(){
         }else{
             var classnm = 'bundlenull';
         }
+        var current = new Array()
+        current.push('tr', ['th', [{'input': {'type': 'hidden',
+              'id': 'currentid_b_' + bundleid, 'value': id,
+              'name': 'currentid'}}]]);
+        s = current.concat(s);
         return element.create('table', {className: classnm}, s);
 
     }
@@ -125,8 +126,10 @@ var forms = new (function forms_class(){
         var s = new Array();
         for(var link in data){
             if(!data[link]) continue;
-            s.push({'a': {'target': '_blank', href: data[link], innerText: link}},
+            for(var el in data[link]){
+                s.push({'a': {'target': '_blank', href: data[link][el], innerText: link}},
                    {'': {innerText: '\240'}});
+            }
         }
         return element.create('p', null, s);
     }

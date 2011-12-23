@@ -42,6 +42,7 @@ class TextToAnimeItemField(CharField):
     def to_python(self, value):
         if not value:
             return None
+        value = value.strip()
         try:
             ivalue = int(value)
             value = AnimeItem.objects.get(id=ivalue)

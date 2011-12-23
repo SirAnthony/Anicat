@@ -106,10 +106,12 @@ var edit = new (function edit_class(){
     }
 
     this.requestForm = function(id, field){
-        var q = {'id': id, 'model': 'anime', 'field': undefined};
+        if(!id) id = 0;
+        var q = {'id': id, 'model': 'anime', 'field': field};
         if(this.edits[field]){
             if(this.edits[field].charAt(0) == '/'){
                 q['model'] = this.edits[field].slice(1);
+                q['field'] = undefined;
                 if(q['model'] == 'bundle'){
                     var b = document.getElementById('currentid_b_' + id);
                     if(b) q['currentid'] = b.value;
@@ -122,6 +124,7 @@ var edit = new (function edit_class(){
     }
 
     this.getFieldLink = function(id, name){
+        if(!id) id = 0;
         if(this.edits[name]){
             if(this.edits[name].charAt(0) == '/')
                 return '/edit' + this.edits[name] + '/' + id + '/';
@@ -188,9 +191,11 @@ var edit = new (function edit_class(){
                     resp.form.push({'a': {name: 'id', className: 'right', innerText: 'Add field',
                     onclick: (function(name){ return function(){
                         var num = (function(el){
-                            var num = 1;
-                            while (el = el.nextSibling)
-                                if(el.tagName == 'INPUT' && el.type == 'text') num += 1;
+                            var num = 0;
+                            do{
+                                if(el.tagName == 'INPUT' && el.type == 'text')
+                                    num += 1;
+                            }while(el = el.nextSibling)
                             return num;
                         })(this.parentNode.firstChild);
                         var nm = name + ' ' + num;
@@ -224,43 +229,8 @@ var edit = new (function edit_class(){
             if(!resp.text)
                 throw new Error('Server returned blank response.');
 
+            this.fillField(field, resp);
 
-            var divs = getElementsByClassName('edit_' + field + resp.id, null, 'div');
-            if(!divs && field == 'bundle'){
-                divs = getElementsByClassName('edit_bundlenull', null, 'div');
-            }
-            var id = (resp.currentid ? resp.currentid : resp.id);
-            for(var i = 0; i < divs.length; i++){
-                var v = (resp.text[resp.field] ? resp.text[resp.field] : resp.text);
-                var s = forms.getField(field, id, v);
-                element.insert(divs[i].parentNode.firstChild, {'a': {className: 'right',
-                    'href': this.getFieldLink(resp.id, field), innerText: 'Edit',
-                    target: '_blank', onclick: function(){ return edit.rf(resp.id, field); }}},
-                    true);
-                element.remove(divs[i].parentNode.firstChild);
-
-                addEvent(divs[i].parentNode, 'mouseover', (function(c){
-                    return function(){c.style.display = "block";}})(divs[i].parentNode.firstChild));
-                addEvent(divs[i].parentNode, 'mouseout', (function(c){
-                    return function(){c.style.display = "none";}})(divs[i].parentNode.firstChild));
-                divs[i].parentNode.firstChild.style.display = "none"
-
-                element.insert(divs[i], s);
-                element.remove(divs[i]);
-            }
-
-            if(resp.model == 'state'){
-                var rs = getStylesheetRule('.rs'+resp.text.selected, 'background-color');
-                rs = rs ? rs : '#FFF';
-                var as = getStylesheetRule('.as'+resp.text.selected, 'background-color');
-                as = as ? as : '#FFF';
-                var sl = getStylesheetRule('.sl'+resp.text.selected, 'color');
-                sl = sl ? sl : '#000';
-                var rules = [['.r'+resp.id, ['background-color', rs]],
-                            ['.a'+resp.id, ['background-color', as]],
-                            ['.s'+resp.id, ['color', sl, true]]];
-                addStylesheetRules(rules);
-            }
         }else{
             for(var target in resp.text){
                 var obj;
@@ -276,6 +246,80 @@ var edit = new (function edit_class(){
                         className: 'error', innerText: resp.text[target][e]}});
                 }
             }
+        }
+    }
+
+    this.fillField = function(fieldname, resp){
+        var func = this['field_'+fieldname];
+        if(!func)
+            func = this.field_default;
+        func.call(this, fieldname, resp);
+    }
+
+    this.field_default = function(field, resp){
+        var divs = getElementsByClassName('edit_' + field + resp.id, null, 'div');
+        this.putFields.call(this, divs, field, resp.id, resp);
+    }
+
+    this.field_bundle = function(field, resp){
+        var divs = getElementsByClassName('edit_' + field + resp.id, null, 'div');
+        if(!divs || divs.length == 0){
+            if(resp.id){
+                divs = getElementsByClassName('edit_bundlenull', null, 'div');
+            }else if(resp.currentid){
+                var d = getElementsByClassName('editDiv', null, 'div');
+                divs_collect:
+                for(var i = 0; i < d.length; i++){
+                    var c = d[i].firstChild;
+                    do{
+                        if(c.tagName == 'INPUT' && c.type == "hidden" &&
+                            /currentid_b_/.test(c.id) && c.value == resp.currentid){
+                            divs.push(d[i]);
+                            continue divs_collect;
+                        }
+                    }while(c = c.nextSibling);
+                }
+            }else{
+                throw new Error('Cannot process response.');
+            }
+        }
+        var id = (resp.currentid ? resp.currentid : resp.id);
+        this.putFields.call(this, divs, field, id, resp);
+    }
+
+    this.field_state = function(field, resp){
+        this.field_default.call(this, field, resp);
+
+        var rs = getStylesheetRule('.rs'+resp.text.selected, 'background-color');
+        rs = rs ? rs : '#FFF';
+        var as = getStylesheetRule('.as'+resp.text.selected, 'background-color');
+        as = as ? as : '#FFF';
+        var sl = getStylesheetRule('.sl'+resp.text.selected, 'color');
+        sl = sl ? sl : '#000';
+        var rules = [['.r'+resp.id, ['background-color', rs]],
+                    ['.a'+resp.id, ['background-color', as]],
+                    ['.s'+resp.id, ['color', sl, true]]];
+        addStylesheetRules(rules);
+    }
+
+    this.putFields = function(divs, field, id, resp){
+        var text = (resp.text[resp.field] ? resp.text[resp.field] : resp.text);
+        for(var i = 0; i < divs.length; i++){
+            var s = forms.getField(field, id, text);
+            element.insert(divs[i].parentNode.firstChild, {'a': {className: 'right',
+                'href': this.getFieldLink(resp.id, field), innerText: 'Edit',
+                target: '_blank', onclick: function(){ return edit.rf(resp.id, field); }}},
+                true);
+            element.remove(divs[i].parentNode.firstChild);
+
+            addEvent(divs[i].parentNode, 'mouseover', (function(c){
+                return function(){c.style.display = "block";}})(divs[i].parentNode.firstChild));
+            addEvent(divs[i].parentNode, 'mouseout', (function(c){
+                return function(){c.style.display = "none";}})(divs[i].parentNode.firstChild));
+            divs[i].parentNode.firstChild.style.display = "none"
+
+            element.insert(divs[i], s);
+            element.remove(divs[i]);
         }
     }
 

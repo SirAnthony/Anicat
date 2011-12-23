@@ -111,7 +111,10 @@ class AnimeBundle(models.Model):
                 else:
                     self.tied.remove(animeitem)
             for item in self.tied:
-                bundle = item.bundle
+                try:
+                    bundle = item.bundle
+                except AnimeBundle.DoesNotExist:
+                    bundle = None
                 item.bundle = self
                 item.save()
                 self.removeLast(bundle)

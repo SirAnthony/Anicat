@@ -54,14 +54,13 @@ class AnimeBundleForm(DynamicModelForm):
                 raise TypeError('%s is not AnimeBundle instance.' % type(instance).__name__)
             items = ()
             fields = {}
-            if instance.id:
-                if data:
-                    fieldsCount = max([int(x.split()[-1]) for x in data.keys() if x.startswith('Bundle ')] or [1,])
-                else:
+            fieldsCount = 1
+            if data:
+                fieldsCount = max([int(x.split()[-1]) for x in data.keys() if x.startswith('Bundle ')] or [1,])
+            else:
+                if instance.id:
                     items = instance.animeitems.all()
                     fieldsCount = len(items)
-            else:
-                fieldsCount = 1
             for i in range(fieldsCount + 1):
                 try:
                     initial = items[i].title
@@ -83,7 +82,8 @@ class AnimeBundleForm(DynamicModelForm):
 
     def clean(self):
         self._validate_unique = True
-        if not self._instance.id and len([x for x in self.cleaned_data.itervalues() if x]) == 1:
+        if not self._instance.id and \
+            len([x for x in self.cleaned_data.itervalues() if x]) == 1:
             raise ValidationError(_('It must be at least two items to tie.'))
         l = {}
         for k, v in self.cleaned_data.items():

@@ -68,8 +68,13 @@ class FieldExplorer(object):
     def links(self, anime, request):
         model = self.get_model()
         if model:
-            return dict([(LINKS_TYPES[x[0]][-1], x[1]) \
-                for x in model.objects.filter(anime=anime).values_list('linkType', 'link')])
+            d = {}
+            for x in model.objects.filter(anime=anime).values_list('linkType', 'link'):
+                name = LINKS_TYPES[x[0]][-1]
+                if name not in d:
+                    d[name] = []
+                d[name].append(x[1])
+            return d
 
     def type(self, anime, request):
         return anime.releaseTypeS
