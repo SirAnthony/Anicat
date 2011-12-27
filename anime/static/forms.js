@@ -56,24 +56,20 @@ var forms = new (function forms_class(){
     }
 
     this.field_state = function(data, id){
-        var state = {'selected': null, 'value': null};
-        if(!isString(data)){
-            catalog_storage.disable();
-            if(data){
-                state.value = data.select[data.selected];
-                state.selected = data.selected;
-            }
-        }else{
+        var state = {'state': null, 'value': null};
+        var statenames = {"0": "None", "1": "Want", "2": "Now", "3": "Done", "4": "Dropped", "5": "Partially watched"}
+        if(data && isHash(data)){
+                state.value = data.select[data.state];
+                state.state = data.state;
+        }else if(!user.logined){
             if(!catalog_storage.enable())
                 return {'span': {innerText: 'Enable local storage to use catalog anonymously.'}}
             else
-                    state = catalog_storage.getStatus(id);
+                state = catalog_storage.getStatus(id, statenames);
         }
-        ret = [ {'span': {innerText: capitalise(state.value)}},
-                {'input': {'type': 'hidden', 'name': 'card_userstatus_input', 'value': state.selected}}];
+        ret = [{'span': {innerText: capitalise(state.value)}}];
         if(data && data.completed && data.all){
-            ret.push({'span': {className: 'right', innerText: data.completed + '/' + data.all}},
-                     {'input': {'type': 'hidden', 'name': 'card_usercount_input', 'value': data.completed}});
+            ret.push({'span': {className: 'right', innerText: data.completed + '/' + data.all}});
         }
         return element.create('p', null, ret);
     }

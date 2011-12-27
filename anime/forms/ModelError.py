@@ -1,6 +1,6 @@
 
 from django.core.exceptions import ValidationError
-from django.forms import ModelForm, ChoiceField
+from django.forms import ModelForm, ChoiceField, ModelChoiceField
 from django.forms.forms import BoundField
 from django.forms.widgets import Select, SelectMultiple
 from django.utils.encoding import force_unicode
@@ -90,4 +90,3 @@ class UserStatusForm(ErrorModelForm):
     class Meta:
         model = UserStatusBundle
         exclude = ('anime', 'user')
-

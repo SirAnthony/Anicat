@@ -89,7 +89,7 @@
         {% if requestTypes %}
         <div class="right select">
             <select id="requestDisplay">
-                <option value="all" selected>All</option>
+                <option value="all" selected="selected">All</option>
                 {% for opt in requestTypes %}
                     <option value="{{ opt.0 }}">{{ opt.1 }}</option>
                 {% endfor %}

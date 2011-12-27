@@ -100,11 +100,12 @@ class FormSerializer(object):
                     field_dict[attr_name] = attr
 
         if 'choices' in field_dict:
+            #TODO: move it to form generation.
+            if field_dict['choices'][0][1] == '---------':
+                del field_dict['choices'][:1]
             #FIXME: no additional tests
             try:
                 for elem in field_dict['choices']:
-                    if not elem[0] and elem[1] == '---------':
-                        continue
                     if int(elem[0]) != int(elem[1]):
                         raise ValueError
                 if field_dict['choices'][0][0]:

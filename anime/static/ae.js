@@ -11,7 +11,7 @@ var add = new (function add_class(){
 
     this.init = function(){
         add.form = document.getElementById('addform');
-        if(!add.form && !add.createForm()) return;
+        if(!add.form || !add.createForm()) return;
         add.loaded = true;
     }
 
@@ -54,11 +54,13 @@ var add = new (function add_class(){
             this.processError(resp.text);
         }else{
             if(this.clearForm()){
-                element.insert(this.form.lastChild, {'span': {className: 's3 left', innerText: 'Added'}});
-                if(isNumber(resp.text))
-                    window.location.replace('/card/' + resp.text + '/');
-                else
+                element.insert(this.form.lastChild, {'span': {className: 's3', innerText: 'Added'}});
+                if(isNumber(resp.text)){
+                    if(getCard(resp.text))
+                        window.location.replace('/card/' + resp.text + '/');
+                }else{
                     window.location.replace('/');
+                }
             }
         }
     }
@@ -101,7 +103,10 @@ var edit = new (function edit_class(){
     this.fields = {'releaseType': 'type', 'releasedAt,endedAt': 'release'};
 
     this.rf = function(id, field, e){
-        this.requestForm(id, field);
+        if(!user.logined && field == 'state')
+            ajax.processSetRequest({'status': true, 'id': id, 'model': field});
+        else
+            this.requestForm(id, field);
         return false;
     }
 
@@ -142,23 +147,39 @@ var edit = new (function edit_class(){
     this.send = function(form){
         if(!form)
             return;
-        var formData = getFormData(form);
+        var formData = this.getFormData(form);
         formData['set'] = true;
-        ajax.loadXMLDoc(url+'set/', formData);
+        if(!user.logined && formData.model == 'state'){
+            ajax.processSetRequest(formData);
+        }else{
+            ajax.loadXMLDoc(url+'set/', formData);
+        }
         var errors = getElementsByClassName('error', form);
         element.remove(errors);
     }
 
+    this.getFormData = function(form){
+        var formData = getFormData(form);
+        if(!user.logined && formData.model == 'state'){
+            formData.status = true;
+            if(formData.state)
+            formData.text = {'state': formData.state, 'select': (function(x){
+                var s = {};
+                for(var i = 0; i < x.childNodes.length; i++)
+                    s[x.childNodes[i].value] = x.childNodes[i].textContent;
+                return s;})(document.getElementById('id_state'))
+            }
+            delete formData.state;
+        }
+        return formData;
+    }
+
     this.processResponse = function(resp){
 
-        /*if(!resp.status){
-            if(resp.model == 'state' && resp.returned && catalog_storage.enabled){
-                resp.text = {'state': resp.returned};
-                user_storage.addItem('list.'+resp.id, resp.returned);
-            }else{
-                throw new Error(resp.text);
-            }
-        }*/
+        if(!user.logined && resp.model == 'state' && !resp.set){
+            var s = catalog_storage.getStatus(resp.id, (resp.text ? resp.text.select : null));
+            resp.form = [{"select": {"name": "state", "required": true, "value": s.state, "label": "State", "choices": [["0", "None"], ["1", "Want"], ["2", "Now"], ["3", "Done"], ["4", "Dropped"], ["5", "Partially watched"]], "id": "id_state"}}];
+        }
 
         message.hide();
 
@@ -232,19 +253,23 @@ var edit = new (function edit_class(){
             this.fillField(field, resp);
 
         }else{
-            for(var target in resp.text){
-                var obj;
-                if(target == '__all__'){
-                    obj = document.getElementsByClassName('edit_' + field + resp.id);
-                    if(obj) obj = obj[0].previousSibling;
-                }else{
-                    obj = document.getElementById('id_'+target);
+            if(isArray(resp.text)){
+                for(var target in resp.text){
+                    var obj;
+                    if(target == '__all__'){
+                        obj = document.getElementsByClassName('edit_' + field + resp.id);
+                        if(obj) obj = obj[0].previousSibling;
+                    }else{
+                        obj = document.getElementById('id_'+target);
+                    }
+                    if(!obj) continue;
+                    for(var e in resp.text[target]){
+                        element.insert(obj.nextSibling, {'span': {
+                            className: 'error', innerText: resp.text[target][e]}});
+                    }
                 }
-                if(!obj) continue;
-                for(var e in resp.text[target]){
-                    element.insert(obj.nextSibling, {'span': {
-                        className: 'error', innerText: resp.text[target][e]}});
-                }
+            }else{
+                throw new Error;
             }
         }
     }
@@ -288,13 +313,17 @@ var edit = new (function edit_class(){
     }
 
     this.field_state = function(field, resp){
+        if(!user.logined){
+            catalog_storage.addStatus(resp.id, resp.text.state);
+        }
+
         this.field_default.call(this, field, resp);
 
-        var rs = getStylesheetRule('.rs'+resp.text.selected, 'background-color');
+        var rs = getStylesheetRule('.rs'+resp.text.state, 'background-color');
         rs = rs ? rs : '#FFF';
-        var as = getStylesheetRule('.as'+resp.text.selected, 'background-color');
+        var as = getStylesheetRule('.as'+resp.text.state, 'background-color');
         as = as ? as : '#FFF';
-        var sl = getStylesheetRule('.sl'+resp.text.selected, 'color');
+        var sl = getStylesheetRule('.sl'+resp.text.state, 'color');
         sl = sl ? sl : '#000';
         var rules = [['.r'+resp.id, ['background-color', rs]],
                     ['.a'+resp.id, ['background-color', as]],

@@ -6,6 +6,7 @@ var user = new( function(){
 
     var info = null;
     var loaded = false;
+    var logined = false;
     var registerForm = null; //Ох, костыли.
 
     this.inform = function(msg, obj){
@@ -19,6 +20,12 @@ var user = new( function(){
     this.init = function(){
         user.info = document.getElementById('logininfo');
         user.loaded = true;
+        if(!user.info){
+            user.logined = true;
+            catalog_storage.disable();
+        }else{
+            catalog_storage.enable();
+        }
     }
 
     this.toggle = function(){
@@ -42,6 +49,7 @@ var user = new( function(){
 
     this.logout = function(){
         if(!this.loaded) return;
+        this.logined = false;
         var div = document.getElementById('logdiv');
         element.removeAllChilds(div);
         while(div.nextSibling)
@@ -88,6 +96,7 @@ var user = new( function(){
         element.appendChild(document.getElementsByTagName("head")[0], [
             {'script': {'type': 'text/javascript', 'src': '/static/ae.js'}}
         ]);
+        this.logined = true;
         catalog_storage.disable();
     }
 
@@ -176,20 +185,28 @@ var catalog_storage = new (function(){
 
     this.enabled = false;
 
-    this.getStatus = function(id){
-        var types = {"0": "none", "1": "want", "2": "now", "3": "done",
-                    "4": "dropped", "5": "partially watched"};
+    this.getStatus = function(id, types){
         var num = 0;
         var value = null;
         if(typeof user_storage != "undefined" && user_storage.loaded){
             this.enable()
             num = user_storage.getItem('list.'+id);
             if(!num) num = 0;
-            value = types[num];
+            if(types) value = types[num];
         }else{
             value = 'Enable local storage to use catalog anonymously.';
         }
-        return {'selected': num, 'value': value}
+        return {'state': num, 'value': value}
+    }
+
+    this.addStatus = function(id, value){
+        if(!this.enabled)
+            throw new Error('Local storage not enabled.');
+        if(!id)
+            throw new Error('Bad item id.');
+        if(!value)
+            value = 0;
+        return user_storage.addItem('list.'+id, value);
     }
 
     this.enable = function(){

@@ -33,15 +33,16 @@ def change(request):
     response = editMethods.edit(request, aid, request.POST.get('model', None),
                                 request.POST.get('field', None),
                                 request.POST.get('set', None))
-    if 'status' in response and not response['status']:
-        del response['form']
     if 'form' in response:
-        try:
-            response['form'] = FormSerializer(response['form'])
-        except Exception, e:
+        if 'status' in response and not response['status']:
             del response['form']
-            response.update({'response': 'error',
-                'status': False, 'text': str(e)})
+        else:
+            try:
+                response['form'] = FormSerializer(response['form'])
+            except Exception, e:
+                del response['form']
+                response.update({'response': 'error',
+                    'status': False, 'text': str(e)})
     if 'text' in response:
         response['text'] = prepare_data(response['text'])
     return response

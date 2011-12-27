@@ -109,24 +109,11 @@ var searcher = new ( function(){
         }
     }
 
-    this.showAdvance = function(){
-        if(!this.loaded) return;
-        /*var cb = document.getElementById('chsrch').checked;
-        if (!cb){
-            document.getElementById('advsrch').style.display = 'none';
-            document.getElementById('sortsrch').style.display = 'none';
-        }else{
-            document.getElementById('advsrch').style.display = 'block';
-            document.getElementById('sortsrch').style.display = 'block';
-       */
-    }
-
     this.send = function(page){
         if(!this.loaded) return;
         if(!page) page = 0;
-        //var text =  document.getElementById('sin');
-        var val; // = document.getElementById('advsrch').value;
-        var sort; // = document.getElementById('sortsrch').value;
+        var val;
+        var sort;
         if(this.input.textLength < 3 && val != 'numberofep' && val != 'type'){
             element.removeAllChilds(this.result);
             element.appendChild(this.result, [{'p': {
@@ -138,8 +125,7 @@ var searcher = new ( function(){
             var text = this.input.value.toLowerCase();
             if(!val) val = 'name';
             var qw = {'page': page, 'field': val, 'string': text, 'sort': sort};
-            var menu = document.getElementById('menu');
-            message.toPosition(40, 65);
+            message.toEventPosition();
             ajax.loadXMLDoc(url+'search/',qw);
         }
     }
@@ -178,9 +164,6 @@ var searcher = new ( function(){
                                 onclick: (function(i, j){ return function(e){ cnt(i, j, e); };})(column, elem.id),
                                     innerText: encd(elem[column])}}]);
                 }
-                /*if(elem.job){
-                   pclass.add(row, 'r' + elem.job + ((elem.air) ? 'on': '' ));
-                }*/
             }
             var srctbl = element.create('table', {'id': 'srchtbl', className: 'tbl', cellSpacing: 0});
             element.appendChild(this.result, [srctbl, tr]);
@@ -270,8 +253,8 @@ var message = new (function(){
     this.toPosition = function(x, y){
         if(!this.getMenu())
             return;
-        this.span.parentNode.style.left = x + 'px';
-        this.span.parentNode.style.top = y + 'px';
+        this.menu.parentNode.style.left = x + 'px';
+        this.menu.parentNode.style.top = y + 'px';
     }
 
     //Move messagebox to last event position.
@@ -391,25 +374,18 @@ if(!Array.prototype.indexOf){
     }
 }
 
-// Получим userAgent браузера и переведем его в нижний регистр
-    // Определим Internet Explorer
-    isIE = (ua.indexOf("msie") != -1 &&  ua.indexOf("webtv") == -1);
-    // Opera
-    isOpera = (ua.indexOf("opera") != -1);
+// Определим Internet Explorer
+isIE = (ua.indexOf("msie") != -1 &&  ua.indexOf("webtv") == -1);
+// Opera
+isOpera = (ua.indexOf("opera") != -1);
 /*  // Gecko = Mozilla + Firefox + Netscape
-    isGecko = (ua.indexOf("gecko") != -1);
-    // Safari
-    isSafari = (ua.indexOf("safari") != -1);
-    // Konqueror, используется в UNIX-системах
-    isKonqueror = (ua.indexOf("konqueror") != -1);
+isGecko = (ua.indexOf("gecko") != -1);
+// Safari
+isSafari = (ua.indexOf("safari") != -1);
+// Konqueror, используется в UNIX-системах
+isKonqueror = (ua.indexOf("konqueror") != -1);
 */
 
-
-addEvent(window, 'load', function(){
-    searcher.init();
-    mv();
-    showFN();
-});
 
 //Расставляет попапы с тем, что скрыто
 function showFN(tbl, cn){
@@ -516,30 +492,9 @@ function mousePageXY(event){
         x = event.clientX + window.scrollX;
         y = event.clientY + window.scrollY;
     }else{// Do nothing
-        alert('Bad browser.');
+        throw new Error('Bad browser.');
     }
     return {"x":x, "y":y};
-}
-
-//################# Эта функция доставляет положение менюшки и контролирует ее прятание
-
-function mv(){
-    document.onmousemove = function(e){
-
-        mCur = mousePageXY(e);
-        if(document.getElementById('popup')){
-            if(document.getElementById('popup').style.display == "block"){
-                document.getElementById('popup').style.top = mCur.y + 10 +'px';
-                document.getElementById('popup').style.left = mCur.x + 10 +'px';
-            }
-        }
-
-        if(document.getElementById('menu')){
-            if(document.getElementById('menu').style.display == "block" && !edtdv){
-                document.onclick = message.close; // Прятание меню
-            }
-        }
-    }
 }
 
 //################# Get menu with info
@@ -559,14 +514,8 @@ function cnt(tag, num, e){
             qw['field'] = ['bundle', 'duration'];
         break;
         case 'id':
-            if(typeof user_storage != "undefined" && user_storage.enabled){
-                ajax.processGetRequest({'id': num, 'order': ["state"], 'state': '1'});
-                return
-            }else{
-                //qw['field'] = 'state';
-                edit.status_menu_edit = true;
-                return edit.rf(num, 'state');
-            }
+            edit.status_menu_edit = true; //Fuuu
+            return edit.rf(num, 'state');
         break;
         default:
             qw['field'] = tag;
@@ -593,75 +542,20 @@ function getCard(id){
     return true;
 }
 
-function createStatusForm(id, selected, select, all, completed){
-    select = select ? select : {"0": "None", "1": "Want", "2": "Now", "3": "Done",
-                                "4": "Dropped", "5": "Partially watched"};
-    var sp = element.create('form', {name: 'state'});
-    var sel = element.create('select', {name: 'state',
-        onchange: (function(el){ return function(){
-            var noe = document.getElementById('stnum');
-            if(this.value != 2 && this.value != 4){
-                element.remove(noe);
-            }else{
-                if(!noe)
-                    element.appendChild(this.parentNode, [{'input':
-                        {'type': 'hidden', name: 'count', value: 1}}]);
-            }
-            if(typeof user_storage != "undefined" && user_storage.enabled){
-                var opts = {'returned': this.value};
-                element.downTree((function(elm){if(elm && elm.tagName == 'INPUT')
-                    opts[elm.name] = elm.value;}), this.parentNode);
-                ajax.processSetRequest(opts);
-            }else{
-                edit.send(el);
-            }
-        };})(sp)
-    });
-    element.addOption(sel, select);
-    if(selected){
-        for(var i in sel.childNodes){
-            if( sel.childNodes[i].value == selected){
-                sel.childNodes[i].selected = true;
-                break;
-            }
-        }
-    }
-    if(completed && all){
-        var sall = element.create('select', {id: 'stnum', name: 'count',
-            onchange: function(){ edit.send(); /*FIXME: through server, anyway not supported for anons*/ }});
-        var arr = new Array();
-        for(var i=1; i<=all; i++){arr[i] = i;}//Пиздец, а не способ!
-        element.addOption(sall, arr);
-        if(completed && sall.childNodes[completed]){
-            var el = completed;
-            sall.childNodes[el].selected = true;
-        }else{sall.childNodes[0].selected = true;}
-        sall.removeChild(sall.firstChild);
-    }
-    element.appendChild(sp, [
-            {'input': {'type': 'hidden', name: 'id', 'value': id}},
-            {'input': {'type': 'hidden', name: 'model', 'value': 'state'}},
-            sel, sall]);
-    return sp;
-}
+// Additional functions
 
-//################# Status change for cards
-function cardstatus(id){
-    var statusdiv = document.getElementById('card_userstatus');
-    if(!statusdiv) return;
-    var inputs = statusdiv.getElementsByTagName('input');
-    if(!inputs.length) return;
-    var get_input = function(ar, n){for(var i in ar){if(ar[i] && ar[i].name == n) return inputs[i].value;}};
-    var status = get_input(inputs, 'card_userstatus_input');
-    var count = get_input(inputs, 'card_usercount_input');
-    var form = createStatusForm(id, status, null, (function(){
-            var n = document.getElementsByName('episodesCount');
-            for(var i in n){if(n[i].tagName == "SPAN") return n[i].innerText;}})(), count);
-    element.remove((function(x){
-        var a = new Array(); for(var i in x)
-            if(x[i] && (x[i].tagName == "SPAN" || x[i].tagName == "FORM")) a.push(x[i]); return a;
-    })(statusdiv.childNodes));
-    element.appendChild(statusdiv, [form]);
+function map(callback, array, environ){
+    if(!isFunction(callback))
+        throw new TypeError(callback + " is not a function");
+    var ret;
+    if(isHash(array))
+        ret = {}
+    else
+        ret = new Array();
+    for(var i in array){
+        ret[i] = callback.call(environ, array[i]);
+    }
+    return ret;
 }
 
 function range(start, end){
@@ -764,3 +658,24 @@ function getStylesheetRule(ruleName, field){
     }
     return value;
 }
+
+
+addEvent(window, 'load', function(){
+    searcher.init();
+    showFN();
+});
+
+addEvent(document, 'mousemove', function(e){
+    mCur = mousePageXY(e);
+    if(document.getElementById('popup')){
+        if(document.getElementById('popup').style.display == "block"){
+            document.getElementById('popup').style.top = mCur.y + 10 +'px';
+            document.getElementById('popup').style.left = mCur.x + 10 +'px';
+        }
+    }
+    if(document.getElementById('menu')){
+        if(document.getElementById('menu').style.display == "block" && !edtdv){
+            document.onclick = message.close; // Прятание меню
+        }
+    }
+});
