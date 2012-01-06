@@ -8,26 +8,21 @@ var CalendarNamespace = {
     daysOfWeek: gettext('S M T W T F S').split(' '),
     firstDayOfWeek: parseInt(get_format('FIRST_DAY_OF_WEEK')),
     isLeapYear: function(year) {
-        return (((year % 4)==0) && ((year % 100)!=0) || ((year % 400)==0));
+        return ((year % 100) && !(year % 4) || !(year % 400));
     },
-    getDaysInMonth: function(month,year) {
+    getDaysInMonth: function(m, year) {
         var days;
-        if (month==1 || month==3 || month==5 || month==7 || month==8 || month==10 || month==12) {
+        if(m == 2)
+            days = CalendarNamespace.isLeapYear(year) ? 29 : 28;
+        else if((m < 8 && (m & 1)) || (m > 7 && !(m & 1)))
             days = 31;
-        }
-        else if (month==4 || month==6 || month==9 || month==11) {
+        else
             days = 30;
-        }
-        else if (month==2 && CalendarNamespace.isLeapYear(year)) {
-            days = 29;
-        }
-        else {
-            days = 28;
-        }
         return days;
     },
     strptime: function(strDate) {
         var date = new Date();
+        date.setHours(0, 0, 0, 0);
         if(/\d{2}\.\d{2}\.\d{4}/.test(strDate)){
             var dateParts = strDate.split(".");
             date.setFullYear(dateParts[2]);
@@ -60,6 +55,7 @@ function Calendar(inp, div_id, callback) {
 Calendar.prototype = {
     draw: function(month, year, div_id, callback) { // month = 1-12, year = 1-9999
         var today = new Date();
+        today.setHours(0, 0, 0, 0);
         var todayDay = today.getDate();
         var todayMonth = today.getMonth()+1;
         var todayYear = today.getFullYear();
@@ -73,25 +69,15 @@ Calendar.prototype = {
         var days = CalendarNamespace.getDaysInMonth(month, year);
 
         var weeks = new Array();
+        weeks.push(element.create('tr', null, map(function(j){
+            return {'th': { innerText: CalendarNamespace.daysOfWeek[(j + CalendarNamespace.firstDayOfWeek) % 7]}};
+            }, range(0, 6))));
         var row;
         var currentDay = 1;
-        var currentDate = new Date(year, month, currentDay);
+        var currentDate = new Date(year, month-1, currentDay);
         for(var i = 0; currentDay <= days; i++){
             currentDate.setDate(currentDay);
             var todayClass = '';
-            if(i == 0){
-                row = element.create('tr');
-                weeks.push(row);
-                /*var daysCap = new Array();
-                for(var j = 0; j < 7; j++){
-                    daysCap.push(element.create('th', {
-                        innerText: CalendarNamespace.daysOfWeek[(j + CalendarNamespace.firstDayOfWeek) % 7]}));
-                }*/
-                element.appendChild(row, map(function(j){ return {'th': {
-                        innerText: CalendarNamespace.daysOfWeek[(j + CalendarNamespace.firstDayOfWeek) % 7]}};
-                }, range(0, 7)));
-                //daysCap);
-            }
             if(i % 7 == 0){
                 row = element.create('tr');
                 weeks.push(row);
@@ -101,9 +87,9 @@ Calendar.prototype = {
             if(currentDate - selected == 0)
                 todayClass += ' selected';
             if(i < startingPos){
-                var _cell = element.create('td', {innerText: ' '});
-                _cell.style.backgroundColor = '#f3f3f3';
-                element.appendChild(row, [_cell]);
+                element.appendChild(row, [{'td': {
+                    innerText: ' ', style: {backgroundColor: '#f3f3f3'}}
+                }]);
             }else{
                 element.appendChild(row, [
                     {'td': {className: todayClass}}, [
@@ -120,18 +106,14 @@ Calendar.prototype = {
         }
 
         while(row.childNodes.length < 7){
-            var _cell = element.create('td', {innerText: ' '});
-            _cell.style.backgroundColor = '#f3f3f3';
-            element.appendChild(row, [_cell]);
+            element.appendChild(row, [{'td': {
+                    innerText: ' ', style: {backgroundColor: '#f3f3f3'}}
+                }]);
         }
 
         var calDiv = document.getElementById(div_id);
         element.removeAllChilds(calDiv);
-        element.appendChild(calDiv, [
-            {'table': {}}, [
-                {'tbody': {}}, weeks
-            ]
-        ])
+        element.appendChild(calDiv, ['table', ['tbody', weeks]])
         var caption = calDiv.previousSibling.getElementsByTagName('caption');
         if(!caption || !caption[0])
             element.appendChild(calDiv.previousSibling, [

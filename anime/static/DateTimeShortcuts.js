@@ -108,16 +108,7 @@ var DateTimeShortcuts = {
             return;
         }
 
-        // Determine if the current value in the input has a valid date.
-        // If so, draw the calendar with that date's year and month.
-        if (inp.value) {
-            var date_parts = inp.value.split('-');
-            var year = date_parts[0];
-            var month = parseFloat(date_parts[1]);
-            if (year.match(/\d\d\d\d/) && month >= 1 && month <= 12) {
-                DateTimeShortcuts.calendars[num].drawDate(month, year);
-            }
-        }
+        DateTimeShortcuts.calendars[num].drawInput();
 
         var position = element.getOffset(cal_link);
         // Recalculate the clockbox position
@@ -135,7 +126,6 @@ var DateTimeShortcuts = {
         cal_box.style.top = Math.max(0, position.top - 90) + 'px';
 
         cal_box.style.display = 'block';
-        //addEvent(window.document, 'click', function(){DateTimeShortcuts.dismissCalendar(num);});
     },
 
     dismissCalendar: function(num) {
