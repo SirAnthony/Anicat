@@ -5,20 +5,11 @@ calendar.js - Calendar functions by Adrian Holovaty
 // CalendarNamespace -- Provides a collection of HTML calendar-related helper functions
 var CalendarNamespace = {
     monthsOfYear: gettext('January February March April May June July August September October November December').split(' '),
-    daysOfWeek: gettext('S M T W T F S').split(' '),
-    firstDayOfWeek: parseInt(get_format('FIRST_DAY_OF_WEEK')),
-    isLeapYear: function(year) {
-        return ((year % 100) && !(year % 4) || !(year % 400));
-    },
+    daysOfWeek: gettext('M T W T F S S').split(' '),
+    firstDayOfWeek: parseInt(get_format('FIRST_DAY_OF_WEEK')) + 1,
     getDaysInMonth: function(m, year) {
-        var days;
-        if(m == 2)
-            days = CalendarNamespace.isLeapYear(year) ? 29 : 28;
-        else if((m < 8 && (m & 1)) || (m > 7 && !(m & 1)))
-            days = 31;
-        else
-            days = 30;
-        return days;
+        var d = new Date(year, m, 0);
+        return d.getDate();
     },
     strptime: function(strDate) {
         var date = new Date();
