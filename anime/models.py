@@ -267,14 +267,6 @@ class AnimeLink(models.Model):
         super(AnimeLink, self).save(*args, **kwargs)
 
 
-class AnimeLinks(models.Model):
-    anime = models.ForeignKey(AnimeItem, related_name="links1")
-    AniDB = models.IntegerField(blank=True, null=True)
-    ANN = models.IntegerField(blank=True, null=True)
-    MAL = models.IntegerField(unique=True, blank=True, null=True)
-    audit_log = AuditLog()
-
-
 class Organisation(models.Model):
     name = models.CharField(max_length=200, unique=True)
     audit_log = AuditLog()

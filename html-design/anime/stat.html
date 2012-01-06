@@ -22,6 +22,7 @@
                     <th>Items</th>
                     <th colspan="2">Full duration</th>
                     <th colspan="2">Watched</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -37,6 +38,7 @@
                     <td>min.</td>
                     <td name="num">{{ element.custom|default_if_none:0 }}</td>
                     <td>min.</td>
+                    <td><a target="_blank" class="blacklink" href="/user/{{ userid }}/show/{{forloop.counter}}/">↪</a></td>
                 </tr>
             {% endfor %}
             </tbody>

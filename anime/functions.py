@@ -41,9 +41,11 @@ def invalidateCacheKey(fragment_name, *variables):
     cache.delete(cache_key)
 
 
-def cleanTableCache(order, status, page, user):
+def cleanTableCache(order, status, page, user, cuserid):
     link = ''
     if status is not None:
+        if user.id != cuserid:
+            link += 'user/%s/' % user.id
         link += 'show/%s/' % status
     if order != AnimeItem._meta.ordering[0]:
         link += 'sort/%s/' % order

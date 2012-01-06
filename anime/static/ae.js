@@ -335,9 +335,10 @@ var edit = new (function edit_class(){
         var text = (resp.text[resp.field] ? resp.text[resp.field] : resp.text);
         for(var i = 0; i < divs.length; i++){
             var s = forms.getField(field, id, text);
-            element.insert(divs[i].parentNode.firstChild, {'a': {className: 'right',
-                'href': this.getFieldLink(resp.id, field), innerText: 'Edit',
-                target: '_blank', onclick: function(){ return edit.rf(resp.id, field); }}},
+            element.insert(divs[i].parentNode.firstChild, {'a': {
+                className: 'right', 'href': this.getFieldLink(resp.id, field),
+                innerText: 'Edit', style: {display: "none"}, target: '_blank',
+                onclick: function(){ return edit.rf(resp.id, field); }}},
                 true);
             element.remove(divs[i].parentNode.firstChild);
 
@@ -345,7 +346,6 @@ var edit = new (function edit_class(){
                 return function(){c.style.display = "block";}})(divs[i].parentNode.firstChild));
             addEvent(divs[i].parentNode, 'mouseout', (function(c){
                 return function(){c.style.display = "none";}})(divs[i].parentNode.firstChild));
-            divs[i].parentNode.firstChild.style.display = "none"
 
             element.insert(divs[i], s);
             element.remove(divs[i]);

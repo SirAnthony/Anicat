@@ -6,6 +6,7 @@ body {
     padding: 0px;
     font-family: "times new roman", serif;
     margin-top: 0px;
+    background: #FFF;
 }
 
 body * {
@@ -64,6 +65,7 @@ a:hover{
     position: absolute;
     opacity: 0;
 }
+
 
 #dvid{
     clear: both;
@@ -190,62 +192,16 @@ width: 200px !important;
     color: #339966;
 }
 
-/*Редактор(инпут), менюшки, etc.*/
-#edtbox{
-width: 200px;
-height: 22px;
-}
-#edit{
-position: fixed;
-left: 220px;
-top: 40px;
-padding: 5px 10px;
-z-index: 15;
-}
-#edit>div{
-padding: 5px;
-clear: both;
-border: 1px #808080 solid;
-border-top: none;
-}
-#edit>div input[type=button]{
-margin: 5px 5px 0px 5px;
-}
-#edit fieldset{
-padding: 6px 8px;
-}
-#edit legend{
-display: block !important;
-}
-#edit *{
-background-color: #D4D0C8;
-}
-#edit ul{
-list-style-type: none;
-background-color: transparent;
-}
-#edit>ul li{
-padding: 2px 5px;
-border: 1px solid;
-border-color: #808080 #808080 #808080 #808080;
-cursor: pointer;
-}
-#edit>ul li.nosel{
-background-color:#c0c0c0;
-}
-#edit>ul li.nosel *:hover{
-background-color:#bfe0fe;
-}
-#edit>ul li.sel{
-background-color:#D4D0C8;
-border-color: #808080 #808080 #D4D0C8 #808080;
-cursor: default;
-}
-#edtcont div{
-max-height: 500px;
-overflow: auto;
+.blacklink {
+    color: #000 !important;
+    text-decoration: none;
 }
 
+a.blacklink:hover {
+    color: #0068ef !important;
+}
+
+/*Менюшки, etc.*/
 .leftmenu{
     float: left;
     margin: 2px 3px 10px 3px;
@@ -318,9 +274,6 @@ font-size: 10pt;
     margin-bottom: 10px;
 }
 
-.advsrch{
-width: 200px;
-}
 #srchpg{
     margin: 3px;
     width: 1000px;
@@ -335,7 +288,7 @@ width: 200px;
     padding: 0px 3px;
 }
 
-#srchp, .advsrch{
+#srchp{
     margin-top: 2px;
     margin-bottom: 5px;
 }
@@ -576,10 +529,3 @@ font-weight: bold;
     margin-top: 5px;
     font-size: 12pt !important;
 }
-
-/*Some ie hacks */
-<!--[if lt IE 8]>
-#edit{position: absolute;}
-#ids{position: absolute;}
-.app_div{position: absolute;}
-<![endif]-->

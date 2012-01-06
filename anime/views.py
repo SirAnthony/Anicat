@@ -3,7 +3,7 @@ import anime.core as coreMethods
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
@@ -24,34 +24,44 @@ def latestStatus(request, userId=0):
 
 
 @render_to('anime/list.html')
-def index(request, order='title', page=0, status=None):
+def index(request, order='title', page=0, status=None, user=None):
     try:
         page = int(page or request.REQUEST.get('page'))
     except:
         page = 0
     limit = 100
+
+    if user is None:
+        user = request.user
+    else:
+        try:
+            user = User.objects.get(id=user)
+        except:
+            raise Http404
+
     try:
         AnimeItem._meta.get_field(order)
     except:
         order = 'title'
+
     qs = AnimeItem.objects.order_by(order)
     try:
         status = int(status)
         USER_STATUS[status]
-        if request.user.is_authenticated():
+        if user.is_authenticated():
             if status:
                 ids = map(lambda x: x[0], UserStatusBundle.objects.filter(
-                        user=request.user, state=status).values_list('anime'))
+                        user=user, state=status).values_list('anime'))
                 qs = qs.filter(id__in=ids)
             else:
                 ids = map(lambda x: x[0], UserStatusBundle.objects.filter(
-                        user=request.user, state__gte=1).values_list('anime'))
+                        user=user, state__gte=1).values_list('anime'))
                 qs = qs.exclude(id__in=ids)
         else:
             raise Exception
     except:
         status = None
-    (link, cachestr) = cleanTableCache(order, status, page, request.user)
+    (link, cachestr) = cleanTableCache(order, status, page, user, request.user.id)
     pages = cache.get('Pages:' + link)
     if not pages:
         pages = createPages(qs, order, limit)
@@ -189,7 +199,7 @@ def stat(request, userId=0):
                 tuser.append(arr)
             tuser.append(total)
             cache.set('Stat:%s' % user.id, tuser)
-    return {'username': username, 'stat': tuser}
+    return {'username': username, 'userid': user.id, 'stat': tuser}
 
 
 @cache_control(private=True, no_cache=True)
