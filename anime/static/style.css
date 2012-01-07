@@ -120,14 +120,11 @@ width: 20px !important;
     text-align: right !important;
     cursor: pointer;
 }
-.numberofep{
-width: 80px !important;
+.numberofep {
+    width: 80px !important;
 }
-.type, .ann{
-width: 55px !important;
-}
-.release{
-width: 200px !important;
+.type, .rating {
+    width: 55px !important;
 }
 .footer{
     margin-top: 10px;

@@ -22,3 +22,4 @@ class loginFormNode(template.Node):
 
 register.tag('addForm', addForm)
 register.tag('loginForm', loginForm)
+

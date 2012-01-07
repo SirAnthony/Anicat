@@ -1,6 +1,7 @@
 {% extends "anime/base.html" %}
 
 {% load cache %}
+{% load animefilters %}
 
 {% block mainlink %}
 {% endblock %}
@@ -30,6 +31,11 @@
                     <th class="type" id="type">
                         <a rel="nofollow" href="{% if link.user %}/user/{{ link.user }}{% endif %}{% if link.status %}/show/{{ link.status }}{% endif %}/sort/{% if link.order == 'releaseType' %}-{% endif %}releaseType/">Type</a>
                     </th>
+                    {% if link.status == 3 and sbundle %}
+                    <th id="rating" class="rating">
+                        <a href="#" rel="nofollow">Rated</a>
+                    </th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody id="tbdid">
@@ -42,9 +48,12 @@
                     </td>
                     <td onclick="cnt('id', '{{ title.id }}', event);" id="id{{ title.id }}" class="id">{{ forloop.counter|add:page.start }}</td>
                     <td onclick="cnt('name', '{{ title.id }}', event);" id="name{{ title.id }}" class="name left">{{ title.title }}</td>
-                    <td onclick="cnt('numberofep', '{{ title.id }}', event);" id="numberofep{{ title.id }}" class="numberofep">{% if title.1.count %}{{ title.1.count }}/{% endif %}{{ title.episodesCount }}</td>
+                    <td onclick="cnt('numberofep', '{{ title.id }}', event);" id="numberofep{{ title.id }}" class="numberofep">{% if sbundle %}{% with sbundle|hash:title.id as s %}{% if s.count %}{{ s.count }}/{% endif %}{% endwith %}{% endif %}{{ title.episodesCount }}</td>
                     <td onclick="cnt('release', '{{ title.id }}', event);" id="release{{ title.id }}" class="release">{{ title.release }}</td>
                     <td onclick="cnt('type', '{{ title.id }}', event);" id="type{{ title.id }}" class="type">{{ title.releaseTypeS }}</td>
+                    {% if link.status == 3 and sbundle %}
+                        <td id="rating{{title.id}}" class="rating">{% with sbundle|hash:title.id as s %}{{ s.rating }}{% endwith %}</td>
+                    {% endif %}
                     {# custom fields #}
                 {% endfor %}
                 </tr>

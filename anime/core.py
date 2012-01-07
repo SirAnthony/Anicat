@@ -47,16 +47,14 @@ class FieldExplorer(object):
             status = int(bundle.state)
         except Exception:
             status = 0
-        response = {'state': status,
-                                'select': dict(USER_STATUS)}
+        response = {'state': status, 'select': dict(USER_STATUS)}
         # Магические числа, охуенно
-        if status == 2 or status == 4:
+        if status == 3:
+            response.update({'rating': bundle.rating})
+        elif status in (2, 4):
             response.update({'completed': bundle.count,
                                         'all': anime.episodesCount})
         return response
-
-    def rating(self, anime, request):
-        return {'state': 0, 'select': {'1': '2'}}
 
     def name(self, anime, request):
         return list(self.get_model().objects.filter(anime=anime).values_list('title', flat=True))

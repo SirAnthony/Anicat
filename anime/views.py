@@ -47,14 +47,18 @@ def index(request, order='title', page=0, status=None, user=None):
         raise Http404
 
     qs = AnimeItem.objects.order_by(order)
+    sbundle = None
     try:
         status = int(status)
         USER_STATUS[status]
         if user.is_authenticated():
+            #Fixme: 2 useless queries when cached.
             if status:
-                ids = map(lambda x: x[0], UserStatusBundle.objects.filter(
-                        user=user, state=status).values_list('anime'))
+                sbundle = UserStatusBundle.objects.filter(user=user, state=status)
+                ids = map(lambda x: x[0], sbundle.values_list('anime'))
                 qs = qs.filter(id__in=ids)
+                sbundle = dict(map(lambda x: (x['anime'], x),
+                     sbundle.values('anime', 'count', 'rating')))
             else:
                 ids = map(lambda x: x[0], UserStatusBundle.objects.filter(
                         user=user, state__gte=1).values_list('anime'))
@@ -69,7 +73,7 @@ def index(request, order='title', page=0, status=None, user=None):
         pages = createPages(qs, order, limit)
         cache.set('Pages:%s' % link, pages)
     items = qs[page * limit:(page + 1) * limit]
-    return {'list': items, 'cachestr': cachestr,
+    return {'list': items, 'sbundle': sbundle, 'cachestr': cachestr,
             'link': {
                 'link': link,
                 'order': order,
@@ -160,7 +164,7 @@ def card(request, animeId=0):
     if request.user.is_authenticated():
         userstatus = None
         try:
-            userstatus = ret['anime'].statusbundles.values('state', 'count').get(user=request.user)
+            userstatus = ret['anime'].statusbundles.values('state', 'count', 'rating').get(user=request.user)
         except UserStatusBundle.DoesNotExist:
             pass
         except AttributeError:

@@ -86,15 +86,17 @@
         </div>
         {% endif %}
         {% if user.is_authenticated %}
-        <div> <!--id="card_userstatus"-->
+        <div>
             <a href="/edit/state/{{ anime.id }}/" onclick="return edit.rf({{ anime.id }}, 'state');" class="right">Edit</a>
             <h4>State:</h4>
             <p class="state{{ anime.id }}">
                 <span>{% if userstatus.statusName %}{{ userstatus.statusName|capfirst }}{% else %}None{% endif %}</span>
-                <!--<input type="hidden" name="card_userstatus_input" value="{{ userstatus.state }}">-->
-                {% if userstatus.count %}
-                    <span class="right">{{ userstatus.count }}/{{ anime.episodesCount }}</span>
-                    <!--<input type="hidden" name="card_usercount_input" value="{{ userstatus.count }}">-->
+                {% if userstatus.state == 3 %}
+                    <span class="right">{{ userstatus.rating }}</span>
+                {% else %}
+                    {% if userstatus.count %}
+                        <span class="right">{{ userstatus.count }}/{{ anime.episodesCount }}</span>
+                    {% endif %}
                 {% endif %}
             </p>
         </div>

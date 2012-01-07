@@ -68,8 +68,11 @@ var forms = new (function forms_class(){
                 state = catalog_storage.getStatus(id, statenames);
         }
         ret = [{'span': {innerText: capitalise(state.value)}}];
-        if(data && data.completed && data.all){
-            ret.push({'span': {className: 'right', innerText: data.completed + '/' + data.all}});
+        if(data){
+            if(data.completed && data.all)
+                ret.push({'span': {className: 'right', innerText: data.completed + '/' + data.all}});
+            else if(data.rating)
+                ret.push({'span': {className: 'right', innerText: data.rating}});
         }
         return element.create('p', null, ret);
     }
