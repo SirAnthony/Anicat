@@ -175,21 +175,11 @@ var ajax = new (function(){
                     ]);
                     var soffsety = (document.documentElement.scrollTop || document.body.scrollTop) - document.documentElement.clientTop;
                     card.style.top = soffsety + ((soffsety > card.parentNode.offsetTop) ? 5 : 40) + 'px';
-                    var imgbun;
-                    if(card.clientWidth < 750){
-                        imgbun = (card.clientWidth < 600) ? 200 : 300;
-                        card.firstChild.style.maxWidth = imgbun + 'px';
-                        card.firstChild.firstChild.firstChild.style.maxWidth = imgbun + 'px';
-                        imgbun += 40;
-                    }else{
-                        imgbun = card.firstChild.clientWidth + 40;
-                    }
-                    card.lastChild.style.maxWidth = card.clientWidth - imgbun + 'px';
-                    if(typeof hideEdits == 'undefined')
+                    if(typeof cardLoad == 'undefined')
                         element.appendChild(document.getElementsByTagName("head")[0],
                             {'script': {'type': 'text/javascript', 'src': '/static/card.js'}});
                     else
-                        hideEdits();
+                        cardLoad();
                 break;
 
                 case 'login':

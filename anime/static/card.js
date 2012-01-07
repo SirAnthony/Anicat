@@ -1,6 +1,21 @@
 
-function hideEdits(){
-    var p = document.getElementById('card');
+function cardLoad(){
+    var card = document.getElementById('card') || document.getElementById('pagecard');
+    hideEdits(card);
+    if(!card) return
+    var imgbun;
+    if(card.clientWidth < 750){
+        imgbun = (card.clientWidth < 600) ? 200 : 300;
+        card.firstChild.style.maxWidth = imgbun + 'px';
+        card.firstChild.firstChild.lastChild.style.maxWidth = imgbun + 'px';
+        imgbun += 40;
+    }else{
+        imgbun = card.firstChild.clientWidth + 40;
+    }
+    card.lastChild.style.maxWidth = card.clientWidth - imgbun + 'px';
+}
+
+function hideEdits(p){
     if(!p) p = document;
     var h = p.getElementsByTagName('h4');
     h[h.length] = document.getElementById("cimg").lastChild;
@@ -17,6 +32,6 @@ function hideEdits(){
     }
 }
 
-addEvent(window, 'load', hideEdits);
+addEvent(window, 'load', cardLoad);
 if(document.readyState == "complete")
-    hideEdits();
+    cardLoad();
