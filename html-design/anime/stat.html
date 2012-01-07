@@ -38,7 +38,7 @@
                     <td>min.</td>
                     <td name="num">{{ element.custom|default_if_none:0 }}</td>
                     <td>min.</td>
-                    <td><a target="_blank" class="blacklink" href="/user/{{ userid }}/show/{{forloop.counter}}/">↪</a></td>
+                    <td>{% if forloop.counter < 6 %}<a target="_blank" class="blacklink" href="/user/{{ userid }}/show/{{forloop.counter}}/">↪</a>{% endif %}</td>
                 </tr>
             {% endfor %}
             </tbody>

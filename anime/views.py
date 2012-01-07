@@ -31,7 +31,7 @@ def index(request, order='title', page=0, status=None, user=None):
         page = 0
     limit = 100
 
-    if user is None:
+    if user is None or int(user) == request.user.id:
         user = request.user
     else:
         try:
@@ -39,10 +39,12 @@ def index(request, order='title', page=0, status=None, user=None):
         except:
             raise Http404
 
-    try:
-        AnimeItem._meta.get_field(order)
-    except:
+    if order is None:
         order = 'title'
+    try:
+        AnimeItem._meta.get_field(order[1:] if order.startswith('-') else order)
+    except:
+        raise Http404
 
     qs = AnimeItem.objects.order_by(order)
     try:
@@ -63,11 +65,17 @@ def index(request, order='title', page=0, status=None, user=None):
         status = None
     (link, cachestr) = cleanTableCache(order, status, page, user, request.user.id)
     pages = cache.get('Pages:' + link)
-    if not pages:
+    if pages is None:
         pages = createPages(qs, order, limit)
         cache.set('Pages:%s' % link, pages)
     items = qs[page * limit:(page + 1) * limit]
-    return {'list': items, 'link': link, 'cachestr': cachestr,
+    return {'list': items, 'cachestr': cachestr,
+            'link': {
+                'link': link,
+                'order': order,
+                'user': None if user is request.user else user.id,
+                'status': status
+            },
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
 
 
@@ -263,8 +271,11 @@ def history(request, field=None, page=0):
                 ret[name] = getattr(obj, name)
         return ret
     table = map(r, res)
-    return {'table': table, 'pages': range(1, pages+1),
-            'link': link, 'page': page
+    return {
+        'table': table,
+        'pages': range(1, pages+1),
+        'link': link,
+        'page': page
     }
 
 #@render_to('anime/add.html')

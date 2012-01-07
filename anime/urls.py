@@ -6,7 +6,7 @@ urlpatterns = patterns(
     'anime.views',
     (r'^$', 'index'),
     # TODO Split regexp
-    (r'^(user/(?P<user>\d+))?/?(show/(?P<status>\d+))?/?(sort/(?P<order>\w+))?/?(?P<page>\d+)?/$', 'index'),
+    (r'^(user/(?P<user>\d+))?/?(show/(?P<status>\d+))?/?(sort/(?P<order>-?\w+))?/?(?P<page>\d+)?/$', 'index'),
     (r'^search/(?P<string>[^/]+)?/?(field/(?P<field>\w+))?/?(sort/(?P<order>\w+))?/?(?P<page>\d+)?/?$', 'search'),
     (r'^changes/$', direct_to_template, {'template': 'anime/changes.html'}),
     (r'^faq/$', direct_to_template, {'template': 'anime/faq.html'}),
