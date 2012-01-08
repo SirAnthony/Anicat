@@ -57,8 +57,7 @@ def index(request, order='title', page=0, status=None, user=None):
                 sbundle = UserStatusBundle.objects.filter(user=user, state=status)
                 ids = map(lambda x: x[0], sbundle.values_list('anime'))
                 qs = qs.filter(id__in=ids)
-                sbundle = dict(map(lambda x: (x['anime'], x),
-                     sbundle.values('anime', 'count', 'rating')))
+                sbundle = sbundle.values('anime', 'count', 'rating')
             else:
                 ids = map(lambda x: x[0], UserStatusBundle.objects.filter(
                         user=user, state__gte=1).values_list('anime'))
@@ -72,8 +71,15 @@ def index(request, order='title', page=0, status=None, user=None):
     if pages is None:
         pages = createPages(qs, order, limit)
         cache.set('Pages:%s' % link, pages)
-    items = qs[page * limit:(page + 1) * limit]
-    return {'list': items, 'sbundle': sbundle, 'cachestr': cachestr,
+    items = qs[page * limit:(page + 1) * limit]    
+    if sbundle:
+        ids = list(qs.values_list('id', flat=True)[page * limit:(page + 1) * limit])
+        sbundle = dict(map(lambda x: (x['anime'], x), list(sbundle.filter(anime__in=ids))))
+        for item in items:
+            if item.id in sbundle:
+                item.rating = sbundle[item.id]['rating']
+                item.count = sbundle[item.id]['count']
+    return {'list': items, 'cachestr': cachestr,
             'link': {
                 'link': link,
                 'order': order,
