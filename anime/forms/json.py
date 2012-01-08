@@ -101,7 +101,8 @@ class FormSerializer(object):
 
         if 'choices' in field_dict:
             #TODO: move it to form generation.
-            if field_dict['choices'][0][1] == '---------':
+            if type(field_dict['choices']) is list and \
+               field_dict['choices'][0][1] == '---------':
                 del field_dict['choices'][:1]
             #FIXME: no additional tests
             try:

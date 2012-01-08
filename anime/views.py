@@ -72,7 +72,7 @@ def index(request, order='title', page=0, status=None, user=None):
         pages = createPages(qs, order, limit)
         cache.set('Pages:%s' % link, pages)
     items = qs[page * limit:(page + 1) * limit]    
-    if sbundle:
+    if sbundle is not None:
         ids = list(qs.values_list('id', flat=True)[page * limit:(page + 1) * limit])
         sbundle = dict(map(lambda x: (x['anime'], x), list(sbundle.filter(anime__in=ids))))
         for item in items:

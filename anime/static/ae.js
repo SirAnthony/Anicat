@@ -253,7 +253,7 @@ var edit = new (function edit_class(){
             this.fillField(field, resp);
 
         }else{
-            if(isArray(resp.text)){
+            if(isHash(resp.text)){
                 for(var target in resp.text){
                     var obj;
                     if(target == '__all__'){

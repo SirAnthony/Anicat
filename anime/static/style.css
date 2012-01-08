@@ -85,7 +85,7 @@ a:hover{
 }
 
 .tbl{
-    line-height: 23px;
+    line-height: 24px;
 }
 
 .thdtbl{
@@ -106,16 +106,14 @@ z-index: 0;
 overflow: hidden;
 padding: 1px;
 }
-.link, .plus{
-width: 20px !important;
+.link{
+	width: 20px !important;
 }
-
 .name{
     height: 27px;
 }
-
-.id{
-    width: 30px !important;
+.id{	
+    width: 30px !important;    
     background-color: #339966 !important;
     text-align: right !important;
     cursor: pointer;
