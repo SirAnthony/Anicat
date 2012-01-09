@@ -87,10 +87,11 @@ var Card = new (function(){
         if(!card) return;
         var soffsety = (document.documentElement.scrollTop || document.body.scrollTop) - document.documentElement.clientTop;
         if(!user.logined && soffsety < 75){
-            if(document.getElementById('logdv').style.display == 'block')
+            if(document.getElementById('logdv').style.display == 'block'){
                 soffsety += 20;
-            if(user.info.style.display == 'block')
-                soffsety += 17;
+                if(user.info.style.display == 'block')
+                    soffsety += 17;
+            }
         }
         card.style.top = soffsety + ((soffsety > card.parentNode.offsetTop) ? 5 : 40) + 'px';
     }
