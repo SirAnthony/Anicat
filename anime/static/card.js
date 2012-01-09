@@ -23,7 +23,7 @@ var Card = new (function(){
     }
 
     this.hideEdits = function(p){
-        if(!p) p = document;
+        if(!p) return;
         var h = new Array();
         h.push.apply(h, p.getElementsByTagName('h4'));
         if(!h.length) return;
