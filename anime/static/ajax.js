@@ -20,19 +20,26 @@ var ajax = new (function(){
         if(!(/^http:.*/.test(url) || /^https:.*/.test(url)))
             qry['csrfmiddlewaretoken'] = cookie.get('csrftoken');
 
+        var boundary = '-----------' + parseInt(Math.random()*1000000000000)
+
+        var makePostData = function(name, value){
+            var crlf = '\r\n'
+            var s = '--' + boundary + crlf;
+            s += 'Content-Disposition: form-data; name="' + name + '"' + crlf;
+            s += crlf + value + crlf;
+            return s;
+        }
+
         for(var item in qry){
             if(!item || !qry[item]) continue;
-            if(request)
-                request += '&';
             if(isArray(qry[item])){
-                var e = new Array();
                 for(var i=0; i<qry[item].length; i++)
-                    e.push(item + '=' + qry[item][i]);
-                request += e.join('&');
+                    request += makePostData(item, qry[item][i]);
             }else{
-                request += item + '=' + qry[item];
+                request += makePostData(item, qry[item]);
             }
         }
+        request += '--' + boundary + '--'
 
         xmlHttp = null;
         if(window.XMLHttpRequest){
@@ -53,7 +60,7 @@ var ajax = new (function(){
             if (xmlHttp){
                 xmlHttp.open("POST", url, true);
                 xmlHttp.onreadystatechange = handleRequestStateChange;
-                xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xmlHttp.setRequestHeader("Content-type", "multipart/form-data; boundary=" + boundary);
                 xmlHttp.send(request);
             }
         }

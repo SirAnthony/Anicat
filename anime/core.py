@@ -9,6 +9,9 @@ from anime.functions import createPages
 from anime.functions import getVal, getAttr, updateMainCaches
 from hashlib import sha1
 
+class GetError(Exception):
+    pass
+
 
 class FieldExplorer(object):
     def __init__(self, field):
@@ -30,7 +33,7 @@ class FieldExplorer(object):
             else:
                 return getattr(anime, self.field)
         except Exception, e:
-            return 'Error: ' + str(e)
+            raise GetError('Error: ' + str(e))
 
     def get_model(self):
         try:
@@ -67,7 +70,9 @@ class FieldExplorer(object):
         if model:
             d = {}
             for x in model.objects.filter(anime=anime).values_list('linkType', 'link'):
-                name = LINKS_TYPES[x[0]][-1]
+                for t in LINKS_TYPES:
+                    if t[0] == x[0]:
+                        name = t[-1]
                 if name not in d:
                     d[name] = []
                 d[name].append(x[1])
@@ -106,7 +111,10 @@ def get(request):
     response = {'order': fields}
     for field in fields:
         field_expl = FieldExplorer(field)
-        response[field] = field_expl.get_value(anime, request)
+        try:
+            response[field] = field_expl.get_value(anime, request)
+        except GetError, e:
+            response[field] = e.message
 
     r = 'card' if request.POST.get('card') else 'get'
     response = {'response': r, 'status': True, 'id': aid, 'text': response}
@@ -118,7 +126,7 @@ def search(field, string, request, attrs={}):
     try:
         string = string.strip()
         if not string:
-            raise AttributeError 
+            raise AttributeError
     except AttributeError:
         return {'text': 'Empty query.'}
     if not field:

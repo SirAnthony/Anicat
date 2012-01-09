@@ -1,4 +1,5 @@
 
+from django.db import IntegrityError
 from django.utils.translation import ugettext_lazy as _
 from anime.edit.objects import EditableDefault, EditError
 from anime.models import AnimeItem, AnimeLink
@@ -93,4 +94,7 @@ class Links(EditableAnimeBased):
         for link in oldLinks:
             link.delete()
         for l in links:
-            l.save()
+            try:
+                l.save()
+            except IntegrityError:
+                pass

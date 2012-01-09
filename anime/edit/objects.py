@@ -4,7 +4,7 @@ from django.core.cache import cache
 from django.db.models.fields import FieldDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 
-from anime.core import FieldExplorer
+from anime.core import FieldExplorer, GetError
 from anime.forms.create import createFormFromModel
 from anime.functions import updateMainCaches
 from anime.models import (AnimeItem, USER_STATUS, EDIT_MODELS)
@@ -118,10 +118,16 @@ class EditableDefault(object):
         obj.save()
 
     def explore_result(self):
+        ret = {}
         retid = self.retid or getattr(self.obj, 'id', 0)
         anime = AnimeItem.objects.get(id=retid)
         field_expl = FieldExplorer(self.field or self.modelname)
-        return {'text': field_expl.get_value(anime, self.request)}
+        try:
+            ret['text'] = field_expl.get_value(anime, self.request)
+        except GetError, e:
+            ret['text'] = e.message
+            ret['status'] = False
+        return ret
 
     def last(self):
         cache.delete('card:%s' % self.itemId)
@@ -198,7 +204,11 @@ class Bundle(EditableDefault):
             except IndexError:
                 anime = None
         field_expl = FieldExplorer(self.field or self.modelname)
-        ret['text'] = field_expl.get_value(anime, self.request)
+        try:
+            ret['text'] = field_expl.get_value(anime, self.request)
+        except GetError, e:
+            ret['text'] = e.message
+            ret['status'] = False
         if not ret['text']:
             ret['text'] = []
         return ret

@@ -25,7 +25,9 @@ var Card = new (function(){
     this.hideEdits = function(p){
         if(!p) return;
         var h = new Array();
-        h.push.apply(h, p.getElementsByTagName('h4'));
+        var c = p.getElementsByTagName('h4');
+        for(var i=0; i<c.length; i++) //google chrome, lol
+            h.push(c[i]);
         if(!h.length) return;
         h.push(document.getElementById("cimg").lastChild);
         for(var element=0; element<h.length; element++){

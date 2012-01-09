@@ -123,11 +123,15 @@ var forms = new (function forms_class(){
 
     this.field_links = function(data){
         var s = new Array();
-        for(var link in data){
-            if(!data[link]) continue;
-            for(var el=0; el<data[link].length; el++){
-                s.push({'a': {'target': '_blank', href: data[link][el], innerText: link}},
-                   {'': {innerText: '\240'}});
+        if(isString(data)){
+            s = {'span': {innerText: data}};
+        }else if(isHash(data)){
+            for(var link in data){
+                if(!data[link]) continue;
+                for(var el=0; el<data[link].length; el++){
+                    s.push({'a': {'target': '_blank', href: data[link][el], innerText: link}},
+                    {'': {innerText: '\240'}});
+                }
             }
         }
         return element.create('p', null, s);
