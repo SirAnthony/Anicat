@@ -372,12 +372,14 @@ max-width: 400px;
 .elemlbl{
 font-weight: bold;
 }
-
 #id_genre {
     height: 22px;
     width: 100%;
     padding-top: 2px;
     display: block;
+}
+html>body #id_genre {
+    height: 300px;
 }
 
 #id_genre:hover {

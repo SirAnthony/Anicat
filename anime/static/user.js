@@ -30,12 +30,13 @@ var user = new( function(){
 
     this.toggle = function(){
         if(!this.loaded) return;
-        login = document.getElementById('logdv');
-        if(!login) return;
-        if(login.style.display == 'block'){
-            login.style.display = 'none';
+        var logdv = document.getElementById('logdv');
+        if(!logdv) return;
+        if(logdv.style.display == 'block'){
+            logdv.style.display = 'none';
+            
         }else{
-            login.style.display = 'block';
+            logdv.style.display = 'block';
         }
     }
 

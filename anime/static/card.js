@@ -1,8 +1,9 @@
 
 function cardLoad(){
     var card = document.getElementById('card') || document.getElementById('pagecard');
-    hideEdits(card);
-    if(!card) return
+    if(!isOldIE)
+        hideEdits(card);
+    if(!card || !card.clientWidth) return
     var imgbun;
     if(card.clientWidth < 750){
         imgbun = (card.clientWidth < 600) ? 200 : 300;

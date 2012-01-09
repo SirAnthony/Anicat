@@ -2,11 +2,7 @@
 // Anicat js part v 1.99
 
 var mCur; // Хранит текущую позицию мыши
-var xmlHttp;
-//var mfl = 0;  // 0 - никаких действий. 1 - меню открыто, заболкирован инпут под ним.
-         // 2 - заблокировано инпутом, закрыто.
 var url = '/ajax/';
-var edtdv = 0; // эта переменная определяет редактируется ли менюшка или нет
 var timer;
 var ua = navigator.userAgent.toLowerCase();
 
@@ -114,7 +110,7 @@ var searcher = new ( function(){
         if(!page) page = 0;
         var val;
         var sort;
-        if(this.input.textLength < 3 && val != 'numberofep' && val != 'type'){
+        if(this.input.value.length < 3 && val != 'numberofep' && val != 'type'){
             element.removeAllChilds(this.result);
             element.appendChild(this.result, [{'p': {
                 innerText: 'Query must consist of at least 3 characters.'}}]);
@@ -138,7 +134,7 @@ var searcher = new ( function(){
            element.appendChild(this.result, [{'p': {innerText: 'Nothing found.'}}]);
         }else{
             var tr = new Array();
-            for(i in rs.items){
+            for(var i=0; i<rs.items.length; i++){
                 var elem = rs.items[i];
                 var row = element.create('tr',
                     {className: (elem.air ? 'air a' : 'r') + elem.id}, [
@@ -166,7 +162,7 @@ var searcher = new ( function(){
                 }
             }
             var srctbl = element.create('table', {'id': 'srchtbl', className: 'tbl', cellSpacing: 0});
-            element.appendChild(this.result, [srctbl, tr]);
+            element.appendChild(this.result, [srctbl, ['thead', 'tbody', tr]]);
             if(rs.count > rs.items.length){
                 var pg = new Array();
                 for( var i = 1; i <= Math.ceil(rs.count / 20); i++){
@@ -204,7 +200,7 @@ var message = new (function(){
     this.create = function(str, timeout){
         this.clear();
         this.lock();
-        this.toEventPosition();
+        //this.toEventPosition();
         if(!isString(str) && !isNumber(str) && !isUndef(str) && !isError(str))
             this.addTree(str);
         else
@@ -374,8 +370,10 @@ if(!Array.prototype.indexOf){
     }
 }
 
-// Определим Internet Explorer
+// Internet Explorer
 isIE = (ua.indexOf("msie") != -1 &&  ua.indexOf("webtv") == -1);
+// Internet Explorer < 8
+isOldIE = (isIE && parseFloat(navigator.appVersion.split("MSIE")[1]) < 8);
 // Opera
 isOpera = (ua.indexOf("opera") != -1);
 /*  // Gecko = Mozilla + Firefox + Netscape
@@ -486,8 +484,10 @@ function mousePageXY(event){
     var x = 0, y = 0;
 
     if(document.attachEvent != null){ // Internet Explorer & Opera
-        x = window.event.clientX + (document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft);
-        y = window.event.clientY + (document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop);
+        x = window.event.clientX + (document.documentElement.scrollLeft ? 
+            document.documentElement.scrollLeft : (document.body ? document.body.scrollLeft : 0));
+        y = window.event.clientY + (document.documentElement.scrollTop ?
+            document.documentElement.scrollTop : (document.body ? document.body.scrollTop : 0));
     }else if(!document.attachEvent && document.addEventListener){ // Gecko
         x = event.clientX + window.scrollX;
         y = event.clientY + window.scrollY;
@@ -629,7 +629,7 @@ function addStylesheetRules (decls) {
             s.insertRule(selector + '{' + rulesStr + '}', s.cssRules.length);
         }
         else { /* IE */
-            s.addRule(selector, rulesStr, -1);
+            s.addRule(selector, rulesStr);
         }
     }
 }
@@ -637,7 +637,7 @@ function addStylesheetRules (decls) {
 function getStylesheetRule(ruleName, field){
     var value = null;
     var recls = new RegExp(ruleName.toLowerCase());
-    var reimp = new RegExp('(\\s|^)' + field.toLowerCase() + ':[^;]+!\\s*important\\s*;');
+    var reimp = new RegExp('(\\s|^)' + field.toLowerCase() + ':[^;]+(!\\s*important)?\\s*;?');
     for( var i = 0; i < document.styleSheets.length; i++){
         var sheet = document.styleSheets[i];
         var rules = sheet.cssRules ? sheet.cssRules : sheet.rules;
@@ -647,11 +647,16 @@ function getStylesheetRule(ruleName, field){
                 continue;
             var text = rule.selectorText.toLowerCase();
             if(text.match(recls)){
-                if(isIE)
-                    value = rule.style[field];
-                else if(window.getComputedStyle)
-                    value = rule.style.getPropertyValue(field);
-                if(rule.cssText && rule.cssText.toLowerCase().match(reimp))
+            	if(window.getComputedStyle)
+            		value = rule.style.getPropertyValue(field);
+                else if(isIE){
+                    function camelize(text) {
+                        return text.replace(/-+(.)?/g, function (match, chr) {
+                            return chr ? chr.toUpperCase() : '';});
+                    }
+                    value = rule.style[camelize(field)];
+                }
+                if(rule.style.cssText && rule.style.cssText.toLowerCase().match(reimp))
                     return value;
             }
         }
@@ -674,7 +679,7 @@ addEvent(document, 'mousemove', function(e){
         }
     }
     if(document.getElementById('menu')){
-        if(document.getElementById('menu').style.display == "block" && !edtdv){
+        if(document.getElementById('menu').style.display == "block"){
             document.onclick = message.close; // Прятание меню
         }
     }

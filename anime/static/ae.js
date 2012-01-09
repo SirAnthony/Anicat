@@ -165,8 +165,9 @@ var edit = new (function edit_class(){
             if(formData.state)
             formData.text = {'state': formData.state, 'select': (function(x){
                 var s = {};
-                for(var i = 0; i < x.childNodes.length; i++)
-                    s[x.childNodes[i].value] = x.childNodes[i].textContent;
+                for(var i = 0; i < x.childNodes.length; i++){
+                    s[x.childNodes[i].value] = x.childNodes[i].innerText;
+                }
                 return s;})(document.getElementById('id_state'))
             }
             delete formData.state;
@@ -196,7 +197,7 @@ var edit = new (function edit_class(){
                     message.addTree(forms.getField(field, resp.id));
                     message.show();
                 }
-                for(var fld in resp.form){
+                for(var fld=0; fld<resp.form.length; fld++){
                     for(var type in resp.form[fld]){
                         var f = resp.form[fld];
                         if(type == 'select'){

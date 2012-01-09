@@ -26,7 +26,7 @@ var ajax = new (function(){
                 request += '&';
             if(isArray(qry[item])){
                 var e = new Array();
-                for(var i in qry[item])
+                for(var i=0; i<qry[item].length; i++)
                     e.push(item + '=' + qry[item][i]);
                 request += e.join('&');
             }else{
@@ -160,7 +160,7 @@ var ajax = new (function(){
                     var data = new Array();
                     var fields = ['name', 'type', 'genre', 'episodesCount',
                                 'duration', 'release', 'links', 'state']
-                    for(var i in fields){
+                    for(var i=0; i<fields.length; i++){
                         data.push(
                             forms.getTitledField(fields[i], resp.id, res[fields[i]]));
                     }

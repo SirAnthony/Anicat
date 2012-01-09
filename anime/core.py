@@ -115,8 +115,11 @@ def get(request):
 
 def search(field, string, request, attrs={}):
     #Rewrite this
-    string = string.strip()
-    if not string:
+    try:
+        string = string.strip()
+        if not string:
+            raise AttributeError 
+    except AttributeError:
         return {'text': 'Empty query.'}
     if not field:
         field = 'name'

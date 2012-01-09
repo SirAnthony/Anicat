@@ -17,7 +17,7 @@ var DateTimeShortcuts = {
 
         var ftype = ['vDateField', 'vTimeField'];
         var dates = getElementsByClassName(ftype[0], document, 'input');
-        for(var date in dates){
+        for(var date=0; date<dates.length; date++){
             DateTimeShortcuts.addCalendar(dates[date]);
         }
     },
@@ -26,6 +26,8 @@ var DateTimeShortcuts = {
     addCalendar: function(inp){
         if(inp.type != 'text')
             throw new Error('Only text input supported.');
+        if(typeof Calendar == "undefined") //ie7
+            return
 
         var num = DateTimeShortcuts.calendars.length;
 

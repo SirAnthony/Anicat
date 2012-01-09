@@ -67,13 +67,14 @@ var forms = new (function forms_class(){
             else
                 state = catalog_storage.getStatus(id, statenames);
         }
-        ret = [{'span': {innerText: capitalise(state.value)}}];
+        ret = new Array();
         if(data){
             if(data.completed && data.all)
                 ret.push({'span': {className: 'right', innerText: data.completed + '/' + data.all}});
             else if(data.rating)
                 ret.push({'span': {className: 'right', innerText: data.rating}});
         }
+        ret.push({'span': {innerText: capitalise(state.value)}});        
         return element.create('p', null, ret);
     }
 
@@ -112,12 +113,11 @@ var forms = new (function forms_class(){
         }else{
             var classnm = 'bundlenull';
         }
-        var current = new Array()
-        current.push('tr', ['th', [{'input': {'type': 'hidden',
+        var th = ['tr', ['th', [{'input': {'type': 'hidden',
               'id': 'currentid_b_' + bundleid, 'value': id,
-              'name': 'currentid'}}]]);
-        s = current.concat(s);
-        return element.create('table', {className: classnm}, s);
+              'name': 'currentid'}}]]];
+        return element.create('table', {className: classnm}, [
+                                        'thead', th, 'tbody', s]);
 
     }
 
@@ -125,7 +125,7 @@ var forms = new (function forms_class(){
         var s = new Array();
         for(var link in data){
             if(!data[link]) continue;
-            for(var el in data[link]){
+            for(var el=0; el<data[link].length; el++){
                 s.push({'a': {'target': '_blank', href: data[link][el], innerText: link}},
                    {'': {innerText: '\240'}});
             }
