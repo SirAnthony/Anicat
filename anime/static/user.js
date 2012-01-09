@@ -15,6 +15,7 @@ var user = new( function(){
         if(obj) info = obj;
         this.info.innerText = msg;
         this.info.style.display = 'block';
+        Card.place();
     }
 
     this.init = function(){
@@ -34,10 +35,10 @@ var user = new( function(){
         if(!logdv) return;
         if(logdv.style.display == 'block'){
             logdv.style.display = 'none';
-            
         }else{
             logdv.style.display = 'block';
         }
+        Card.place();
     }
 
     this.login = function(){

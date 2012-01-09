@@ -6,10 +6,6 @@
     {% block description %}{% if anime %}Name: {{ anime.title }}. Type: {{ anime.releaseTypeS }}{% endif %}{% endblock %}
     {% block keywords %}{% if anime %}{{ anime.title }}, {{ anime.releaseTypeS }}{% endif %}{% endblock %}
 
-    {% block customScripts %}
-    <script type="text/javascript" src="/static/card.js"></script>
-    {% endblock %}
-
     {% block main %}
     {% if not anime %}
     <div id="nocard">

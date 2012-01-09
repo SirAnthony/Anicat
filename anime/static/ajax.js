@@ -155,31 +155,7 @@ var ajax = new (function(){
 
                 case 'card':
                     message.hide();
-                    var card = document.getElementById("card");
-                    var res = resp.text;
-                    var data = new Array();
-                    var fields = ['name', 'type', 'genre', 'episodesCount',
-                                'duration', 'release', 'links', 'state']
-                    for(var i=0; i<fields.length; i++){
-                        data.push(
-                            forms.getTitledField(fields[i], resp.id, res[fields[i]]));
-                    }
-                    element.appendChild(card, [
-                        {'div': {'id': 'imagebun', 'className': 'cardcol'}}, [
-                            {'div': {'id': 'cimg'}}, [
-                                {'img': {'src': 'http://anicat.net/images/' + res.id + '/'}}],
-                            forms.getTitledField('bundle', resp.id, res.bundle)
-                        ],
-                        {'div': {'id': 'main', 'className': 'cardcol'}}, data
-
-                    ]);
-                    var soffsety = (document.documentElement.scrollTop || document.body.scrollTop) - document.documentElement.clientTop;
-                    card.style.top = soffsety + ((soffsety > card.parentNode.offsetTop) ? 5 : 40) + 'px';
-                    if(typeof cardLoad == 'undefined')
-                        element.appendChild(document.getElementsByTagName("head")[0],
-                            {'script': {'type': 'text/javascript', 'src': '/static/card.js'}});
-                    else
-                        cardLoad();
+                    Card.create(resp.id, resp.text);
                 break;
 
                 case 'login':

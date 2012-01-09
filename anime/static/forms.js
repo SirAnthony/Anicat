@@ -74,7 +74,7 @@ var forms = new (function forms_class(){
             else if(data.rating)
                 ret.push({'span': {className: 'right', innerText: data.rating}});
         }
-        ret.push({'span': {innerText: capitalise(state.value)}});        
+        ret.push({'span': {innerText: capitalise(state.value)}});
         return element.create('p', null, ret);
     }
 
@@ -104,7 +104,7 @@ var forms = new (function forms_class(){
                     {'td': {className: "bundle_number", innerText: g+1}},
                     'td', [{'a': {
                         href: '/card/' + cur.elemid + '/',
-                        onclick: (function(c){ return function(){ return getCard(c); }})(cur.elemid),
+                        onclick: (function(c){ return function(){ return Card.get(c); }})(cur.elemid),
                         innerText: encd(cur.name),
                         className: 's s' + cur.elemid
                     }}]

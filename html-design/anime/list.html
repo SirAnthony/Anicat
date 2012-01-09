@@ -41,7 +41,7 @@
                 {% for title in list %}
                 <tr class="{% if title.air %}air a{% else %}r{% endif %}{{ title.id }}">
                     <td id="link{{ title.id }}" class="link">
-                        <a target="_blank" class="cardurl" href="/card/{{ title.id }}/" onclick="return getCard({{ title.id }});">
+                        <a target="_blank" class="cardurl" href="/card/{{ title.id }}/" onclick="return Card.get({{ title.id }});">
                             <img alt="Go" src="/static/arrow.gif">
                         </a>
                     </td>
