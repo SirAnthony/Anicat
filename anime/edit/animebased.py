@@ -26,7 +26,7 @@ class Name(EditableAnimeBased):
         newNames = filter(lambda x: x and x not in names, cleaned)
         oldNames = filter(lambda x: x and x not in cleaned, names)
         if not newNames and len(oldNames) == len(names):
-            raise Exception('Cannot delete all names. One name must be left.')
+            raise Exception(_('Cannot delete all names. One name must be left.'))
         for name in oldNames:
             try:
                 newname = newNames.pop()

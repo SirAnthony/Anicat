@@ -17,6 +17,7 @@ class EditError(Exception):
 
 EDITABLE_LIST = [
     'state',
+    'request',
     'animerequest',
     'feedback'
 ]
@@ -90,7 +91,7 @@ class EditableDefault(object):
         return r
 
     def post(self, formobject):
-        form = formobject(self.request.POST.copy(),
+        self.form = form = formobject(self.request.POST.copy(),
                 files=self.request.FILES, user=self.request.user,
                 instance=self.obj)
         ret = {}

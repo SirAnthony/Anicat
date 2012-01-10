@@ -11,6 +11,9 @@ class Request(EditableDefault):
     def last(self):
         cache.delete('requests')
 
+    def explore_result(self):
+        return {'form': self.form}
+
 
 class Animerequest(Request):
     pass

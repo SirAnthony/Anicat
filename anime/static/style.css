@@ -107,13 +107,13 @@ overflow: hidden;
 padding: 1px;
 }
 .link{
-	width: 20px !important;
+    width: 20px !important;
 }
 .name{
     height: 27px;
 }
-.id{	
-    width: 30px !important;    
+.id{
+    width: 30px !important;
     background-color: #339966 !important;
     text-align: right !important;
     cursor: pointer;
@@ -372,16 +372,13 @@ max-width: 400px;
 .elemlbl{
 font-weight: bold;
 }
+
 #id_genre {
     height: 22px;
     width: 100%;
     padding-top: 2px;
     display: block;
 }
-html>body #id_genre {
-    height: 300px;
-}
-
 #id_genre:hover {
     position: absolute;
     height: 30em;
@@ -525,4 +522,9 @@ html>body #id_genre {
 .malresult p.s3, .malresult .error{
     margin-top: 5px;
     font-size: 12pt !important;
+}
+
+#id_genre {
+    *height: 300px;
+    height: 300px\0/;
 }

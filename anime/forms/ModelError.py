@@ -23,7 +23,7 @@ class ReadOnlyModelForm(ModelForm):
 
     def clean(self):
         if hasattr(self, '__readonly__') and self.__readonly__:
-            raise ValidationError(_('This form is readonly for you.'))
+            raise ValidationError(_('This form is read-only for you.'))
         return super(ReadOnlyModelForm, self).clean()
 
 class ErrorModelForm(ModelForm):

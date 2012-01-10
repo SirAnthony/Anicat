@@ -15,7 +15,7 @@
     <div id="pagecard">
         <div id="imagebun" class="cardcol">
             <div id="cimg">
-                {% if user.is_authenticated %}<a href="/edit/image/{{ anime.id }}/" onclick="return edit.rf({{ anime.id }}, 'image');" class="right">Edit</a>{%endif%}
+                {% if user.is_authenticated %}<a href="/edit/image/{{ anime.id }}/" class="right">Edit</a>{%endif%}
                 <img src="http://anicat.net/images/{{ anime.id }}/" />
             </div>
             <div>
