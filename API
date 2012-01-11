@@ -47,7 +47,7 @@ Add:
         Add form
     Response:
         response: "add"
-        text: int // New record id
+        id: int // New record id
 
 Get:
     Request type: Post

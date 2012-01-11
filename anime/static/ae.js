@@ -55,9 +55,11 @@ var add = new (function add_class(){
         }else{
             if(this.clearForm()){
                 element.insert(this.form.lastChild, {'span': {className: 's3', innerText: 'Added'}});
-                if(isNumber(resp.text)){
-                    if(Card.get(resp.text))
-                        window.location.replace('/card/' + resp.text + '/');
+                if(isNumber(resp.id)){
+                    if(Card.get(resp.id))
+                        window.location.replace('/card/' + resp.id + '/');
+                    else
+                        this.toggle();
                 }else{
                     window.location.replace('/');
                 }

@@ -52,13 +52,14 @@ def change(request):
 def add(request):
     result = editMethods.edit(request)
     if result.get('status', None):
-        return {'response': 'add', 'status': True, 'text': result.get('id', 0)}
+        return {'response': 'add', 'status': True, 'id': result.get('id', 0)}
     try:
         text = result['form'].errors
     except KeyError:
         text = None
     if not text:
         text = {'__all__': [result['text']]}
+    text = prepare_data(text)
     return {'response': 'add', 'status': False, 'text': text}
 
 
