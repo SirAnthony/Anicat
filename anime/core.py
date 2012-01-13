@@ -93,7 +93,6 @@ class FieldExplorer(object):
         return None
 
 
-
 def get(request):
     fields = []
     if request.method != 'POST':
@@ -108,6 +107,8 @@ def get(request):
         fields.extend(request.POST.getlist('field'))
     except Exception, e:
         return {'text': 'Bad request fields: ' + str(e)}
+    if not fields:
+        return {'text': 'No fields passed.'}
     response = {'order': fields}
     for field in fields:
         field_expl = FieldExplorer(field)

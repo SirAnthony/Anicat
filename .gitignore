@@ -1,4 +1,5 @@
 *.pyc
 *~
 *.db
+coverage report/
 audit_log

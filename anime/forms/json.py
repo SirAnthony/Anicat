@@ -29,6 +29,9 @@ def prepare_data(data, depth=None):
     if isinstance(data, basestring):
         return smart_unicode(data)
 
+    elif isinstance(data, (int, long, float, complex)):
+        return data
+
     elif isinstance(data, bool):
         return data
 

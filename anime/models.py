@@ -135,6 +135,7 @@ class AnimeBundle(models.Model):
             one.bundle = two.bundle = bundle
             one.save()
             two.save()
+        return bundle
 
     @classmethod
     def untie(cls, item):

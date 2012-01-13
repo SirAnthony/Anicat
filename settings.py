@@ -1,15 +1,20 @@
 # Django settings for anicat project.
 
 import os
+import sys
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+TEST_RUNNER = "code_coverage.run_tests"
+COVERAGE_REPORT_PATH = os.path.join(PROJECT_ROOT, 'coverage report')
+
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
 )
+
 
 MANAGERS = ADMINS
 
@@ -23,6 +28,12 @@ DATABASES = {
         'PORT': '',
     }
 }
+
+if 'test' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'test_database.sqlite'
+    }
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name

@@ -175,8 +175,14 @@ var ajax = new (function(){
                     }
                 break;
 
-                case 'regfail':
-                    user.registerFail(resp.text);
+                case 'register':
+                    message.hide();
+                    if(!resp.status){
+                        user.registerFail(resp.text);
+                    }else{
+                        user.loginSuccess(resp.text);
+                        updateStylesheets('/css/');
+                    }
                 break;
 
                 case 'search':

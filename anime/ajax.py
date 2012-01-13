@@ -13,6 +13,9 @@ def ajaxResponse(fn):
         ret = {'text': 'Unprocessed error', 'response': 'error'}
         #FIXME: no type check
         ret.update(fn(*args))
+        for key in ret.copy():
+            if ret[key] is None:
+                del ret[key]
         return HttpResponse(simplejson.dumps(ret),
                 mimetype='application/javascript')
     return new
@@ -20,7 +23,7 @@ def ajaxResponse(fn):
 
 @ajaxResponse
 def get(request):
-    response = coreMethods.get(request)
+    response = prepare_data(coreMethods.get(request))
     return response
 
 
@@ -52,7 +55,7 @@ def change(request):
 def add(request):
     result = editMethods.edit(request)
     if result.get('status', None):
-        return {'response': 'add', 'status': True, 'id': result.get('id', 0)}
+        return {'response': 'add', 'status': True, 'id': result.get('id', 0), 'text': None}
     try:
         text = result['form'].errors
     except KeyError:
@@ -81,7 +84,7 @@ def register(request):
     if 'response' in res:
         return {'response': 'login', 'status': True, 'text': res['text']}
     else:
-        return {'response': 'regfail', 'text': res['form'].errors}
+        return {'response': 'register', 'status': False, 'text': res['form'].errors}
 
 
 @ajaxResponse

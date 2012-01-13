@@ -14,7 +14,7 @@ def login(request):
 
 def logout(request):
     auth.logout(request)
-    return HttpResponseRedirect("/")
+    return HttpResponseRedirect('/')
 
 
 @render_to('anime/register.html')
