@@ -88,8 +88,7 @@ class FieldExplorer(object):
         if anime.bundle:
             items = anime.bundle.animeitems.all().order_by('releasedAt')
             bundles = [{'name': x.title, 'elemid': x.id} for x in  items]
-            bundles.append(anime.bundle.id)
-            return bundles
+            return {'id': anime.bundle.id, 'bundles': bundles}
         return None
 
 
@@ -145,11 +144,11 @@ def search(field, string, request, attrs={}):
         link += string + '/'
     if field:
         link += 'field/%s/' % field
-    #FIXME: 2 caches: /sort/title/ and /
     try:
         order = attrs.get('order')
         AnimeItem._meta.get_field(order)
-        link += 'sort/%s/' % order
+        if order != 'title':
+            link += 'sort/%s/' % order
     except Exception:
         order = 'title'
     try:

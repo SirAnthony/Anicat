@@ -9,12 +9,9 @@ var forms = new (function forms_class(){
     }
 
     this.title_bundle = function(fieldname, id, data){
-        var num = numHash(data);
-        var bundleid = 0;
-        if(data && (isString(data[num]) || isNumber(data[num])))
-            bundleid = data[num];
         var fields = this.getField(fieldname, id, data);
-        return this.titledfield(fieldname, bundleid, fields);
+        return this.titledfield(fieldname,
+            ((data && data.id) ? data.id : 0), fields);
     }
 
     this.title_default = function(fieldname, id, data){
@@ -89,16 +86,12 @@ var forms = new (function forms_class(){
 
     this.field_bundle = function(data, id){
         var s = new Array();
-        var num = numHash(data);
-        var bundleid = 0;
-        if(data && num){
-            if(isString(data[num]) || isNumber(data[num])){
-                bundleid = data.pop()
-                var classnm = 'bundle' + bundleid;
-                num -= 1;
-            }
-            for(var g=0; g<=num; g++){
-                var cur = data[g];
+        var bundleid = 0
+        if(data && data.bundles){
+            bundleid = data.id;
+            var bundles = data.bundles;
+            for(var g=0; g<bundles.length; g++){
+                var cur = bundles[g];
                 s.push('tr', [
                     {'td': {innerText: (id == cur.elemid ? "►" : "")}},
                     {'td': {className: "bundle_number", innerText: g+1}},
@@ -110,9 +103,8 @@ var forms = new (function forms_class(){
                     }}]
                 ]);
             }
-        }else{
-            var classnm = 'bundlenull';
         }
+        var classnm = 'bundle' + bundleid;
         var th = ['tr', ['th', [{'input': {'type': 'hidden',
               'id': 'currentid_b_' + bundleid, 'value': id,
               'name': 'currentid'}}]]];

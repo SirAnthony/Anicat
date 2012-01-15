@@ -92,11 +92,11 @@ def search(request):
     if request.method != 'POST':
         return {'text': 'Only POST method allowed.'}
     limit = 20
-    response = coreMethods.search(request.POST.get('field', 'name'),
+    response = coreMethods.search(request.POST.get('field'),
         request.POST.get('string'), request,
         {
             'page': request.POST.get('page', 0),
-            'order': request.POST.get('sort'),
+            'order': request.POST.get('order'),
             'limit': request.POST.get('limit', limit)
              })
     if 'response' in response:

@@ -179,6 +179,9 @@ var edit = new (function edit_class(){
 
     this.processResponse = function(resp){
 
+        if(!resp.id)
+            resp.id = 0;
+
         if(!user.logined && resp.model == 'state' && !resp.set){
             var s = catalog_storage.getStatus(resp.id, (resp.text ? resp.text.select : null));
             resp.form = [{"select": {"name": "state", "required": true, "value": s.state, "label": "State", "choices": [["0", "None"], ["1", "Want"], ["2", "Now"], ["3", "Done"], ["4", "Dropped"], ["5", "Partially watched"]], "id": "id_state"}}];
@@ -293,7 +296,7 @@ var edit = new (function edit_class(){
         var divs = getElementsByClassName('edit_' + field + resp.id, null, 'div');
         if(!divs || divs.length == 0){
             if(resp.id){
-                divs = getElementsByClassName('edit_bundlenull', null, 'div');
+                divs = getElementsByClassName('edit_bundle0', null, 'div');
             }else if(resp.currentid){
                 var d = getElementsByClassName('editDiv', null, 'div');
                 divs_collect:

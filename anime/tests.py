@@ -41,23 +41,23 @@ def check_response(response, origin, *args, **kwargs):
     if isinstance(origin, dict):
         if not isinstance(response, dict):
             raise AssertionError('%s not match original type: %s' % (response, origin))
-        elif not isinstance(origin, (api.CallableDict, api.NoneableDict)) and \
-                len(origin.keys()) != len(response.keys()):
-            #FIXME: Not checks for NoneableDict
-            raise AssertionError('%s fields count differs from %s' % (response, origin))
+        #elif not isinstance(origin, api.NoneableDict) and \
+        #        len(origin.keys()) != len(response.keys()):
+        #    raise AssertionError('%s fields count differs from %s' % (response, origin))
         else:
             for key, item in origin.items():
                 try:
                     check_response(response[key], item, *args, **kwargs)
                 except KeyError:
                     # Field may be absent if value is None
-                    if not isinstance(origin, api.NoneableDict):
+                    if not isinstance(origin, api.NoneableDict) and \
+                       not isinstance(item, api.Noneable):
                         raise AssertionError('%s not match original: %s' % (response, origin))
             return
 
     if isinstance(origin, basestring):
         if not isinstance(response, basestring):
-            raise AssertionError('%s type not match original: %s' % (response, origin))
+            raise AssertionError('%s is not string. Type does not match: %s' % (response, origin))
         elif not origin == response:
             raise AssertionError('%s not match original: %s' % (response, origin))
         return
@@ -67,12 +67,11 @@ def check_response(response, origin, *args, **kwargs):
             raise AssertionError('%s not match original type: %s' % (response, origin))
         if isinstance(origin, api.FuzzyList):
             origin.set_count(len(response))
-        for item in origin:
-            index = origin.index(item)
+        for i in range(0, len(origin)):
             try:
-                check_response(response[index], item, *args, **kwargs)
+                check_response(response[i], origin[i], *args, **kwargs)
             except IndexError:
-                raise AssertionError('%s not match original: %s. Item %s not found' % (response, origin, item))
+                raise AssertionError('%s not match original: %s. Item %s not found' % (response, origin, origin[i]))
             except Exception, e:
                 raise e
         return
@@ -85,10 +84,14 @@ def check_response(response, origin, *args, **kwargs):
                 raise AssertionError('%s not match original: %s' % (response, origin))
         return
 
+    if isinstance(origin, api.Noneable):
+        if response is not None:
+           check_response(response, origin.type)
+        return
+
     if isinstance(origin, type):
-        # Check only if response not None or field cannot be absent
-        if response is not None or not isinstance(origin, api.Noneable):
-            if not type(response) == origin:
+        if not type(response) == origin:
+            if origin != unicode or type(response) not in (str, bool, int, float, long, complex):
                 raise AssertionError('%s type (%s) not match original type: %s' % (response, type(response), origin))
         return
 
@@ -203,16 +206,52 @@ class AjaxTest(TestCase):
                     endedAt=datetime.date.today(), air=True)
         AnimeBundle.tie(anime,
             AnimeItem(title=1234, releaseType=6, episodesCount=5, duration=43,
-                        releasedAt=datetime.date.today(),
-                        endedAt=datetime.date.today(), air=True)
+                        releasedAt=datetime.date.today(), air=False)
         )
         AnimeLink(anime=anime, link="http://example.org", linkType=1).save()
         AnimeLink(anime=anime, link="http://example.com", linkType=1).save()
         AnimeLink(anime=anime, link="http://www.example.org", linkType=2).save()
-        params = {'id': 1, 'field': None}
         fields = [x.name for x in AnimeItem._meta.fields] + [
             'releasedAt,endedAt', 'release', 'type', 'genre', 'name', 'state', 'links']
-        for f in fields:
-            params['field'] = f
-            a.returns['text'].set_order([f])
-            self.send_request(link, params, a.returns)
+        for i in [1, 2]:
+            for f in fields:
+                params = {'id': i, 'field': f}
+                a.returns['text'].set_order([f])
+                self.send_request(link, params, a.returns)
+
+    def test_search(self):
+        a = api.Search()
+        link = a.get_link()
+        for i in range(0, 40):
+            AnimeItem(title='test%d' % i, releaseType=1, episodesCount=5, duration=43,
+                    releasedAt=datetime.date.today(), endedAt=datetime.date.today(), air=True).save()
+        self.send_request(link, {'string': 'test', 'limit': 'd', 'page': 'f'}, a.returns)
+        self.send_request(link, {'string': 't', 'order': 'releasedAt', 'limit': 40, 'page': 2}, a.returns)
+
+    @create_user()
+    @login()
+    def test_forms(self):
+        a = api.Forms()
+        link = a.get_link()
+        anime = AnimeItem(title=123, releaseType=6, episodesCount=5, duration=43,
+                releasedAt=datetime.date.today(), air=True)
+        AnimeBundle.tie(anime,
+            AnimeItem(title=1234, releaseType=6, episodesCount=5, duration=43,
+                        releasedAt=datetime.date.today(), air=False)
+        )
+        AnimeLink(anime=anime, link="http://example.org", linkType=1).save()
+        AnimeLink(anime=anime, link="http://example.com", linkType=2).save()
+        for name, model in EDIT_MODELS.items():
+            params = {'id': 1, 'model': name}
+            ret = a.returns
+            ret['form'].new_type(name)
+            if name == 'anime':
+                for f in AnimeItem._meta.fields:
+                    if not f.auto_created and f.name not in ['releasedKnown', 'endedKnown', 'bundle']:
+                        ret['form'].new_type(f.name)
+                        params['field'] = f.name
+                        self.send_request(link, params, ret)
+                ret['form'].reset_types()
+                del params['field']
+                continue
+            self.send_request(link, params, ret)
