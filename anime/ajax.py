@@ -32,7 +32,7 @@ def change(request):
     try:
         aid = int(request.POST.get('id', 0))
     except Exception, e:
-        return {'text': 'Invalid id.' + str(e)}
+        return {'text': 'Invalid id: ' + str(e)}
     response = editMethods.edit(request, aid, request.POST.get('model', None),
                                 request.POST.get('field', None),
                                 request.POST.get('set', None))

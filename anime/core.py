@@ -101,7 +101,7 @@ def get(request):
         aid = int(request.POST.get('id', 0))
         anime = AnimeItem.objects.get(id=aid)
     except Exception, e:
-        return {'text': 'Invalid id.' + str(e)}
+        return {'text': 'Invalid id: ' + str(e)}
     try:
         fields.extend(request.POST.getlist('field'))
     except Exception, e:

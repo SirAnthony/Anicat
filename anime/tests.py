@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.utils.encoding import smart_unicode
 
 import api
-from anime.models import AnimeItem, AnimeBundle, AnimeLink, Genre, EDIT_MODELS
+from anime.models import AnimeItem, AnimeBundle, AnimeLink, Genre, EDIT_MODELS, USER_STATUS
 from anime.forms.json import is_iterator
 
 user = 'nobody'
@@ -52,7 +52,7 @@ def check_response(response, origin, *args, **kwargs):
                     # Field may be absent if value is None
                     if not isinstance(origin, api.NoneableDict) and \
                        not isinstance(item, api.Noneable):
-                        raise AssertionError('%s not match original: %s' % (response, origin))
+                        raise AssertionError('%s not match original: %s;\nKey: %s, item: %s' % (response, origin, key, item))
             return
 
     if isinstance(origin, basestring):
@@ -167,7 +167,11 @@ class AjaxTest(TestCase):
     def send_request(self, link, params, returns):
         response = self.client.post(link, params)
         ret = json.loads(response._container[0])
-        check_response(ret, returns)
+        try:
+            check_response(ret, returns)
+        except AssertionError, e:
+            raise AssertionError('Error in response check. Data: %s, %s\nOriginal message: %s' % (
+                    ret, returns, e.message))
 
     def test_registration(self):
         a = api.Register()
@@ -243,15 +247,31 @@ class AjaxTest(TestCase):
         AnimeLink(anime=anime, link="http://example.com", linkType=2).save()
         for name, model in EDIT_MODELS.items():
             params = {'id': 1, 'model': name}
-            ret = a.returns
-            ret['form'].new_type(name)
             if name == 'anime':
                 for f in AnimeItem._meta.fields:
                     if not f.auto_created and f.name not in ['releasedKnown', 'endedKnown', 'bundle']:
-                        ret['form'].new_type(f.name)
                         params['field'] = f.name
-                        self.send_request(link, params, ret)
-                ret['form'].reset_types()
+                        self.send_request(link, params, a.get_returns(name, f.name))
                 del params['field']
                 continue
-            self.send_request(link, params, ret)
+            self.send_request(link, params, a.get_returns(name))
+
+    @create_user()
+    @login()
+    def test_set(self):
+        a = api.Set()
+        link = a.get_link()
+        AnimeItem(title=123, releaseType=6, episodesCount=5, duration=43,
+                releasedAt=datetime.date.today(), air=True).save()
+        AnimeItem(title=1234, releaseType=6, episodesCount=5, duration=43,
+                        releasedAt=datetime.date.today(), air=False).save()
+        for name, model in EDIT_MODELS.items():
+            if name == 'anime':
+                for f in AnimeItem._meta.fields:
+                #if not f.auto_created and f.name not in ['releasedKnown', 'endedKnown', 'bundle']:
+                        params = a.get_params(name, f.name)
+                        self.send_request(link, params, a.get_returns(name, f.name))
+                continue
+            params = a.get_params(name)
+            #{'id': 1, 'model': name, 'set': True}
+            self.send_request(link, params, a.get_returns(name))

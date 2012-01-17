@@ -13,8 +13,9 @@ class Noneable(object):
 class CallableDict(dict):
 
     def __getitem__(self, item):
-        item = dict.__getitem__(self, item)
-        if not item:
+        try:
+            item = dict.__getitem__(self, item)
+        except:
             item = self.funcs.__getitem__(item)
         if callable(item):
             return item()
@@ -30,31 +31,53 @@ class FuzzyList(list):
         self.extend([item] * count)
 
 
-class TypedList(list):
-
-    types = {}
-
-    def __init__(self, types=None, *args, **kwargs):
-        self._types = self.types = types
-        super(TypedList, self).__init__(*args, **kwargs)
-
-    def new_type(self, t):
-        item = self.types[t]
-        self[:] = []
-        if isinstance(item, TypedList):
-            self.types = item.types
-            return
-        if type(item) in (list, tuple):
-            self.extend(item)
-        else:
-            self.append(item)
-
-    def reset_types(self):
-        self.types = self._types
-
-
 class NoneableDict(dict):
     pass
+
+
+class CatalogGetTypes(CallableDict):
+
+        def __init__(self):
+            self.funcs = {
+                'id': int,
+                'title': unicode,
+                'releaseType': unicode,
+                'releasedAt': unicode,
+                'releasedAt,endedAt': unicode,
+                'release': unicode,
+                'endedAt': Noneable(unicode),
+                'type': int,
+                'releasedKnown': int,
+                'endedKnown': int,
+                'genre': unicode,
+                'episodesCount': int,
+                'air': bool,
+                'name': FuzzyList([unicode,]),
+                'bundle': {'id': int, 'bundles': FuzzyList([{"elemid": int, "name": unicode}])},
+                'links': NoneableDict([(x[1], FuzzyList([unicode,])) for x in LINKS_TYPES[1:]]),
+                'duration': int,
+                'state': {"state": int, "select": dict(map(lambda x: (unicode(x[0]), x[1]), USER_STATUS))},
+                'release': unicode,
+                'order': tuple,
+                'type': unicode,
+            }
+
+        def set_order(self, o):
+            self.funcs['order'] = o
+            self['order'] = o
+            self.set_type(o)
+
+        def set_type(self, t):
+            self.clear()
+            if type(t) in (list, tuple):
+                for item in t:
+                    self[item] = self.funcs[item]
+            elif isinstance(t, basestring):
+                self[t] = self.funcs[t]
+
+        def get_api(self):
+            return self.funcs
+
 
 class Base(object):
 
@@ -125,44 +148,6 @@ class Add(Base):
 
 class Get(Base):
 
-    class Dict(CallableDict):
-
-        def __init__(self):
-            self.funcs = {
-                'id': int,
-                'title': unicode,
-                'releaseType': unicode,
-                'releasedAt': unicode,
-                'releasedAt,endedAt': unicode,
-                'release': unicode,
-                'endedAt': Noneable(unicode),
-                'type': int,
-                'releasedKnown': int,
-                'endedKnown': int,
-                'genre': unicode,
-                'episodesCount': int,
-                'air': bool,
-                'name': FuzzyList([unicode,]),
-                'bundle': {'id': int, 'bundles': FuzzyList([{"elemid": int, "name": unicode}])},
-                'links': NoneableDict([(x[1], FuzzyList([unicode,])) for x in LINKS_TYPES[1:]]),
-                'duration': int,
-                'state': {"state": int, "select": dict(map(lambda x: (unicode(x[0]), x[1]), USER_STATUS))},
-                'release': unicode,
-                'order': tuple,
-                'type': unicode,
-            }
-
-        def set_order(self, o):
-            self.funcs['order'] = o
-            self.clear()
-            self['order'] = o
-            for item in o:
-                self[item] = self.funcs[item]
-
-        def get_api(self):
-            return self.funcs
-
-
     link = 'get/'
 
     params = {
@@ -174,7 +159,7 @@ class Get(Base):
         'response': 'get',
         'status': True,
         'id': int,
-        'text': Dict()
+        'text': CatalogGetTypes()
     }
 
 class Search(Base):
@@ -206,18 +191,49 @@ class Search(Base):
         }
     }
 
-def input_field(field, name=None):
-    if not name:
-        name = field
-    return NoneableDict({"input": {"name": field, "value": Noneable(unicode), "label": Noneable(name[0].capitalize() + name[1:]), "type": unicode, "id": "id_%s" % field}})
 
-def select_field(field, choices, name=None):
-    if not name:
-        name = field
-    return NoneableDict({'select': {'choices': choices, 'required': True, 'id': u'id_%s' % field, 'name': field, 'label': Noneable(name[0].capitalize() + name[1:]), 'value': Noneable(int)}})
 
-def textarea_field(field):
-    return NoneableDict({u'textarea': {u'rows': Noneable(unicode), u'name': field, u'required': Noneable(True), u'cols': Noneable(unicode), u'label': Noneable(unicode), u'id': 'id_%s' % field}})
+class Field(object):
+
+    def __init__(self, t, name, label=None, fid=None, **kwargs):
+        if t not in ['input', 'select', 'textarea']:
+            raise ValueError('Field type not supported')
+        self.type = t
+        self.name = name
+        self.label = label if label else name[0].capitalize() + name[1:]
+        self.id = fid if fid else 'id_{0}'.format(name)
+        self.attrs = kwargs
+        self.attr = self.props()
+        self.field = self._field()
+
+    #TODO: make something with name
+    def props(self):
+        func = getattr(self, self.type, None)
+        attr = {
+            "name": self.name,
+            "value": Noneable(unicode),
+            "label": Noneable(self.label),
+            "id": self.id
+        }
+        if callable(func):
+            attr.update(func())
+        return attr
+
+    def _field(self):
+        return NoneableDict({self.type: self.attr})
+
+    def select(self):
+        if 'choices' not in self.attrs:
+            raise AttributeError('Choices not passed.')
+        return {'choices': self.attrs['choices'],
+                'value': Noneable(int)}
+
+    def textarea(self):
+        return {
+            'rows': Noneable(unicode),
+            'cols': Noneable(unicode),
+        }
+
 
 class Forms(Base):
 
@@ -235,23 +251,81 @@ class Forms(Base):
         'id': int,
         'model': unicode,
         'field': Noneable(unicode),
-        'form': TypedList({
-            'state': select_field('state', USER_STATUS),
-            'anime': TypedList({
-                'title': input_field('title'),
-                'releaseType': {"select": {"name": "releaseType", "required": True, "value": int, "label": "ReleaseType", "choices": ANIME_TYPES, "id": "id_releaseType"}},
-                'episodesCount': input_field('episodesCount'),
-                'duration': input_field('duration'),
-                'releasedAt': input_field('releasedAt', 'released'),
-                'endedAt': input_field('endedAt', 'Ended'),
-                'air': input_field('air'),
-            }),
-            'links': [input_field('Link 0'), select_field('Link type 0', LINKS_TYPES)],
-            'animerequest': textarea_field('text'),
-            'image': input_field('text', 'File'),
-            'request': textarea_field('text'),
-            'feedback': textarea_field('text'),
-            'bundle': [input_field('Bundle 0'), input_field('Bundle 1')],
-            'name': [input_field('Name 0'), input_field('Name 1')],
-        })
+        'form': list
     })
+
+    forms = {
+        'state': Field('select','state', choices=USER_STATUS),
+        'anime': {
+            'title': Field('input', 'title'),
+            'releaseType': Field('select', 'releaseType', choices=ANIME_TYPES),
+            'episodesCount': Field('input', 'episodesCount'),
+            'duration': Field('input', 'duration'),
+            'releasedAt': Field('input', 'releasedAt', 'Released'),
+            'endedAt': Field('input', 'endedAt', 'Ended'),
+            'air': Field('input', 'air'),
+        },
+        'links': [Field('input', 'Link 0'), Field('select', 'Link type 0', choices=LINKS_TYPES)],
+        'animerequest': Field('textarea', 'text', 'Request anime'),
+        'image': Field('input', 'text', 'File'),
+        'request': Field('textarea', 'text'),
+        'feedback': Field('textarea', 'text', 'Please tell about your suffering'),
+        'bundle': [Field('input', 'Bundle 0'), Field('input', 'Bundle 1')],
+        'name': [Field('input', 'Name 0'), Field('input', 'Name 1')],
+    }
+
+    def get_fields(self, t, f=None):
+        ret = []
+        if not isinstance(self.forms[t], Field) and f is not None:
+            form = self.forms[t][f]
+        else:
+            form = self.forms[t]
+        if type(form) in (tuple, list):
+            ret.extend(form)
+        else:
+            ret.append(form)
+        return ret
+
+    def get_returns(self, t, f=None):
+        r = self.returns
+        r['form'] = []
+        for item in self.get_fields(t, f):
+            r['form'].append(item.field)
+        return r
+
+
+class Set(Get):
+
+    link = 'set/'
+
+    params = {
+        'id': int,
+        'model': unicode,
+        'field': Noneable(unicode),
+        'set': True
+    }
+
+    returns = {
+        'response': 'edit',
+        'status': True,
+        'id': int,
+        'field': Noneable(unicode),
+        'model': unicode,
+        'text': dict,
+    }
+
+    types = CatalogGetTypes()
+    forms = Forms()
+
+    def get_returns(self, t):
+        r = self.returns
+        r['text'] = self.types[t]
+        return r
+
+    def get_params(self, t, f=None):
+        form = self.forms.get_fields(t, f)
+        ret = self.params
+        for item in form:
+            ret[item.attr['name']] = item.attr['value']
+        return ret
+
