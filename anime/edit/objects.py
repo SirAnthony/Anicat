@@ -144,9 +144,6 @@ class Anime(EditableDefault):
                 raise ValueError(_('Cannot save new instance without all required fields.'))
         super(Anime, self).save(form, obj)
 
-    def explore_result(self):
-        return {}
-
     def last(self):
         updateMainCaches(USER_STATUS[0][0])
         cache.delete('card:%s' % self.itemId)

@@ -31,7 +31,7 @@ class FieldExplorer(object):
             if callable(field):
                 return field(anime, request)
             else:
-                return getattr(anime, self.field)
+                return getattr(anime, self.field, None)
         except Exception, e:
             raise GetError('Error: ' + str(e))
 
