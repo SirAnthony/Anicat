@@ -12,7 +12,7 @@ class Request(EditableDefault):
         cache.delete('requests')
 
     def explore_result(self):
-        return {'form': self.form}
+        return {'form': self.form, 'text': None}
 
 
 class Animerequest(Request):

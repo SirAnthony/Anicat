@@ -1,4 +1,5 @@
 
+import datetime
 from anime.models import ANIME_TYPES, USER_STATUS, LINKS_TYPES
 
 
@@ -17,7 +18,7 @@ class CallableDict(dict):
             item = dict.__getitem__(self, item)
         except:
             item = self.funcs.__getitem__(item)
-        if callable(item):
+        if callable(item) and not isinstance(item, type):
             return item()
         else:
             return item
@@ -202,16 +203,18 @@ class Field(object):
         self.name = name
         self.label = label if label else name[0].capitalize() + name[1:]
         self.id = fid if fid else 'id_{0}'.format(name)
+        self.default = kwargs.pop('default', None)
         self.attrs = kwargs
-        self.attr = self.props()
-        self.field = self._field()
 
     #TODO: make something with name
     def props(self):
         func = getattr(self, self.type, None)
         attr = {
             "name": self.name,
-            "value": Noneable(unicode),
+            "value": Noneable(
+                self.attrs['value'] if 'value' in self.attrs else unicode,
+                self.default
+            ),
             "label": Noneable(self.label),
             "id": self.id
         }
@@ -219,14 +222,14 @@ class Field(object):
             attr.update(func())
         return attr
 
-    def _field(self):
-        return NoneableDict({self.type: self.attr})
+    def field(self):
+        return NoneableDict({self.type: self.props()})
 
     def select(self):
         if 'choices' not in self.attrs:
             raise AttributeError('Choices not passed.')
         return {'choices': self.attrs['choices'],
-                'value': Noneable(int)}
+                'value': Noneable(int, self.default)}
 
     def textarea(self):
         return {
@@ -259,18 +262,18 @@ class Forms(Base):
         'anime': {
             'title': Field('input', 'title'),
             'releaseType': Field('select', 'releaseType', choices=ANIME_TYPES),
-            'episodesCount': Field('input', 'episodesCount'),
-            'duration': Field('input', 'duration'),
-            'releasedAt': Field('input', 'releasedAt', 'Released'),
-            'endedAt': Field('input', 'endedAt', 'Ended'),
+            'episodesCount': Field('input', 'episodesCount', value=int),
+            'duration': Field('input', 'duration', value=int),
+            'releasedAt': Field('input', 'releasedAt', 'Released', value=datetime.date),
+            'endedAt': Field('input', 'endedAt', 'Ended', value=datetime.date),
             'air': Field('input', 'air'),
         },
-        'links': [Field('input', 'Link 0'), Field('select', 'Link type 0', choices=LINKS_TYPES)],
+        'links': [Field('input', 'Link 0', default='http://example.com'), Field('select', 'Link type 0', default=0, choices=LINKS_TYPES)],
         'animerequest': Field('textarea', 'text', 'Request anime'),
         'image': Field('input', 'text', 'File'),
         'request': Field('textarea', 'text'),
         'feedback': Field('textarea', 'text', 'Please tell about your suffering'),
-        'bundle': [Field('input', 'Bundle 0'), Field('input', 'Bundle 1')],
+        'bundle': [Field('input', 'Bundle 0', default=1), Field('input', 'Bundle 1', default=2)],
         'name': [Field('input', 'Name 0'), Field('input', 'Name 1')],
     }
 
@@ -290,7 +293,7 @@ class Forms(Base):
         r = self.returns
         r['form'] = []
         for item in self.get_fields(t, f):
-            r['form'].append(item.field)
+            r['form'].append(item.field())
         return r
 
 
@@ -318,14 +321,15 @@ class Set(Get):
     forms = Forms()
 
     def get_returns(self, t):
-        r = self.returns
+        r = self.returns.copy()
         r['text'] = self.types[t]
         return r
 
     def get_params(self, t, f=None):
         form = self.forms.get_fields(t, f)
-        ret = self.params
+        ret = self.params.copy()
         for item in form:
-            ret[item.attr['name']] = item.attr['value']
+            attr = item.props()
+            ret[attr['name']] = attr['value']
         return ret
 

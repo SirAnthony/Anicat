@@ -50,7 +50,7 @@ def check_response(response, origin, *args, **kwargs):
                     check_response(response[key], item, *args, **kwargs)
                 except KeyError:
                     # Field may be absent if value is None
-                    if not isinstance(origin, api.NoneableDict) and \
+                    if item is not None and not isinstance(origin, api.NoneableDict) and \
                        not isinstance(item, api.Noneable):
                         raise AssertionError('%s not match original: %s;\nKey: %s, item: %s' % (response, origin, key, item))
             return
@@ -91,6 +91,8 @@ def check_response(response, origin, *args, **kwargs):
 
     if isinstance(origin, type):
         if not type(response) == origin:
+            if origin is datetime.date and type(response) is unicode: #rewrite
+                return
             if origin != unicode or type(response) not in (str, bool, int, float, long, complex):
                 raise AssertionError('%s type (%s) not match original type: %s' % (response, type(response), origin))
         return
@@ -256,22 +258,58 @@ class AjaxTest(TestCase):
                 continue
             self.send_request(link, params, a.get_returns(name))
 
+    def fill_params(self, sample, data={}):
+
+        for t in (basestring, str, bool, int, float, long, complex, type(None)):
+            if isinstance(sample, t):
+                return sample
+
+        if isinstance(sample, api.Noneable):
+            t = sample.default if sample.default is not None else sample.type
+            return self.fill_params(t)
+
+        if isinstance(sample, dict):
+            params = {}
+            for key, value in sample.iteritems():
+                param = self.fill_params(data[key] if key in data else value)
+                if param is not None:
+                    params[key] = param
+            #print params
+            return params
+
+        if is_iterator(sample):
+            return [self.fill_params(s) for s in sample]
+
+        if isinstance(sample, type):
+            if sample in (unicode, str):
+                return u'a'
+            elif sample is int:
+                return 1
+            elif sample is datetime.date:
+                return datetime.date.today()
+            else:
+                raise TypeError('Not supported type: {0}'.format(sample))
+
     @create_user()
     @login()
     def test_set(self):
         a = api.Set()
         link = a.get_link()
-        AnimeItem(title=123, releaseType=6, episodesCount=5, duration=43,
+        AnimeItem(title='123', releaseType=6, episodesCount=5, duration=43,
                 releasedAt=datetime.date.today(), air=True).save()
-        AnimeItem(title=1234, releaseType=6, episodesCount=5, duration=43,
+        AnimeItem(title='1234', releaseType=6, episodesCount=5, duration=43,
                         releasedAt=datetime.date.today(), air=False).save()
         for name, model in EDIT_MODELS.items():
             if name == 'anime':
                 for f in AnimeItem._meta.fields:
-                #if not f.auto_created and f.name not in ['releasedKnown', 'endedKnown', 'bundle']:
-                        params = a.get_params(name, f.name)
-                        self.send_request(link, params, a.get_returns(name, f.name))
+                    if not f.auto_created and f.name not in ['releasedKnown', 'endedKnown', 'bundle']:
+                        params = self.fill_params(
+                                    a.get_params(name, f.name),
+                                    {'model': name, 'field': f.name})
+                        self.send_request(link, params, a.get_returns(f.name))
                 continue
-            params = a.get_params(name)
-            #{'id': 1, 'model': name, 'set': True}
+            elif name in ['image', 'animerequest', 'request', 'feedback']:
+                continue
+            params = self.fill_params(a.get_params(name), {
+                                    'model': name, 'field': None})
             self.send_request(link, params, a.get_returns(name))
