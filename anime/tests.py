@@ -5,9 +5,13 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils.encoding import smart_unicode
+from math import ceil
+from random import randint
 
 import api
-from anime.models import AnimeItem, AnimeBundle, AnimeLink, Genre, EDIT_MODELS, USER_STATUS
+from anime.models import (AnimeItem, AnimeBundle, AnimeLink, Genre,
+        UserStatusBundle, EDIT_MODELS, USER_STATUS, AnimeRequest,
+        AnimeItemRequest, AnimeImageRequest, AnimeFeedbackRequest)
 from anime.forms.json import is_iterator
 
 user = 'nobody'
@@ -103,7 +107,30 @@ def check_response(response, origin, *args, **kwargs):
 
 class NormalTest(TestCase):
 
+
+    def fill_base(animenum=2, genresnum=3):
+        def wrap(f):
+            def create(self, *args, **kwargs):
+                genres = []
+                r = unicode(randint(0, 300))
+                if genresnum:
+                    for i in range(0, genresnum):
+                        genres.append(Genre(name=r+unicode(i)))
+                        genres[-1].save()
+                for i in range(0, animenum):
+                    a = AnimeItem(title=r+unicode(i), releaseType=6, episodesCount=5, duration=43,
+                        releasedAt=datetime.date.today(), air=True)
+                    a.save()
+                    if genres:
+                        for g in range(1, randint(1, genresnum)):
+                            a.genre.add(genres[randint(0, len(genres)-1)])
+                        a.save()
+                f(self, *args, **kwargs)
+            return create
+        return wrap
+
     @create_user()
+    @fill_base()
     def setUp(self):
         pass
 
@@ -119,36 +146,30 @@ class NormalTest(TestCase):
         #Next try real register
         params["register-password2"] = 'u'
         response = self.client.post(register_link, params)
-        self.assertEquals(response.status_code, 302)
-        self.assert_(response["Location"].endswith('/'))
+        self.assertRedirects(response, '/')
 
     @login()
     def test_login_logout(self):
         # logout
         response = self.client.get('/logout/')
-        self.assertEquals(response.status_code, 302)
-        self.assert_(response["Location"].endswith('/'))
+        self.assertRedirects(response, '/')
         #bad login
-        response = self.client.post('/login/', {})
+        response = self.client.get('/login/')
         self.assertEquals(response.status_code, 200)
 
     @login()
     def test_add(self):
-        Genre(name='1').save()
-        Genre(name='2').save()
         add_link = '/add/'
         params = {'title': 12, 'releaseType': 6, 'episodesCount': 5, 'duration':  43,
                   'releasedAt': '2.4.1952', 'endedAt': '??.??.1952', 'air': True,
                   'genre': ('1','2'),}
         #test blank input
         response = self.client.post(add_link, params)
-        self.assertEquals(response.status_code, 302)
+        self.assertRedirects(response, '/card/3/')
 
     @login()
     def test_forms(self):
         link = '/edit/%s/%d/'
-        AnimeItem(title=123, releaseType=6, episodesCount=5, duration=43,
-                releasedAt=datetime.date.today(), air=True).save()
         for name, model in EDIT_MODELS.items():
             n = 0
             if name in ['name', 'links', 'state', 'image']:
@@ -163,6 +184,39 @@ class NormalTest(TestCase):
                 self.assertEquals(self.client.get(link % f.name, {}).status_code, 200)
         self.assertEquals(self.client.get(link % 'genre', {}).status_code, 200)
 
+    @login()
+    def test_requests(self):
+        u = User.objects.get(id=1)
+        for t in [AnimeRequest, AnimeItemRequest, AnimeImageRequest, AnimeFeedbackRequest]:
+            t(user=u, status=0, requestType=3, text='New').save()
+        self.assertEquals(self.client.get('/requests/').status_code, 200)
+
+    def test_card(self):
+        #self.assertEquals(self.client.get('/card/').status_code, 302)
+        self.assertEquals(self.client.get('/card/2/').status_code, 200)
+
+    @create_user('2')
+    @login()
+    @fill_base(20)
+    def test_index_state(self):
+        self.assertEquals(self.client.get('/').status_code, 200)
+        #TODO: add fixtures
+        for user in range(1, 3):
+            us = User.objects.get(id=user)
+            for c in range(1, 17):
+                UserStatusBundle(anime=AnimeItem.objects.get(id=c), state=randint(2, len(USER_STATUS))-1, user=us).save()
+            for status in USER_STATUS:
+                status_count = UserStatusBundle.objects.filter(user=us, state=status[0]).count()
+                if not status_count:
+                    continue
+                for field in AnimeItem._meta.fields:
+                    for o in ['', '-']:
+                        for page in range(0, int(ceil(float(status_count)/settings.INDEX_PAGE_LIMIT))):
+                            link = '/user/{0}/show/{1}/sort/{2}{3}/{4}/'.format(user, status[0], o, field.name, page)
+                            self.assertEquals(self.client.get(link).status_code, 200)
+        self.assertEquals(self.client.get('/css/').status_code, 200)
+        self.assertEquals(self.client.get('/stat/').status_code, 200)
+
 
 class AjaxTest(TestCase):
 
@@ -174,89 +228,6 @@ class AjaxTest(TestCase):
         except AssertionError, e:
             raise AssertionError('Error in response check. Data: %s, %s\nOriginal message: %s' % (
                     ret, returns, e.message))
-
-    def test_registration(self):
-        a = api.Register()
-        link = a.get_link()
-        s = {}
-        for key in a.params.keys():
-            s[key] = 'a@a.aa'
-        self.send_request(link, s, a.returns)
-
-    @create_user()
-    def test_login(self):
-        a = api.Login()
-        link = a.get_link()
-        s = {'username': 'nobody', 'password': 'querty'}
-        self.send_request(link, s, a.returns)
-
-    @create_user()
-    @login()
-    def test_add(self):
-        a = api.Add()
-        Genre(name='1').save()
-        Genre(name='2').save()
-        link = a.get_link()
-        params = {'title': 12, 'releaseType': 6, 'episodesCount': 5, 'duration':  43,
-                  'releasedAt': '2.4.1952', 'endedAt': '??.??.1952', 'air': True,
-                  'genre': ('1','2'),}
-        self.send_request(link, params, a.returns)
-
-    @create_user()
-    @login()
-    def test_get(self):
-        a = api.Get()
-        link = a.get_link()
-        anime = AnimeItem(title=123, releaseType=6, episodesCount=5, duration=43,
-                    releasedAt=datetime.date.today(),
-                    endedAt=datetime.date.today(), air=True)
-        AnimeBundle.tie(anime,
-            AnimeItem(title=1234, releaseType=6, episodesCount=5, duration=43,
-                        releasedAt=datetime.date.today(), air=False)
-        )
-        AnimeLink(anime=anime, link="http://example.org", linkType=1).save()
-        AnimeLink(anime=anime, link="http://example.com", linkType=1).save()
-        AnimeLink(anime=anime, link="http://www.example.org", linkType=2).save()
-        fields = [x.name for x in AnimeItem._meta.fields] + [
-            'releasedAt,endedAt', 'release', 'type', 'genre', 'name', 'state', 'links']
-        for i in [1, 2]:
-            for f in fields:
-                params = {'id': i, 'field': f}
-                a.returns['text'].set_order([f])
-                self.send_request(link, params, a.returns)
-
-    def test_search(self):
-        a = api.Search()
-        link = a.get_link()
-        for i in range(0, 40):
-            AnimeItem(title='test%d' % i, releaseType=1, episodesCount=5, duration=43,
-                    releasedAt=datetime.date.today(), endedAt=datetime.date.today(), air=True).save()
-        self.send_request(link, {'string': 'test', 'limit': 'd', 'page': 'f'}, a.returns)
-        self.send_request(link, {'string': 't', 'order': 'releasedAt', 'limit': 40, 'page': 2}, a.returns)
-
-    @create_user()
-    @login()
-    def test_forms(self):
-        a = api.Forms()
-        link = a.get_link()
-        anime = AnimeItem(title=123, releaseType=6, episodesCount=5, duration=43,
-                releasedAt=datetime.date.today(), air=True)
-        AnimeBundle.tie(anime,
-            AnimeItem(title=1234, releaseType=6, episodesCount=5, duration=43,
-                        releasedAt=datetime.date.today(), air=False)
-        )
-        AnimeLink(anime=anime, link="http://example.org", linkType=1).save()
-        AnimeLink(anime=anime, link="http://example.com", linkType=2).save()
-        for name, model in EDIT_MODELS.items():
-            params = {'id': 1, 'model': name}
-            if name == 'anime':
-                for f in AnimeItem._meta.fields:
-                    if not f.auto_created and f.name not in ['releasedKnown', 'endedKnown', 'bundle']:
-                        params['field'] = f.name
-                        self.send_request(link, params, a.get_returns(name, f.name))
-                del params['field']
-                continue
-            self.send_request(link, params, a.get_returns(name))
 
     def fill_params(self, sample, data={}):
 
@@ -291,6 +262,88 @@ class AjaxTest(TestCase):
                 raise TypeError('Not supported type: {0}'.format(sample))
 
     @create_user()
+    def setUp(self):
+        pass
+
+    def test_registration(self):
+        a = api.Register()
+        link = a.get_link()
+        s = {}
+        for key in a.params.keys():
+            s[key] = 'a@a.aa'
+        self.send_request(link, s, a.returns)
+
+    def test_login(self):
+        a = api.Login()
+        link = a.get_link()
+        s = {'username': 'nobody', 'password': 'querty'}
+        self.send_request(link, s, a.returns)
+
+    def test_search(self):
+        a = api.Search()
+        link = a.get_link()
+        for i in range(0, 40):
+            AnimeItem(title='test%d' % i, releaseType=1, episodesCount=5, duration=43,
+                    releasedAt=datetime.date.today(), endedAt=datetime.date.today(), air=True).save()
+        self.send_request(link, {'string': 'test', 'limit': 'd', 'page': 'f'}, a.returns)
+        self.send_request(link, {'string': 't', 'order': 'releasedAt', 'limit': 40, 'page': 2}, a.returns)
+
+    @login()
+    def test_add(self):
+        a = api.Add()
+        Genre(name='1').save()
+        Genre(name='2').save()
+        link = a.get_link()
+        params = {'title': 12, 'releaseType': 6, 'episodesCount': 5, 'duration':  43,
+                  'releasedAt': '2.4.1952', 'endedAt': '??.??.1952', 'air': True,
+                  'genre': ('1','2'),}
+        self.send_request(link, params, a.returns)
+
+    @login()
+    def test_get(self):
+        a = api.Get()
+        link = a.get_link()
+        anime = AnimeItem(title=123, releaseType=6, episodesCount=5, duration=43,
+                    releasedAt=datetime.date.today(),
+                    endedAt=datetime.date.today(), air=True)
+        AnimeBundle.tie(anime,
+            AnimeItem(title=1234, releaseType=6, episodesCount=5, duration=43,
+                        releasedAt=datetime.date.today(), air=False)
+        )
+        AnimeLink(anime=anime, link="http://example.org", linkType=1).save()
+        AnimeLink(anime=anime, link="http://example.com", linkType=1).save()
+        AnimeLink(anime=anime, link="http://www.example.org", linkType=2).save()
+        fields = [x.name for x in AnimeItem._meta.fields] + [
+            'releasedAt,endedAt', 'release', 'type', 'genre', 'name', 'state', 'links']
+        for i in [1, 2]:
+            for f in fields:
+                params = {'id': i, 'field': f}
+                a.returns['text'].set_order([f])
+                self.send_request(link, params, a.returns)
+
+    @login()
+    def test_forms(self):
+        a = api.Forms()
+        link = a.get_link()
+        anime = AnimeItem(title=123, releaseType=6, episodesCount=5, duration=43,
+                releasedAt=datetime.date.today(), air=True)
+        AnimeBundle.tie(anime,
+            AnimeItem(title=1234, releaseType=6, episodesCount=5, duration=43,
+                        releasedAt=datetime.date.today(), air=False)
+        )
+        AnimeLink(anime=anime, link="http://example.org", linkType=1).save()
+        AnimeLink(anime=anime, link="http://example.com", linkType=2).save()
+        for name, model in EDIT_MODELS.items():
+            params = {'id': 1, 'model': name}
+            if name == 'anime':
+                for f in AnimeItem._meta.fields:
+                    if not f.auto_created and f.name not in ['releasedKnown', 'endedKnown', 'bundle']:
+                        params['field'] = f.name
+                        self.send_request(link, params, a.get_returns(name, f.name))
+                del params['field']
+                continue
+            self.send_request(link, params, a.get_returns(name))
+
     @login()
     def test_set(self):
         a = api.Set()

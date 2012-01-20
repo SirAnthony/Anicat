@@ -1,5 +1,6 @@
 
 import anime.core as coreMethods
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db.models import Q
@@ -29,7 +30,7 @@ def index(request, order='title', page=0, status=None, user=None):
         page = int(page or request.REQUEST.get('page'))
     except:
         page = 0
-    limit = 100
+    limit = settings.INDEX_PAGE_LIMIT
 
     if user is None or int(user) == request.user.id:
         user = request.user
@@ -71,7 +72,7 @@ def index(request, order='title', page=0, status=None, user=None):
     if pages is None:
         pages = createPages(qs, order, limit)
         cache.set('Pages:%s' % link, pages)
-    items = qs[page * limit:(page + 1) * limit]    
+    items = qs[page * limit:(page + 1) * limit]
     if sbundle is not None:
         ids = list(qs.values_list('id', flat=True)[page * limit:(page + 1) * limit])
         sbundle = dict(map(lambda x: (x['anime'], x), list(sbundle.filter(anime__in=ids))))
@@ -91,7 +92,7 @@ def index(request, order='title', page=0, status=None, user=None):
 
 @render_to('anime/requests.html')
 def requests(request, status=None, rtype=None, page=0):
-    limit = 30
+    limit = settings.REQUESTS_PAGE_LIMIT
     qs = AnimeRequest.objects.order_by("-id")
     try:
         page = int(page or request.REQUEST.get('page'))
@@ -115,7 +116,7 @@ def requests(request, status=None, rtype=None, page=0):
 
 @render_to('anime/search.html')
 def search(request, string=None, field=None, order=None, page=0):
-    limit = 20
+    limit = settings.SEARCH_PAGE_LIMIT
     string = string or request.POST.get('string') or ''
     field = field or request.POST.get('field')
     order = order or request.POST.get('sort')
@@ -148,32 +149,25 @@ def card(request, animeId=0):
             return HttpResponseRedirect('/card/%s/' % animeId)
     ret = cache.get('card:%s' % animeId)
     if not ret:
+        ret = {}
         try:
             anime = AnimeItem.objects.get(id=animeId)
         except:
-            return {}
-        bundles = None
-        names = None
-        if anime:
-            names = anime.animenames.values()
+            pass
+        else:
+            ret.update({'anime': anime, 'names': anime.animenames.values()})
             if anime.bundle:
-                bundles = anime.bundle.animeitems.values('id', 'title').all().order_by('releasedAt')
-        try:
-            links = anime.links.order_by('linkType').all()
-        except AnimeLink.DoesNotExist:
-            links = None
-        except AttributeError:
-            links = None
-        ret = {'anime': anime, 'bundles': bundles, 'animelinks': links,
-                'names': names}
-        cache.set('card:%s' % animeId, ret)
-    if request.user.is_authenticated():
+                ret['bundles'] = anime.bundle.animeitems.values('id', 'title').all().order_by('releasedAt')
+            try:
+                ret['animelinks'] = anime.links.order_by('linkType').all()
+            except (AnimeLink.DoesNotExist, AttributeError):
+                pass
+            cache.set('card:%s' % animeId, ret)
+    if request.user.is_authenticated() and 'anime' in ret:
         userstatus = None
         try:
             userstatus = ret['anime'].statusbundles.values('state', 'count', 'rating').get(user=request.user)
-        except UserStatusBundle.DoesNotExist:
-            pass
-        except AttributeError:
+        except (UserStatusBundle.DoesNotExist, AttributeError):
             pass
         else:
             userstatus['statusName'] = USER_STATUS[userstatus['state'] or 0][1]
