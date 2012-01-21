@@ -211,7 +211,7 @@ def stat(request, userId=0):
                 tuser.append(arr)
             tuser.append(total)
             cache.set('Stat:%s' % user.id, tuser)
-    return {'username': username, 'userid': user.id, 'stat': tuser}
+    return {'username': username, 'userid': getattr(user, 'id', None), 'stat': tuser}
 
 
 @cache_control(private=True, no_cache=True)

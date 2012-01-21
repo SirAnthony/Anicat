@@ -336,12 +336,13 @@ class UserStatusBundle(models.Model):
 
     def save(self, *args, **kwargs):
         if self.state in (2, 4):
+            self.count = int(self.count)
             if self.count < 1:
                 self.count = 1
             else:
                 limit = self.anime.episodesCount
-                if self.count > self.anime.episodesCount:
-                    self.count = self.anime.episodesCount
+                if self.count > limit:
+                    self.count = limit
         else:
             self.count = None
         super(UserStatusBundle, self).save(*args, **kwargs)

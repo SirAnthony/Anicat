@@ -85,7 +85,7 @@ class UserStatusForm(ErrorModelForm):
             del self.fields['count']
         else:
             self.fields['count'] = ChoiceField(choices=(
-                (i, str(i)) for i in range(1, self.instance.anime.episodesCount+1)))
+                (i, i) for i in range(1, self.instance.anime.episodesCount+1)))
 
     class Meta:
         model = UserStatusBundle
