@@ -77,13 +77,6 @@ class NormalTest(TestCase):
                 self.assertEquals(self.client.get(link % f.name, {}).status_code, 200)
         self.assertEquals(self.client.get(link % 'genre', {}).status_code, 200)
 
-    @login()
-    def test_requests(self):
-        u = User.objects.get(id=1)
-        for t in [AnimeRequest, AnimeItemRequest, AnimeImageRequest, AnimeFeedbackRequest]:
-            t(user=u, status=0, requestType=3, text='New').save()
-        self.assertEquals(self.client.get('/requests/').status_code, 200)
-
     def test_card(self):
         #self.assertEquals(self.client.get('/card/').status_code, 302)
         self.assertEquals(self.client.get('/card/2/').status_code, 200)
@@ -98,6 +91,12 @@ class BigTest(TestCase):
 
     fixtures = ['100trash.json']
 
+    @create_user()
+    def setUp(self):
+        pass
+
+    @create_user('1')
+    @create_user('2')
     def test_index(self):
         self.assertEquals(self.client.get('/').status_code, 200)
         for us in User.objects.all():
@@ -110,3 +109,19 @@ class BigTest(TestCase):
                         for page in range(0, int(ceil(float(scount)/settings.INDEX_PAGE_LIMIT))):
                             link = '/user/{0}/show/{1}/sort/{2}{3}/{4}/'.format(us.id, status[0], o, field.name, page)
                             self.assertEquals(self.client.get(link).status_code, 200)
+
+class RequestsTest(TestCase):
+
+    fixtures = ['requests.json']
+
+    @create_user()
+    def setUp(self):
+        pass
+
+    @login()
+    def test_requests_page(self):
+        self.assertEquals(self.client.get('/requests/').status_code, 200)
+
+    @login()
+    def test_user_requests(self):
+        self.assertEquals(self.client.get('/settings/').status_code, 200)

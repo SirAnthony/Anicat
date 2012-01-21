@@ -82,8 +82,8 @@ def getRequests(user, *keys):
         try:
             types = AnimeRequest._meta.get_field('requestType').choices
         except:
-            pass
+            types = None
         return {'requests': list(qs),
                 'requestTypes': types}
     except:
-        pass
+        return {}
