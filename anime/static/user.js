@@ -4,29 +4,28 @@
 
 var user = new( function(){
 
-    var info = null;
     var loaded = false;
     var logined = false;
-    var registerForm = null; //Ох, костыли.
 
     this.inform = function(msg, obj){
         if(!this.loaded) return;
-        var info = info;
-        if(obj) info = obj;
-        this.info.innerText = msg;
-        this.info.style.display = 'block';
+        var info = obj;
+        if(!info)
+            throw new Error('Bad object passed for error rendering.');
+        info.innerText = msg;
+        info.style.display = 'block';
         Card.place();
     }
 
     this.init = function(){
-        user.info = document.getElementById('logininfo');
-        user.loaded = true;
-        if(!user.info){
+        var info = document.getElementById('logininfo');
+        if(!info){
             user.logined = true;
             catalog_storage.disable();
         }else{
             catalog_storage.enable();
         }
+        user.loaded = true;
     }
 
     this.toggle = function(){
@@ -41,12 +40,35 @@ var user = new( function(){
         Card.place();
     }
 
-    this.login = function(){
+    this.more = function(){
         if(!this.loaded) return;
-        this.info.style.display = 'none';
+        var logdv = document.getElementById('logdvmore');
+        if(!logdv) return;
+        if(logdv.style.display == 'block'){
+            logdv.style.display = 'none';
+        }else{
+            logdv.style.display = 'block';
+        }
+        Card.place();
+    }
+
+    this.login = function(){
+        if(!this.loaded || user.logined) return true;
+        document.getElementById('logininfo').style.display = 'none';
         var rform = document.getElementById('login');
         var formData = getFormData(rform);
         ajax.loadXMLDoc(url+'login/', formData);
+        return false;
+    }
+
+    this.alterlogin = function(url){
+        if(!this.loaded || user.logined) return true;
+        document.getElementById('socialinfo').style.display = 'none';
+        var w = 700;
+        var h = 500;
+        var prop = 'height=' + h + ',width=' + w + ',left=0,top=0,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=yes,directories=no,status=yes';
+        window.open(url, "Login", prop);
+        return false;
     }
 
     this.logout = function(){
@@ -56,8 +78,7 @@ var user = new( function(){
         element.removeAllChilds(div);
         while(div.nextSibling)
             element.remove(div.nextSibling);
-        element.appendChild(div, [{'a': {href: '', onclick: function(){quickreg();},
-                                innerText: 'Account', className: "nurl"}}]);
+        element.appendChild(div, [{'a': {href: '', innerText: 'Account', className: "nurl"}}]);
         element.appendChild(div.parentNode, [{'div': {id: 'logdv'}}, [
                                         {'form': {id: 'login', className: 'thdtbl',
                                             onsubmit: function(){ user.login(); return false;}}}, [
@@ -102,81 +123,34 @@ var user = new( function(){
         catalog_storage.disable();
     }
 
-    this.loginFail = function(text){
+    this.loginFail = function(text, obj){
         if(!this.loaded) return;
-        document.getElementById('menu').style.display = 'none';
+        var info = document.getElementById(obj ? obj : 'logininfo');
         this.inform(text.__all__ ? text.__all__ : ( // Everything better with lambda
             function(arr){
                 var s = '';
                 for(el in arr) s += el + ': ' + arr[el] + ' ';
                 return s;
-            })(text));
-    }
-
-    this.quickreg = function(){
-        if(!this.loaded) return;
-        var dv = document.getElementById('menu');
-        var displ = dv.style.display;
-        if( displ == 'block'){
-            dv.style.display = 'none';
-        }else{
-            var div = document.getElementById('menu');
-            var register = document.getElementById('register');
-            if(!register && this.registerForm){
-                element.removeAllChilds(div);
-                element.appendChild(div, [this.registerForm]);
-            }else{
-                if(!div.firstChild || !(div.childNodes[1] && div.childNodes[1] == register)){
-                    element.removeAllChilds(div);
-                    element.appendChild(div, [
-                                {'form': {'id': 'register'}}, [
-                                    {'span': {'className': 'left', innerText: 'Quick registration'}},
-                                    {'label': {'for': 'id_register-username', innerText: 'Login:'}},
-                                    {'input': {'id': 'id_register-username', type: 'text', name: 'register-username'}},
-                                    {'label': {'for': 'id_register-email', innerText: 'E-Mail:'}},
-                                    {'input': {'id': 'id_register-email', type: 'text', name: 'register-email'}},
-                                    {'label': {'for': 'id_register-password1', innerText: 'Password:'}},
-                                    {'input': {'id': 'id_register-password1', type: 'password', name: 'register-password1'}},
-                                    {'label': {'for': 'id_register-password2', innerText: 'Confirm:'}},
-                                    {'input': {'id': 'id_register-password2', type: 'password', name: 'register-password2'}},
-                                    {'input': {type: 'button', onclick: function(){user.register();}, value: 'Ok'}},
-                                    {'input': {type: 'button', onclick: function(){user.register('abort');}, value: 'Cancel'}}]
-                                ]);
-                }
-            }
-            dv.style.display = 'block';
-            try{
-                dv.style.top = '60px';
-                dv.style.left = document.getElementById('logdv').offsetLeft - dv.offsetWidth/2 + 'px';
-            }catch(e){}
-        }
+            })(text), info);
     }
 
     this.register = function(cncl){
-        if(!this.loaded) return;
-        if(cncl == 'abort'){
-            document.getElementById('menu').style.display = 'none';
-        }else{
-            var form = document.getElementById('register');
-            var formData = getFormData(form);
-            var errors = getElementsByClassName('error', form);
-            element.remove(errors);
-            if(!this.registerForm)
-                this.registerForm = form.parentNode.removeChild(form);
-            ajax.loadXMLDoc(url+'register/', formData);
-        }
+        if(!this.loaded) return true;
+        var form = document.getElementById('register');
+        var formData = getFormData(form);
+        var errors = getElementsByClassName('error', form);
+        element.remove(errors);
+        ajax.loadXMLDoc(url+'register/', formData);
+        return false;
     }
 
     this.registerFail = function(error){
-        if(!this.loaded || !this.registerForm) return;
-        var div = document.getElementById('menu');
-        element.removeAllChilds(div);
-        element.appendChild(div, [this.registerForm]);
+        if(!this.loaded) return;
         for(var target in error){
             var obj = document.getElementById('id_register-'+target);
             if(!obj) continue;
             for(var e in error[target]){
-                element.insert(obj.nextSibling, {'span': {className: 'error left', innerText: error[target][e]}});
+                element.insert(obj, {'span': {className: 'error right', innerText: error[target][e]}}, true);
             }
         }
     }

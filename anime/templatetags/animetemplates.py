@@ -1,5 +1,5 @@
 from anime.forms.ModelError import AnimeForm
-from django.contrib.auth.forms import AuthenticationForm
+from anime.forms.User import NotActiveAuthenticationForm, UserCreationFormMail
 from django import template
 
 register = template.Library()
@@ -17,7 +17,8 @@ def loginForm(parser, token):
 
 class loginFormNode(template.Node):
     def render(self, context):
-        context['LoginForm'] = AuthenticationForm()
+        context['LoginForm'] = NotActiveAuthenticationForm()
+        context['RegisterForm'] = UserCreationFormMail()
         return ''
 
 register.tag('addForm', addForm)

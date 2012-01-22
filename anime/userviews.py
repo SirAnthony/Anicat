@@ -2,6 +2,7 @@
 import anime.user as userMethods
 
 from django.contrib import auth
+from django.contrib.messages.api import get_messages
 from django.http import HttpResponseRedirect
 from annoying.decorators import render_to
 
@@ -10,6 +11,12 @@ from annoying.decorators import render_to
 def login(request):
     res = userMethods.login(request)
     return HttpResponseRedirect('/') if 'response' in res else res
+
+
+@render_to('anime/social-error.html')
+def social_error(request):
+    messages = get_messages(request)
+    return {'messages': messages}
 
 
 def logout(request):

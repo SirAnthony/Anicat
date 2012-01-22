@@ -21,9 +21,10 @@ urlpatterns = patterns(
 
 urlpatterns += patterns('anime.userviews',
     (r'^login/$', 'login'),
+    (r'^login-error/$', 'social_error'),
     (r'^logout/$', 'logout'),
     (r'^register/$', 'register'),
-    (r'^settings/$', 'settings')
+    (r'^settings/$', 'settings'),
 )
 
 urlpatterns += patterns('anime.editview',
@@ -44,6 +45,7 @@ urlpatterns += patterns('anime.ajax',
 )
 
 urlpatterns += patterns('',
+    (r'', include('social_auth.urls')),
     (r'^jsi18n/(?P<packages>\S+?)?/?$',
         'django.views.i18n.javascript_catalog'),
 )

@@ -1,0 +1,34 @@
+{% extends "anime/base.html" %}
+
+{% block title %} - Login error{% endblock %}
+{% block customScripts %}
+    <script>
+        var e = [
+        {% if messages %}
+            {% for msg in messages %}
+                '{{ msg.message }} ({{ msg.extra_tags }})',
+            {% endfor %}
+        {% endif %}]
+        if(window.opener && window.opener.user){
+
+            window.opener.user.loginFail({'__all__': e }, 'socialinfo');
+            window.close();
+        }
+    </script>
+{% endblock %}
+
+{% block main %}
+<div>
+    <p>Sorry but some error made you impossible to login.</p>
+
+    {% if messages %}
+        {% for msg in messages %}
+    <p class="error">{{ msg.message }} ({{ msg.extra_tags }})</p>
+        {% endfor %}
+    {% endif %}
+
+    <p>Please try again</p>
+
+    <input type="button" onclick="window.close()" value="Close" />
+</div>
+{% endblock %}

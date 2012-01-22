@@ -73,15 +73,54 @@
             <a onclick="user.toggle();" class="nurl">Account</a>
         </div>
         <div id="logdv" class="right">
-            <form method="POST" action="/login/" id="login" class="thdtbl" onsubmit="user.login(); return false;">
-                <a class="nurl inurl" onclick="user.quickreg();">Registration⇣</a>
+            {% loginForm %}
+            <form method="POST" action="/login/" id="login" class="thdtbl" onsubmit="return user.login();">
+                <a class="nurl inurl" onclick="user.more();">More⇣</a>
                 {% csrf_token %}
-                {% loginForm %}
                 {{ LoginForm.username }}
                 {{ LoginForm.password }}
+                <p id="logininfo" class="error left"></p>
                 <input type="submit" value="Login" />
-                <p id="logininfo" class="error"></p>
             </form>
+            <dl id="logdvmore" class="right">
+                <dd>
+                    <p>
+                    {% for name in social_auth.backends.openid %}
+                        {% if  name != "openid" %}
+                        <a rel="nofollow" target="_blank" onclick="return user.alterlogin('{% url socialauth_begin name %}');" class="inurl" href="{% url socialauth_begin name %}">{{ name|title }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    </p>
+                    <p id="socialinfo" class="error"></p>
+                </dd>
+                <dt class="inurl">Login with</dt>
+                <dd>
+                    <form action="{% url socialauth_begin "openid" %}" method="post">{% csrf_token %}
+                        <input id="openid_identifier" type="text" value="" name="openid_identifier" />
+                        <input type="submit" value="Login" />
+                    </form>
+                </dd>
+                <dt class="inurl">OpenID</dt>
+                <dd>
+                    <form method="POST" action="/register/" id="register" class="register"  onsubmit="return user.register();">
+                        {% csrf_token %}
+                        <p class="mainerror">
+                            {{ RegisterForm.non_field_errors }}
+                        </p>
+                        {% for field in RegisterForm %}
+                        <p class="clear">
+                            {{ field }}
+                            {{ field.label_tag }}<b>:</b>
+                            {% if field.errors %}
+                            <p class="error">{{ field.errors }}</p>
+                            {% endif %}
+                        </p>
+                        {% endfor %}
+                        <input type="submit" class="clear" value="Register" />
+                    </form>
+                </dd>
+                <dt class="inurl">Registration</dt>
+            </dl>
         </div>
         {% endif %}
     </div>

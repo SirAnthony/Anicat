@@ -21,6 +21,28 @@
         <tr><td><input type="submit" value="Login" /></td></tr>
         </table>
     </form>
+    <div>
+        <h3>Login using <a href="http://openid.net/" title="OpenId">OpenId</a> from:</h3>
+        <ul>
+        {% for name in social_auth.backends.openid %}
+            {% if  name != "openid" %}
+            <li>
+                <a rel="nofollow" href="{% url socialauth_begin name %}">{{ name|title }}</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+            <li>
+                <form action="{% url socialauth_begin "openid" %}" method="post">{% csrf_token %}
+                    <div>
+                        <label for="openid_identifier">Other provider</label><br/>
+                        <input id="openid_identifier" type="text" value="" name="openid_identifier" />
+                        <input type="submit" value="Login" />
+                    </div>
+                    <p class="helptext">Like your personal <a href="https://www.myopenid.com/" title="My OpenId">myopenid</a></p>
+                </form>
+            </li>
+        </ul>
+    </div>
 {% else %}
     <p>Already logged in. <a href="/logout/">Logout</a>?</p>
 {% endif %}

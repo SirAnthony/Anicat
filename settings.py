@@ -137,6 +137,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
+    'social_auth',
     'anime',
     'south',
     'debug_toolbar',
@@ -185,3 +186,5 @@ SEARCH_PAGE_LIMIT = 20
 if 'test' in sys.argv:
     INDEX_PAGE_LIMIT = 40
     REQUESTS_PAGE_LIMIT = 20
+
+from settings_auth import *

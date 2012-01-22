@@ -3,4 +3,5 @@ annoying
 debug-toolbar
 django-extensions
 south
+django-social-auth
 git+github.com/SirAnthony/django-audit-log#

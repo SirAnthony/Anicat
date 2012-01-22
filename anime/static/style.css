@@ -214,10 +214,36 @@ a.blacklink:hover {
     background-color: #fff;
 }
 
-#logdv{
+#logdv {
+    width: 600px;
     display: none;
     clear: right;
     margin-right: 6px;
+}
+
+#logdv dl {
+    width: 100%;
+}
+
+#logdv dt {
+    float: right;
+    max-width: 100px;
+    font-weight: bold;
+    margin-top: 3px;
+}
+
+#logdv dd {
+    width: 473px;
+    float: right;
+    margin: 1px 0 9px 10px;
+}
+
+#logdv dd a{
+    line-height: 20px;
+}
+
+#logdv form#login {
+    width: 529px;
 }
 
 #show {
@@ -227,33 +253,30 @@ a.blacklink:hover {
 }
 
 #lname, #lpasswd{
-width: 150px;
+    width: 150px;
 }
 
 #login p.error {
     display: none;
 }
 
-#register {
-    width: 295px;
-}
-
-#register label{
-    float:left;
-    clear: left;
-    width:100px;
-}
-
-#register input{
-    float: left;
-}
-
-#register span.error{
+.register span.error{
     width: 290px !important;
     white-space: normal !important;
 }
 
-#register input[type=button]{
+.register label {
+    font-weight: bold;
+    line-height: 22px;
+    margin: 0 0 1px 0;
+}
+
+.register input {
+    float: right;
+    margin: 0 52px 1px 5px;
+}
+
+.register input[type=button]{
     float: right;
     clear: left;
     margin: 5px 3px;
