@@ -17,11 +17,7 @@ var add = new (function add_class(){
 
     this.toggle = function(){
         if(!this.loaded) return;
-        if(this.form.style.display == 'block'){
-            this.form.style.display = 'none';
-        }else if(!edit.visible){
-            this.form.style.display = 'block';
-        }
+        toggle(this.form);
     }
 
     this.createForm = function(){
@@ -94,8 +90,6 @@ var add = new (function add_class(){
 //################################################################
 
 var edit = new (function edit_class(){
-
-    var visible = false;
 
     this.status_menu_edit = false;
 
@@ -349,9 +343,9 @@ var edit = new (function edit_class(){
             element.remove(divs[i].parentNode.firstChild);
 
             addEvent(divs[i].parentNode, 'mouseover', (function(c){
-                return function(){c.style.display = "block";}})(divs[i].parentNode.firstChild));
+                return function(){toggle(c, 1);}})(divs[i].parentNode.firstChild));
             addEvent(divs[i].parentNode, 'mouseout', (function(c){
-                return function(){c.style.display = "none";}})(divs[i].parentNode.firstChild));
+                return function(){toggle(c, -1);}})(divs[i].parentNode.firstChild));
 
             element.insert(divs[i], s);
             element.remove(divs[i]);

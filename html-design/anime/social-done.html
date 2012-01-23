@@ -1,0 +1,19 @@
+{% extends "anime/base.html" %}
+
+{% block title %} - Login success{% endblock %}
+{% block customScripts %}
+    <script>
+        if(window.opener && window.opener.user){
+            window.opener.user.loginSuccess({'name': '{{ user.username }}'});
+            window.close();
+        }
+    </script>
+{% endblock %}
+
+{% block main %}
+<div>
+    <p>Login success.</p>
+
+    <input type="button" onclick="window.close()" value="Close" />
+</div>
+{% endblock %}

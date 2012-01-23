@@ -60,12 +60,14 @@ var DateTimeShortcuts = {
         //  <p class="calendar-cancel"><a href="#">Cancel</a></p>
         // </div>
 
-        var cal_box = element.create('div', {className: 'cont_men calendarbox module',
-                            id: DateTimeShortcuts.calendarDivName1 + num,
-                            onclick: DateTimeShortcuts.cancelEventPropagation});
+        var cal_box = element.create();
 
-        element.appendChildNoCopy(document.body, [cal_box, [
-            {'div': {}}, [ //В образце h2, а в коде div ололо
+        element.appendChildNoCopy(document.body, [{'div': {
+                className: 'cont_men calendarbox module',
+                id: DateTimeShortcuts.calendarDivName1 + num,
+                onclick: DateTimeShortcuts.cancelEventPropagation,
+                style: {display: 'none', position: 'absolute'}}}, [
+            'div', [ //В образце h2, а в коде div ололо
                 {'a': {className: 'left', innerText: '<<\240',
                     onclick: (function(num){return function(){DateTimeShortcuts.drawPrevY(num);}})(num)}},
                 {'a': {className: 'left', innerText: '<',
@@ -92,9 +94,6 @@ var DateTimeShortcuts = {
             ]
         ]])
 
-        cal_box.style.display = 'none';
-        cal_box.style.position = 'absolute';
-
         DateTimeShortcuts.calendars[num] = new Calendar(inp, DateTimeShortcuts.calendarDivName2 + num, DateTimeShortcuts.handleCalendarCallback(num));
         DateTimeShortcuts.calendars[num].drawInput();
 
@@ -105,7 +104,7 @@ var DateTimeShortcuts = {
         var cal_link = document.getElementById(DateTimeShortcuts.calendarLinkName+num);
         var inp = DateTimeShortcuts.calendarInputs[num];
 
-        if(cal_box.style.display == 'block'){
+        if(visible(cal_box)){
             DateTimeShortcuts.dismissCalendar(num);
             return;
         }
@@ -127,11 +126,11 @@ var DateTimeShortcuts = {
         cal_box.style.left = position.left + 'px';
         cal_box.style.top = Math.max(0, position.top - 90) + 'px';
 
-        cal_box.style.display = 'block';
+        toggle(cal_box, 1);
     },
 
     dismissCalendar: function(num) {
-        document.getElementById(DateTimeShortcuts.calendarDivName1+num).style.display = 'none';
+        toggle(document.getElementById(DateTimeShortcuts.calendarDivName1+num), -1);
         window.document.onclick = null;
     },
 
@@ -163,7 +162,7 @@ var DateTimeShortcuts = {
             return function(y, m, d){
                 DateTimeShortcuts.calendarInputs[num].value = new Date(y, m-1, d).strftime(format);
                 DateTimeShortcuts.calendarInputs[num].focus();
-                document.getElementById(DateTimeShortcuts.calendarDivName1+num).style.display='none';
+                toggle(document.getElementById(DateTimeShortcuts.calendarDivName1+num), -1);
             }
         })(num, format);
     },

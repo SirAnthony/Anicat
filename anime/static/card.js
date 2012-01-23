@@ -35,11 +35,11 @@ var Card = new (function(){
             var parent = h[element].parentNode;
             if(!c || c.tagName != "A")
                 continue;
-            c.style.display = "none";
+            toggle(c, -1);
             addEvent(parent, 'mouseover', (function(c){
-                return function(){c.style.display = "block";}})(c));
+                return function(){toggle(c, 1);}})(c));
             addEvent(parent, 'mouseout', (function(c){
-                return function(){c.style.display = "none";}})(c));
+                return function(){toggle(c, -1);}})(c));
         }
     }
 
@@ -69,9 +69,8 @@ var Card = new (function(){
     this.get = function(id){
         var card = document.getElementById("card");
         if(card){
-            var dvid = document.getElementById("dvid");
             var tbl = document.getElementById("tbl");
-            var w = dvid.clientWidth - tbl.clientWidth - 100;
+            var w = document.documentElement.clientWidth - tbl.clientWidth - 100;
             element.removeAllChilds(card);
             card.style.width = w + 'px';
             if(w >= 500){
@@ -88,14 +87,19 @@ var Card = new (function(){
         var card = document.getElementById("card");
         if(!card) return;
         var soffsety = (document.documentElement.scrollTop || document.body.scrollTop) - document.documentElement.clientTop;
-        if(!user.logined && soffsety < 75){
-            if(document.getElementById('logdv').style.display == 'block'){
-                soffsety += 20;
-                if(user.info.style.display == 'block')
-                    soffsety += 17;
-            }
+        var scry = 0;
+        if(isNumber(window.pageYOffset))
+            scry = window.pageYOffset;
+        else if(document.body && document.body.scrollTop)
+            scry = document.body.scrollTop;
+        else if(document.documentElement && document.documentElement.scrollTop)
+            scry = document.documentElement.scrollTop;
+        if(!user.logined){
+            var l = document.getElementById('logdv');
+            if(visible(l) && soffsety < l.scrollHeight)
+                soffsety = l.scrollHeight + 25 - (scry ? 0 : 40);
         }
-        card.style.top = soffsety + ((soffsety > card.parentNode.offsetTop) ? 5 : 40) + 'px';
+        card.style.top = soffsety + (scry ? 5 : 40) + 'px';
     }
 
 })();

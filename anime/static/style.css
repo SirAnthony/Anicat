@@ -68,7 +68,6 @@ a:hover{
 
 
 #dvid{
-    clear: both;
     overflow: auto;
 }
 
@@ -183,7 +182,7 @@ padding: 1px;
     cursor: pointer;
 }
 
-.inurl, a.inurl:hover, a.inurl:active, a.inurl:visited{
+.inurl, a.inurl:link, a.inurl:hover, a.inurl:active, a.inurl:visited{
     color: #339966;
 }
 
@@ -246,6 +245,10 @@ a.blacklink:hover {
     width: 529px;
 }
 
+#logdv form#login_openid {
+    display: none;
+}
+
 #show {
     padding: 0px;
     margin-left: -7px;
@@ -258,6 +261,11 @@ a.blacklink:hover {
 
 #login p.error {
     display: none;
+    margin-top: 2px;
+}
+
+#login p#logininfo {
+    margin-left: 57px;
 }
 
 .register span.error{

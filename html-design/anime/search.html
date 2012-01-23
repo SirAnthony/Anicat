@@ -36,7 +36,6 @@
     {% if not items %}
     <p>Nothing found.</p>
     {% else %}
-    <div id="card" class="right"></div>
     <div id="dvid">
         <table id="tbl" cellspacing="0" class="tbl">
             <thead class="thdtbl">
@@ -80,6 +79,7 @@
             </tbody>
         </table>
     </div>
+    <div id="card" class="right"></div>
     <div id="pg">
         {% for pname in pages %}
             {% ifequal page.number forloop.counter0 %}

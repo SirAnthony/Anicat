@@ -21,7 +21,8 @@ urlpatterns = patterns(
 
 urlpatterns += patterns('anime.userviews',
     (r'^login/$', 'login'),
-    (r'^login-error/$', 'social_error'),
+    (r'^login/error/$', 'social_error'),
+    (r'^login/done/$', direct_to_template, {'template': 'anime/social-done.html'}),
     (r'^logout/$', 'logout'),
     (r'^register/$', 'register'),
     (r'^settings/$', 'settings'),

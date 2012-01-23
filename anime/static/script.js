@@ -97,12 +97,8 @@ var searcher = new ( function(){
 
     this.toggle = function(){
         if(!this.loaded) return;
-        if(this.sobj.style.display == 'block'){
-            this.sobj.style.display = 'none';
-        }else{
-            this.sobj.style.display = 'block';
+        if(toggle(this.sobj))
             this.input.focus();
-        }
     }
 
     this.send = function(page){
@@ -299,11 +295,12 @@ var message = new (function(){
             return;
         element.removeAllChilds(this.menu);
         element.appendChild(this.menu, this.strobj);
-        this.menu.style.display = 'block';
+        toggle(this.menu, 1);
         if(time)
             this.timeout = time;
         if(this.timeout)
-            timer = setTimeout("document.getElementById('menu').style.display='none';", this.timeout);
+            timer = setTimeout(function(){toggle(document.getElementById('menu'), -1);}, this.timeout);
+        addEvent(document, 'click', message.close);
         this.unlock();
     }
 
@@ -320,8 +317,7 @@ var message = new (function(){
             return false;
         }
         if(checkParent(target)){
-            menu.style.display = 'none';
-            document.onclick = "undefined";
+            m.hide();
             clearTimeout(timer);
         }
     }
@@ -330,7 +326,8 @@ var message = new (function(){
     this.hide = function(){
         if(!message.getMenu())
             return;
-        message.menu.style.display = 'none';
+        removeEvent(document, 'click', message.close);
+        toggle(message.menu, -1);
     }
 
 })();
@@ -398,11 +395,11 @@ function showFN(tbl, cn){
         if(el.offsetHeight < el.scrollHeight){
             el.onmouseover = function(){
                 message.toEventPosition(1);
-                document.getElementById('popup').style.display = 'block';
+                toggle(document.getElementById('popup'), 1);
                 document.getElementById('popups').innerText = this.innerText;
             }
             el.onmouseout = function(){
-                document.getElementById('popup').style.display = 'none';
+                toggle(document.getElementById('popup'), -1);
             }
         }
     }
@@ -477,6 +474,23 @@ function setshow(){
     }
 }
 
+function toggle(elem, force){
+    if(elem){
+        if((!force && elem.style.display == 'block') || force < 0){
+            elem.style.display = 'none';
+        }else{
+            elem.style.display = 'block';
+            return true;
+        }
+    }
+    return false;
+}
+
+function visible(elem){
+    if(elem && elem.style.display == 'block')
+        return true;
+    return false;
+}
 
 //################# Отсюда берется положение менюшки
 
@@ -564,13 +578,13 @@ function addEvent(obj, evType, fn) {
 }
 
 function removeEvent(obj, evType, fn) {
-    if (obj.removeEventListener) {
+    if(obj.removeEventListener){
         obj.removeEventListener(evType, fn, false);
         return true;
-    } else if (obj.detachEvent) {
+    }else if(obj.detachEvent){
         obj.detachEvent("on" + evType, fn);
         return true;
-    } else {
+    }else{
         return false;
     }
 }
@@ -654,15 +668,9 @@ addEvent(window, 'load', function(){
 
 addEvent(document, 'mousemove', function(e){
     mCur = mousePageXY(e);
-    if(document.getElementById('popup')){
-        if(document.getElementById('popup').style.display == "block"){
-            document.getElementById('popup').style.top = mCur.y + 10 +'px';
-            document.getElementById('popup').style.left = mCur.x + 10 +'px';
-        }
-    }
-    if(document.getElementById('menu')){
-        if(document.getElementById('menu').style.display == "block"){
-            document.onclick = message.close; // Прятание меню
-        }
+    var p = document.getElementById('popup');
+    if(visible(p)){
+        p.style.top = mCur.y + 10 +'px';
+        p.style.left = mCur.x + 10 +'px';
     }
 });

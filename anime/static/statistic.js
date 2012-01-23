@@ -4,8 +4,8 @@ var stat = new ( function(){
     this.hrs = null;
 
     this.init = function(){
-        stat.hrs = element.create('div', {id: 'tohrs', className: 'cont_men'});
-        stat.hrs.style.position = 'absolute';
+        stat.hrs = element.create('div', {id: 'tohrs',
+                className: 'cont_men', style: {position: 'absolute'}});
         element.appendChild(document.body, [stat.hrs]);
         var el = document.getElementsByName('num');
         for(var i in el){
@@ -23,7 +23,7 @@ var stat = new ( function(){
         this.hrs.textContent = (mins/60).toFixed(2) +'h. '+ (mins/(60*24)).toFixed(2) + 'd.';
         this.hrs.style.left = x + 'px';
         this.hrs.style.top = y + 'px';
-        this.hrs.style.display = 'block';
+        toggle(this.hrs, 1);
     }
 
     this.hrsHide = function(){
@@ -31,7 +31,7 @@ var stat = new ( function(){
         if(!hrs)
             return;
         hrs.textContent = '';
-        hrs.style.display = 'none';
+        toggle(this.hrs, -1);
     }
 
 })();

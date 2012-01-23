@@ -1,4 +1,6 @@
 
+from random import choice, randint
+
 AUTHENTICATION_BACKENDS = (
     #'social_auth.backends.twitter.TwitterBackend',
     #'social_auth.backends.facebook.FacebookBackend',
@@ -26,8 +28,10 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'social_auth.context_processors.social_auth_by_type_backends',
 )
 
-LOGIN_REDIRECT_URL = '/'
-LOGIN_ERROR_URL    = '/login-error/'
+charlist = [u'bcdfgklmnprstxz', u'aejioqvuwy']
+
+LOGIN_ERROR_URL = '/login/error/'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/login/done/'
 
 TWITTER_CONSUMER_KEY = ''
 TWITTER_CONSUMER_SECRET = ''
@@ -41,7 +45,7 @@ GOOGLE_OAUTH2_CLIENT_ID = ''
 GOOGLE_OAUTH2_CLIENT_SECRET = ''
 SOCIAL_AUTH_CREATE_USERS = True
 SOCIAL_AUTH_FORCE_RANDOM_USERNAME = False
-SOCIAL_AUTH_DEFAULT_USERNAME = 'socialauth_user'
+SOCIAL_AUTH_DEFAULT_USERNAME = lambda:  ''.join(map(choice, (charlist * randint(2, 6))))
 SOCIAL_AUTH_COMPLETE_URL_NAME = 'socialauth_complete'
 #SOCIAL_AUTH_USER_MODEL = 'app.CustomUser'
 SOCIAL_AUTH_ERROR_KEY = 'socialauth_error'

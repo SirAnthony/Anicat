@@ -31,7 +31,7 @@
             <span class="delimiter">|</span>
             {% endblock %}
             {% block searchlink %}
-            <a class="nurl" href="/search/" rel="nofollow" onclick="searcher.toggle(); return false;">Search</a>
+            <a class="nurl" href="/search/" rel="nofollow" onclick="searcher.toggle(); return false;" accesskey="s">Search</a>
             <span class="delimiter">|</span>
             {% endblock %}
             <a class="nurl" href="/faq/">FAQ</a><span class="delimiter">|</span>
@@ -90,17 +90,16 @@
                         <a rel="nofollow" target="_blank" onclick="return user.alterlogin('{% url socialauth_begin name %}');" class="inurl" href="{% url socialauth_begin name %}">{{ name|title }}</a>
                         {% endif %}
                     {% endfor %}
+                        <a rel="nofollow" onclick="return user.alterlogin('openid');" class="nurl inurl">OpenID</a>
                     </p>
-                    <p id="socialinfo" class="error"></p>
-                </dd>
-                <dt class="inurl">Login with</dt>
-                <dd>
-                    <form action="{% url socialauth_begin "openid" %}" method="post">{% csrf_token %}
+                    <form id="login_openid" action="{% url socialauth_begin 'openid' %}" target="Login" method="post" onsubmit="return user.alterlogin('{% url socialauth_begin 'openid' %}');">
+                        {% csrf_token %}
                         <input id="openid_identifier" type="text" value="" name="openid_identifier" />
                         <input type="submit" value="Login" />
                     </form>
+                    <p id="socialinfo" class="error"></p>
                 </dd>
-                <dt class="inurl">OpenID</dt>
+                <dt class="inurl">Login with</dt>
                 <dd>
                     <form method="POST" action="/register/" id="register" class="register"  onsubmit="return user.register();">
                         {% csrf_token %}

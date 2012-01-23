@@ -8,7 +8,6 @@
 {% block main %}
 {% cache 600 mainTable cachestr %}
     <div id="dvid">
-        <div id="card" class="right"></div>
         <table id="tbl" cellspacing="0" class="tbl">
             <thead class="thdtbl">
                 <tr id="wtr">
@@ -59,6 +58,7 @@
             </tbody>
         </table>
     </div>
+    <div id="card" class="right"></div>
     <div id="pg">
         {% for pname in pages %}
             {% ifequal page.number forloop.counter0 %}

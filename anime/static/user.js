@@ -13,7 +13,7 @@ var user = new( function(){
         if(!info)
             throw new Error('Bad object passed for error rendering.');
         info.innerText = msg;
-        info.style.display = 'block';
+        toggle(info, 1);
         Card.place();
     }
 
@@ -32,11 +32,7 @@ var user = new( function(){
         if(!this.loaded) return;
         var logdv = document.getElementById('logdv');
         if(!logdv) return;
-        if(logdv.style.display == 'block'){
-            logdv.style.display = 'none';
-        }else{
-            logdv.style.display = 'block';
-        }
+        toggle(logdv);
         Card.place();
     }
 
@@ -44,17 +40,13 @@ var user = new( function(){
         if(!this.loaded) return;
         var logdv = document.getElementById('logdvmore');
         if(!logdv) return;
-        if(logdv.style.display == 'block'){
-            logdv.style.display = 'none';
-        }else{
-            logdv.style.display = 'block';
-        }
+        toggle(logdv);
         Card.place();
     }
 
     this.login = function(){
         if(!this.loaded || user.logined) return true;
-        document.getElementById('logininfo').style.display = 'none';
+        toggle(document.getElementById('logininfo'), -1);
         var rform = document.getElementById('login');
         var formData = getFormData(rform);
         ajax.loadXMLDoc(url+'login/', formData);
@@ -63,11 +55,22 @@ var user = new( function(){
 
     this.alterlogin = function(url){
         if(!this.loaded || user.logined) return true;
-        document.getElementById('socialinfo').style.display = 'none';
-        var w = 700;
-        var h = 500;
-        var prop = 'height=' + h + ',width=' + w + ',left=0,top=0,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=yes,directories=no,status=yes';
-        window.open(url, "Login", prop);
+        if(url == 'openid'){
+            toggle(document.getElementById('login_openid'));
+        }else{
+            toggle(document.getElementById('socialinfo'), -1);
+            var w = 700;
+            var h = 500;
+            var login_form = null;
+            var prop = 'height=' + h + ',width=' + w + ',left=0,top=0,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=yes,directories=no,status=yes';
+            if(url == '/login/openid/'){
+                url = '';
+                login_form = document.getElementById('login_openid');
+            }
+            window.open(url, "Login", prop);
+            if(login_form)
+                login_form.submit();
+        }
         return false;
     }
 
