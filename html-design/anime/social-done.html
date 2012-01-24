@@ -4,7 +4,7 @@
 {% block customScripts %}
     <script>
         if(window.opener && window.opener.user){
-            window.opener.user.loginSuccess({'name': '{{ user.username }}'});
+            window.opener.user.loginSuccess({'name': '{% if user.first_name %}user.first_name{% if user.last_name %} user.last_name{% endif %}{% else %}Anonymous{% endif %}'});
             window.close();
         }
     </script>

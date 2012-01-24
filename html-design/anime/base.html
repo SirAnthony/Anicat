@@ -44,7 +44,7 @@
         </div>
         <div id="logdiv" class="rightmenu">
             <span class="delimiter">|</span>
-            <span><a href="/settings/" title="User settings">{{ user.username }}</a></span>
+            <span><a href="/settings/" title="User settings">{% if user.first_name %}user.first_name{% if user.last_name %} user.last_name{% endif %}{% else %}Anonymous{% endif %}</a></span>
             <span class="delimiter">|</span>
             <a href="/logout/" class="nurl" onclick="user.logout();  return false;">Logout</a>
         </div>

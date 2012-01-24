@@ -8,8 +8,9 @@ from django.http import Http404, HttpResponseRedirect
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
-from anime.models import AnimeItem, AnimeLink, UserStatusBundle, AnimeRequest, USER_STATUS
 from anime.functions import getAttr, createPages, cleanTableCache, cleanRequestsCache
+from anime.models import AnimeItem, AnimeLink, UserStatusBundle, AnimeRequest, USER_STATUS
+from anime.user import get_username
 from random import randint
 
 
@@ -179,7 +180,6 @@ def card(request, animeId=0):
 @render_to('anime/stat.html')
 def stat(request, userId=0):
     user = None
-    username = 'Anonymous'
     tuser = None
     if userId:
         try:
@@ -188,7 +188,6 @@ def stat(request, userId=0):
             user = None
     elif request.user.is_authenticated():
         user = request.user
-        username = user.username
     if user:
         tuser = cache.get('Stat:%s' % user.id)
         if not tuser:
@@ -211,7 +210,7 @@ def stat(request, userId=0):
                 tuser.append(arr)
             tuser.append(total)
             cache.set('Stat:%s' % user.id, tuser)
-    return {'username': username, 'userid': getattr(user, 'id', None), 'stat': tuser}
+    return {'username': get_username(user), 'userid': getattr(user, 'id', None), 'stat': tuser}
 
 
 @cache_control(private=True, no_cache=True)

@@ -30,12 +30,16 @@ class EditableDefault(object):
             raise EditError(_('You must be logged in.'))
         elif modelname not in EDIT_MODELS:
             raise EditError(_('Bad model name passed.'))
-        elif not request.user.is_active and modelname != 'state':
+        elif request.user.is_blocked:
             raise EditError(_('You cannot do this.'))
-        elif modelname not in EDITABLE_LIST and (
-                datetime.now() - request.user.date_joined).days < 15:
-            raise EditError(_('You cannot do this now. Please wait for {0} days.'.format(
-                15 - (datetime.now() - request.user.date_joined).days)))
+        elif not request.user.is_active and modelname not in EDITABLE_LIST:
+            if (datetime.now() - request.user.date_joined).days < 15:
+                raise EditError(_('You cannot do this now. Please wait for {0} days.'.format(
+                    15 - (datetime.now() - request.user.date_joined).days)))
+            else:
+                request.user.is_active = True
+                request.user.save()
+
         try:
             self.itemId = int(itemId)
         except:

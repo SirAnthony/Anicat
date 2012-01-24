@@ -8,6 +8,13 @@ from anime.malconvert import passFile
 from anime.models import AnimeRequest
 from datetime import datetime, timedelta
 
+def get_username(user):
+    username = 'Anonymous'
+    if user and user.first_name:
+        username = user.first_name
+        if user.last_name:
+            username += u' ' + user.last_name
+    return username
 
 def login(request):
     response = {}
@@ -22,7 +29,7 @@ def login(request):
             user = form.get_user()
             auth.login(request, user)
             response.update({'response': True,
-                'text': {'name': user.username}})
+                'text': {'name': get_username(user)}})
     response['form'] = form or NotActiveAuthenticationForm()
     return response
 
@@ -40,7 +47,7 @@ def register(request):
             user = form.save()
             user = auth.authenticate(username=user.username, password=form.cleaned_data['password1'])
             auth.login(request, user)
-            response.update({'response': True, 'text': {'name': user.username}})
+            response.update({'response': True, 'text': {'name': get_username(user)}})
     response['form'] = form or UserCreationFormMail()
     return response
 

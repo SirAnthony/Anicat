@@ -14,6 +14,7 @@ AUTHENTICATION_BACKENDS = (
     #'social_auth.backends.contrib.foursquare.FoursquareBackend',
     'social_auth.backends.contrib.github.GithubBackend',
     'social_auth.backends.OpenIDBackend',
+    'anime.backends.EmailLoginBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 

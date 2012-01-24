@@ -432,3 +432,12 @@ EDIT_MODELS = {
     'image': AnimeImageRequest,
     'feedback': AnimeFeedbackRequest,
 }
+
+
+from social_auth.signals import socialauth_registered
+
+def new_user(sender, user, response, details, **kwargs):
+    user.is_active = False
+    return True
+
+socialauth_registered.connect(new_user, sender=None)
