@@ -3,3 +3,4 @@
 *.db
 coverage report/
 audit_log
+settings_secrets.py
