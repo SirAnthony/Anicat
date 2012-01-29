@@ -72,7 +72,7 @@ def login(request):
     if 'response' in res and res['response']:
         form = res['form']
         return {'response': 'login', 'status': True,
-                    'text': {'name': form.get_user().username}}
+                    'text': {'name': userMethods.get_username(form.get_user())}}
     else:
         return {'response': 'login', 'status': False,
                 'text': res['form'].errors}

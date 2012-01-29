@@ -3,7 +3,7 @@
     {% block addLink %}
         {% if model != 'anime' or  id and id != '0' %}
         <span class="delimiter">|</span>
-        <a class="nurl" href="/add/" rel="nofollow" onclick="add.toggle(); return false;">Add</a>
+        <a href="/add/" rel="nofollow" onclick="add.toggle(); return false;">Add</a>
         {% endif %}
     {% endblock %}
 

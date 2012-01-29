@@ -8,9 +8,9 @@ from django.http import Http404, HttpResponseRedirect
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
-from anime.functions import getAttr, createPages, cleanTableCache, cleanRequestsCache
 from anime.models import AnimeItem, AnimeLink, UserStatusBundle, AnimeRequest, USER_STATUS
 from anime.user import get_username
+from anime.utils.catalog import getAttr, createPages, cleanTableCache, cleanRequestsCache
 from random import randint
 
 
@@ -210,7 +210,7 @@ def stat(request, userId=0):
                 tuser.append(arr)
             tuser.append(total)
             cache.set('Stat:%s' % user.id, tuser)
-    return {'username': get_username(user), 'userid': getattr(user, 'id', None), 'stat': tuser}
+    return {'userid': getattr(user, 'id', None), 'stat': tuser}
 
 
 @cache_control(private=True, no_cache=True)
@@ -280,8 +280,6 @@ def history(request, field=None, page=0):
         'link': link,
         'page': page
     }
-
-#@render_to('anime/add.html')
 
 
 def test(request):

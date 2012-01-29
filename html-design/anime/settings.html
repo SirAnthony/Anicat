@@ -1,4 +1,5 @@
 {% extends "anime/base.html" %}
+{% load animetemplates %}
 
     {% block customScripts %}
     <link rel="stylesheet" href="/static/requests.css" />
@@ -7,8 +8,13 @@
 
     {% block main %}
     {% if user.is_authenticated %}
+    <h4>Account:</h4>
+    <div class="column">
+        <p>{% username user %} <a>Change</a></p>
+        <a href="{% url password_change %}">Change password</a>
+    </div>
     <h4>Load MAL list:</h4>
-    <form class="fileform" action="/settings/" method="post" enctype="multipart/form-data">
+    <form class="fileform" action="{% url settings %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="mainerror{% if not mallistform.non_field_errors %} hidden{% endif %}">
             {{ mallistform.non_field_errors }}
@@ -37,7 +43,7 @@
             <span class="helpText">These records already have mal id. Added successfully.</span>
             <dl>
             {% for record in mallist.list.withMal %}
-                <dt><a href="/card/{{ record.object.id }}">{{ record.object.name }}</a></dt>
+                <dt><a href="{% url card record.object.id %}">{{ record.object.name }}</a></dt>
             {% endfor %}
             </dl>
         </div>
@@ -52,7 +58,7 @@
                 {% if record.unmatched %}
                 <dd>
                     <ul>{% for variant in record.unmatched %}
-                        <li><a href="/card/{{ variant.id }}">{{ variant.name }}</a></li>
+                        <li><a href="{% url card variant.id %}">{{ variant.name }}</a></li>
                         {% endfor %}
                     </ul>
                 </dd>
@@ -72,7 +78,7 @@
                 {% if record.unmatched %}
                 <dd>
                     <ul>{% for variant in record.unmatched %}
-                        <li><a href="/card/{{ variant.id }}">{{ variant.name }}</a></li>
+                        <li><a href="{% url card variant.id %}">{{ variant.name }}</a></li>
                     {% endfor %}
                     </ul>
                 </dd>
@@ -101,7 +107,7 @@
         {% for request in requests %}
         <div class="request request{{ request.requestType }}">
             <span class="right"><b>Status:</b>{{ request.get_status_display }}</span>
-            <span><b>№:</b><a href="/request/{{ request.id }}/">{{ request.id }}</a></span>
+            <span><b>№:</b><a href="{% url request_item request.id %}">{{ request.id }}</a></span>
             <span><b>Type:</b>{{ request.get_requestType_display }}</span>
         </div>
         {% endfor %}

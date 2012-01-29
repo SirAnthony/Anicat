@@ -9,11 +9,13 @@ var stat = new ( function(){
         element.appendChild(document.body, [stat.hrs]);
         var el = document.getElementsByName('num');
         for(var i in el){
-            el[i].onmouseover = function(){
+            addEvent(el[i], 'mouseover', function(){
                 var offset = element.getOffset(this);
                 stat.hrsShow(this.textContent, offset.left + this.offsetWidth/1.6, offset.top - this.offsetHeight*2.8);
-            }
-            el[i].onmouseout = stat.hrsHide;
+            });
+            addEvent(el[i], 'mouseout', (function(h){
+                return function(){toggle(h, -1)} }
+            )(stat.hrs));
         }
     }
 
@@ -24,14 +26,6 @@ var stat = new ( function(){
         this.hrs.style.left = x + 'px';
         this.hrs.style.top = y + 'px';
         toggle(this.hrs, 1);
-    }
-
-    this.hrsHide = function(){
-        var hrs = this != stat ? stat.hrs : this.hrs;
-        if(!hrs)
-            return;
-        hrs.textContent = '';
-        toggle(this.hrs, -1);
     }
 
 })();

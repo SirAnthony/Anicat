@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
+from hashlib import sha1
+from django.core.cache import cache
 from anime.models import (
             AnimeItem,
             UserStatusBundle,
             LINKS_TYPES, EDIT_MODELS, USER_STATUS,
             )
-from django.core.cache import cache
-from anime.functions import createPages
-from anime.functions import getVal, getAttr, updateMainCaches
-from hashlib import sha1
+from anime.utils.catalog import createPages, getVal, getAttr, updateMainCaches
+
 
 class GetError(Exception):
     pass

@@ -6,13 +6,13 @@ function hideType(){
     var elements = sel.options;
     if(sel.options[selected].value == 'all'){
         var divs = getElementsByClassName('request', sel.parentNode.parentNode, 'div');
-        for(var elem = divs.length; elem++)
+        for(var elem; elem < divs.length; elem++)
             toggle(divs[elem], 1);
     }else{
         selected -= 1;
         for(var i=0; i<elements.length; i++){
             var divs = getElementsByClassName('request'+i, sel.parentNode.parentNode, 'div')
-            for(var elem = divs.length; elem++)
+            for(var elem; elem < divs.length; elem++)
                 toggle(divs[elem], (i == selected ? 1 : -1));
         }
     }

@@ -1,17 +1,19 @@
 {% extends "anime/base.html" %}
 
-    {% block customScripts %}
-    <script type="text/javascript" src="/static/statistic.js"></script>
-    {% endblock %}
+{% load animetemplates %}
 
-    {% block main %}
+{% block customScripts %}
+<script type="text/javascript" src="/static/statistic.js"></script>
+{% endblock %}
+
+{% block main %}
     {% if not stat %}
     <div id="nostat">
         No such user.
     </div>
     {% else %}
     <div>
-        <p><b>User</b>: {{ username }}</p>
+        <p><b>User</b>: {% username user %}</p>
     </div>
     <div>
         <p>Statistics:</p>
@@ -45,4 +47,4 @@
         </table>
     </div>
     {% endif %}
-    {% endblock %}
+{% endblock %}

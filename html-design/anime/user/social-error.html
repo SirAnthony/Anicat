@@ -12,7 +12,7 @@
         if(window.opener && window.opener.user){
 
             window.opener.user.loginFail({'__all__': e }, 'socialinfo');
-            window.close();
+            {% if not debug %}window.close();{% endif %}
         }
     </script>
 {% endblock %}

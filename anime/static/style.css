@@ -15,7 +15,38 @@ body * {
 }
 
 input, select {
-    padding: 0 2px;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    height: 20px;
+    padding: 2px 2px 1px 2px;
+    -moz-border-radius:2px;
+    -webkit-border-radius:2px;
+    border-radius:2px;
+    border: 1px solid #cfcfcf;
+    margin-right: 1px;
+}
+
+input[type=button], input[type=submit] {
+    background-color:#ededed;
+    display: inline-block;
+    color: #6e6e6e;
+    font-family: sans-sherif;
+    font-size: 10pt;
+    font-weight: bold;
+    height: 20px;
+    width: 100px;
+    text-decoration: none;
+    padding: 0px;
+    /*top: 1px;*/
+    text-shadow: 1px 1px 5px #ffffff;
+}
+input[type=button]:hover, input[type=submit]:hover {
+    background-color:#f5f5f5;
+}
+
+fieldset {
+    border: none;
 }
 
 a:link, a:visited, a:active, a:hover{
@@ -173,17 +204,16 @@ padding: 1px;
 
 
 /* Ссылки*/
-.leftmenu, #login a:link, .nurl,
-.thdtbl a:link, .thdtbl a:visited, .thdtbl a:active, .thdtbl a:hover{
+.leftmenu,
+.thdtbl a:link, .thdtbl a:visited, .thdtbl a:active, .thdtbl a:hover,
+#header .select span{
     font-weight: bold;
     color: #FFFFCC;
-}
-.nurl{
-    cursor: pointer;
 }
 
 .inurl, a.inurl:link, a.inurl:hover, a.inurl:active, a.inurl:visited{
     color: #339966;
+    cursor: pointer;
 }
 
 .blacklink {
@@ -202,15 +232,11 @@ a.blacklink:hover {
 }
 
 /*Форма входа*/
-#login, .rightmenu{
+.rightmenu{
     float: right;
     margin-bottom: 10px;
     margin-top: 2px;
     margin-right: 2px;
-}
-
-#login{
-    background-color: #fff;
 }
 
 #logdv {
@@ -224,21 +250,20 @@ a.blacklink:hover {
     width: 100%;
 }
 
+#logdv dt, #logdv dd {
+    line-height: 1.75em;
+}
+
 #logdv dt {
     float: right;
-    max-width: 100px;
+    max-width: 120px;
     font-weight: bold;
-    margin-top: 3px;
 }
 
 #logdv dd {
     width: 473px;
     float: right;
-    margin: 1px 0 9px 10px;
-}
-
-#logdv dd a{
-    line-height: 20px;
+    margin: 0px 0 4px 10px;
 }
 
 #logdv form#login {
@@ -249,23 +274,19 @@ a.blacklink:hover {
     display: none;
 }
 
+#logdv p.error {
+    display: none;
+}
+
 #show {
     padding: 0px;
     margin-left: -7px;
     margin-top: 1px;
+    cursor: pointer;
 }
 
 #lname, #lpasswd{
     width: 150px;
-}
-
-#login p.error {
-    display: none;
-    margin-top: 2px;
-}
-
-#login p#logininfo {
-    margin-left: 57px;
 }
 
 .register span.error{
@@ -279,16 +300,10 @@ a.blacklink:hover {
     margin: 0 0 1px 0;
 }
 
-.register input {
-    float: right;
-    margin: 0 52px 1px 5px;
+.register input[type=text] {
+    margin-left: 1em;
 }
 
-.register input[type=button]{
-    float: right;
-    clear: left;
-    margin: 5px 3px;
-}
 
 #lngs{
 font-size: 10pt;

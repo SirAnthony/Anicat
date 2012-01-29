@@ -565,19 +565,21 @@ function range(start, end){
 }
 
 // Cross-browser event handlers.
-function addEvent(obj, evType, fn) {
-    if (obj.addEventListener) {
+function addEvent(obj, evType, fn){
+    if(!obj) return false;
+    if(obj.addEventListener){
         obj.addEventListener(evType, fn, false);
         return true;
-    } else if (obj.attachEvent) {
+    }else if(obj.attachEvent){
         var r = obj.attachEvent("on" + evType, fn);
         return r;
-    } else {
+    }else{
         return false;
     }
 }
 
 function removeEvent(obj, evType, fn) {
+    if(!obj) return false;
     if(obj.removeEventListener){
         obj.removeEventListener(evType, fn, false);
         return true;

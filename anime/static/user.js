@@ -29,11 +29,12 @@ var user = new( function(){
     }
 
     this.toggle = function(){
-        if(!this.loaded) return;
+        if(!this.loaded) return true;
         var logdv = document.getElementById('logdv');
-        if(!logdv) return;
+        if(!logdv) return true;
         toggle(logdv);
         Card.place();
+        return false;
     }
 
     this.more = function(){
@@ -81,7 +82,7 @@ var user = new( function(){
         element.removeAllChilds(div);
         while(div.nextSibling)
             element.remove(div.nextSibling);
-        element.appendChild(div, [{'a': {href: '', innerText: 'Account', className: "nurl"}}]);
+        element.appendChild(div, [{'a': {href: '', innerText: 'Account'}}]);
         element.appendChild(div.parentNode, [{'div': {id: 'logdv'}}, [
                                         {'form': {id: 'login', className: 'thdtbl',
                                             onsubmit: function(){ user.login(); return false;}}}, [
@@ -104,18 +105,17 @@ var user = new( function(){
             {'span': {className: 'delimiter', innerText: '|'}}, {'span': {}}, [
                 {'a': {'href': '/settings/', title: 'User settings', innerText: nick}}],
             {'span': {className: 'delimiter', innerText: '|'}},
-            {'a': {className: 'nurl', innerText: 'Logout',
-                                    onclick: function(){user.logout();}}}
+            {'a': {innerText: 'Logout', onclick: function(){user.logout();}}}
         ]);
         element.appendChild(form.parentNode, [
             {'div': {className: 'rightmenu'}}, [
-                {'a': {href: '/stat/', className: 'nurl', innerText: 'Statistics'}},
+                {'a': {href: '/stat/', innerText: 'Statistics'}},
                 {'span': {className: 'delimiter', innerText: '|'}},
                 {'div': {className: 'select'}}, [
                     {'select': {id: 'show', onchange: function(){setshow();}}},
                     element.addOption(false, {'a': 'All', '0': 'None', '1': 'Want', '2': 'Now',
                                     '3': 'Watched', '4': 'Dropped', '5': 'Partially watched'}),
-                    {'span': {className: 'nurl', innerText: 'Display Mode\xa0\xa0⇵'}},
+                    {'span': {innerText: 'Display Mode\xa0\xa0⇵'}},
                 ]
             ]
         ]);

@@ -3,6 +3,11 @@
 import os
 import sys
 
+try:
+    from settings_secrets import *
+except ImportError:
+    pass
+
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 DEBUG = True
@@ -14,6 +19,11 @@ COVERAGE_REPORT_PATH = os.path.join(PROJECT_ROOT, 'coverage report')
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
 )
+
+DEFAULT_FROM_EMAIL = 'nobody@anicat.net'
+
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 MANAGERS = ADMINS
@@ -187,4 +197,7 @@ if 'test' in sys.argv:
     INDEX_PAGE_LIMIT = 40
     REQUESTS_PAGE_LIMIT = 20
 
-from settings_auth import *
+try:
+    from settings_auth import *
+except ImportError, e:
+    print e

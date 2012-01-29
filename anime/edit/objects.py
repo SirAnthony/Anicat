@@ -6,8 +6,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from anime.core import FieldExplorer, GetError
 from anime.forms.create import createFormFromModel
-from anime.functions import updateMainCaches
 from anime.models import (AnimeItem, USER_STATUS, EDIT_MODELS)
+from anime.utils.catalog import updateMainCaches
 
 
 

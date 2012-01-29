@@ -1,5 +1,6 @@
 {% spaceless %}
-{% if user.is_authenticated %}{% load animetemplates %}{% addForm %}{% endif %}
+{% load animetemplates %}
+{% load cache %}
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
@@ -10,7 +11,7 @@
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
     <link rel="search" type="application/opensearchdescription+xml" title="Anime catalog" href="/static/srch.xml" />
     <link href="/static/style.css" type="text/css" rel="stylesheet" />
-    <link href="/css/" type="text/css" rel="stylesheet" />
+    <link href="{% url user_css %}" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="/jsi18n/"></script>
     <script type="text/javascript" src="/static/js/element.js"></script>
     <script type="text/javascript" src="/static/script.js"></script>
@@ -21,35 +22,35 @@
     <script type="text/javascript" src="/static/card.js"></script>
     {% if not user.is_authenticated %}<script type="text/javascript" src="/static/userstorage.js"></script>{% endif %}
     {% block customScripts %}{% endblock %}
-    {% if user.is_authenticated %}{{ AddForm.media.render }}{% endif %}
+    {% if user.is_authenticated %}{% addForm %}{% endif %}
 </head>
 <body>
     <div id="header" class="thdtbl">
         <div class="leftmenu">
             {% block mainlink %}
-            <a class="nurl" href="/">Main</a>
+            <a href="/">Main</a>
             <span class="delimiter">|</span>
             {% endblock %}
             {% block searchlink %}
-            <a class="nurl" href="/search/" rel="nofollow" onclick="searcher.toggle(); return false;" accesskey="s">Search</a>
+            <a href="{% url search %}" rel="nofollow" onclick="searcher.toggle(); return false;" accesskey="s">Search</a>
             <span class="delimiter">|</span>
             {% endblock %}
-            <a class="nurl" href="/faq/">FAQ</a><span class="delimiter">|</span>
-            <a class="nurl" href="/card/" rel="nofollow">Random</a>
+            <a href="{% url faq %}">FAQ</a><span class="delimiter">|</span>
+            <a href="{% url card %}" rel="nofollow">Random</a>
         {% if user.is_authenticated %}
             {% block addLink %}
             <span class="delimiter">|</span>
-            <a class="nurl" href="/add/" rel="nofollow" onclick="add.toggle(); return false;">Add⇣</a>
+            <a href="{% url edit_add %}" rel="nofollow" onclick="add.toggle(); return false;">Add⇣</a>
             {% endblock %}
         </div>
         <div id="logdiv" class="rightmenu">
             <span class="delimiter">|</span>
-            <span><a href="/settings/" title="User settings">{% if user.first_name %}user.first_name{% if user.last_name %} user.last_name{% endif %}{% else %}Anonymous{% endif %}</a></span>
+            <span><a href="{% url settings %}" title="User settings">{% username user %}</a></span>
             <span class="delimiter">|</span>
-            <a href="/logout/" class="nurl" onclick="user.logout();  return false;">Logout</a>
+            <a href="{% url logout %}" onclick="user.logout();  return false;">Logout</a>
         </div>
         <div class="rightmenu">
-            <a href="/stat/" class="nurl">Statistics</a>
+            <a href="{% url statistics %}">Statistics</a>
             {% block selectView %}
             <span class="delimiter">|</span>
             <div class="select">
@@ -63,25 +64,29 @@
                     <option value="4">Dropped</option>
                     <option value="5">Partially watched</option>
                 </select>
-                <span class="nurl">Display Mode&nbsp;&nbsp;⇵</span>
+                <span>Display Mode&nbsp;&nbsp;⇵</span>
             </div>
             {% endblock %}
         </div>
         {% else %}
         </div>
         <div id="logdiv" class="rightmenu">
-            <a onclick="user.toggle();" class="nurl">Account</a>
+            <a href="{% url login %}" onclick="return user.toggle();">Account</a>
         </div>
         <div id="logdv" class="right">
             {% loginForm %}
-            <form method="POST" action="/login/" id="login" class="thdtbl" onsubmit="return user.login();">
-                <a class="nurl inurl" onclick="user.more();">More⇣</a>
-                {% csrf_token %}
-                {{ LoginForm.username }}
-                {{ LoginForm.password }}
-                <p id="logininfo" class="error left"></p>
-                <input type="submit" value="Login" />
-            </form>
+            <dl>
+                <dd>
+                    <form method="POST" action="{% url login %}" id="login" onsubmit="return user.login();">
+                        {% csrf_token %}
+                        {{ LoginForm.username }}
+                        {{ LoginForm.password }}
+                        <input type="submit" value="Login" />
+                        <p id="logininfo" class="error">s</p>
+                    </form>
+                </dd>
+                <dt><a class="inurl" onclick="user.more();">More⇣</a></dt>
+            </dl>
             <dl id="logdvmore" class="right">
                 <dd>
                     <p>
@@ -90,7 +95,7 @@
                         <a rel="nofollow" target="_blank" onclick="return user.alterlogin('{% url socialauth_begin name %}');" class="inurl" href="{% url socialauth_begin name %}">{{ name|title }}</a>
                         {% endif %}
                     {% endfor %}
-                        <a rel="nofollow" onclick="return user.alterlogin('openid');" class="nurl inurl">OpenID</a>
+                        <a rel="nofollow" onclick="return user.alterlogin('openid');" class="inurl">OpenID</a>
                     </p>
                     <form id="login_openid" action="{% url socialauth_begin 'openid' %}" target="Login" method="post" onsubmit="return user.alterlogin('{% url socialauth_begin 'openid' %}');">
                         {% csrf_token %}
@@ -101,21 +106,25 @@
                 </dd>
                 <dt class="inurl">Login with</dt>
                 <dd>
-                    <form method="POST" action="/register/" id="register" class="register"  onsubmit="return user.register();">
+                    <a rel="nofollow" href="{% url password_reset %}" class="inurl">Restore</a>
+                </dd>
+                <dt class="inurl">Forgot password</dt>
+                <dd>
+                    <form method="POST" action="{% url registration %}" id="register" class="register"  onsubmit="return user.register();">
                         {% csrf_token %}
-                        <p class="mainerror">
-                            {{ RegisterForm.non_field_errors }}
-                        </p>
-                        {% for field in RegisterForm %}
                         <p class="clear">
-                            {{ field }}
+                        {% for field in RegisterForm %}
                             {{ field.label_tag }}<b>:</b>
+                            {{ field }}
                             {% if field.errors %}
                             <p class="error">{{ field.errors }}</p>
                             {% endif %}
-                        </p>
                         {% endfor %}
-                        <input type="submit" class="clear" value="Register" />
+                            <input type="submit" class="clear" value="Register" />
+                        </p>
+                        <p class="mainerror error">
+                            {{ RegisterForm.non_field_errors }}
+                        </p>
                     </form>
                 </dd>
                 <dt class="inurl">Registration</dt>
@@ -124,9 +133,10 @@
         {% endif %}
     </div>
     <br />
+    <div class="clear"></div>
     {% block search %}
     <div id="srch" class="hidden">
-        <form method="POST" action="/search/" id="srchp" onsubmit="searcher.send(); return false;">
+        <form method="POST" action="{% url search %}" id="srchp" onsubmit="searcher.send(); return false;">
         {% csrf_token %}
             <input id="sin" name="string" type="text"/>
             <input type="submit" value="Search" />
@@ -136,14 +146,15 @@
     {% endblock %}
     {% block main %}
     {% endblock %}
+{% cache 0 footer user.is_authenticated %}
     <div class="cont_men" id="menu"></div>
     <div class="cont_men" id="popup">
         <span id="popups"></span>
     </div>
-    <div class="footer">v. <a href="/changes/" style="font-size: 10pt;">3.1.3</a>.</div>
+    <div class="footer">v. <a href="{% url changes %}" style="font-size: 10pt;">3.1.3</a>.</div>
     {% block addForm %}
     {% if user.is_authenticated %}
-    <form id="addform" class="addform cont_men" action="/add/" method="post" enctype="multipart/form-data"
+    <form id="addform" class="addform cont_men" action="{% url edit_add %}" method="post" enctype="multipart/form-data"
         onsubmit="return false;">
         {% csrf_token %}
         <div class="mainerror">{{ AddForm.non_field_errors }}</div>
@@ -158,4 +169,5 @@
     {% endif %}
     {% endblock %}
 </body>
+{% endcache %}
 {% endspaceless %}

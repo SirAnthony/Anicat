@@ -12,7 +12,7 @@
             {% endif %}
         {# Костыли, костыли everywhere #}
         {% else %}
-    <div style="margin-bottom: 5px;"><a href="/requests/">All requests</a></div>
+    <div style="margin-bottom: 5px;"><a href="{% url requests %}">All requests</a></div>
     <div class="request">
         <div class="title">
             <p>
@@ -24,7 +24,7 @@
             <p>
                 <span>
                     <b>Related to:</b>
-                    <a href="/card/{{ form.instance.anime.id }}/">{{ form.instance.anime }}</a>
+                    <a href="{% url card form.instance.anime.id %}/">{{ form.instance.anime }}</a>
                 </span>
             </p>
             {% endif %}

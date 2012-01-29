@@ -3,8 +3,7 @@ from django.core.cache import cache
 from django.utils.hashcompat import md5_constructor
 from django.utils.http import urlquote
 from django.contrib.auth.models import User
-from models import AnimeItem
-
+from anime.models import AnimeItem
 
 def getVal(val, obj=None, default=''):
     if obj and val in obj:

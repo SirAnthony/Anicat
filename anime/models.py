@@ -3,8 +3,8 @@ import collections
 import os
 from audit_log.models.managers import AuditLog
 from django.db import models, IntegrityError
+from django.conf import settings
 from django.contrib.auth.models import User
-from settings import MEDIA_ROOT, IMAGES_ROOT
 
 ANIME_TYPES = [
     (0, u'TV'),
@@ -371,13 +371,13 @@ class AnimeRequest(models.Model):
         if self.requestType == 1 and self.status and self.text != "0.png":
             if not self.anime:
                 raise IntegrityError("Anime name cannot be null for image request.")
-            filename = os.path.join(MEDIA_ROOT, self.text)
+            filename = os.path.join(settings.MEDIA_ROOT, self.text)
             if not os.path.exists(filename):
                 raise OSError('File does not exists.')
             if self.status > 1:
                 ext = filename.rsplit('.', 1)[-1]
                 os.rename(filename,
-                        os.path.join(IMAGES_ROOT,
+                        os.path.join(settings.IMAGES_ROOT,
                             '%s.%s' % (self.anime_id, ext)))
                 self.status = 3
             else:
@@ -435,9 +435,15 @@ EDIT_MODELS = {
 
 
 from social_auth.signals import socialauth_registered
+from anime.utils.misc import generate_password, mail
 
 def new_user(sender, user, response, details, **kwargs):
     user.is_active = False
+    password = generate_password()
+    user.set_password(password)
+    if getattr(user, 'email', None):
+        mail(user.email, {'username': user.username, 'password': password, 'openid': True},
+                    'anime/user/welcome.txt', 'anime/user/registred_email.html')
     return True
 
 socialauth_registered.connect(new_user, sender=None)
