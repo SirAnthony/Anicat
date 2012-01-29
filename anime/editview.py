@@ -16,8 +16,8 @@ def add(request):
 
 
 @render_to('anime/request.html')
-def request_item(request, requestId):
-    form = editMethods.edit(request, requestId, 'request')
+def request_item(request, request_id):
+    form = editMethods.edit(request, request_id, 'request')
     return form
 
 

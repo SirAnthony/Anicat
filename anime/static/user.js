@@ -105,7 +105,7 @@ var user = new( function(){
             {'span': {className: 'delimiter', innerText: '|'}}, {'span': {}}, [
                 {'a': {'href': '/settings/', title: 'User settings', innerText: nick}}],
             {'span': {className: 'delimiter', innerText: '|'}},
-            {'a': {innerText: 'Logout', onclick: function(){user.logout();}}}
+            {'a': {href: '/logout/', innerText: 'Logout', onclick: function(){user.logout();}}}
         ]);
         element.appendChild(form.parentNode, [
             {'div': {className: 'rightmenu'}}, [

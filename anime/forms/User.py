@@ -47,6 +47,13 @@ class UserCreationFormMail(forms.ModelForm):
         fields = ('email', )
 
 
+class UserNamesForm(forms.ModelForm):
+
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name')
+
+
 class NotActivePasswordResetForm(PasswordResetForm):
 
     def clean_email(self):

@@ -58,7 +58,7 @@ urlpatterns += patterns('anime.editview',
     url(r'^add/$', 'add', name='edit_add'),
     (r'^feedback/$', 'feedback'),
     (r'^animerequest/$', 'anime_request'),
-    url(r'^request/(?P<requestId>\d+)/?$', 'request_item', 'request_item'),
+    url(r'^request/(?P<request_id>\d+)/?$', 'request_item', name='request_item'),
     (r'^edit/(?P<model>[a-zA-Z_]+)?/?(?P<itemId>\d+)/?(?P<field>[a-zA-Z_,]+)?/?$', 'edit'),
 )
 

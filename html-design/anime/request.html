@@ -43,8 +43,15 @@
                 {{ form.non_field_errors }}
             </div>
             <div class="clear">
-                {{ form.status.label_tag }}: {{ form.status }}
-                {{ form.status.errors }}
+                {% if form.instance.requestType == 1 and form.instance.status > 0 %}
+                    <p>
+                        <b>Status:</b>
+                        <span class="block">{{ form.instance.get_status_display }}</span>
+                    </p>
+                {% else %}
+                    {{ form.status.label_tag }}: {{ form.status }}
+                    {{ form.status.errors }}
+                {% endif %}
             </div>
             <div>
                 {{ form.reason.label_tag }}: {{ form.reason }}

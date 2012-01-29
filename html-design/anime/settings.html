@@ -1,6 +1,5 @@
 {% extends "anime/base.html" %}
 {% load animetemplates %}
-
     {% block customScripts %}
     <link rel="stylesheet" href="/static/requests.css" />
     <script type="text/javascript" src="/static/settings.js"></script>
@@ -10,11 +9,22 @@
     {% if user.is_authenticated %}
     <h4>Account:</h4>
     <div class="column">
-        <p>{% username user %} <a>Change</a></p>
-        <a href="{% url password_change %}">Change password</a>
+        <b>User name: </b><a class="form" onclick="toggle(this.nextSibling);">{% username user %}</a>
+        <form method="POST" class="hidden" action="{% url settings %}">
+            {% csrf_token %}
+            <table>
+                {{ usernames.as_table }}
+                <tr>
+                    <td colspan="2">
+                        <input type="submit" class="clear right" value="Set" name="usernames" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+        <a class="block" href="{% url password_change %}">Change password</a>
     </div>
     <h4>Load MAL list:</h4>
-    <form class="fileform" action="{% url settings %}" method="post" enctype="multipart/form-data">
+    <form class="fileform" action="{% url settings %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="mainerror{% if not mallistform.non_field_errors %} hidden{% endif %}">
             {{ mallistform.non_field_errors }}
@@ -22,7 +32,7 @@
         <div>{{ mallistform.rewrite.label_tag }}: {{ mallistform.rewrite }}</div>
         <div>
             {{ mallistform.file }}
-            <input type="submit" value="Upload" />
+            <input type="submit" value="Upload" name="mallist" />
             {{ mallistform.file.errors }}
         </div>
         <span class="helpText">Supported types: xml, gzip compressed xml(xml.gz).</span>

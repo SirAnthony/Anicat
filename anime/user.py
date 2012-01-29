@@ -3,7 +3,7 @@ from django.contrib import auth
 from django.core.cache import cache
 from django.db.models import Q
 from anime.forms.Error import UploadMalListForm
-from anime.forms.User import UserCreationFormMail, NotActiveAuthenticationForm
+from anime.forms.User import UserNamesForm, UserCreationFormMail, NotActiveAuthenticationForm
 from anime.malconvert import passFile
 from anime.models import AnimeRequest
 from datetime import datetime, timedelta
@@ -52,28 +52,45 @@ def register(request):
     return response
 
 
+def set_usernames(request):
+    response = {}
+    form = UserNamesForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        response.update({'response': True, 'text': {'name': get_username(user)}})
+
+def load_settings(request):
+    res = {}
+    if 'mallist' in request.POST:
+        res.update(loadMalList(request))
+    else:
+        res['mallistform'] = UploadMalListForm()
+    if 'usernames' in request.POST:
+        res['usernames'] = form = UserNamesForm(request.POST or None, instance=request.user)
+        if form.is_valid():
+            form.save()
+    else:
+        res['usernames'] = UserNamesForm(instance=request.user)
+    return res
+
 def loadMalList(request):
     lastLoad = cache.get('MalList:%s' % request.user.id)
-    if request.method == 'POST':
-        form = UploadMalListForm(request.POST, request.FILES)
-        if form.is_valid():
-            timeLeft = 0
-            try:
-                timeLeft = (1800 - (datetime.now() - lastLoad['date']).seconds) / 60
-            except TypeError:
-                lastLoad = {}
-                pass
-            if lastLoad and timeLeft > 0:
-                form.addError('You doing it too often. Try again in %s minutes.' % timeLeft)
+    form = UploadMalListForm(request.POST or None, request.FILES)
+    if form.is_valid():
+        timeLeft = 0
+        try:
+            timeLeft = (1800 - (datetime.now() - lastLoad['date']).seconds) / 60
+        except TypeError:
+            lastLoad = {}
+        if lastLoad and timeLeft > 0:
+            form.addError('You doing it too often. Try again in %s minutes.' % timeLeft)
+        else:
+            status, error = passFile(request.FILES['file'],
+                    request.user, form.cleaned_data['rewrite'])
+            if not status:
+                form.addError(error)
             else:
-                status, error = passFile(request.FILES['file'],
-                        request.user, form.cleaned_data['rewrite'])
-                if not status:
-                    form.addError(error)
-                else:
-                    lastLoad['updated'] = True
-    else:
-        form = UploadMalListForm()
+                lastLoad['updated'] = True
     return {'mallistform': form, 'mallist': lastLoad}
 
 

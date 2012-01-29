@@ -33,7 +33,7 @@
                         <td>{% ifequal bundle.id anime.id %}►{% endifequal %}</td>
                         <td align="right">{{ forloop.counter }}</td>
                         <td>
-                            <a href="/card/{{ bundle.id }}" class="s s{{ bundle.id }}" >{{ bundle.title }}</a>
+                            <a href="{% url card bundle.id %}" class="s s{{ bundle.id }}" >{{ bundle.title }}</a>
                         </td>
                     </tr>
                 {% endfor %}

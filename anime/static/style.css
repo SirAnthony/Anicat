@@ -18,13 +18,14 @@ input, select {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
-    height: 20px;
-    padding: 2px 2px 1px 2px;
+    height: 22px;
+    padding: 1px 2px;
     -moz-border-radius:2px;
     -webkit-border-radius:2px;
     border-radius:2px;
-    border: 1px solid #cfcfcf;
+    border: 1px solid #B0B0B0;
     margin-right: 1px;
+    vertical-align: middle;
 }
 
 input[type=button], input[type=submit] {
@@ -34,7 +35,6 @@ input[type=button], input[type=submit] {
     font-family: sans-sherif;
     font-size: 10pt;
     font-weight: bold;
-    height: 20px;
     width: 100px;
     text-decoration: none;
     padding: 0px;
@@ -77,6 +77,10 @@ a:hover{
 
 .hidden {
     display: none;
+}
+
+.block {
+    display: block;
 }
 
 /* Trash */
@@ -166,8 +170,6 @@ padding: 1px;
     border-color: #F0F0F0 #808080 #808080 #F0F0F0;
     background-color: #D4D0C8;
     position: absolute;
-    top: 100px; /* начальные координаты */
-    left: 100px; /* для наглядности */
     z-index: 5;
     display: none;
 }
@@ -213,6 +215,7 @@ padding: 1px;
 
 .inurl, a.inurl:link, a.inurl:hover, a.inurl:active, a.inurl:visited{
     color: #339966;
+    font-weight: bold;
     cursor: pointer;
 }
 
@@ -264,6 +267,10 @@ a.blacklink:hover {
     width: 473px;
     float: right;
     margin: 0px 0 4px 10px;
+}
+
+#logdv a {
+    vertical-align: top;
 }
 
 #logdv form#login {
@@ -421,7 +428,6 @@ font-weight: bold;
 
 #id_genre {
     height: 22px;
-    width: 100%;
     padding-top: 2px;
     display: block;
 }
@@ -468,7 +474,7 @@ font-weight: bold;
 }
 
 .addform {
-    width: 425px;
+    width: 420px;
 }
 
 .addfrmoc { /* Опять же костыли */
@@ -480,9 +486,10 @@ font-weight: bold;
     margin-right: 10px;
 }
 
-.addform input[type=checkbox] {
-    margin-left: 10px;
-    width: auto;
+
+.addform input[type="submit"] {
+    margin-right: 13px;
+    margin-bottom: 2px;
 }
 
 .addform div {
@@ -491,18 +498,15 @@ font-weight: bold;
     float: left;
     margin: 5px;
 }
-.addform div input {
+.addform div input, .addform div select {
     width: 192px;
     margin: 3px 0;
+    background-color: #FFF;
 }
 .addform div textarea {
     margin: 3px 0;
     padding: 5px 2px;
     font-size: 11pt;
-}
-.addform div select {
-    width: 100%;
-    margin: 3px 0;
 }
 
 .addform ul li, .errorlist li {
@@ -513,6 +517,11 @@ font-weight: bold;
     float: none;
     width: 100%;
     min-height: 0px;
+}
+
+.addform .block {
+    margin-top: 5px;
+    margin-left: 5px;
 }
 
 .fileform {
@@ -554,14 +563,15 @@ font-weight: bold;
     margin-bottom: 7px;
 }
 
+.column a.form {
+    cursor: pointer;
+    color: #000;
+}
+
 /* Id's */
 #addform {
     top: 30px;
     left: 30px;
-}
-
-#id_releaseType {
-    width: 100%;
 }
 
 /* Specific things */
