@@ -35,7 +35,6 @@ class UserCreationFormMail(forms.ModelForm):
         self.cleaned_data['password1'] = password
         user.set_password(password)
         user.username = username = username_for_email(self.cleaned_data["email"])
-        user.is_active = False
         if commit:
             user.save()
             mail(user.email, {'username': username, 'password': password},

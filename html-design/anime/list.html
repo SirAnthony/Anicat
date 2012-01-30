@@ -64,7 +64,7 @@
             {% ifequal page.number forloop.counter0 %}
                 <span id="spanl">[{{ pname }}]</span>
             {% else %}
-                <a href="/{{ link.link }}{% ifnotequal forloop.counter0 0 %}{{forloop.counter0}}/{% endifnotequal %}">{{ pname }}</a>
+                <a href="{{ link.link }}{% ifnotequal forloop.counter0 0 %}{{forloop.counter0}}/{% endifnotequal %}">{{ pname }}</a>
             {% endifequal %}
         {% endfor %}
     </div>

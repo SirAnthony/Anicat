@@ -139,7 +139,7 @@ def search(field, string, request, attrs={}):
     if limit > 30:
         limit = 30
     qs = None
-    link = 'search/'
+    link = '/search/'
     if string:
         link += string + '/'
     if field:
@@ -155,6 +155,7 @@ def search(field, string, request, attrs={}):
         page = int(attrs.get('page', 0))
     except:
         page = 0
+    #FIXME: Search cache lives its own life
     cachestr = sha1(link.encode('utf-8') + str(page)).hexdigest()
     cached = cache.get('search:%s' % cachestr)
     if cached:

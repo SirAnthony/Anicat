@@ -30,15 +30,11 @@ class EditableDefault(object):
             raise EditError(_('You must be logged in.'))
         elif modelname not in EDIT_MODELS:
             raise EditError(_('Bad model name passed.'))
-        #elif request.user.is_blocked:
-        #    raise EditError(_('You cannot do this.'))
         elif not request.user.is_active and modelname not in EDITABLE_LIST:
-            if (datetime.now() - request.user.date_joined).days < 15:
-                raise EditError(_('You cannot do this now. Please wait for {0} days.'.format(
-                    15 - (datetime.now() - request.user.date_joined).days)))
-            else:
-                request.user.is_active = True
-                request.user.save()
+            raise EditError(_('You cannot do this.'))
+        elif (datetime.now() - request.user.date_joined).days < 15:
+            raise EditError(_('You cannot do this now. Please wait for {0} days.'.format(
+                15 - (datetime.now() - request.user.date_joined).days)))
 
         try:
             self.itemId = int(itemId)
@@ -74,11 +70,12 @@ class EditableDefault(object):
         except AttributeError:
             raise EditError(_('Bad request type.'))
         r = f(formobject)
-        try:
-            #TODO: rename to post_save()?
-            self.last()
-        except AttributeError:
-            pass
+        if f == self.post:
+            try:
+                #TODO: rename to post_save()?
+                self.last()
+            except Exception:
+                pass
         return r
 
     def get(self, formobject, data=None):
@@ -150,7 +147,10 @@ class Anime(EditableDefault):
 
     def last(self):
         updateMainCaches(USER_STATUS[0][0])
-        cache.delete('card:%s' % self.itemId)
+        super(Anime, self).last()
+        if 'title' in self.fields and self.obj.bundle:
+            for item in self.obj.bundle.animeitems.values_list('id').all():
+                cache.delete('card:%s' % item[0])
 
 
 class State(EditableDefault):

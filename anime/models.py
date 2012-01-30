@@ -438,7 +438,6 @@ from social_auth.signals import socialauth_registered
 from anime.utils.misc import generate_password, mail
 
 def new_user(sender, user, response, details, **kwargs):
-    user.is_active = False
     password = generate_password()
     user.set_password(password)
     if getattr(user, 'email', None):

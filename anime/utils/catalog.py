@@ -18,6 +18,14 @@ def getAttr(obj, val, default=''):
         return default
 
 
+def getPages(link, page, qs, order, limit):
+    pages = cache.get('Pages:{0}'.format(link))
+    if pages is None:
+        pages = createPages(qs, order, limit)
+        cache.set('Pages:{0}'.format(link), pages)
+    return pages
+
+
 def createPages(qs, order, limit=20):
     pages = []
     reverse = '-'
@@ -45,7 +53,7 @@ def invalidateCacheKey(fragment_name, *variables):
 
 
 def cleanTableCache(order, status, page, user, cuserid):
-    link = ''
+    link = '/'
     if status is not None:
         if user.id != cuserid:
             link += 'user/%s/' % user.id
@@ -60,23 +68,22 @@ def cleanTableCache(order, status, page, user, cuserid):
         maintablekey = 'mainTable:%s' % user.id
     else:
         maintablekey = 'mainTable'
-    _cleanCache(maintablekey, status, order,
-            page, cachestr, 'Pages', 'mainTable')
+    _cleanCache(maintablekey, status, order, page, cachestr, 'mainTable')
     return link, cachestr
 
 
 def cleanRequestsCache(status, rtype, page):
-    link = ''
+    link = '/requests/'
     if status is not None:
         link += 'status/%s/' % status
     if rtype is not None:
         link += 'type/%s/' % rtype
     cachestr = link + str(page)
-    _cleanCache('requests', status, rtype, page, cachestr, 'requestPages')
+    _cleanCache('requests', status, rtype, page, cachestr)
     return link, cachestr
 
 
-def _cleanCache(cachekey, first, second, third, cachestr, pagekey, ckey=None):
+def _cleanCache(cachekey, first, second, third, cachestr, ckey=None):
     #cache = {first: {second: [third,]]}} or {second: [third,]]}
     ccontent = cache.get(cachekey)
     if ccontent is None:
@@ -104,7 +111,7 @@ def _cleanCache(cachekey, first, second, third, cachestr, pagekey, ckey=None):
             ccontent[first] = firstcontent
         else:
             ccontent = firstcontent
-        cache.delete('%s:%s' % (pagekey, cachestr))
+        cache.delete('Pages:%s' % cachestr)
         invalidateCacheKey(ckey or cachekey, cachestr)
         cache.set(cachekey, ccontent)
 

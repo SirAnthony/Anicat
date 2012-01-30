@@ -10,7 +10,7 @@ from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
 from anime.models import AnimeItem, AnimeLink, UserStatusBundle, AnimeRequest, USER_STATUS
 from anime.user import get_username
-from anime.utils.catalog import getAttr, createPages, cleanTableCache, cleanRequestsCache
+from anime.utils.catalog import getAttr, getPages, cleanTableCache, cleanRequestsCache
 from random import randint
 
 
@@ -23,6 +23,7 @@ def latestStatus(request, userId=0):
         return
 
 # TODO: Pager here
+# wut?
 
 
 @render_to('anime/list.html')
@@ -69,10 +70,7 @@ def index(request, order='title', page=0, status=None, user=None):
     except:
         status = None
     (link, cachestr) = cleanTableCache(order, status, page, user, request.user.id)
-    pages = cache.get('Pages:' + link)
-    if pages is None:
-        pages = createPages(qs, order, limit)
-        cache.set('Pages:%s' % link, pages)
+    pages = getPages(link, page, qs, order, limit)
     items = qs[page * limit:(page + 1) * limit]
     if sbundle is not None:
         ids = list(qs.values_list('id', flat=True)[page * limit:(page + 1) * limit])
@@ -106,10 +104,7 @@ def requests(request, status=None, rtype=None, page=0):
     if rtype:
         qs = qs.filter(requestType=rtype)
     (link, cachestr) = cleanRequestsCache(status, rtype, page)
-    pages = cache.get('requestPages:' + link)
-    if not pages:
-        pages = createPages(qs, 'id', limit)
-        cache.set('requestPages:%s' % link, pages)
+    pages = getPages(link, page, qs, 'id', limit)
     items = qs[page*limit:(page+1)*limit]
     return {'requests': items, 'cachestr': cachestr, 'link': link,
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
