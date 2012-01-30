@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils.encoding import smart_unicode
+from django.utils.unittest import skip
 from math import ceil
 from random import randint
 
@@ -20,14 +21,7 @@ class NoDBTests(TestCase):
         params = {}
         register_link = '/register/'
         #First try bad attempts
-        for param, value in (('register-username', 'u'), ('register-email', 'u@uu.uu'),
-                             ('register-password1', 'u')):
-            params[param] = value
-            response = self.client.post(register_link, params)
-            self.assertEquals(response.status_code, 200)
-        #Next try real register
-        params["register-password2"] = 'u'
-        response = self.client.post(register_link, params)
+        response = self.client.post(register_link, {'register-email': 'u@uu.uu'})
         self.assertRedirects(response, '/')
 
     @create_user()
@@ -86,7 +80,7 @@ class NormalTest(TestCase):
         self.assertEquals(self.client.get('/css/').status_code, 200)
         self.assertEquals(self.client.get('/stat/').status_code, 200)
 
-
+@skip
 class BigTest(TestCase):
 
     fixtures = ['100trash.json']

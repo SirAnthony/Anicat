@@ -53,6 +53,13 @@ class UserNamesForm(forms.ModelForm):
         fields = ('first_name', 'last_name')
 
 
+class UserEmailForm(forms.ModelForm):
+
+    class Meta:
+        model = User
+        fields = ('email', )
+
+
 class NotActivePasswordResetForm(PasswordResetForm):
 
     def clean_email(self):

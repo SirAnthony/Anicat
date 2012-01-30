@@ -36,6 +36,53 @@ class NoneableDict(dict):
     pass
 
 
+class Field(object):
+
+    def __init__(self, t, name, label=None, fid=None, **kwargs):
+        if t not in ['input', 'select', 'textarea']:
+            raise ValueError('Field type not supported')
+        self.type = t
+        self.name = name
+        self.label = label if label else name[0].capitalize() + name[1:]
+        self.id = fid if fid else 'id_{0}'.format(name)
+        self.default = kwargs.pop('default', None)
+        self.attrs = kwargs
+
+    #TODO: make something with name
+    def props(self):
+        func = getattr(self, self.type, None)
+        attr = {
+            "name": self.name,
+            "value": Noneable(
+                self.attrs['value'] if 'value' in self.attrs else unicode,
+                self.default
+            ),
+            "label": Noneable(self.label),
+            "id": self.id
+        }
+        if callable(func):
+            attr.update(func())
+        return attr
+
+    def value(self):
+        return self.props()['value']
+
+    def field(self):
+        return NoneableDict({self.type: self.props()})
+
+    def select(self):
+        if 'choices' not in self.attrs:
+            raise AttributeError('Choices not passed.')
+        return {'choices': self.attrs['choices'],
+                'value': Noneable(int, self.default)}
+
+    def textarea(self):
+        return {
+            'rows': Noneable(unicode),
+            'cols': Noneable(unicode),
+        }
+
+
 class CatalogGetTypes(CallableDict):
 
         def __init__(self):
@@ -94,15 +141,16 @@ class Base(object):
     def get_link(self):
         return self.link_prefix + self.link
 
+    def get_params(self):
+        return self.params
+
+
 class Register(Base):
 
     link = 'register/'
 
     params = {
-        'register-username': unicode,
         'register-email': unicode,
-        'register-password1': unicode,
-        'register-password2': unicode
     }
 
     returns = {
@@ -131,20 +179,24 @@ class Add(Base):
     link = 'add/'
 
     params = {
-        'title': unicode,
-        'releaseType': int,
-        'duration': int,
-        'episodesCount': int,
-        'releasedAt': unicode,
-        'endedAt': unicode,
-        'genre': tuple,
-        'air': bool,
+        'title': Field('input', 'title'),
+        'releaseType': Field('select', 'releaseType', choices=ANIME_TYPES),
+        'duration': Field('input', 'duration', value=int),
+        'episodesCount': Field('input', 'episodesCount', value=int),
+        'releasedAt': Field('input', 'releasedAt', value=datetime.date),
+        'endedAt': Field('input', 'endedAt', value=datetime.date),
+        'genre': [Field('input', 'genre', value=1), Field('input', 'genre', value=2)],
+        'air': Field('input', 'air', value=bool),
     }
 
     returns = {
         'response': 'add',
         'status': True,
         'id': int,
+    }
+
+    errors = {
+
     }
 
 class Get(Base):
@@ -191,51 +243,6 @@ class Search(Base):
             'page': int
         }
     }
-
-
-
-class Field(object):
-
-    def __init__(self, t, name, label=None, fid=None, **kwargs):
-        if t not in ['input', 'select', 'textarea']:
-            raise ValueError('Field type not supported')
-        self.type = t
-        self.name = name
-        self.label = label if label else name[0].capitalize() + name[1:]
-        self.id = fid if fid else 'id_{0}'.format(name)
-        self.default = kwargs.pop('default', None)
-        self.attrs = kwargs
-
-    #TODO: make something with name
-    def props(self):
-        func = getattr(self, self.type, None)
-        attr = {
-            "name": self.name,
-            "value": Noneable(
-                self.attrs['value'] if 'value' in self.attrs else unicode,
-                self.default
-            ),
-            "label": Noneable(self.label),
-            "id": self.id
-        }
-        if callable(func):
-            attr.update(func())
-        return attr
-
-    def field(self):
-        return NoneableDict({self.type: self.props()})
-
-    def select(self):
-        if 'choices' not in self.attrs:
-            raise AttributeError('Choices not passed.')
-        return {'choices': self.attrs['choices'],
-                'value': Noneable(int, self.default)}
-
-    def textarea(self):
-        return {
-            'rows': Noneable(unicode),
-            'cols': Noneable(unicode),
-        }
 
 
 class Forms(Base):

@@ -99,6 +99,12 @@ def check_response(response, origin, *args, **kwargs):
 
 def fill_params(sample, data={}):
 
+    if isinstance(sample, api.Base):
+        return fill_params(sample.get_params(), data)
+
+    if isinstance(sample, api.Field):
+        return fill_params(sample.value())
+
     for t in (basestring, str, bool, int, float, long, complex, type(None)):
         if isinstance(sample, t):
             return sample
@@ -109,7 +115,7 @@ def fill_params(sample, data={}):
 
     if isinstance(sample, dict):
         params = {}
-        for key, value in sample.iteritems():
+        for key, value in sample.copy().items():
             param = fill_params(data[key] if key in data else value)
             if param is not None:
                 params[key] = param
@@ -123,7 +129,10 @@ def fill_params(sample, data={}):
             return u'a'
         elif sample is int:
             return 1
+        elif sample is bool:
+            return False
         elif sample is datetime.date:
             return datetime.date.today()
         else:
             raise TypeError('Not supported type: {0}'.format(sample))
+

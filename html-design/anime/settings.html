@@ -9,7 +9,9 @@
     {% if user.is_authenticated %}
     <h4>Account:</h4>
     <div class="column">
-        <b>User name: </b><a class="form" onclick="toggle(this.nextSibling);">{% username user %}</a>
+        <div>
+            <b>User name: </b><a class="form" onclick="toggle(this.parentNode.nextSibling);">{% username user %}</a>
+        </div>
         <form method="POST" class="hidden" action="{% url settings %}">
             {% csrf_token %}
             <table>
@@ -20,6 +22,16 @@
                     </td>
                 </tr>
             </table>
+        </form>
+        <div>
+            <b>E-mail: </b><a class="form" onclick="toggle(this.parentNode.nextSibling);">{{ user.email }}</a>
+        </div>
+        <form method="POST" {% if not emailForm.errors and not emailForm.non_field_errors %}class="hidden"{% endif %} action="{% url settings %}">
+            {% csrf_token %}
+            <div class="mainerror">{{ emailForm.non_field_errors }}</div>
+            {{ emailForm.email }}
+            <input type="submit" value="Set" name="emailform" />
+            {{ emailForm.errors }}
         </form>
         <a class="block" href="{% url password_change %}">Change password</a>
     </div>

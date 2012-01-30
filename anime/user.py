@@ -3,7 +3,8 @@ from django.contrib import auth
 from django.core.cache import cache
 from django.db.models import Q
 from anime.forms.Error import UploadMalListForm
-from anime.forms.User import UserNamesForm, UserCreationFormMail, NotActiveAuthenticationForm
+from anime.forms.User import ( UserNamesForm, UserEmailForm,
+        UserCreationFormMail, NotActiveAuthenticationForm, )
 from anime.malconvert import passFile
 from anime.models import AnimeRequest
 from datetime import datetime, timedelta
@@ -59,6 +60,7 @@ def set_usernames(request):
         form.save()
         response.update({'response': True, 'text': {'name': get_username(user)}})
 
+
 def load_settings(request):
     res = {}
     if 'mallist' in request.POST:
@@ -71,7 +73,14 @@ def load_settings(request):
             form.save()
     else:
         res['usernames'] = UserNamesForm(instance=request.user)
+    if 'emailform' in request.POST:
+        res['emailForm'] = form = UserEmailForm(request.POST or None, instance=request.user)
+        if form.is_valid():
+            form.save()
+    else:
+        res['emailForm'] = UserEmailForm(instance=request.user)
     return res
+
 
 def loadMalList(request):
     lastLoad = cache.get('MalList:%s' % request.user.id)

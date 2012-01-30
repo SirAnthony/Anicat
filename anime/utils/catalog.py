@@ -19,6 +19,7 @@ def getAttr(obj, val, default=''):
 
 
 def getPages(link, page, qs, order, limit):
+    #TODO: use page in iterator-like pager function
     pages = cache.get('Pages:{0}'.format(link))
     if pages is None:
         pages = createPages(qs, order, limit)

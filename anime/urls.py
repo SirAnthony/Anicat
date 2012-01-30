@@ -71,12 +71,9 @@ urlpatterns += patterns('anime.ajax',
     (r'^ajax/search/$', 'search'),
 )
 
-urlpatterns += patterns('anime.socialviews',
-    url(r'^complete/(?P<backend>[^/]+)/$', 'complete', name='socialauth_complete'),
-)
-
 urlpatterns += patterns('social_auth.views',
     url(r'^login/(?P<backend>[^/]+)/$', 'auth', name='socialauth_begin'),
+    url(r'^complete/(?P<backend>[^/]+)/$', 'complete', name='socialauth_complete'),
     url(r'^associate/(?P<backend>[^/]+)/$', 'associate', name='socialauth_associate_begin'),
     url(r'^associate/complete/(?P<backend>[^/]+)/$', 'associate_complete',
         name='socialauth_associate_complete'),

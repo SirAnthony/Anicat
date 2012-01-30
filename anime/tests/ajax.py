@@ -56,10 +56,7 @@ class AjaxTest(TestCase):
     def test_add(self):
         a = api.Add()
         link = a.get_link()
-        params = {'title': 12, 'releaseType': 6, 'episodesCount': 5, 'duration':  43,
-                  'releasedAt': '2.4.1952', 'endedAt': '??.??.1952', 'air': True,
-                  'genre': ('1','2'),}
-        self.send_request(link, params, a.returns)
+        self.send_request(link, fill_params(a), a.returns)
 
     @login()
     def test_get(self):
