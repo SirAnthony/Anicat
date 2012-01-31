@@ -133,6 +133,7 @@ class Base(object):
     link = ''
     params = {}
     returns = {}
+    errors = {}
 
     def __init__(self, prefix=''):
         if prefix:
@@ -143,6 +144,9 @@ class Base(object):
 
     def get_params(self):
         return self.params
+
+    def get_errors(self):
+        return errors
 
 
 class Register(Base):
@@ -196,7 +200,16 @@ class Add(Base):
     }
 
     errors = {
-
+        'status': False,
+        'response': 'add',
+        'text': NoneableDict({
+            'releasedAt': [u'This field is required.'],
+            'episodesCount': [u'This field is required.'],
+            'title': [u'This field is required.'],
+            'releaseType': [u'This field is required.'],
+            'genre': [u'This field is required.'],
+            'duration': [u'This field is required.']
+        })
     }
 
 class Get(Base):

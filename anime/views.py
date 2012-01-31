@@ -149,6 +149,7 @@ def card(request, animeId=0):
         try:
             anime = AnimeItem.objects.get(id=animeId)
         except:
+            #TODO: return 404
             pass
         else:
             ret.update({'anime': anime, 'names': anime.animenames.values()})
@@ -180,6 +181,7 @@ def stat(request, userId=0):
         try:
             user = User.objects.get(id=userId)
         except Exception, e:
+            #TODO: return 404?
             user = None
     elif request.user.is_authenticated():
         user = request.user

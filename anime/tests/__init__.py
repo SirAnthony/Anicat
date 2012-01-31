@@ -6,5 +6,5 @@ from anime.tests.errors import *
 __test__= {
     'ajax': ajax,
     'pages': pages,
-    'errors': pages,
+    'errors': errors,
 }

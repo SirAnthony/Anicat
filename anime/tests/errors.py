@@ -14,6 +14,14 @@ class ErrorsTest(TestCase):
             raise AssertionError('Error in response check. Data: %s, %s\nOriginal message: %s' % (
                     ret, returns, e.message))
 
+    @create_user()
+    def setUp(self):
+        pass
+
+    #def test_login(self):
+
+
+    @login()
     def test_add(self):
         a = api.Add()
         link = a.get_link()
