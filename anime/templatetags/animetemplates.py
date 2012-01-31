@@ -1,5 +1,6 @@
 from anime.forms.ModelError import AnimeForm
 from anime.forms.User import NotActiveAuthenticationForm, UserCreationFormMail
+from anime.models import USER_STATUS
 from anime.user import get_username
 from django import template
 
@@ -43,8 +44,27 @@ class UsernameNode(template.Node):
         return get_username(self.user.resolve(context))
 
 
+def statusname(parser, token):
+    try:
+        tag_name, status = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError("%r tag requires exactly one argument" % token.contents.split()[0])
+    return StatusNameNode(status)
+
+
+class StatusNameNode(template.Node):
+    def __init__(self, status):
+        self.status = template.Variable(status)
+    def render(self, context):
+        try:
+            return USER_STATUS[int(self.status.resolve(context))][1]
+        except:
+            return u"Bad status"
+
+
 register.tag('addForm', addForm)
 register.tag('loginForm', loginForm)
 register.tag('username', username)
+register.tag('statusname', statusname)
 
 
