@@ -14,7 +14,7 @@ from anime import api
 from anime.models import (AnimeItem, AnimeBundle, AnimeLink, Genre,
         UserStatusBundle, EDIT_MODELS, USER_STATUS, AnimeRequest,
         AnimeItemRequest, AnimeImageRequest, AnimeFeedbackRequest)
-from anime.tests.functions import create_user, login, fill_params
+from anime.tests.functions import last_record, create_user, login, fill_params
 
 
 class NoDBTests(TestCase):
@@ -51,7 +51,7 @@ class NormalTest(TestCase):
         params = {'title': 12, 'releaseType': 6, 'episodesCount': 5, 'duration':  43,
                   'releasedAt': '2.4.1952', 'endedAt': '??.??.1952', 'air': True,
                   'genre': ('1','2'),}
-        count = AnimeItem.objects.count()
+        count = last_record(AnimeItem)
         response = self.client.post(add_link, params)
         self.assertRedirects(response, '/card/{0}/'.format(count + 1))
 
@@ -68,17 +68,17 @@ class NormalTest(TestCase):
             rlink = '/card/{0}/'
             c = 0
             if name == 'bundle':
-                c = AnimeBundle.objects.count()
+                c = last_record(AnimeBundle)
                 rlink = '/edit/bundle/{0}/'
             elif name == 'anime':
-                c = AnimeItem.objects.count()
+                c = last_record(AnimeItem)
             response = self.client.post(link.format(name, n), params)
             self.assertRedirects(response, rlink.format(c + 1))
 
     @login()
     def test_image(self):
         files = ['test_random.jpg', ]
-        c = AnimeRequest.objects.count()
+        c = last_record(AnimeRequest)
         with open(os.path.join(settings.MEDIA_ROOT, 'test', '1px.png'), 'r') as f:
             response = self.client.post('/edit/image/1/', {'text': f})
         self.assertRedirects(response, '/request/{0}/'.format(c + 1))
@@ -103,6 +103,15 @@ class NormalTest(TestCase):
         self.assertEquals(self.client.get('/stat/').status_code, 200)
         self.assertEquals(self.client.get('/stat/6/').status_code, 200)
 
+    @login()
+    def test_settings(self):
+        self.assertEquals(self.client.post('/settings/', {
+            'first_name': '1', 'last_name': '2', 'usernames': True
+            }).status_code, 200)
+        self.assertEquals(self.client.post('/settings/', {
+            'email': 'a@aa.aa', 'emailform': True
+            }).status_code, 200)
+
     def test_search(self):
         self.assertEquals(self.client.get('/search/1/').status_code, 200)
 
@@ -118,6 +127,10 @@ class BigTest(TestCase):
     @create_user()
     def setUp(self):
         pass
+
+    @login()
+    def test_user_requests(self):
+        self.assertEquals(self.client.get('/settings/').status_code, 200)
 
     @create_user('1')
     @create_user('2')
@@ -149,10 +162,6 @@ class RequestsTest(TestCase):
         self.assertEquals(self.client.get('/requests/status/1/type/1/').status_code, 200)
 
     @login()
-    def test_user_requests(self):
-        self.assertEquals(self.client.get('/settings/').status_code, 200)
-
-    @login()
     def test_requests(self):
         for i in range(0, 9):
             self.assertEquals(self.client.get('/request/{0}/'.format(i)).status_code, 200)
@@ -162,7 +171,7 @@ class RequestsTest(TestCase):
         for link in ('/feedback/', '/animerequest/'):
             self.assertEquals(self.client.get(link).status_code, 200)
             self.assertEquals(self.client.post(link, {}).status_code, 200)
-            count = AnimeRequest.objects.count()
+            count = last_record(AnimeRequest)
             response = self.client.post(link, {'text': 'new'})
             self.assertRedirects(response, '/request/{0}/'.format(count + 1))
 
@@ -186,3 +195,9 @@ class ErrorTest(TestCase):
             if name in ['name', 'links', 'state', 'image']:
                 n = 1
             self.assertEquals(self.client.get(link % (name, n), {}).status_code, 200)
+
+class MiscTests(TestCase):
+
+    def test_filters(self):
+        from anime.templatetags import animefilters
+        self.assertEquals(animefilters.hash({1: True}, True), True)

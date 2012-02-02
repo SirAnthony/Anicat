@@ -1,9 +1,14 @@
 import json
 from django.test import TestCase
 from anime import api
+#from anime.forms import fields
 from anime.tests.functions import create_user, login, check_response, fill_params
 
+
+
 class ErrorsTest(TestCase):
+
+    fixtures = ['2trash.json']
 
     def send_request(self, link, params, returns):
         response = self.client.post(link, params)
@@ -26,3 +31,13 @@ class ErrorsTest(TestCase):
         a = api.Add()
         link = a.get_link()
         self.send_request(link, {}, a.errors)
+
+
+    @login()
+    def test_forms(self):
+        pass
+        #Just lazy
+
+    def test_fields(self):
+        pass
+        #wait for assertFieldOutput

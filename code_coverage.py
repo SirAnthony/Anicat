@@ -8,6 +8,7 @@ import os
 from django.test import simple
 from django.conf import settings
 
+SKIP_DIRS = ['migrations']
 
 try:
     from coverage import coverage as Coverage
@@ -31,6 +32,9 @@ else:
             if module:
                 base_path = os.path.join(os.path.split(module.__file__)[0], "")
                 for root, dirs, files in os.walk(base_path):
+                    for sd in SKIP_DIRS:
+                        if sd in dirs:
+                            dirs.remove(sd)
                     for fname in files:
                         if fname.endswith(".py") and os.path.getsize(os.path.join(root, fname)) > 1:
                             try:

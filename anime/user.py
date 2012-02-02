@@ -1,4 +1,5 @@
 
+from django.conf import settings
 from django.contrib import auth
 from django.core.cache import cache
 from django.db.models import Q
@@ -108,8 +109,8 @@ def getRequests(user, *keys):
         qs = AnimeRequest.objects.filter(user=user).order_by('status', '-id')
         qs = qs.exclude(Q(status__gt=2) & Q(changed__lte=datetime.now() - timedelta(days=20)))
         c = qs.filter(status__gt=2).count()
-        if c > 20:
-            qs = qs[:qs.count() - (c - 10)]
+        if c > settings.USER_PAGE_REQUEST_COUNT:
+            qs = qs[:qs.count() - (c - settings.USER_PAGE_REQUEST_COUNT/2)]
         if keys:
             qs = qs.values(*keys)
         try:
