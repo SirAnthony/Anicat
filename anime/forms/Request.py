@@ -25,6 +25,10 @@ class RequestForm(ErrorModelForm):
         exclude = ('user', 'anime', 'status')
 
 class PureRequestForm(ReadOnlyModelForm, RequestForm):
+    error_messages = {
+        'notchangable': _('You cannot change it anymore.'),
+    }
+
     def __init__(self, *args, **kwargs):
         user = kwargs.get('user', None)
         super(PureRequestForm, self).__init__(*args, **kwargs)
@@ -34,7 +38,7 @@ class PureRequestForm(ReadOnlyModelForm, RequestForm):
     def clean_status(self):
         if self.instance.requestType == 1 and self.instance.status > 0:
             if 'status' in self._get_changed_data():
-                raise ValidationError(_('You cannot change it anymore.'))
+                raise ValidationError(self.error_messages['notchangable'])
         return self.cleaned_data['status']
 
     class Meta:
@@ -46,13 +50,19 @@ class AnimeItemRequestForm(RequestForm):
         exclude = ('user', 'anime', 'requestType', 'reason', 'status')
 
 class ImageRequestForm(RequestForm):
+    error_messages = {
+        'notexists': _('Record not exist.'),
+        'notanime': _('{0} is not AnimeItem instance.'),
+        'required': _('This field is required.'),
+        'loaded': _('This file already loaded.')
+    }
     text = CardImageField(max_length=150, label='File')
     def __init__(self, *args, **kwargs):
         anime = kwargs.pop('instance', None)
         if not anime or not anime.id:
-            raise ValueError(_('Record not exist.'))
+            raise ValueError(self.error_messages['notexists'])
         if not isinstance(anime, AnimeItem):
-            raise TypeError('%s is not AnimeItem instance.' % type(anime).__name__)
+            raise TypeError(self.error_messages['notanime'].format(type(anime.__class__).__name__))
         instance = AnimeImageRequest(anime=anime)
         super(ImageRequestForm, self).__init__(*args, instance=instance, **kwargs)
         self.files = kwargs.get('files', None)
@@ -64,15 +74,15 @@ class ImageRequestForm(RequestForm):
         if name in self.errors:
             return
         image = self.files.get(name)
-        fname, ext = image.name.rsplit('.', 1)
-        image.name = sha1(fname.encode('utf-8')).hexdigest()
         try:
             if not image:
-                raise ValidationError(_('This field is required.'))
-            filename = u'%s%s.%s' % (image.size, image.name, ext)
+                raise ValidationError(self.error_messages['required'])
+            fname, ext = image.name.rsplit('.', 1)
+            image.name = sha1(fname.encode('utf-8')).hexdigest()
+            filename = u'%s%s.%s' % (image.size, image.name, ext.lower())
             fullfilename = os.path.join(settings.MEDIA_ROOT, filename)
             if os.path.exists(fullfilename):
-                raise ValidationError(_('This file already loaded.'))
+                raise ValidationError(self.error_messages['loaded'])
             try:
                 fileobj = open(fullfilename, 'wb+')
                 for chunk in image.chunks():
@@ -90,6 +100,6 @@ class ImageRequestForm(RequestForm):
         exclude = ('user', 'anime', 'requestType', 'reason', 'status')
 
 class FeedbackForm(RequestForm):
-    text = CharField(label='Please tell about your suffering', widget=Textarea)
+    text = CharField(label=_('Please tell about your suffering'), widget=Textarea)
     class Meta:
         exclude = ('user', 'anime', 'requestType', 'reason', 'status')

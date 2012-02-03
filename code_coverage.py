@@ -8,7 +8,7 @@ import os
 from django.test import simple
 from django.conf import settings
 
-SKIP_DIRS = ['migrations']
+SKIP_DIRS = ['migrations', 'tests']
 
 try:
     from coverage import coverage as Coverage

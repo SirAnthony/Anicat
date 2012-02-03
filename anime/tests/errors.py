@@ -1,9 +1,11 @@
 import json
+from django.contrib.auth.models import User
+from django.db import models
 from django.test import TestCase
 from anime import api
-#from anime.forms import fields
+from anime.forms.create import createFormFromModel
+from anime.models import AnimeItem, AnimeName, AnimeRequest, AnimeImageRequest, DATE_FORMATS
 from anime.tests.functions import create_user, login, check_response, fill_params
-
 
 
 class ErrorsTest(TestCase):
@@ -25,19 +27,13 @@ class ErrorsTest(TestCase):
 
     #def test_login(self):
 
-
     @login()
     def test_add(self):
         a = api.Add()
         link = a.get_link()
         self.send_request(link, {}, a.errors)
 
-
-    @login()
-    def test_forms(self):
-        pass
-        #Just lazy
-
     def test_fields(self):
         pass
         #wait for assertFieldOutput
+

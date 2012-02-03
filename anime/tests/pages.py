@@ -36,6 +36,25 @@ class NoDBTests(TestCase):
         response = self.client.get('/login/')
         self.assertEquals(response.status_code, 200)
 
+    def test_social_error(self):
+        self.assertEquals(self.client.get('/login/error/').status_code, 200)
+
+    @create_user()
+    def test_password_reset(self):
+        from anime.tests.functions import email
+        from django.core import mail
+        self.assertRedirects(self.client.post('/password/reset/',
+            {'email': email}), '/password/reset/sent/')
+        message = mail.outbox[-1]
+        self.assertEquals(message.to[0], email)
+        #FIXME: binding to domain
+        mo = re.search('://anicat.net(/\S+)$', message.body, re.M)
+        self.assertNotEquals(mo, None)
+        link = mo.group(1)
+        self.assertEquals(self.client.get(link).status_code, 200)
+        response = self.client.post(link, {'new_password1': '1', 'new_password2': '1'})
+        self.assertRedirects(response, '/password/reset/done/')
+
 
 class NormalTest(TestCase):
 
@@ -86,11 +105,11 @@ class NormalTest(TestCase):
 
     @login()
     def test_fields(self):
-        link = '/edit/anime/0/%s/'
+        link = '/edit/anime/0/{0}/'
         for f in AnimeItem._meta.fields:
             if not f.auto_created and f.name not in ['releasedKnown', 'endedKnown', 'bundle']:
-                self.assertEquals(self.client.get(link % f.name, {}).status_code, 200)
-        self.assertEquals(self.client.get(link % 'genre', {}).status_code, 200)
+                self.assertEquals(self.client.get(link.format(f.name)).status_code, 200)
+        self.assertEquals(self.client.get(link.format('genre')).status_code, 200)
 
     def test_card(self):
         self.assertEquals(self.client.get('/card/', follow=True).status_code, 200)
@@ -119,7 +138,7 @@ class NormalTest(TestCase):
         self.assertEquals(self.client.get('/history/add/').status_code, 200)
 
 
-#@skip
+@skip
 class BigTest(TestCase):
 
     fixtures = ['100trash.json']

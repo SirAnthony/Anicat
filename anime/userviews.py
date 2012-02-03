@@ -33,8 +33,5 @@ def register(request):
 @render_to('anime/settings.html')
 def settings(request):
     response = userMethods.load_settings(request)
-    try:
-        response.update(userMethods.getRequests(request.user))
-    except:
-        pass
+    response.update(userMethods.getRequests(request.user))
     return response

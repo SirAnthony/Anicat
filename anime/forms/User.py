@@ -61,6 +61,12 @@ class UserEmailForm(forms.ModelForm):
 
 
 class NotActivePasswordResetForm(PasswordResetForm):
+    error_messages = {
+        'unknown': _("That e-mail address doesn't have an associated "
+                "user account. Are you sure you've registered?"),
+        'unusable': _("The user account associated with this e-mail "
+                "address cannot reset the password."),
+    }
 
     def clean_email(self):
         email = self.cleaned_data["email"]
@@ -74,6 +80,9 @@ class NotActivePasswordResetForm(PasswordResetForm):
 
 
 class NotActiveAuthenticationForm(AuthenticationForm):
+    error_messages = {
+        'wrong': _("Please enter a correct username and password. Note that both fields are case-sensitive."),
+    }
 
     def clean(self):
         username = self.cleaned_data.get('username')
@@ -81,6 +90,6 @@ class NotActiveAuthenticationForm(AuthenticationForm):
         if username and password:
             self.user_cache = authenticate(username=username, password=password)
             if self.user_cache is None:
-                raise ValidationError(_("Please enter a correct username and password. Note that both fields are case-sensitive."))
+                raise ValidationError(self.error_messages['wrong'])
         self.check_for_test_cookie()
         return self.cleaned_data

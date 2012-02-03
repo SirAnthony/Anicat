@@ -7,6 +7,7 @@ from django.core.validators import EMPTY_VALUES
 from django.forms import CharField, TextInput, URLField, DateField, ImageField
 from django.utils.translation import ugettext_lazy as _
 
+
 #dirty but works
 INPUT_FORMATS = (
     '%Y-%m-%d', '%m/%d/%Y', '%m/%d/%y',
@@ -15,6 +16,7 @@ INPUT_FORMATS = (
     '%B %d %Y', '%B %d, %Y',
     '%d %B %Y', '%d %B, %Y',
 )
+
 
 LINKS_URLS = [
     (0, None, None),
@@ -38,7 +40,16 @@ LINKS_URLS = [
     (15, None, None)
 ]
 
+
 class TextToAnimeItemField(CharField):
+    extra_error_messages = {
+        'multiple': _('Too many items with such title, try to use id instead title.'),
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(TextToAnimeItemField, self).__init__(*args, **kwargs)
+        self.error_messages.update(self.extra_error_messages)
+
     def to_python(self, value):
         if not value:
             return None
@@ -52,10 +63,20 @@ class TextToAnimeItemField(CharField):
             except AnimeItem.DoesNotExist, e:
                 raise ValidationError(e)
             except AnimeItem.MultipleObjectsReturned, e:
-                raise ValidationError(_('Too many items with such title, try to use id instead title.'))
+                raise ValidationError(self.error_messages['multiple'])
         return value
 
+
 class TextToAnimeNameField(CharField):
+    extra_error_messages = {
+        'noname': _('AnimeItem not set.'),
+    }
+    _animeobject = None
+
+    def __init__(self, *args, **kwargs):
+        super(TextToAnimeNameField, self).__init__(*args, **kwargs)
+        self.error_messages.update(self.extra_error_messages)
+
     def to_python(self, value):
         try:
             value = value.strip()
@@ -64,12 +85,13 @@ class TextToAnimeNameField(CharField):
         except:
             return None
         if not self._animeobject:
-            raise ValidationError(_('AnimeItem not set.'))
+            raise ValidationError(self.error_messages['noname'])
         try:
             value, create = AnimeName.objects.get_or_create(anime=self._animeobject, title=value)
         except Exception, e:
             raise ValidationError(e)
         return value
+
 
 class TextToAnimeLinkField(URLField):
     _linktype = None
@@ -113,7 +135,7 @@ class CalendarWidget(TextInput):
             try:
                 value = value.strftime(DATE_FORMATS[self._known])
             except:
-                value = 'Bad value'
+                value = _('Bad value')
         return super(CalendarWidget, self).render(name, value, attrs)
 
 
@@ -173,6 +195,7 @@ class UnknownDateField(DateField):
         if format_index & 1: #day
             date = date.replace(day=1, month=(date.month%12)+1) - datetime.timedelta(1)
         return date
+
 
 class CardImageField(ImageField):
 

@@ -46,10 +46,8 @@ class AnimeForm(ErrorModelForm):
         super(AnimeForm, self).__init__(*args, **kwargs)
         if self.instance.id:
             for field in ['released', 'ended']:
-                try:
+                if field + 'At' in self.fields:
                     self.fields[field + 'At'].widget._known = getattr(self.instance, field + 'Known')
-                except:
-                    continue
 
     def _clean_form(self):
         super(AnimeForm, self)._clean_form()
