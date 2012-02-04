@@ -1,7 +1,7 @@
 
 from collections import defaultdict
 from django.core.exceptions import ValidationError
-from django.forms import ChoiceField, CharField, HiddenInput
+from django.forms import ChoiceField, CharField, HiddenInput, widgets
 from django.utils.translation import ugettext_lazy as _
 from anime.forms.ModelError import ErrorModelForm
 from anime.forms.fields import TextToAnimeItemField, TextToAnimeNameField, TextToAnimeLinkField
@@ -76,7 +76,7 @@ class AnimeBundleForm(DynamicModelForm):
             if hasattr(self, "_currentid"):
                 fields['currentid'] = CharField(initial=self._currentid,
                     widget=HiddenInput(attrs={
-                        "id": "currentid_b_%i" % (instance.id or 0)}))
+                        "id": "currentid_b_{0}".format(instance.id or 0)}))
             self.setFields(fields)
             self.setData(data)
 
@@ -138,7 +138,7 @@ class AnimeLinksForm(DynamicModelForm):
         if not instance or not instance.id:
             raise ValueError(_('Record not exist.'))
         if not isinstance(instance, AnimeItem):
-            raise TypeError('%s is not AnimeItem instance.' % type(instance).__name__)
+            raise TypeError(_('{0} is not AnimeItem instance.').format(type(instance).__name__))
         super(AnimeLinksForm, self).__init__(data, *args, **kwargs)
         fields = {}
         if data:
@@ -154,10 +154,11 @@ class AnimeLinksForm(DynamicModelForm):
                 link = None
                 ltype = 0
             field_link = TextToAnimeLinkField(initial=link, required=False)
-            field_type = ChoiceField(choices=LINKS_TYPES, initial=ltype)
+            field_type = ChoiceField(choices=LINKS_TYPES, initial=ltype,
+                            widget=widgets.Select(attrs={'class': 'linktype'}))
             field_type._linkfield = field_link
-            fields['Link %i' % i] = field_link
-            fields['Link type %i' % i] = field_type
+            fields['Link {0}'.format(i)] = field_link
+            fields['Link type {0}'.format(i)] = field_type
         for fieldname in self.fields.keys():
             del self.fields[fieldname]
         self.setFields(fields)

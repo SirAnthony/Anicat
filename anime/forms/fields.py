@@ -21,11 +21,11 @@ INPUT_FORMATS = (
 LINKS_URLS = [
     (0, None, None),
     (1, re.compile(u'^(?:http|ftp)s?://anidb\.net/(?:perl-bin/animedb\.pl\?show=anime\&aid=|a)(\d+)'),
-        u'http://anidb.net/a'),
+        u'http://anidb.net/a{0}'),
     (2, re.compile(u'^(?:http|ftp)s?://www\.animenewsnetwork\.com/encyclopedia/anime\.php\?id=(\d+)'),
-        u'http://www.animenewsnetwork.com/encyclopedia/anime.php?id='),
+        u'http://www.animenewsnetwork.com/encyclopedia/anime.php?id={0}'),
     (3, re.compile(u'^(?:http|ftp)s?://myanimelist\.net/anime/(\d+)'),
-        u'http://myanimelist.net/anime/'),
+        u'http://myanimelist.net/anime/{0}'),
     (4, re.compile(u'^(?:http|ftp)s?://[a-z]{2}\.wikipedia\.org/wiki/(.+)#?'), None),
     (5, None, None),
     (6, None, None),
@@ -94,33 +94,51 @@ class TextToAnimeNameField(CharField):
 
 
 class TextToAnimeLinkField(URLField):
+    extra_error_messages = {
+        'notype': _('Type for this field is not set.'),
+        'badtype': _('Bad link type choosen.'),
+        'badlink': _('Bad link passed.'),
+    }
     _linktype = None
+
+    def __init__(self, *args, **kwargs):
+        super(TextToAnimeLinkField, self).__init__(*args, **kwargs)
+        self.error_messages.update(self.extra_error_messages)
 
     def to_python(self, value):
         if self._linktype is None:
-            raise ValidationError(_('Type for this field is not set.'))
+            raise ValidationError(self.error_messages['notype'])
         try:
             value = value.strip()
             if value in EMPTY_VALUES:
                 raise ValueError
         except:
             return None
+        regexp = None
         if self._linktype == 0:
             for t, r, l in LINKS_URLS[1:]:
                 if r:
-                    m = r.match(value)
-                    if m:
+                    regexp = r.match(value)
+                    if regexp:
                         self._linktype = t
-                        if l:
-                            value = l + m.groups()[-1]
+                        break
             if not self._linktype:
                 self._linktype = 15
-        if self._linktype in (1, 2, 3) and value.isdecimal():
-            value = LINKS_URLS[self._linktype][2] + value
-        m = LINKS_URLS[self._linktype][1]
-        if m and not m.match(value):
-            raise ValidationError(_('Bad link type choosen.'))
+        cregexp = LINKS_URLS[self._linktype][1]
+        link = LINKS_URLS[self._linktype][2]
+        if not regexp and cregexp:
+            regexp = cregexp.match(value)
+            if not regexp:
+                raise ValidationError(self.error_messages['badlink'])
+        try:
+            if regexp and link:
+                value = link.format(regexp.groups()[-1])
+            elif value.isdecimal():
+                value = link.format(value)
+        except AttributeError:
+            raise ValidationError(self.error_messages['badtype'])
         return super(TextToAnimeLinkField, self).to_python(value)
+
 
 class CalendarWidget(TextInput):
     class Media:
@@ -153,16 +171,16 @@ class UnknownDateField(DateField):
         Validates that the input can be converted to a date. Returns a Python
         datetime.date object.
         """
+        if isinstance(value, datetime.datetime):
+            return value.date()
+        if isinstance(value, datetime.date):
+            return value
         try:
             value = value.strip()
             if value in EMPTY_VALUES:
                 raise ValueError
         except:
             return None
-        if isinstance(value, datetime.datetime):
-            return value.date()
-        if isinstance(value, datetime.date):
-            return value
         for format in self.input_formats:
             try:
                 return self.strptime(value, format)

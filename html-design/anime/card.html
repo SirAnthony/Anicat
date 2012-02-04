@@ -24,7 +24,7 @@
             {%endif%}
                 <h4>Bundled with:</h4>
                 <!-- Это все нужно переверстать -->
-                <table class="bundle{% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}null{% endif %}">
+                <table class="bundle{% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}0{% endif %}">
                     <tr>
                         <th><input type="hidden" id="currentid_b_{% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}0{% endif %}" name="currentid" value="{{ anime.id }}" /></th>
                     </tr>

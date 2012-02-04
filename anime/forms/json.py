@@ -97,10 +97,9 @@ class FormSerializer(object):
         field_type = self.get_field_type(field)
 
         for attr_name in ['required', 'label', 'choices']:
-            if hasattr(field, attr_name):
-                attr = getattr(field, attr_name)
-                if attr:
-                    field_dict[attr_name] = attr
+            attr = getattr(field, attr_name, None)
+            if attr is not None:
+                field_dict[attr_name] = attr
 
         if 'choices' in field_dict:
             #TODO: move it to form generation.
@@ -128,14 +127,6 @@ class FormSerializer(object):
         if bound_field.help_text:
             field_dict['title'] = bound_field.help_text
 
-        try:
-            field_dict['className'] = bf.css_classes()
-        except:
-            pass
-        else:
-            if not field_dict['className']:
-                del field_dict['className']
-
         if field_tag == 'input':
             field_dict['type'] = field_type
         elif field_tag == 'select':
@@ -143,7 +134,14 @@ class FormSerializer(object):
                 field_dict['multiple'] = 'multiple'
 
         for name, attr in field.widget.attrs.items():
+            if name == 'class':
+                name = 'className'
             field_dict[name] = attr
+
+        try:
+            field_dict['className'] += bound_field.css_classes()
+        except:
+            pass
 
         for key in field_dict.keys():
             if not field_dict[key]:

@@ -255,7 +255,7 @@ class AnimeName(models.Model):
 
 class AnimeLink(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="links")
-    link = models.URLField(max_length=100)
+    link = models.URLField(max_length=250)
     linkType = models.IntegerField(choices=LINKS_TYPES)
     audit_log = AuditLog()
 

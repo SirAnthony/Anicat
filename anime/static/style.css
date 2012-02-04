@@ -396,10 +396,15 @@ color: HighlightText;
     margin: 0px 10px !important;
     min-width: 125px;
 }
-.cardcol div{
-    clear: right;
-    margin-right: 10px;
+.cardcol div {
+    clear: both;
+    float: left;
+    min-width: 190px;
+    /*margin-right: 10px;*/
     margin-top: 3px;
+}
+.cardcol input, .cardcol select {
+    width: 190px;
 }
 .cardcol a.right {
     color: #000;
@@ -442,6 +447,10 @@ font-weight: bold;
     width: 200px;
 }
 
+select.linktype {
+    width: 108px;
+}
+
 .calendarbox {
     border-color: #FFFFFF #FFFFFF #808080 #808080;
     background-color: #D4D0C8;
@@ -476,6 +485,10 @@ font-weight: bold;
 .datetimeshortcuts {
     float: right;
     margin-top: -1px;
+}
+
+.editDiv {
+    min-height: 22px;
 }
 
 .addform {
@@ -577,6 +590,13 @@ font-weight: bold;
 #addform {
     top: 30px;
     left: 30px;
+}
+
+.editDiv select#id_state{
+    width: 74%;
+}
+.editDiv select#id_rating, .editDiv select#id_count {
+    width: 24%;
 }
 
 /* Specific things */
