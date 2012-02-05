@@ -1,19 +1,29 @@
 import datetime
 import re
+import os
+from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile, TemporaryUploadedFile
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.test import TestCase
 from anime.forms import fields
+from anime.forms import json
 from anime.forms.create import createFormFromModel
-from anime.models import AnimeItem, UserStatusBundle, AnimeRequest, AnimeImageRequest, DATE_FORMATS
+from anime.models import ( AnimeItem, AnimeBundle, AnimeName, AnimeLink,
+    UserStatusBundle, AnimeRequest, AnimeImageRequest, DATE_FORMATS, )
 from anime.tests.functions import create_user, login, last_record
 
 
 
 class FormsTest(TestCase):
-    pass
 
-class RequestsFormsTest(TestCase):
+    #remove in 1.4
+    def assertRaisesMessage(self, expected_exception, expected_message,
+                            callable_obj=None, *args, **kwargs):
+        return self.assertRaisesRegexp(expected_exception,
+            re.escape(expected_message), callable_obj, *args, **kwargs)
+
+class RequestsFormsTest(FormsTest):
 
     fixtures = ['2trash.json']
 
@@ -32,20 +42,36 @@ class RequestsFormsTest(TestCase):
 
     def test_ImageRequestForm(self):
         F = createFormFromModel(AnimeImageRequest)
-        try:
-            F()
-        except ValueError, e:
-            if not unicode(F.error_messages['notexists']) == unicode(e.message):
-                raise AssertionError
-        self.assertRaisesRegexp(TypeError,
+        self.assertRaisesMessage(ValueError, F.error_messages['notexists'], F)
+        self.assertRaisesMessage(TypeError,
             unicode(F.error_messages['notanime']).format(type(UserStatusBundle).__name__),
             F, instance=UserStatusBundle.objects.get(id=1))
         anime = AnimeItem.objects.get(id=1)
         f = F(files={'text': 'file'}, instance=anime)
         self.assertEquals(f.is_valid(), False)
-        f = F(files={'text': 'file'}, instance=anime)
-        #self.assertEquals(f.errors['status'][0], f.error_messages['notchangable'])
-
+        filename = os.path.join(settings.MEDIA_ROOT, 'test', '1px.png')
+        resultname = os.path.join(settings.MEDIA_ROOT, '1619e0741c0526b10c74eda382595812bd6679adf84.png')
+        with open(filename, 'r') as fl:
+            f = F(files={'text': SimpleUploadedFile(filename, fl.read())}, instance=anime)
+            self.assertEquals(f.is_valid(), True)
+            fl.seek(0)
+            f = F(files={'text': SimpleUploadedFile(filename, fl.read())}, instance=anime)
+            self.assertEquals(f.is_valid(), False)
+            self.assertEquals(f.errors['text'][0], F.error_messages['loaded'])
+            os.unlink(resultname)
+            # Emulate system problems
+            mode = (os.stat(settings.MEDIA_ROOT).st_mode & 0777)
+            try:
+                os.chmod(settings.MEDIA_ROOT, 444)
+                fl.seek(0)
+                f = F(files={'text': SimpleUploadedFile(filename, fl.read())}, instance=anime)
+                self.assertEquals(f.is_valid(), False)
+                self.assertEquals(f.errors['text'][0],
+                    "[Errno 13] Permission denied: u'{0}'".format(resultname))
+            except:
+                raise
+            finally:
+                os.chmod(settings.MEDIA_ROOT, mode)
 
 class FormsErrorTests(TestCase):
 
@@ -101,6 +127,109 @@ class FormsModelErrorTests(TestCase):
         ub.state = 2
         F(instance=ub)
 
+
+class FormsDynamicTests(FormsTest):
+
+    fixtures = ['2trash.json']
+
+    def setUp(self):
+        pass
+
+    def test_AnimeBundleForm(self):
+        F = createFormFromModel(AnimeBundle)
+        self.assertRaisesMessage(ValueError,
+            F.error_messages['noinstance'], F)
+        self.assertRaisesMessage(TypeError,
+            F.error_messages['badinstance'].format(
+                AnimeRequest.__name__, AnimeBundle.__name__), F,
+                instance=AnimeRequest(anime=AnimeItem.objects.get(id=1),
+                    text="0", requestType=1, status=2,))
+        self.assertRaisesMessage(AttributeError,
+                    "'bool' object has no attribute 'keys'", F, True,
+                    instance=AnimeBundle())
+        f = F(instance=AnimeBundle())
+        self.assertEquals(f.is_valid(), False)
+        #One item
+        f = F({'Bundle 0': u'1'}, instance=AnimeBundle())
+        self.assertEquals(f.is_valid(), False)
+        self.assertEquals(f.non_field_errors()[-1],
+                          f.error_messages['one_item'])
+        #Similar items and wrong field number
+        f = F({'Bundle 0': u'1', 'Bundle 69': u'1'}, instance=AnimeBundle())
+        self.assertEquals(f.is_valid(), False)
+        self.assertEquals(f.errors['Bundle 0'][-1],
+                          f.error_messages['not_unique'])
+        self.assertEquals(f.errors['Bundle 69'][-1],
+                          f.error_messages['equal_item'])
+        #Currentid for item not in form
+        f = F({'Bundle 0': u'1', 'Bundle 2': u'2', 'currentid': u'3'}, instance=AnimeBundle())
+        self.assertEquals(f.is_valid(), False)
+        self.assertEquals(f.non_field_errors()[-1],
+                          f.error_messages['no_item'])
+        #Currentid without data
+        f = F({'currentid': '1'}, instance=AnimeBundle.objects.get(id=1))
+        self.assertEquals(f.is_valid(), False)
+        #Bad data
+        #TODO: Add more getDataCount tests
+        self.assertEquals(f.getDataCount({},'Bundle ', None), (1, []))
+        #Test setFields
+        f.setFields({'f': 1, 's': 1})
+        self.assertEquals((f.fields['f'], f.fields['s']), (1, 1))
+
+    def test_AnimeNameForm(self):
+        F = createFormFromModel(AnimeName)
+        self.assertRaisesMessage(ValueError,
+                F.error_messages['notexist'], F,
+                instance=AnimeItem(releasedAt="1987-9-30 00:00",
+                episodesCount=230, title='d', releasedKnown=0,
+                releaseType=5, endedKnown=0, duration=17))
+        f = F(instance=AnimeItem.objects.get(id=1))
+        self.assertEquals(f.is_valid(), False)
+        f = F({'Name 0': 'd'}, instance=AnimeItem.objects.get(id=1))
+        self.assertEquals(f.is_valid(), True)
+
+    def test_AnimeLinksForm(self):
+        F = createFormFromModel(AnimeLink)
+        f = F(instance=AnimeItem.objects.get(id=1))
+        self.assertEquals(f.is_valid(), False)
+        f = F({'Link 0': 'a'}, instance=AnimeItem.objects.get(id=1))
+        self.assertEquals(f.is_valid(), False)
+        self.assertEquals(f.errors['Link 0'][-1],
+                    f.fields['Link 0'].error_messages['notype'])
+        self.assertEquals(f.errors['Link type 0'][-1],
+                    f.fields['Link type 0'].error_messages['required'])
+        f = F({'Link 0': 'a', 'Link type 0': '1'},
+                instance=AnimeItem.objects.get(id=1))
+        self.assertEquals(f.is_valid(), False)
+        self.assertEquals(f.errors['Link 0'][-1],
+                    f.fields['Link 0'].error_messages['badlink'])
+        #One of links is bad
+        f = F({'Link 0': u'www.example.com', 'Link type 0': u'0',
+               'Link 1': u'www.example.com', 'Link type 1': u'1'},
+                instance=AnimeItem.objects.get(id=1))
+        self.assertEquals(f.is_valid(), False)
+        self.assertEquals(f.errors['Link 1'][-1],
+                    f.fields['Link 1'].error_messages['badlink'])
+        #Test for clean_<field>
+        f = F({'Link 0': u'www.example.com', 'Link type 0': u'0'},
+                instance=AnimeItem.objects.get(id=1))
+        def tmp(s):
+            raise ValidationError('Clean failed')
+        setattr(f, 'clean_Link 0', tmp)
+        self.assertEquals(f.is_valid(), False)
+        self.assertEquals(f.errors['Link 0'][-1], 'Clean failed')
+        f = F({'Link 0': u'www.example.com', 'Link type 0': u'0'},
+                instance=AnimeItem.objects.get(id=1))
+        def tmp(s):
+            return 'Clean success'
+        setattr(f, 'clean_Link 0', tmp)
+        self.assertEquals(f.is_valid(), True)
+        #All ok
+        f = F({'Link 0': u'www.example.com', 'Link type 0': u'0'},
+                    instance=AnimeItem.objects.get(id=1))
+        self.assertEquals(f.is_valid(), True)
+
+
 class FormsUserTests(TestCase):
 
     @create_user()
@@ -142,15 +271,9 @@ class FormsUserTests(TestCase):
         self.assertEquals(f.non_field_errors()[-1], f.error_messages['wrong'])
 
 
-class FormsFieldsTests(TestCase):
+class FormsFieldsTests(FormsTest):
 
     fixtures = ['2trash.json']
-
-    #remove in 1.4
-    def assertRaisesMessage(self, expected_exception, expected_message,
-                            callable_obj=None, *args, **kwargs):
-        return self.assertRaisesRegexp(expected_exception,
-            re.escape(expected_message), callable_obj, *args, **kwargs)
 
     def test_TextToAnimeItemField(self):
         f = fields.TextToAnimeItemField()
@@ -220,3 +343,57 @@ class FormsFieldsTests(TestCase):
     def test_CardImageField(self):
         f = fields.CardImageField()
         self.assertEquals(f.to_python(None), None)
+        filename = os.path.join(settings.MEDIA_ROOT, 'test', '1px.png')
+        with open(filename, 'r') as fl:
+            data = SimpleUploadedFile(filename, fl.read())
+            self.assertEquals(f.to_python(data), data)
+        filename = os.path.join(settings.MEDIA_ROOT, 'test', '1px.tga')
+        with open(filename, 'r') as fl:
+            data = SimpleUploadedFile(filename, fl.read())
+            self.assertRaisesMessage(ValidationError,
+                f.error_messages['invalid_image'].format(
+                f.error_messages['bad_format']), f.to_python, data)
+        filename = os.path.join(settings.MEDIA_ROOT, 'test', '801px.png')
+        with open(filename, 'r') as fl:
+            data = SimpleUploadedFile(filename, fl.read())
+            self.assertRaisesMessage(ValidationError,
+                f.error_messages['invalid_image'].format(
+                f.error_messages['big_image']), f.to_python, data)
+        filename = os.path.join(settings.MEDIA_ROOT, 'test', 'random.jpg')
+        with open(filename, 'r') as fl:
+            data = TemporaryUploadedFile(filename, 'image/jpeg', 1024, None)
+            self.assertRaisesMessage(ValidationError,
+                f.error_messages['invalid_image'].format(
+                u'Cannot identify image file'), f.to_python, data)
+
+class FormsJSONTests(FormsTest):
+
+    fixtures = ['2trash.json']
+
+    def test_is_iterator(self):
+        from itertools import chain
+        for item in (list(), tuple(), chain()):
+            self.assertEquals(json.is_iterator(item), True)
+        self.assertEquals(json.is_iterator(True), False)
+
+    def test_prepare_data(self):
+        from datetime import datetime, date
+        from django.utils.functional import lazy
+        self.assertEquals(json.prepare_data('a', -1), u'a')
+        for item in [u'a', 1, 1.0, 1+1j, True, None]:
+            self.assertEquals(json.prepare_data(item), item)
+        now = datetime.now()
+        today = date.today()
+        self.assertEquals(json.prepare_data(now), now.strftime(fields.DATE_FORMATS[0]))
+        self.assertEquals(json.prepare_data(today), today.strftime(fields.DATE_FORMATS[0]))
+        self.assertEquals(json.prepare_data([1]), [1])
+        self.assertEquals(json.prepare_data({1: 1}), {1: 1})
+        o = object()
+        self.assertEquals(json.prepare_data(o), unicode(o))
+
+    def test_FormSerializer(self):
+        self.assertRaisesMessage(TypeError,
+            'Form instance has bad type.', json.FormSerializer, None)
+        f = createFormFromModel(AnimeItem)(instance=AnimeItem.objects.get(id=1))
+        json.FormSerializer(f)
+

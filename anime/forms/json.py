@@ -21,6 +21,7 @@ def is_iterator(obj):
 
 def prepare_data(data, depth=None):
 
+    #Not works with 0
     depth = depth or 7
 
     if depth <= 0:
@@ -29,10 +30,7 @@ def prepare_data(data, depth=None):
     if isinstance(data, basestring):
         return smart_unicode(data)
 
-    elif isinstance(data, (int, long, float, complex)):
-        return data
-
-    elif isinstance(data, bool):
+    elif isinstance(data, (bool, int, long, float, complex)):
         return data
 
     elif data is None:

@@ -43,7 +43,7 @@ LINKS_URLS = [
 
 class TextToAnimeItemField(CharField):
     extra_error_messages = {
-        'multiple': _('Too many items with such title, try to use id instead title.'),
+        'multiple': _(u'Too many items with such title, try to use id instead title.'),
     }
 
     def __init__(self, *args, **kwargs):
@@ -69,7 +69,7 @@ class TextToAnimeItemField(CharField):
 
 class TextToAnimeNameField(CharField):
     extra_error_messages = {
-        'noname': _('AnimeItem not set.'),
+        'noname': _(u'AnimeItem not set.'),
     }
     _animeobject = None
 
@@ -95,9 +95,9 @@ class TextToAnimeNameField(CharField):
 
 class TextToAnimeLinkField(URLField):
     extra_error_messages = {
-        'notype': _('Type for this field is not set.'),
-        'badtype': _('Bad link type choosen.'),
-        'badlink': _('Bad link passed.'),
+        'notype': _(u'Type for this field is not set.'),
+        'badtype': _(u'Bad link type choosen.'),
+        'badlink': _(u'Bad link passed.'),
     }
     _linktype = None
 
@@ -136,6 +136,7 @@ class TextToAnimeLinkField(URLField):
             elif value.isdecimal():
                 value = link.format(value)
         except AttributeError:
+            #Check value type first, str cannot into isdecimal
             raise ValidationError(self.error_messages['badtype'])
         return super(TextToAnimeLinkField, self).to_python(value)
 
@@ -216,6 +217,16 @@ class UnknownDateField(DateField):
 
 
 class CardImageField(ImageField):
+    extra_error_messages = {
+        'bad_format': _(u'Only PNG, JPEG and GIF formats are accepted'),
+        'big_image': _(u'Image too big'),
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(CardImageField, self).__init__(*args, **kwargs)
+        self.error_messages.update(self.extra_error_messages)
+        self.error_messages['invalid_image'] = u'{1}. {0}'.format(
+                self.error_messages.get('invalid_image', ''), u'{0}')
 
     def to_python(self, data):
         """
@@ -249,9 +260,9 @@ class CardImageField(ImageField):
             trial_image = Image.open(file)
             trial_image.load()
             if trial_image.format not in ('PNG', 'JPEG', 'GIF'):
-                raise ValueError(_('Only PNG, JPEG and GIF formats are accepted.'))
-            if max(trial_image.size) >= 800:
-                raise ValueError(_('Image too big.'))
+                raise ValueError(self.error_messages['bad_format'])
+            if max(trial_image.size) >= 801:
+                raise ValueError(self.error_messages['big_image'])
             # Since we're about to use the file again we have to reset the
             # file object if possible.
             if hasattr(file, 'reset'):
@@ -266,7 +277,9 @@ class CardImageField(ImageField):
             # raised. Catch and re-raise.
             raise
         except Exception, e: # Python Imaging Library doesn't recognize it as an image
-            raise ValidationError(self.error_messages['invalid_image'] + ' ' + str(e))
+            string = unicode(e)
+            string = string[0].capitalize() + string[1:]
+            raise ValidationError(self.error_messages['invalid_image'].format(string))
         if hasattr(f, 'seek') and callable(f.seek):
             f.seek(0)
         return f

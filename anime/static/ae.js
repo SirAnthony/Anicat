@@ -309,6 +309,8 @@ var edit = new (function edit_class(){
             }
         }
         var id = (resp.currentid ? resp.currentid : resp.id);
+        if(resp.currentid && (isArray(resp.text) && !resp.text.length))
+            resp.id = 0;
         this.putFields.call(this, divs, field, id, resp);
     }
 

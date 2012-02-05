@@ -60,7 +60,7 @@ class ImageRequestForm(RequestForm):
     def __init__(self, *args, **kwargs):
         anime = kwargs.pop('instance', None)
         if not anime or not anime.id:
-            raise ValueError(self.error_messages['notexists'])
+            raise ValueError(unicode(self.error_messages['notexists']))
         if not isinstance(anime, AnimeItem):
             raise TypeError(self.error_messages['notanime'].format(type(anime.__class__).__name__))
         instance = AnimeImageRequest(anime=anime)
@@ -75,8 +75,6 @@ class ImageRequestForm(RequestForm):
             return
         image = self.files.get(name)
         try:
-            if not image:
-                raise ValidationError(self.error_messages['required'])
             fname, ext = image.name.rsplit('.', 1)
             image.name = sha1(fname.encode('utf-8')).hexdigest()
             filename = u'%s%s.%s' % (image.size, image.name, ext.lower())
