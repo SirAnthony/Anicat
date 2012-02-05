@@ -138,7 +138,7 @@ class NormalTest(TestCase):
         self.assertEquals(self.client.get('/history/add/').status_code, 200)
 
 
-@skip
+#@skip
 class BigTest(TestCase):
 
     fixtures = ['100trash.json']

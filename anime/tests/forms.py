@@ -396,4 +396,5 @@ class FormsJSONTests(FormsTest):
             'Form instance has bad type.', json.FormSerializer, None)
         f = createFormFromModel(AnimeItem)(instance=AnimeItem.objects.get(id=1))
         json.FormSerializer(f)
+        #TODO: full test
 
