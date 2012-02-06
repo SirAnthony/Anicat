@@ -51,6 +51,8 @@ class RequestsFormsTest(FormsTest):
         self.assertEquals(f.is_valid(), False)
         filename = os.path.join(settings.MEDIA_ROOT, 'test', '1px.png')
         resultname = os.path.join(settings.MEDIA_ROOT, '1619e0741c0526b10c74eda382595812bd6679adf84.png')
+        if os.path.exists(resultname):
+            os.unlink(resultname)
         with open(filename, 'r') as fl:
             f = F(files={'text': SimpleUploadedFile(filename, fl.read())}, instance=anime)
             self.assertEquals(f.is_valid(), True)

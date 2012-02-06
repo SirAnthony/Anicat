@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from anime.edit.objects import (EditError, EditableDefault,
-                                Anime, State, Bundle)
+from anime.edit.default import EditError, EditableDefault
+from anime.edit.simple import Anime, State, Bundle
 from anime.edit.animebased import Name, Links
 from anime.edit.requests import (Request, Animerequest, Feedback, Image)
 
 
-def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
+def edit(request, item_id=0, modelname='anime', field=None, ajaxSet=True):
     if not modelname:
         modelname = 'anime'
     response = {
         'response': 'edit',
         'status': False,
-        'id': itemId,
+        'id': item_id,
         'model': modelname,
         'field': field
     }
@@ -22,7 +22,7 @@ def edit(request, itemId=0, modelname='anime', field=None, ajaxSet=True):
     except KeyError:
         editable = EditableDefault
     try:
-        eobj = editable(request, itemId, modelname, field)
+        eobj = editable(request, item_id, modelname, field)
         response.update(
             eobj.process('get' if not ajaxSet else request.method.lower()))
     except EditError, e:

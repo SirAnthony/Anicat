@@ -1,7 +1,7 @@
 
 from django.core.cache import cache
 from django.utils.translation import ugettext_lazy as _
-from anime.edit.objects import EditableDefault, EditError
+from anime.edit.default import EditError, EditableDefault
 from anime.edit.animebased import EditableAnimeBased
 
 

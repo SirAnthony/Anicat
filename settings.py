@@ -76,7 +76,7 @@ IMAGES_ROOT = os.path.join(PROJECT_ROOT, 'images')
 
 FILE_UPLOAD_HANDLERS = (
     'django.core.files.uploadhandler.MemoryFileUploadHandler',
-    'anime.classes.QuotaUploadHandler',
+    'anime.upload.QuotaUploadHandler',
 )
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a

@@ -42,8 +42,8 @@ def anime_request(request):
 
 
 @render_to('anime/edit.html')
-def edit(request, itemId, model='anime', field=None):
-    res = editMethods.edit(request, itemId, model, field)
+def edit(request, item_id, model='anime', field=None):
+    res = editMethods.edit(request, item_id, model, field)
     if res.get('status', None):
         rid = res.get('id')
         if model == 'bundle':

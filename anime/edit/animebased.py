@@ -1,7 +1,7 @@
 
 from django.db import IntegrityError
 from django.utils.translation import ugettext_lazy as _
-from anime.edit.objects import EditableDefault, EditError
+from anime.edit.default import EditError, EditableDefault
 from anime.models import AnimeItem, AnimeLink
 
 
@@ -10,10 +10,10 @@ class EditableAnimeBased(EditableDefault):
 
     def setObject(self):
         try:
-            self.obj = AnimeItem.objects.get(id=self.itemId)
+            self.obj = AnimeItem.objects.get(id=self.item_id)
         except AnimeItem.DoesNotExist:
             raise EditError(_('Bad id passed.'))
-        self.retid = self.itemId
+        self.retid = self.item_id
 
 
 class Name(EditableAnimeBased):

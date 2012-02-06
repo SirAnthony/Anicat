@@ -7,7 +7,7 @@ from anime.forms.User import NotActivePasswordResetForm
 
 
 urlpatterns = patterns(
-    'anime.views',
+    'anime.views.base',
     (r'^$', 'index'),
     # TODO Split regexp
     (r'^(user/(?P<user>\d+))?/?(show/(?P<status>\d+))?/?(sort/(?P<order>-?\w+))?/?(?P<page>\d+)?/$', 'index'),
@@ -20,10 +20,13 @@ urlpatterns = patterns(
     url(r'^requests/(status/(?P<status>\d+))?/?(type/(?P<rtype>\d+))?/?(?P<page>\d+)?/?$', 'requests', name='requests'),
     url(r'^css/$', 'generateCss', name='user_css'),
     (r'^test/$', 'test'),
+)
+
+urlpatterns += patterns('anime.views.history',
     (r'^history/add/?(f/(?P<field>\w+))?/?(?P<page>\d+)?/$', 'history'),
 )
 
-urlpatterns += patterns('anime.userviews',
+urlpatterns += patterns('anime.views.user',
     url(r'^login/$', 'login', name='login'),
     (r'^login/error/$', 'social_error'),
     (r'^login/done/$', direct_to_template, {'template': 'anime/user/social-done.html'}),
@@ -54,15 +57,15 @@ urlpatterns += patterns('django.contrib.auth.views',
         'template_name': 'anime/user/password.html'}, 'password_change'),
 )
 
-urlpatterns += patterns('anime.editview',
+urlpatterns += patterns('anime.views.edit',
     url(r'^add/$', 'add', name='edit_add'),
     (r'^feedback/$', 'feedback'),
     (r'^animerequest/$', 'anime_request'),
     url(r'^request/(?P<request_id>\d+)/?$', 'request_item', name='request_item'),
-    (r'^edit/(?P<model>[a-zA-Z_]+)?/?(?P<itemId>\d+)/?(?P<field>[a-zA-Z_,]+)?/?$', 'edit'),
+    (r'^edit/(?P<model>[a-zA-Z_]+)?/?(?P<item_id>\d+)/?(?P<field>[a-zA-Z_,]+)?/?$', 'edit'),
 )
 
-urlpatterns += patterns('anime.ajax',
+urlpatterns += patterns('anime.views.ajax',
     (r'^ajax/get/$', 'get'),
     (r'^ajax/set/$', 'change'),
     (r'^ajax/add/$', 'add'),
