@@ -72,6 +72,13 @@ var ajax = new (function(){
         message.unlock()
     }
 
+    this.processFormRequest = function(opts){
+        setRequest();
+        opts.response = 'form';
+        processingResult(opts);
+        message.unlock()
+    }
+
     this.processSetRequest = function(opts){
         setRequest();
         opts.response = 'edit';
@@ -135,6 +142,10 @@ var ajax = new (function(){
 
                 case 'edit':
                     edit.processResponse(resp);
+                break;
+
+                case 'form':
+                    edit.processForm(resp);
                 break;
 
                 case 'error':

@@ -29,13 +29,21 @@ def get(request):
 
 @ajaxResponse
 def change(request):
-    try:
-        aid = int(request.POST.get('id', 0))
-    except Exception, e:
-        return {'text': 'Invalid id: ' + str(e)}
-    response = editMethods.edit(request, aid, request.POST.get('model', None),
-                                request.POST.get('field', None),
-                                request.POST.get('set', None))
+    response = editMethods.edit(request, request.POST.get('id', 0),
+                                request.POST.get('model', None),
+                                request.POST.get('field', None))
+    return process_edit_response(response)
+
+
+@ajaxResponse
+def form(request):
+    response = editMethods.edit(request, request.POST.get('id', 0),
+                                request.POST.get('model', None),
+                                request.POST.get('field', None), True)
+    return process_edit_response(response)
+
+
+def process_edit_response(response):
     if 'form' in response:
         if 'status' in response and not response['status']:
             del response['form']

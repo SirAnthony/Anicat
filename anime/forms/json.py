@@ -169,7 +169,7 @@ class FormSerializer(object):
                 fields.append(field)
 
         if top_errors:
-            output = top_errors
+            output.extend(top_errors)
         output.extend(fields)
         if hidden_fields: # Insert any hidden fields in the last row.
             output.extend(hidden_fields)

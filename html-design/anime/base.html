@@ -22,7 +22,7 @@
     <script type="text/javascript" src="/static/card.js"></script>
     {% if not user.is_authenticated %}<script type="text/javascript" src="/static/userstorage.js"></script>{% endif %}
     {% block customScripts %}{% endblock %}
-    {% if user.is_authenticated %}{% addForm %}{% endif %}
+    {% if user.is_authenticated %}{% addForm %}{{ AddForm.media.render }}{% endif %}
 </head>
 <body>
     <div id="header" class="thdtbl">

@@ -32,8 +32,8 @@ var forms = new (function forms_class(){
             childs.push({'a': {className: 'right',
                 'href': edit.getFieldLink(id, fieldname),
                 innerText: 'Edit', target: '_blank',
-                onclick: (function(i, f){ return function(){
-                    return edit.rf(i, f); }})(id, fieldname) }});
+                onclick: (function(i, f){ return function(e){
+                    return edit.rf(i, f, e); }})(id, fieldname) }});
         childs.push({'h4': {innerText: capitalise(title)}});
         if(isArray(fields))
             childs.push.apply(childs, fields); //lolo
@@ -97,7 +97,7 @@ var forms = new (function forms_class(){
                     {'td': {className: "bundle_number", innerText: g+1}},
                     'td', [{'a': {
                         href: '/card/' + cur.elemid + '/',
-                        onclick: (function(c){ return function(){ return Card.get(c); }})(cur.elemid),
+                        onclick: (function(c){ return function(e){ return Card.get(c, e); }})(cur.elemid),
                         innerText: encd(cur.name),
                         className: 's s' + cur.elemid
                     }}]

@@ -87,7 +87,7 @@ class AnimeBundleForm(DynamicModelForm):
         try:
             if data and 'currentid' in data:
                 self._currentid = int(data.get('currentid'))
-                if len(data.keys()) == 1:
+                if len([x for x in data.keys() if x.startswith('Bundle ')]) < 1:
                     data = None
         except:
             pass
@@ -112,7 +112,8 @@ class AnimeBundleForm(DynamicModelForm):
         if self._currentid:
             fields['currentid'] = CharField(initial=self._currentid,
                 show_hidden_initial=True, widget=HiddenInput(attrs={
-                    "id": "currentid_b_{0}".format(instance.id or 0)}))
+                    "id": "currentid_b_{0}".format(instance.id or 0)}),
+                required=False)
         self.setFields(fields)
         self.setData(data)
 
@@ -121,12 +122,13 @@ class AnimeBundleForm(DynamicModelForm):
             del self.cleaned_data['currentid']
         self._validate_unique = True
         if not self._instance.id:
-            if len([x for x in self.cleaned_data.itervalues() if x]) == 1:
+            iv = [x for x in self.cleaned_data.itervalues() if x]
+            if len(iv) == 1:
                 raise ValidationError(self.error_messages['one_item'])
-            if  self._currentid and \
-                not len([x for x in self.cleaned_data.itervalues() \
-                        if x and x.id == self._currentid]):
-                raise ValidationError(self.error_messages['no_item'])
+            elif len(iv) > 1:
+                if self._currentid and \
+                   not len([x for x in iv if x.id == self._currentid]):
+                    raise ValidationError(self.error_messages['no_item'])
         l = {}
         for k, v in self.cleaned_data.items():
             if not v:

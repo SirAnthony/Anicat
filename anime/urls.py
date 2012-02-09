@@ -66,12 +66,13 @@ urlpatterns += patterns('anime.views.edit',
 )
 
 urlpatterns += patterns('anime.views.ajax',
-    (r'^ajax/get/$', 'get'),
-    (r'^ajax/set/$', 'change'),
-    (r'^ajax/add/$', 'add'),
-    (r'^ajax/login/$', 'login'),
-    (r'^ajax/register/$', 'register'),
-    (r'^ajax/search/$', 'search'),
+    url(r'^ajax/get/$', 'get', name='ajax_get'),
+    url(r'^ajax/set/$', 'change', name='ajax_set'),
+    url(r'^ajax/form/$', 'form', name='ajax_form'),
+    url(r'^ajax/add/$', 'add', name='ajax_add'),
+    url(r'^ajax/login/$', 'login', name='ajax_login'),
+    url(r'^ajax/register/$', 'register', name='ajax_register'),
+    url(r'^ajax/search/$', 'search', name='ajax_search'),
 )
 
 urlpatterns += patterns('social_auth.views',

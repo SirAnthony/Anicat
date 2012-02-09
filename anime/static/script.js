@@ -101,7 +101,7 @@ var searcher = new ( function(){
             this.input.focus();
     }
 
-    this.send = function(page){
+    this.send = function(page, e){
         if(!this.loaded) return;
         if(!page) page = 0;
         var val;
@@ -138,7 +138,7 @@ var searcher = new ( function(){
                             {'a': {className: 'cardurl', 'target': '_blank',
                                 'href': '/card/'+elem.id+'/',
                                 onclick: ( function(id){
-                                            return function(){return Card.get(id);};
+                                            return function(e){return Card.get(id, e);};
                                         })(elem.id)}}, [
                                 {'img': {'src': '/static/arrow.gif', 'alt': 'Go'}},
                             ]
@@ -166,7 +166,7 @@ var searcher = new ( function(){
                         pg.push(element.create('span', {innerText: '[' + i + ']'}));
                     }else{
                         pg.push(element.create('a', {innerText: i,
-                                onclick: (function(pg){ return function(){ searcher.send(pg);};})(i-1)}));
+                                onclick: (function(pg){ return function(e){ searcher.send(pg, e);};})(i-1)}));
                     }
                 }
                 element.appendChild(this.result, [{'div': {'id': 'srchpg'}}, pg]);

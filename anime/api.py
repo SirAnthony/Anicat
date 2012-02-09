@@ -199,18 +199,6 @@ class Add(Base):
         'id': int,
     }
 
-    errors = {
-        'status': False,
-        'response': 'add',
-        'text': NoneableDict({
-            'releasedAt': [u'This field is required.'],
-            'episodesCount': [u'This field is required.'],
-            'title': [u'This field is required.'],
-            'releaseType': [u'This field is required.'],
-            'genre': [u'This field is required.'],
-            'duration': [u'This field is required.']
-        })
-    }
 
 class Get(Base):
 
@@ -260,7 +248,7 @@ class Search(Base):
 
 class Forms(Base):
 
-    link = 'set/'
+    link = 'form/'
 
     params = {
         'id': int,
@@ -325,7 +313,6 @@ class Set(Get):
         'id': int,
         'model': unicode,
         'field': Noneable(unicode),
-        'set': True
     }
 
     returns = {

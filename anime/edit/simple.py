@@ -63,8 +63,7 @@ class State(EditableDefault):
 
 class Bundle(EditableDefault):
 
-    def get(self, formobject):
-        data = None
+    def get(self, formobject, data=None):
         if 'currentid' in self.request.POST:
             data = {'currentid': self.request.POST['currentid']}
         return super(Bundle, self).get(formobject, data)

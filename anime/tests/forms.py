@@ -169,8 +169,9 @@ class FormsDynamicTests(FormsTest):
         self.assertEquals(f.non_field_errors()[-1],
                           f.error_messages['no_item'])
         #Currentid without data
-        f = F({'currentid': '1'}, instance=AnimeBundle.objects.get(id=1))
+        f = F({'currentid': '1', 'blah': None}, instance=AnimeBundle.objects.get(id=1))
         self.assertEquals(f.is_valid(), False)
+        self.assertEquals((f.errors, f.non_field_errors()), ({}, []))
         #Bad data
         #TODO: Add more getDataCount tests
         self.assertEquals(f.getDataCount({},'Bundle ', None), (1, []))

@@ -1,5 +1,6 @@
 
 from datetime import datetime
+from django.conf import settings
 from django.core.cache import cache
 from django.db.models.fields import FieldDoesNotExist
 from django.utils.translation import ugettext_lazy as _
@@ -10,7 +11,35 @@ from anime.models import AnimeItem, EDIT_MODELS
 
 
 class EditError(Exception):
-    pass
+    def __init__(self, message, code=None, params=None):
+        import operator
+        from django.utils.encoding import force_unicode
+        if isinstance(message, dict):
+            self.message_dict = message
+            # Reduce each list of messages into a single list.
+            message = reduce(operator.add, message.values())
+        if isinstance(message, list):
+            self.messages = [force_unicode(msg) for msg in message]
+        else:
+            self.code = code
+            self.params = params
+            self.messages = force_unicode(message)
+
+    def __str__(self):
+        if hasattr(self, 'message_dict'):
+            return repr(self.message_dict)
+        if isinstance(self.messages, basestring):
+            try:
+                return str(self.messages)
+            except:
+                pass
+        return repr(self.messages)
+
+    def __repr__(self):
+        if hasattr(self, 'message_dict'):
+            return 'EditError({0})'.format(repr(self.message_dict))
+        return 'EditError({0})'.format(repr(self.messages))
+
 
 
 EDITABLE_LIST = [
@@ -22,22 +51,34 @@ EDITABLE_LIST = [
 
 
 class EditableDefault(object):
+    error_messages = {
+        'not_loggined': _('You must be logged in.'),
+        'bad_model': _('Bad model name passed.'),
+        'bad_id': _('Bad id passed.'),
+        'bad_fields': _('Bad fields passed.'),
+        'bad_request': _('Bad request type.'),
+        'bad_form': _('Bad form.'),
+        'forbidden': _('You cannot do this.'),
+        'wait': _('You cannot do this now. Please wait for {0} days.'),
+        'error': _('Error "{0}" has occured.'),
+    }
 
     def __init__(self, request, item_id=0, modelname='anime', field=None):
         if not request.user.is_authenticated():
-            raise EditError(_('You must be logged in.'))
+            raise EditError(self.error_messages['not_loggined'])
         elif modelname not in EDIT_MODELS:
-            raise EditError(_('Bad model name passed.'))
+            raise EditError(self.error_messages['bad_model'])
         elif not request.user.is_active and modelname not in EDITABLE_LIST:
-            raise EditError(_('You cannot do this.'))
+            raise EditError(self.error_messages['forbidden'])
         elif (datetime.now() - request.user.date_joined).days < 15:
-            raise EditError(_('You cannot do this now. Please wait for {0} days.'.format(
-                15 - (datetime.now() - request.user.date_joined).days)))
+            raise EditError(self.error_messages['wait'].format(
+                settings.DAYS_BEFORE_EDIT - (
+                    datetime.now() - request.user.date_joined).days))
 
         try:
             self.item_id = int(item_id)
         except:
-            raise EditError(_('Bad id passed.'))
+            raise EditError(self.error_messages['bad_id'])
 
         self.request = request
         self.model = EDIT_MODELS[modelname]
@@ -51,7 +92,7 @@ class EditableDefault(object):
                 self.fields = field.split(',')
                 map(lambda x: self.model._meta.get_field(x), self.fields)
             except FieldDoesNotExist:
-                raise EditError(_('Bad fields passed.'))
+                raise EditError(self.error_messages['bad_fields'])
 
         self.setObject()
 
@@ -63,10 +104,12 @@ class EditableDefault(object):
 
     def process(self, rtype):
         formobject = createFormFromModel(self.model, self.fields)
+        #if not formobject:
+        #    raise EditError(self.error_messages['bad_form'])
         try:
-            f = getattr(self, rtype)
+            f = getattr(self, rtype.lower())
         except AttributeError:
-            raise EditError(_('Bad request type.'))
+            raise EditError(self.error_messages['bad_request'])
         r = f(formobject)
         if f == self.post:
             try:
@@ -77,16 +120,16 @@ class EditableDefault(object):
         return r
 
     def get(self, formobject, data=None):
-        if not formobject:
-            return {}
         r = {'form': formobject(data, instance=self.obj)}
-        # FIXME: cruve
-        if self.request.method == 'POST':
-            r.update({
-                'status': True,
-                'id': self.retid or getattr(self.obj, 'id', 0),
-                'text': None
-            })
+        return r
+
+    def form(self, formobject, data=None):
+        r = self.get(formobject, data)
+        r.update({
+            'status': True,
+            'id': self.retid or getattr(self.obj, 'id', 0) or 0,
+            'text': None
+        })
         return r
 
     def post(self, formobject):
@@ -96,16 +139,17 @@ class EditableDefault(object):
         ret = {}
         try:
             if not self.obj or not form.is_valid():
-                raise EditError
+                raise EditError('')
             self.save(form, self.obj)
         except Exception, e:
             #if not isinstance(e, EditError):
             #    pass
             if unicode(e):
-                form.addError('Error "%s" has occured.' % unicode(e))
+                form.addError(self.error_messages['error'].format(e))
             ret['text'] = form.errors
             ret['form'] = form
         else:
+            ret['response'] = 'edit'
             ret['status'] = True
             ret.update(self.explore_result())
         ret['id'] = self.retid or getattr(self.obj, 'id', 0) or 0

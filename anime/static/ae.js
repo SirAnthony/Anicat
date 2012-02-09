@@ -1,5 +1,4 @@
 //add-edit classes module
-//var seturl = '/cgi-bin/aniseted.pl';
 //################################################################
 //##################### Add #######################################
 //################################################################
@@ -100,7 +99,7 @@ var edit = new (function edit_class(){
 
     this.rf = function(id, field, e){
         if(!user.logined && field == 'state')
-            ajax.processSetRequest({'status': true, 'id': id, 'model': field});
+            ajax.processFormRequest({'status': true, 'id': id, 'model': field});
         else
             this.requestForm(id, field);
         return false;
@@ -121,7 +120,7 @@ var edit = new (function edit_class(){
                 q['field'] = this.edits[field];
             }
         }
-        ajax.loadXMLDoc(url+'set/', q);
+        ajax.loadXMLDoc(url+'form/', q);
     }
 
     this.getFieldLink = function(id, name){
@@ -144,8 +143,8 @@ var edit = new (function edit_class(){
         if(!form)
             return;
         var formData = this.getFormData(form);
-        formData['set'] = true;
         if(!user.logined && formData.model == 'state'){
+            formData['set'] = true;
             ajax.processSetRequest(formData);
         }else{
             ajax.loadXMLDoc(url+'set/', formData);
@@ -171,87 +170,80 @@ var edit = new (function edit_class(){
         return formData;
     }
 
-    this.processResponse = function(resp){
+    this.processForm = function(resp){
 
         if(!resp.id)
             resp.id = 0;
-
-        if(!user.logined && resp.model == 'state' && !resp.set){
-            var s = catalog_storage.getStatus(resp.id, (resp.text ? resp.text.select : null));
-            resp.form = [{"select": {"name": "state", "required": true, "value": s.state, "label": "State", "choices": [["0", "None"], ["1", "Want"], ["2", "Now"], ["3", "Done"], ["4", "Dropped"], ["5", "Partially watched"]], "id": "id_state"}}];
-        }
 
         message.hide();
 
         var field = (resp.field ? resp.field : resp.model);
         if(this.fields[field]) field = this.fields[field];
 
+        if(!user.logined && resp.model == 'state'){
+            var s = catalog_storage.getStatus(resp.id, (resp.text ? resp.text.select : null));
+            resp.form = [{"select": {"name": "state", "required": true, "value": s.state, "label": "State", "choices": [["0", "None"], ["1", "Want"], ["2", "Now"], ["3", "Done"], ["4", "Dropped"], ["5", "Partially watched"]], "id": "id_state"}}];
+        }
+
         if(resp.status){
+            if(!resp.form)
+                throw new Error('Server did not return form.')
 
-            if(resp.form){
-                if(this.status_menu_edit){
-                    message.create()
-                    message.addTree(element.create('label', {'for': field + resp.id,
-                                    innerText: capitalise(field) + ':'}));
-                    message.addTree(forms.getField(field, resp.id));
-                    message.show();
-                }
-                for(var fld=0; fld<resp.form.length; fld++){
-                    for(var type in resp.form[fld]){
-                        var f = resp.form[fld];
-                        if(type == 'select'){
-                            if(f[type].choices && isString(f[type].choices) && /^range\(/.test(f[type].choices))
-                                resp.form[fld][type].choices = eval(f[type].choices);
-                            if(resp.model == 'state')
-                                resp.form[fld][type].onchange = function(){ edit.send(this.parentNode.parentNode); };
-                        }
+            if(this.status_menu_edit){
+                message.create()
+                message.addTree(element.create('label', {'for': field + resp.id,
+                                innerText: capitalise(field) + ':'}));
+                message.addTree(forms.getField(field, resp.id));
+                message.show();
+            }
+            for(var fld=0; fld<resp.form.length; fld++){
+                for(var type in resp.form[fld]){
+                    var f = resp.form[fld];
+                    if(type == 'select'){
+                        if(f[type].choices && isString(f[type].choices) && /^range\(/.test(f[type].choices))
+                            resp.form[fld][type].choices = eval(f[type].choices);
+                        if(resp.model == 'state')
+                            resp.form[fld][type].onchange = function(){ edit.send(this.parentNode.parentNode); };
                     }
                 }
-
-                if(field == 'name' || field == 'bundle'){
-                    resp.form.push({'a': {name: 'id', className: 'right', innerText: 'Add field',
-                    onclick: (function(name){ return function(){
-                        var num = (function(el){
-                            var num = 0;
-                            do{
-                                if(el.tagName == 'INPUT' && el.type == 'text')
-                                    num += 1;
-                            }while(el = el.nextSibling)
-                            return num;
-                        })(this.parentNode.firstChild);
-                        var nm = name + ' ' + num;
-                        element.insert(this,
-                            {'input': {'type': 'text', 'id': 'id_'+nm, 'name': nm}});
-                    }})(capitalise(field))}});
-                }
-
-                var spans = getElementsByClassName(field+resp.id, null);
-                resp.form.push({'input': {type: 'hidden', name: 'id', value: resp.id}});
-                resp.form.push({'input': {type: 'hidden', name: 'model', value: resp.model}});
-
-                if(resp.field)
-                    resp.form.push({'input': {type: 'hidden', name: 'field', value: resp.field}});
-                for(var i = 0; i < spans.length; i++){
-                    var s = element.create('div', {className: 'editDiv edit_' + field + resp.id}, resp.form);
-                    if(!this.status_menu_edit){
-                        s.style.width = (field != 'links') ? '190px' : '300px';
-                        element.insert(spans[i].parentNode.firstChild, {'a': {className: 'right',
-                            innerText: 'Save', onclick: function(){ edit.send(this.parentNode); }}}, true);
-                        element.remove(spans[i].parentNode.firstChild);
-                    }
-                    element.insert(spans[i], s);
-                    element.remove(spans[i]);
-                }
-                if(this.status_menu_edit)
-                    this.status_menu_edit = false;
-                return;
             }
 
-            if(!resp.text)
-                throw new Error('Server returned blank response.');
+            if(field == 'name' || field == 'bundle'){
+                resp.form.push({'a': {name: 'id', className: 'right', innerText: 'Add field',
+                onclick: (function(name){ return function(){
+                    var num = (function(el){
+                        var num = 0;
+                        do{
+                            if(el.tagName == 'INPUT' && el.type == 'text')
+                                num += 1;
+                        }while(el = el.nextSibling)
+                        return num;
+                    })(this.parentNode.firstChild);
+                    var nm = name + ' ' + num;
+                    element.insert(this,
+                        {'input': {'type': 'text', 'id': 'id_'+nm, 'name': nm}});
+                }})(capitalise(field))}});
+            }
 
-            this.fillField(field, resp);
+            var spans = getElementsByClassName(field+resp.id, null);
+            resp.form.push({'input': {type: 'hidden', name: 'id', value: resp.id}});
+            resp.form.push({'input': {type: 'hidden', name: 'model', value: resp.model}});
 
+            if(resp.field)
+                resp.form.push({'input': {type: 'hidden', name: 'field', value: resp.field}});
+            for(var i = 0; i < spans.length; i++){
+                var s = element.create('div', {className: 'editDiv edit_' + field + resp.id}, resp.form);
+                if(!this.status_menu_edit){
+                    s.style.width = (field != 'links') ? '190px' : '300px';
+                    element.insert(spans[i].parentNode.firstChild, {'a': {className: 'right',
+                        innerText: 'Save', onclick: function(e){ edit.send(this.parentNode, e); }}}, true);
+                    element.remove(spans[i].parentNode.firstChild);
+                }
+                element.insert(spans[i], s);
+                element.remove(spans[i]);
+            }
+            if(this.status_menu_edit)
+                this.status_menu_edit = false;
         }else{
             if(isHash(resp.text)){
                 for(var target in resp.text){
@@ -269,8 +261,31 @@ var edit = new (function edit_class(){
                     }
                 }
             }else{
-                throw new Error;
+                throw new Error(resp.text);
             }
+        }
+    }
+
+    this.processResponse = function(resp){
+
+        if(!resp.id)
+            resp.id = 0;
+
+        message.hide();
+
+        var field = (resp.field ? resp.field : resp.model);
+        if(this.fields[field]) field = this.fields[field];
+
+        if(resp.status){
+
+            if(!resp.text)
+                throw new Error('Server returned blank response.');
+
+            this.fillField(field, resp);
+
+        }else{
+            // This should not occur
+            throw new Error(resp.text);
         }
     }
 
@@ -340,7 +355,7 @@ var edit = new (function edit_class(){
             element.insert(divs[i].parentNode.firstChild, {'a': {
                 className: 'right', 'href': this.getFieldLink(resp.id, field),
                 innerText: 'Edit', style: {display: "none"}, target: '_blank',
-                onclick: function(){ return edit.rf(resp.id, field); }}},
+                onclick: function(e){ return edit.rf(resp.id, field, e); }}},
                 true);
             element.remove(divs[i].parentNode.firstChild);
 
