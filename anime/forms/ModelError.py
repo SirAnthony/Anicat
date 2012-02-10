@@ -26,7 +26,9 @@ class ReadOnlyModelForm(ModelForm):
             raise ValidationError(_('This form is read-only for you.'))
         return super(ReadOnlyModelForm, self).clean()
 
+
 class ErrorModelForm(ModelForm):
+
     def __init__(self, *args, **kwargs):
         #FUUUU
         kwargs.pop('user', None)
@@ -37,6 +39,7 @@ class ErrorModelForm(ModelForm):
 
     class Meta:
         pass
+
 
 class AnimeForm(ErrorModelForm):
     releasedAt = UnknownDateField(label='Released')

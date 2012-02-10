@@ -29,10 +29,7 @@ class EditError(Exception):
         if hasattr(self, 'message_dict'):
             return repr(self.message_dict)
         if isinstance(self.messages, basestring):
-            try:
-                return str(self.messages)
-            except:
-                pass
+            return str(self.messages)
         return repr(self.messages)
 
     def __repr__(self):
@@ -64,6 +61,8 @@ class EditableDefault(object):
     }
 
     def __init__(self, request, item_id=0, modelname='anime', field=None):
+        if hasattr(self, 'extra_error_messages'):
+            self.error_messages.update(self.extra_error_messages)
         if not request.user.is_authenticated():
             raise EditError(self.error_messages['not_loggined'])
         elif modelname not in EDIT_MODELS:
@@ -162,9 +161,12 @@ class EditableDefault(object):
         obj.save()
 
     def explore_result(self):
-        ret = {}
         retid = self.retid or getattr(self.obj, 'id', 0)
         anime = AnimeItem.objects.get(id=retid)
+        return self.explore_result_item(anime)
+
+    def explore_result_item(self, anime):
+        ret = {}
         field_expl = FieldExplorer(self.field or self.modelname)
         try:
             ret['text'] = field_expl.get_value(anime, self.request)

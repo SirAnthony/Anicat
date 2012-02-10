@@ -17,16 +17,20 @@ class EditableAnimeBased(EditableDefault):
 
 
 class Name(EditableAnimeBased):
+    extra_error_messages = {
+        'not_exists': _('{0} does not exists.'),
+        'no_names': _('Cannot delete all names. One name must be left.'),
+    }
 
     def save(self, form, obj):
         if not obj or not obj.id:
-            raise ValueError('%s does not exists.' % type(obj).__name__)
+            raise ValueError(self.error_messages['not_exists'].format(type(obj).__name__))
         names = obj.animenames.all()
         cleaned = form.cleaned_data.values()
         newNames = filter(lambda x: x and x not in names, cleaned)
         oldNames = filter(lambda x: x and x not in cleaned, names)
         if not newNames and len(oldNames) == len(names):
-            raise Exception(_('Cannot delete all names. One name must be left.'))
+            raise Exception(self.error_messages['no_names'])
         for name in oldNames:
             try:
                 newname = newNames.pop()

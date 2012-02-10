@@ -10,6 +10,7 @@ from anime.forms.ModelError import ReadOnlyModelForm, ErrorModelForm
 from anime.forms.fields import CardImageField
 from anime.models import AnimeItem, AnimeImageRequest
 
+
 class RequestForm(ErrorModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -23,6 +24,7 @@ class RequestForm(ErrorModelForm):
 
     class Meta:
         exclude = ('user', 'anime', 'status')
+
 
 class PureRequestForm(ReadOnlyModelForm, RequestForm):
     error_messages = {
@@ -44,10 +46,13 @@ class PureRequestForm(ReadOnlyModelForm, RequestForm):
     class Meta:
         exclude = ('user', 'anime', 'text', 'requestType',)
 
+
 class AnimeItemRequestForm(RequestForm):
     text = CharField(label="Request anime", widget=Textarea)
+
     class Meta:
         exclude = ('user', 'anime', 'requestType', 'reason', 'status')
+
 
 class ImageRequestForm(RequestForm):
     error_messages = {
@@ -57,6 +62,7 @@ class ImageRequestForm(RequestForm):
         'loaded': _('This file already loaded.')
     }
     text = CardImageField(max_length=150, label='File')
+
     def __init__(self, *args, **kwargs):
         anime = kwargs.pop('instance', None)
         if not anime or not anime.id:
@@ -96,6 +102,7 @@ class ImageRequestForm(RequestForm):
 
     class Meta:
         exclude = ('user', 'anime', 'requestType', 'reason', 'status')
+
 
 class FeedbackForm(RequestForm):
     text = CharField(label=_('Please tell about your suffering'), widget=Textarea)

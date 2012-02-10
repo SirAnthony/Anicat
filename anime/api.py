@@ -143,7 +143,7 @@ class Base(object):
         return self.link_prefix + self.link
 
     def get_params(self):
-        return self.params
+        return self.params.copy()
 
     def get_errors(self):
         return errors

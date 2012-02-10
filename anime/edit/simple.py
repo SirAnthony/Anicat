@@ -10,13 +10,16 @@ from anime.utils.catalog import updateMainCaches
 
 
 class Anime(EditableDefault):
+    extra_error_messages = {
+        'all_required': _('Cannot save new instance without all required fields.'),
+    }
 
     def save(self, form, obj):
         if not self.item_id:
             if not self.fields:
                 obj.save()
             else:
-                raise ValueError(_('Cannot save new instance without all required fields.'))
+                raise ValueError(self.error_messages['all_required'])
         super(Anime, self).save(form, obj)
 
     def last(self):
@@ -28,12 +31,15 @@ class Anime(EditableDefault):
 
 
 class State(EditableDefault):
+    extra_error_messages = {
+        'invalid': _('Status value not valid.'),
+    }
 
     def setObject(self):
         try:
             anime = AnimeItem.objects.get(id=self.item_id)
         except AnimeItem.DoesNotExist:
-            raise EditError(_('Bad id passed.'))
+            raise EditError(self.error_messages['bad_id'])
         try:
             obj = self.model.objects.get(user=self.request.user, anime=anime)
         except self.model.DoesNotExist:
@@ -43,7 +49,7 @@ class State(EditableDefault):
         try:
             self.status = int(self.request.POST.get('state'))
             if not -1 < self.status < len(USER_STATUS):
-                raise EditError(_('Status value not valid.'))
+                raise EditError(self.error_messages['invalid'])
         except:
             self.status = 0
         self.retid = self.item_id
@@ -52,10 +58,8 @@ class State(EditableDefault):
         user = self.request.user
         stat = cache.get('mainTable:%s' % user.id)
         for s in [self.status, self.oldstatus]:
-            try:
+            if type(stat) is dict:
                 stat[s] = {}
-            except:
-                pass
         cache.set('mainTable:%s' % user.id, stat)
         cache.delete('userCss:%s' % user.id)
         cache.delete('Stat:%s' % user.id)
@@ -81,12 +85,7 @@ class Bundle(EditableDefault):
                 ret['currentid'] = anime.id
             except IndexError:
                 anime = None
-        field_expl = FieldExplorer(self.field or self.modelname)
-        try:
-            ret['text'] = field_expl.get_value(anime, self.request)
-        except GetError, e:
-            ret['text'] = e.message
-            ret['status'] = False
+        ret.update(self.explore_result_item(anime))
         if not ret['text']:
             ret['text'] = []
         return ret

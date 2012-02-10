@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from hashlib import sha1
 from django.core.cache import cache
+from django.utils.translation import ugettext_lazy as _
 from anime.models import (
             AnimeItem,
             UserStatusBundle,
@@ -14,6 +15,13 @@ class GetError(Exception):
 
 
 class FieldExplorer(object):
+    CALLABLE_FIELDS = ['anime', 'state', 'name', 'genre', 'links',
+                       'type', 'releaseType', 'bundle']
+    error_messages = {
+        'bad_field': _('Bad field'),
+        'error': _('Error: {0}'),
+    }
+
     def __init__(self, field):
         if field == 'releasedAt,endedAt':
             field = 'release'
@@ -29,11 +37,16 @@ class FieldExplorer(object):
         field = self.get_field()
         try:
             if callable(field):
-                return field(anime, request)
+                if field.__name__ in self.CALLABLE_FIELDS:
+                    return field(anime, request)
+                raise ValueError(self.error_messages['bad_field'])
             else:
-                return getattr(anime, self.field, None)
+                try:
+                    return getattr(anime, self.field)
+                except AttributeError:
+                    raise ValueError(self.error_messages['bad_field'])
         except Exception, e:
-            raise GetError('Error: ' + str(e))
+            raise GetError(self.error_messages['error'].format(e))
 
     def get_model(self):
         try:
@@ -41,6 +54,9 @@ class FieldExplorer(object):
         except KeyError:
             model = None
         return model
+
+    def anime(self, anime, request):
+        return None
 
     def state(self, anime, request):
         if not request.user.is_authenticated():
