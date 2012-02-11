@@ -389,9 +389,9 @@ function showFN(tbl, cn){
     for(i in elms){
         var el = elms[i];
         //Как-то оно не так.
-        if(el.nextSibling && el.offsetHeight < el.nextSibling.offsetHeight)
-            el.style.height = el.nextSibling.offsetHeight + 'px';
-        pclass.add(el, 'left');
+        //if(el.nextSibling && el.offsetHeight < el.nextSibling.offsetHeight)
+        //    el.style.height = el.nextSibling.offsetHeight + 'px';
+        //pclass.add(el, 'left');
         if(el.offsetHeight < el.scrollHeight){
             el.onmouseover = function(){
                 message.toEventPosition(1);
@@ -443,8 +443,8 @@ function encd(string){
     string = string.replace(/\&#47;/gi, "/");
     string = string.replace(/\&#43;/gi, "\+");
     string = string.replace(/\&#61;/gi, "=");
-    string = string.replace(/\&lt/gi, "<");
-    string = string.replace(/\&rt;/gi, ">");
+    string = string.replace(/\&lt;/gi, "<");
+    string = string.replace(/\&gt;/gi, ">");
     string = string.replace(/\&#35;/gi, "#");
     string = string.replace(/\&amp;/gi, "&");
     return string

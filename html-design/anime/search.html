@@ -69,7 +69,7 @@
                         </a>
                     </td>
                     <td onclick="cnt('id', '{{ title.id }}', event);" id="id{{ title.id }}" class="id">{{ forloop.counter|add:page.start }}</td>
-                    <td onclick="cnt('name', '{{ title.id }}', event);" id="name{{ title.id }}" class="name left">{{ title.title }}</td>
+                    <td onclick="cnt('name', '{{ title.id }}', event);" id="name{{ title.id }}" class="name">{{ title.title }}</td>
                     <td onclick="cnt('numberofep', '{{ title.id }}', event);" id="numberofep{{ title.id }}" class="numberofep">{% if title.1.count %}{{ title.1.count }}/{% endif %}{{ title.episodesCount }}</td>
                     <td onclick="cnt('release', '{{ title.id }}', event);" id="release{{ title.id }}" class="release">{{ title.release }}</td>
                     <td onclick="cnt('type', '{{ title.id }}', event);" id="type{{ title.id }}" class="type">{{ title.releaseTypeS }}</td>

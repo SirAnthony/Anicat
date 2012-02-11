@@ -124,7 +124,7 @@ a:hover{
 }
 
 .tbl{
-    line-height: 24px;
+    line-height: 1.5em;
 }
 
 .thdtbl{
@@ -137,19 +137,19 @@ border: none;
 }
 
 #tbl td, #tbl th, #srchtbl td{
-position: relative;
-/*height: 22px;*/
-text-align: center;
-width: 180px;
-z-index: 0;
-overflow: hidden;
-padding: 1px;
+    position: relative;
+    height: 26px;
+    text-align: center;
+    width: 180px;
+    z-index: 0;
+    overflow: hidden;
+    padding: 1px;
 }
 .link{
     width: 20px !important;
 }
 .name{
-    height: 27px;
+    display: inline-block;
 }
 .id{
     width: 30px !important;
@@ -278,12 +278,21 @@ a.blacklink:hover {
     vertical-align: top;
 }
 
+#logdv a#register-more {
+    line-height: 2.1em;
+    margin-right: 0px;
+}
+
 #logdv form#login {
     width: 529px;
 }
 
 #logdv form#login_openid {
     display: none;
+}
+
+#logdv dt.inurl {
+    cursor: text;
 }
 
 #logdv p.error {
@@ -312,9 +321,6 @@ a.blacklink:hover {
     margin: 0 0 1px 0;
 }
 
-.register input[type=text] {
-    margin-left: 1em;
-}
 
 
 #lngs{

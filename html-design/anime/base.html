@@ -85,10 +85,11 @@
                         <p id="logininfo" class="error">s</p>
                     </form>
                 </dd>
-                <dt><a class="inurl" onclick="user.more();">More⇣</a></dt>
+                <dt><a id="register-more" class="inurl" onclick="user.more();">More⇣</a></dt>
             </dl>
-            <dl id="logdvmore" class="right">
+            <dl id="logdvmore" class="right hidden">
                 <dd>
+                    <a rel="nofollow" href="{% url password_reset %}" class="inurl right">Restore password</a>
                     <p>
                     {% for name in social_auth.backends.openid %}
                         {% if  name != "openid" %}
@@ -106,21 +107,16 @@
                 </dd>
                 <dt class="inurl">Login with</dt>
                 <dd>
-                    <a rel="nofollow" href="{% url password_reset %}" class="inurl">Restore</a>
-                </dd>
-                <dt class="inurl">Forgot password</dt>
-                <dd>
                     <form method="POST" action="{% url registration %}" id="register" class="register"  onsubmit="return user.register();">
                         {% csrf_token %}
                         <p class="clear">
                         {% for field in RegisterForm %}
-                            {{ field.label_tag }}<b>:</b>
                             {{ field }}
                             {% if field.errors %}
-                            <p class="error">{{ field.errors }}</p>
+                            <p class="error left">{{ field.errors }}</p>
                             {% endif %}
                         {% endfor %}
-                            <input type="submit" class="clear" value="Register" />
+                        <input type="submit" class="clear" value="Register" />
                         </p>
                         <p class="mainerror error">
                             {{ RegisterForm.non_field_errors }}

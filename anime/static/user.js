@@ -58,6 +58,7 @@ var user = new( function(){
         if(!this.loaded || user.logined) return true;
         if(url == 'openid'){
             toggle(document.getElementById('login_openid'));
+            toggle(document.getElementById('socialinfo'));
         }else{
             toggle(document.getElementById('socialinfo'), -1);
             var w = 700;
@@ -153,7 +154,7 @@ var user = new( function(){
             var obj = document.getElementById('id_register-'+target);
             if(!obj) continue;
             for(var e in error[target]){
-                element.insert(obj, {'span': {className: 'error right', innerText: error[target][e]}}, true);
+                element.insert(obj, {'span': {className: 'error left', innerText: error[target][e]}}, true);
             }
         }
     }
