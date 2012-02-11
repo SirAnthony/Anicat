@@ -30,7 +30,7 @@ class Name(EditableAnimeBased):
         newNames = filter(lambda x: x and x not in names, cleaned)
         oldNames = filter(lambda x: x and x not in cleaned, names)
         if not newNames and len(oldNames) == len(names):
-            raise Exception(self.error_messages['no_names'])
+            raise EditError(self.error_messages['no_names'])
         for name in oldNames:
             try:
                 newname = newNames.pop()
@@ -53,10 +53,13 @@ class Name(EditableAnimeBased):
 
 
 class Links(EditableAnimeBased):
+    extra_error_messages = {
+        'not_exists': _('{0} does not exists.'),
+    }
 
     def save(self, form, obj):
         if not obj or not obj.id:
-            raise ValueError('%s does not exists.' % type(obj).__name__)
+            raise ValueError(self.error_messages['not_exists'].format(type(obj).__name__))
         links = list(obj.links.all())
         cleaned = form.cleaned_data
         cleanlinks = [0] * (len(form.cleaned_data) / 2)

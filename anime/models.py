@@ -89,17 +89,18 @@ class AnimeBundle(models.Model):
         WARNING! This function removes bundles from all items
         which is not in tied array. For linking single items
         use tie classmethod instead.
+
+        If bundle have no ties:
+           If it has more than 1 element nothing happens.
+           Otherwise bundle will be deleted.
+        else:
+           If bundle not exists yet and only one item in tie ValueError will be raised.
+           For each current bundle item if it is not in tied array:
+               remove its bundle, else remove this from tied array
+           For each item in tied array:
+               if item have bundle, change it to this object and clear
+               previous.
         '''
-        # If bundle have no ties:
-        #   If it has more than 1 element nothing happens.
-        #   Otherwise bundle will be deleted.
-        # else:
-        #   If bundle not exists yet and only one item in tie ValueError will be raised.
-        #   For each current bundle item if it is not in tied array:
-        #       remove its bundle, else remove this from tied array
-        #   For each item in tied array:
-        #       if item have bundle, change it to this object and clear
-        #       previous.
         if hasattr(self, 'tied') and self.tied:
             if not self.id and len(self.tied) < 2:
                 raise ValueError('You cannot tie only one item.')
@@ -189,10 +190,12 @@ class AnimeItem(models.Model):
         return ANIME_TYPES[self.releaseType][1]
 
     def _getRelease(self):
-        # This function returns date as "releasedAt - endedAt" in format
-        # "dd.mm.yy" for each. If date is not known (i.e. xKnown field
-        # is 7), "?" returns instead "??.??.??"
-        # If endedAt is None, only releasedAt will be returned.
+        '''
+        This function returns date as "releasedAt - endedAt" in format
+        "dd.mm.yy" for each. If date is not known (i.e. xKnown field
+        is 7), "?" returns instead of "??.??.??"
+        If endedAt is None, only releasedAt will be returned.
+        '''
         try:
             if self.endedAt:
                 return ' - '.join([

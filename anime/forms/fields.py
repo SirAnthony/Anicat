@@ -87,7 +87,10 @@ class TextToAnimeNameField(CharField):
         if not self._animeobject:
             raise ValidationError(self.error_messages['noname'])
         try:
-            value, create = AnimeName.objects.get_or_create(anime=self._animeobject, title=value)
+            try:
+                value = AnimeName.objects.get(anime=self._animeobject, title=value)
+            except AnimeName.DoesNotExist:
+                value = AnimeName(anime=self._animeobject, title=value)
         except Exception, e:
             raise ValidationError(e)
         return value

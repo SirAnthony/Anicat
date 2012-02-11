@@ -245,4 +245,39 @@ class EditAnimebasedTests(FormsTest):
         # Test EditableAnimeBased
         self.assertRaisesMessage(EditError,
                 Name.error_messages['bad_id'], Name, r, 0)
+        # Name test
+        f = Name(r, 1, 'name')
+        self.assertRaisesMessage(ValueError,
+            f.error_messages['not_exists'].format('NoneType'), f.save, None, None)
+        f.process('post') # Create f.form
+        self.assertRaisesMessage(EditError, f.error_messages['no_names'],
+            f.save, f.form, f.obj)
+        f.request.POST = {'Name 0': 'new name'}
+        self.assertEquals(f.process('post'), {'status': True, 'id': 1,
+            'text': [u'new name'], 'response': 'edit'})
+        f.request.POST = {'Name 0': 'New name 0', 'Name 1': 'New name 1'}
+        self.assertEquals(f.process('post'), {'status': True, 'id': 1,
+            'text': [u'New name 0', u'New name 1'], 'response': 'edit'})
 
+    def test_Links(self):
+        r = HttpRequest()
+        r.user = User.objects.get(id=1)
+        f = Links(r, 1, 'links')
+        self.assertRaisesMessage(ValueError,
+            f.error_messages['not_exists'].format('NoneType'), f.save, None, None)
+        f.request.POST = {'Link 0': u'example.com', 'Link type 0': 0,
+            'Link 1': u'same.example.com', 'Link type 1': 0,
+            'Link 2': u'same.example.com', 'Link type 2': 0,
+            'Link 3': u'replaced.example.com', 'Link type 3': 0,}
+        self.assertEquals(f.process('post'), {'status': True, 'text': {
+            u'Other': [u'http://same.example.com/', u'http://example.com/',
+            u'http://replaced.example.com/']}, 'response': 'edit', 'id': 1})
+        f.request.POST = {'Link 0': u'example.com', 'Link type 0': 6, #changed
+            'Link 1': u'replaced.example.com', 'Link type 1': 0}
+        self.assertEquals(f.process('post'), {'status': True, 'text': {
+            u'Other': [u'http://replaced.example.com/'],
+            u'Official page': [u'http://example.com/']},
+            'response': 'edit', 'id': 1})
+        f.request.POST = {'Link 0': u'', 'Link type 0': 6,}
+        self.assertEquals(f.process('post'), {'status': True,
+                            'text': {}, 'response': 'edit', 'id': 1})
