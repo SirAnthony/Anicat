@@ -1,14 +1,17 @@
 
+from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib import auth
 from django.core.cache import cache
 from django.db.models import Q
+from django.utils.translation import ugettext_lazy as _
 from anime.forms.Error import UploadMalListForm
 from anime.forms.User import ( UserNamesForm, UserEmailForm,
         UserCreationFormMail, NotActiveAuthenticationForm, )
 from anime.malconvert import passFile
 from anime.models import AnimeRequest
-from datetime import datetime, timedelta
+
+
 
 def get_username(user):
     username = 'Anonymous'
@@ -18,33 +21,30 @@ def get_username(user):
             username += u' ' + user.last_name
     return username
 
+
 def login(request):
     response = {}
     form = None
-    if request.method != 'POST':
-        response['text'] = 'Only POST method allowed.'
-    elif request.user.is_authenticated():
-        response['text'] = 'Already logged in.'
+    if request.user.is_authenticated():
+        response['text'] = _('Already logged in.')
     else:
-        form = NotActiveAuthenticationForm(data=request.POST)
+        form = NotActiveAuthenticationForm(data=request.POST or None)
         if form.is_valid():
             user = form.get_user()
             auth.login(request, user)
             response.update({'response': True,
                 'text': {'name': get_username(user)}})
-    response['form'] = form or NotActiveAuthenticationForm()
+        response['form'] = form
     return response
 
 
 def register(request):
     response = {}
     form = None
-    if request.method != 'POST':
-        response['text'] = 'Only POST method allowed.'
-    elif request.user.is_authenticated():
-        response['text'] = 'Already registred.'
+    if request.user.is_authenticated():
+        response['text'] = _('Already registred.')
     else:
-        form = UserCreationFormMail(request.POST)
+        form = UserCreationFormMail(request.POST or None)
         if form.is_valid():
             user = form.save()
             user = auth.authenticate(username=user.username, password=form.cleaned_data['password1'])

@@ -16,15 +16,19 @@ def ajaxResponse(fn):
         for key in ret.copy():
             if ret[key] is None:
                 del ret[key]
+        ret = prepare_data(ret)
         return HttpResponse(simplejson.dumps(ret),
                 mimetype='application/javascript')
     return new
 
+def extract_errors(r):
+    return getattr(r.get('form'), 'errors', None) \
+            or {'__all__': [r.get('text')]}
+
 
 @ajaxResponse
 def get(request):
-    response = prepare_data(coreMethods.get(request))
-    return response
+    return coreMethods.get(request)
 
 
 @ajaxResponse
@@ -53,9 +57,7 @@ def process_edit_response(response):
             except Exception, e:
                 del response['form']
                 response.update({'response': 'error',
-                    'status': False, 'text': str(e)})
-    if 'text' in response:
-        response['text'] = prepare_data(response['text'])
+                    'status': False, 'text': unicode(e)})
     return response
 
 
@@ -64,14 +66,7 @@ def add(request):
     result = editMethods.edit(request)
     if result.get('status', None):
         return {'response': 'add', 'status': True, 'id': result.get('id', 0), 'text': None}
-    try:
-        text = result['form'].errors
-    except KeyError:
-        text = None
-    if not text:
-        text = {'__all__': [result['text']]}
-    text = prepare_data(text)
-    return {'response': 'add', 'status': False, 'text': text}
+    return {'response': 'add', 'status': False, 'text': extract_errors(result)}
 
 
 @ajaxResponse
@@ -81,31 +76,26 @@ def login(request):
         form = res['form']
         return {'response': 'login', 'status': True,
                     'text': {'name': userMethods.get_username(form.get_user())}}
-    else:
-        return {'response': 'login', 'status': False,
-                'text': res['form'].errors}
+    return {'response': 'login', 'status': False, 'text': extract_errors(res)}
 
 
 @ajaxResponse
 def register(request):
     res = userMethods.register(request)
     if 'response' in res:
-        return {'response': 'login', 'status': True, 'text': res['text']}
-    else:
-        return {'response': 'register', 'status': False, 'text': res['form'].errors}
+        return {'response': 'login', 'status': True, 'text': res.get('text')}
+    return {'response': 'register', 'status': False, 'text': extract_errors(res)}
 
 
 @ajaxResponse
 def search(request):
     if request.method != 'POST':
-        return {'text': 'Only POST method allowed.'}
-    limit = 20
+        return {'text': {'__all__': 'Only POST method allowed.'}}
     response = coreMethods.search(request.POST.get('field'),
-        request.POST.get('string'), request,
-        {
+        request.POST.get('string'), request, {
             'page': request.POST.get('page', 0),
             'order': request.POST.get('order'),
-            'limit': request.POST.get('limit', limit)
+            'limit': request.POST.get('limit')
              })
     if 'response' in response:
         del response['text']['link']

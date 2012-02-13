@@ -163,6 +163,13 @@ class Register(Base):
         "text": {"name": unicode}
     }
 
+    error = {
+        'response': 'register',
+        'status': False,
+        'text': dict,
+    }
+
+
 class Login(Base):
 
     link = 'login/'
@@ -177,6 +184,13 @@ class Login(Base):
         "response": "login",
         "text": {"name": unicode}
     }
+
+    error = {
+        'response': 'login',
+        'status': False,
+        'text': dict,
+    }
+
 
 class Add(Base):
 
@@ -197,6 +211,12 @@ class Add(Base):
         'response': 'add',
         'status': True,
         'id': int,
+    }
+
+    error = {
+        'response': 'add',
+        'status': False,
+        'text': dict,
     }
 
 
@@ -257,7 +277,7 @@ class Forms(Base):
     }
 
     returns = NoneableDict({
-        'response': 'edit',
+        'response': 'form',
         'status': True,
         'id': int,
         'model': unicode,
@@ -285,6 +305,15 @@ class Forms(Base):
         'name': [Field('input', 'Name 0'), Field('input', 'Name 1')],
     }
 
+    error = {
+        'response': 'form',
+        'status': False,
+        'model': unicode,
+        'field': Noneable(unicode),
+        'id': unicode,
+        'text': unicode,
+    }
+
     def get_fields(self, t, f=None):
         ret = []
         if not isinstance(self.forms[t], Field) and f is not None:
@@ -301,7 +330,11 @@ class Forms(Base):
         r = self.returns
         r['form'] = []
         for item in self.get_fields(t, f):
-            r['form'].append(item.field())
+            if type(item) is dict:
+                for key, value in item.items():
+                    r['form'].append(value.field())
+            else:
+                r['form'].append(item.field())
         return r
 
 
@@ -321,6 +354,15 @@ class Set(Get):
         'id': int,
         'field': Noneable(unicode),
         'model': unicode,
+        'text': dict,
+    }
+
+    error = {
+        'response': 'form',
+        'status': False,
+        'model': unicode,
+        'field': Noneable(unicode),
+        'id': int,
         'text': dict,
     }
 
