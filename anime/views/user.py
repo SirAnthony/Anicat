@@ -3,7 +3,7 @@ import anime.user as userMethods
 
 from django.contrib import auth
 from django.contrib.messages.api import get_messages
-from django.http import HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect
 from annoying.decorators import render_to
 
 
@@ -32,6 +32,8 @@ def register(request):
 
 @render_to('anime/settings.html')
 def settings(request):
+    if not request.user.is_authenticated():
+        raise Http404
     response = userMethods.load_settings(request)
     response.update(userMethods.getRequests(request.user))
     return response

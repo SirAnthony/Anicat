@@ -1,4 +1,5 @@
 {% extends "anime/base.html" %}
+{% load url from future %}
 
     {% block main %}
     <h4>What is this?</h4>
@@ -14,7 +15,7 @@
     <h4>Will this project become a social network in future?</h4>
     <h4>NO</h4><br />
     <h4>But I want to show my list to friends.<span style="font-size: 7px;"> Though they are random people from the Internets, I have no life and my powerlevel is 9001 title, I should boast somehow!</span></h4>
-    <p>You can use your id in statistic link{% if user.is_authenticated %} like <a href="/stat/{{user.id}}/">this</a>{% endif %}.</p><br />
+    <p>You can use your id in statistic link{% if user.is_authenticated %} like <a href="{% url 'statistics' user.id %}">this</a>{% endif %}.</p><br />
     <h4>Why am I Anonymous for other?</h4>
     <p>It is bad? User anonymosity is the default. In the future it will be possible to disable it for youself.</p><br />
     <h4>I registered yesterday but cannot edit or add titles. Does this work?</h4>
@@ -24,11 +25,11 @@
     <p>Not quite. You should not add bonus dvd-specials. Anicat is not intended to cover all the additional releases
     and advertisements. If you're not sure, try to see how it's done in AniDB and ANN. MAL is a bad example.</p><br />
     <h4>I want to add anime but I cannot yet/not sure in it.</h4>
-    <p>You can use <a href="/animerequest/">Anime request form</a>. You can use it as you wish but, please, don't use this form for feedback, it has its own <a href="/feedback/">form</a>.</p><br />
+    <p>You can use <a href="{% url 'edit_animerequest' %}">Anime request form</a>. You can use it as you wish but, please, don't use this form for feedback, it has its own <a href="{% url 'edit_feedback' %}">form</a>.</p><br />
     <h4>I have MAL. Can I migrate easily?</h4>
-    <p>You can try MAL migration tool in your <a href="/settings/" >settings</a> page.</p><br />
+    <p>Yes, Anicat have a set of tools for migration. {% if user.is_authenticated %}You can try MAL migration tool in your <a href="{% url 'settings' %}" >settings</a> page.{% endif %}</p><br />
     <h4>I want to propose anything.</h4>
-    <p>You can use <a href="/feedback/">feedback form</a> as you wish.</p><br />
+    <p>You can use <a href="{% url 'edit_feedback' %}">feedback form</a> as you wish.</p><br />
     <h4>You said that it is beta now but why current version is 3?</h4>
     <p>As I said first version was little standalone script in perl.
     Project received version 2 when it became a multi-user.

@@ -10,14 +10,14 @@ urlpatterns = patterns(
     'anime.views.base',
     (r'^$', 'index'),
     # TODO Split regexp
-    (r'^(user/(?P<user>\d+))?/?(show/(?P<status>\d+))?/?(sort/(?P<order>-?\w+))?/?(?P<page>\d+)?/$', 'index'),
-    url(r'^search/(?P<string>[^/]+)?/?(field/(?P<field>\w+))?/?(sort/(?P<order>\w+))?/?(?P<page>\d+)?/?$', 'search', name='search'),
+    (r'^(?:user/(?P<user>\d+)/)(?:show/(?P<status>\d+)/)(?:sort/(?P<order>-?\w+)/)(?P<page>\d+)?/$', 'index'),
+    url(r'^search/(?:(?P<string>[^/]+)/)?(?:field/(?P<field>\w+)/)?(?:sort/(?P<order>\w+)/)?(?:(?P<page>\d+)/)?$', 'search', name='search'),
     (r'^changes/$', direct_to_template, {'template': 'anime/changes.html'}, 'changes'),
     (r'^faq/$', direct_to_template, {'template': 'anime/faq.html'}, 'faq'),
     url(r'^card/(?P<animeId>\d+)?/?$', 'card', name='card'),
     url(r'^stat/(?P<userId>\d+)?/?$', 'stat', name='statistics'),
     # TODO Split regexp
-    url(r'^requests/(status/(?P<status>\d+))?/?(type/(?P<rtype>\d+))?/?(?P<page>\d+)?/?$', 'requests', name='requests'),
+    url(r'^requests/(?:status/(?P<status>\d+)/)?(?:type/(?P<rtype>\d+)/)?(?:(?P<page>\d+)/)?$', 'requests', name='requests'),
     url(r'^css/$', 'generateCss', name='user_css'),
     (r'^test/$', 'test'),
 )
@@ -28,7 +28,7 @@ urlpatterns += patterns('anime.views.history',
 
 urlpatterns += patterns('anime.views.user',
     url(r'^login/$', 'login', name='login'),
-    (r'^login/error/$', 'social_error'),
+    url(r'^login/error/$', 'social_error', name='social_error'),
     (r'^login/done/$', direct_to_template, {'template': 'anime/user/social-done.html'}),
     url(r'^logout/$', 'logout', name='logout'),
     url(r'^register/$', 'register', name='registration'),
@@ -59,10 +59,11 @@ urlpatterns += patterns('django.contrib.auth.views',
 
 urlpatterns += patterns('anime.views.edit',
     url(r'^add/$', 'add', name='edit_add'),
-    (r'^feedback/$', 'feedback'),
-    (r'^animerequest/$', 'anime_request'),
+    url(r'^feedback/$', 'feedback', name='edit_feedback'),
+    url(r'^animerequest/$', 'anime_request', name='edit_animerequest'),
     url(r'^request/(?P<request_id>\d+)/?$', 'request_item', name='request_item'),
-    (r'^edit/(?P<model>[a-zA-Z_]+)?/?(?P<item_id>\d+)/?(?P<field>[a-zA-Z_,]+)?/?$', 'edit'),
+    url(r'^edit/(?P<model>[a-zA-Z_]+)/(?P<item_id>\d+)/(?:(?P<field>[a-zA-Z_,]+)/)?$',
+        'edit', name='edit_item'),
 )
 
 urlpatterns += patterns('anime.views.ajax',

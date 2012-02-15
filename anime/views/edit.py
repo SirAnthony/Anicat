@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.core.context_processors import csrf
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from annoying.decorators import render_to
 import anime.edit as editMethods
@@ -9,8 +10,8 @@ import anime.edit as editMethods
 def add(request):
     res = editMethods.edit(request)
     if res.get('status', None):
-        rid = res.get('id')
-        return HttpResponseRedirect('/card/%s/' % (rid or 0))
+        rid = res.get('id') or 0
+        return HttpResponseRedirect(reverse('card', args=[rid]))
     res.update(csrf(request))
     return res
 
@@ -25,8 +26,8 @@ def request_item(request, request_id):
 def feedback(request):
     res = editMethods.edit(request, 0, 'feedback')
     if res.get('status', None):
-        rid = res.get('id')
-        return HttpResponseRedirect('/request/%s/' % (rid or 0))
+        rid = res.get('id') or 0
+        return HttpResponseRedirect(reverse('request_item', args=[rid]))
     res.update(csrf(request))
     return res
 
@@ -35,8 +36,8 @@ def feedback(request):
 def anime_request(request):
     res = editMethods.edit(request, 0, 'animerequest')
     if res.get('status', None):
-        rid = res.get('id')
-        return HttpResponseRedirect('/request/%s/' % (rid or 0))
+        rid = res.get('id') or 0
+        return HttpResponseRedirect(reverse('request_item', args=[rid]))
     res.update(csrf(request))
     return res
 
@@ -45,12 +46,13 @@ def anime_request(request):
 def edit(request, item_id, model='anime', field=None):
     res = editMethods.edit(request, item_id, model, field)
     if res.get('status', None):
-        rid = res.get('id')
+        rid = res.get('id') or 0
         if model == 'bundle':
-            return HttpResponseRedirect('/edit/bundle/%s/' % (rid or 0))
+            return HttpResponseRedirect(reverse('edit_item',
+                kwargs={'model': 'bundle', 'item_id': rid}))
         elif model == 'image':
-            return HttpResponseRedirect('/request/%s/' % (rid or 0))
+            return HttpResponseRedirect(reverse('request_item', args=[rid]))
         else:
-            return HttpResponseRedirect('/card/%s/' % (rid or 0))
+            return HttpResponseRedirect(reverse('card', args=[rid]))
     else:
         return res

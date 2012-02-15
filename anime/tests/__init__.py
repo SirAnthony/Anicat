@@ -5,7 +5,8 @@
 #            FormsFieldsTests, FormsJSONTests )
 #from anime.tests.edit import ( EditInitTest, EditDefaultTests,
 #            EditSimpleTests, EditRequestsTests, EditAnimebasedTests )
-from anime.tests.views import AjaxTest
+from anime.tests.views import ( AjaxTest, UserViewsTest, EditViewsTest,
+            EditViewsRequestsTest )
 #import * - bad
 
 __test__= {
