@@ -139,6 +139,18 @@ class UserViewsTest(TestCase):
         self.client.logout()
         self.assertEquals(self.client.get(reverse('settings')).status_code, 404)
 
+    @login()
+    def test_statistics(self):
+        self.assertEquals(self.client.get(reverse('statistics')).status_code, 200)
+        self.client.logout()
+        self.assertEquals(self.client.get(reverse('statistics')).status_code, 404)
+        self.assertEquals(self.client.get(reverse('statistics', args=[1])).status_code, 200)
+        self.assertEquals(self.client.get(reverse('statistics', args=[2])).status_code, 404)
+
+    @login()
+    def test_css(self):
+        self.assertEquals(self.client.get(reverse('user_css')).status_code, 200)
+
 
 class EditViewsTest(TestCase):
 

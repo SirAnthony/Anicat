@@ -13,7 +13,7 @@
     </div>
     {% else %}
     <div>
-        <p><b>User</b>: {% username user %}</p>
+        <p><b>User</b>: {% ifequal user.id userid %}{% username user %}{% else %}{% username '' %}{% endifequal %}</p>
     </div>
     <div>
         <p>Statistics:</p>

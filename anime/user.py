@@ -9,17 +9,26 @@ from anime.forms.Error import UploadMalListForm
 from anime.forms.User import ( UserNamesForm, UserEmailForm,
         UserCreationFormMail, NotActiveAuthenticationForm, )
 from anime.malconvert import passFile
-from anime.models import AnimeRequest
-
+from anime.models import AnimeRequest, UserStatusBundle, USER_STATUS
 
 
 def get_username(user):
     username = 'Anonymous'
-    if user and user.first_name:
+    if getattr(user, 'first_name', None):
         username = user.first_name
         if user.last_name:
             username += u' ' + user.last_name
     return username
+
+
+def latest_status(request, user_id=0):
+    try:
+        if user_id:
+            return UserStatusBundle.objects.filter(user=User.objects.get(id=user_id)).latest("changed").changed
+        return UserStatusBundle.objects.filter(user=request.user).latest("changed").changed
+    except:
+        return
+
 
 
 def login(request):
@@ -121,3 +130,45 @@ def getRequests(user, *keys):
                 'requestTypes': types}
     except:
         return {}
+
+
+def getStatistics(user):
+    if not user or not hasattr(user, 'id'):
+        return None
+    uid = user.id
+    tuser = cache.get('Stat:%s' % uid)
+    if not tuser:
+        tuser = []
+        total = {'name': 'Total', 'full': 0, 'count': 0, 'custom': 0}
+        for status in USER_STATUS[1::]:
+            arr = UserStatusBundle.objects.filter(user=uid, state=status[0]).extra(
+                select = {'full': 'SUM(anime_animeitem.episodesCount*anime_animeitem.duration)',
+                          'custom': 'SUM(anime_animeitem.duration*anime_userstatusbundle.count)',
+                          'count': 'COUNT(*)'}
+                ).values('anime__episodesCount', 'anime__duration', 'full', 'custom',
+                'count').select_related('anime__episodesCount', 'anime__duration').get()
+            arr['name'] = status[1]
+            if status[0] == 3:
+                arr['custom'] = arr['full']
+            #FUUU
+            total['full'] += arr['full'] or 0
+            total['count'] += arr['count'] or 0
+            total['custom'] += arr['custom'] or 0
+            tuser.append(arr)
+        tuser.append(total)
+        cache.set('Stat:%s' % uid, tuser)
+    return tuser
+
+
+def getStyles(user):
+    uid = user.id
+    styles = cache.get('userCss:%s' % uid)
+    if not styles:
+        styles = [[] for i in range(0,len(USER_STATUS))]
+        if user.is_authenticated():
+            statuses = UserStatusBundle.objects.filter(user=user).exclude(state=0).values('anime','state')
+            for status in statuses:
+                styles[status['state']].append(unicode(status['anime']))
+            styles = [[',.r'.join(style), ',.a'.join(style), ',.s'.join(style)] for style in styles]
+        cache.set('userCss:%s' % uid, styles)
+    return styles

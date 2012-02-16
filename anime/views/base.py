@@ -5,21 +5,11 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db.models import Q
 from django.http import Http404, HttpResponseRedirect
-from django.views.decorators.http import condition
-from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
 from anime.models import AnimeItem, AnimeLink, UserStatusBundle, AnimeRequest, USER_STATUS
 from anime.utils.catalog import getPages, cleanTableCache, cleanRequestsCache
 from random import randint
 
-
-def latestStatus(request, userId=0):
-    try:
-        if userId:
-            return UserStatusBundle.objects.filter(user=User.objects.get(id=userId)).latest("changed").changed
-        return UserStatusBundle.objects.filter(user=request.user).latest("changed").changed
-    except:
-        return
 
 # TODO: Pager here
 # wut?
@@ -169,66 +159,6 @@ def card(request, animeId=0):
             userstatus['statusName'] = USER_STATUS[userstatus['state'] or 0][1]
         ret['userstatus'] = userstatus
     return ret
-
-
-@condition(last_modified_func=latestStatus)
-@render_to('anime/stat.html')
-def stat(request, userId=0):
-    user = None
-    tuser = None
-    if userId:
-        try:
-            user = User.objects.get(id=userId)
-        except Exception, e:
-            #TODO: return 404?
-            user = None
-    elif request.user.is_authenticated():
-        user = request.user
-    if user:
-        tuser = cache.get('Stat:%s' % user.id)
-        if not tuser:
-            tuser = []
-            total = {'name': 'Total', 'full': 0, 'count': 0, 'custom': 0}
-            for status in USER_STATUS[1::]:
-                arr = UserStatusBundle.objects.filter(user=user.id, state=status[0]).extra(
-                    select = {'full': 'SUM(anime_animeitem.episodesCount*anime_animeitem.duration)',
-                              'custom': 'SUM(anime_animeitem.duration*anime_userstatusbundle.count)',
-                              'count': 'COUNT(*)'}
-                    ).values('anime__episodesCount', 'anime__duration', 'full', 'custom',
-                    'count').select_related('anime__episodesCount', 'anime__duration').get()
-                arr['name'] = status[1]
-                if status[0] == 3:
-                    arr['custom'] = arr['full']
-                #FUUU
-                total['full'] += arr['full'] or 0
-                total['count'] += arr['count'] or 0
-                total['custom'] += arr['custom'] or 0
-                tuser.append(arr)
-            tuser.append(total)
-            cache.set('Stat:%s' % user.id, tuser)
-    return {'userid': getattr(user, 'id', None), 'stat': tuser}
-
-
-@cache_control(private=True, no_cache=True)
-@condition(last_modified_func=latestStatus)
-@render_to('anime/user.css', 'text/css')
-def generateCss(request):
-    styles = cache.get('userCss:%s' % request.user.id)
-    if not styles:
-        styles = [[] for i in range(0,len(USER_STATUS))]
-        if request.user.is_authenticated():
-            statuses = UserStatusBundle.objects.filter(user=request.user).exclude(state=0).values('anime','state')
-            for status in statuses:
-                styles[status['state']].append(str(status['anime']))
-            styles = [[',.r'.join(style), ',.a'.join(style), ',.s'.join(style)] for style in styles]
-        cache.set('userCss:%s' % request.user.id, styles)
-    return {'style': styles}
-
-
-@condition(last_modified_func=latestStatus)
-@render_to('anime/blank.html', 'text/css')
-def blank(request):
-    return {}
 
 
 def test(request):
