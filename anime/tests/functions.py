@@ -9,13 +9,6 @@ email = 'nobody@example.com'
 passwd = 'qwerty'
 
 
-def last_record(model):
-    try:
-        return model.objects.order_by('-id').all()[0].id
-    except:
-        return 0
-
-
 def login(u=None, pwd=None):
     def wrap(f):
         def d_login(self, *args, **kwargs):

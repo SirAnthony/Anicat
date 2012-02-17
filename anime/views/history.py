@@ -12,9 +12,7 @@ def history(request, field=None, page=0):
         page = int(page)
     except:
         page = 0
-    if field:
-       pass
-    else:
+    if not field:
         Model = AnimeItem
 
     qs = Model.audit_log.filter(action_type=u'I')
@@ -26,10 +24,8 @@ def history(request, field=None, page=0):
             name = fieldName.name
             ret[name] = getattr(obj, name)
             if name in ['releasedAt', 'endedAt']:
-                try:
+                if hasattr(ret[name], 'strftime'):
                     ret[name] = ret[name].strftime("%d.%m.%Y")
-                except:
-                    pass
             elif name == 'action_user':
                 if request.user.is_staff:
                     try:

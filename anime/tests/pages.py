@@ -14,8 +14,8 @@ from anime import api
 from anime.models import (AnimeItem, AnimeBundle, AnimeLink, Genre,
         UserStatusBundle, EDIT_MODELS, USER_STATUS, AnimeRequest,
         AnimeItemRequest, AnimeImageRequest, AnimeFeedbackRequest)
-from anime.tests.functions import last_record, create_user, login, fill_params
-
+from anime.tests.functions import create_user, login, fill_params
+from anime.utils.catalog import last_record_pk
 
 class NoDBTests(TestCase):
 
@@ -70,7 +70,7 @@ class NormalTest(TestCase):
         params = {'title': 12, 'releaseType': 6, 'episodesCount': 5, 'duration':  43,
                   'releasedAt': '2.4.1952', 'endedAt': '??.??.1952', 'air': True,
                   'genre': ('1','2'),}
-        count = last_record(AnimeItem)
+        count = last_record_pk(AnimeItem)
         response = self.client.post(add_link, params)
         self.assertRedirects(response, '/card/{0}/'.format(count + 1))
 
@@ -87,17 +87,17 @@ class NormalTest(TestCase):
             rlink = '/card/{0}/'
             c = 0
             if name == 'bundle':
-                c = last_record(AnimeBundle)
+                c = last_record_pk(AnimeBundle)
                 rlink = '/edit/bundle/{0}/'
             elif name == 'anime':
-                c = last_record(AnimeItem)
+                c = last_record_pk(AnimeItem)
             response = self.client.post(link.format(name, n), params)
             self.assertRedirects(response, rlink.format(c + 1))
 
     @login()
     def test_image(self):
         files = ['test_random.jpg', ]
-        c = last_record(AnimeRequest)
+        c = last_record_pk(AnimeRequest)
         with open(os.path.join(settings.MEDIA_ROOT, 'test', '1px.png'), 'r') as f:
             response = self.client.post('/edit/image/1/', {'text': f})
         self.assertRedirects(response, '/request/{0}/'.format(c + 1))
@@ -190,7 +190,7 @@ class RequestsTest(TestCase):
         for link in ('/feedback/', '/animerequest/'):
             self.assertEquals(self.client.get(link).status_code, 200)
             self.assertEquals(self.client.post(link, {}).status_code, 200)
-            count = last_record(AnimeRequest)
+            count = last_record_pk(AnimeRequest)
             response = self.client.post(link, {'text': 'new'})
             self.assertRedirects(response, '/request/{0}/'.format(count + 1))
 

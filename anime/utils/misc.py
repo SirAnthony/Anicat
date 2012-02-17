@@ -4,6 +4,7 @@ from hashlib import sha1
 from django.conf import settings
 from anime.utils.config import random_string
 
+
 def safe_username(email):
     return re.sub(r"[^a-z]+", '-', email[:email.index('@')]).strip('-')
 

@@ -11,18 +11,18 @@ urlpatterns = patterns(
     'anime.views.base',
     (r'^$', 'index'),
     # TODO Split regexp
-    (r'^(?:user/(?P<user>\d+)/)(?:show/(?P<status>\d+)/)(?:sort/(?P<order>-?\w+)/)(?P<page>\d+)?/$', 'index'),
-    url(r'^search/(?:(?P<string>[^/]+)/)?(?:field/(?P<field>\w+)/)?(?:sort/(?P<order>\w+)/)?(?:(?P<page>\d+)/)?$', 'search', name='search'),
-    url(r'^card/(?P<animeId>\d+)?/?$', 'card', name='card'),
+    url(r'^(?:user/(?P<user>\d+)/)?(?:show/(?P<status>\d+)/)?(?:sort/(?P<order>-?\w+)/)?(?:(?P<page>\d+)/)?$', 'index', name='index'),
+    url(r'^search/(?:(?P<string>[^/]+)/(?:field/(?P<field>\w+)/)?(?:sort/(?P<order>\w+)/)?(?:(?P<page>\d+)/)?)?$', 'search', name='search'),
+    url(r'^card/(?:(?P<anime_id>\d+)/)?$', 'card', name='card'),
     # TODO Split regexp
     url(r'^requests/(?:status/(?P<status>\d+)/)?(?:type/(?P<rtype>\d+)/)?(?:(?P<page>\d+)/)?$', 'requests', name='requests'),
-    (r'^test/$', 'test'),
 )
 
 # Direct
 urlpatterns += patterns('',
     (r'^changes/$', direct_to_template, {'template': 'anime/changes.html'}, 'changes'),
     (r'^faq/$', direct_to_template, {'template': 'anime/faq.html'}, 'faq'),
+    (r'^blank/$', direct_to_template, {'template': 'anime/blank.html'}, 'blank'),
 )
 
 # History
@@ -38,7 +38,7 @@ urlpatterns += patterns('anime.views.user',
     url(r'^logout/$', 'logout', name='logout'),
     url(r'^register/$', 'register', name='registration'),
     url(r'^settings/$', 'settings', name='settings'),
-    url(r'^stat/(?P<user_id>\d+)?/?$', 'statistics', name='statistics'),
+    url(r'^stat/(?:(?P<user_id>\d+)/)?$', 'statistics', name='statistics'),
     url(r'^css/$', 'generate_css', name='user_css'),
 )
 

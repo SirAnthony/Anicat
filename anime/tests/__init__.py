@@ -6,7 +6,8 @@
 #from anime.tests.edit import ( EditInitTest, EditDefaultTests,
 #            EditSimpleTests, EditRequestsTests, EditAnimebasedTests )
 from anime.tests.views import ( AjaxTest, UserViewsTest, EditViewsTest,
-            EditViewsRequestsTest )
+            EditViewsRequestsTest, BaseViewsTest, BaseViewsRequestsTest,
+            HistoryViewsTest )
 #import * - bad
 
 __test__= {

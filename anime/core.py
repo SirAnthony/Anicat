@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from hashlib import sha1
+from django.conf import settings
 from django.core.cache import cache
 from django.utils.translation import ugettext_lazy as _
 from anime.models import (
-            AnimeItem,
+            AnimeItem, AnimeLink,
             UserStatusBundle,
             LINKS_TYPES, EDIT_MODELS, USER_STATUS,
             )
-from anime.utils.catalog import createPages, getVal, getAttr, updateMainCaches
+from anime.utils.catalog import getPages, createPages, updateMainCaches, cleanTableCache
 
 
 class GetError(Exception):
@@ -137,6 +138,48 @@ def get(request):
     return response
 
 
+def index(user, user_id, status, order, page):
+    limit = settings.INDEX_PAGE_LIMIT
+    qs = AnimeItem.objects.order_by(order)
+    sbundle = None
+    try:
+        status = int(status)
+        USER_STATUS[status]
+        if user.is_authenticated():
+            #Fixme: 2 useless queries when cached.
+            if status:
+                sbundle = UserStatusBundle.objects.filter(user=user, state=status)
+                ids = map(lambda x: x[0], sbundle.values_list('anime'))
+                qs = qs.filter(id__in=ids)
+                sbundle = sbundle.values('anime', 'count', 'rating')
+            else:
+                ids = map(lambda x: x[0], UserStatusBundle.objects.filter(
+                        user=user, state__gte=1).values_list('anime'))
+                qs = qs.exclude(id__in=ids)
+        else:
+            raise Exception
+    except:
+        status = None
+    (link, cachestr) = cleanTableCache(order, status, page, user, user_id)
+    pages = getPages(link, page, qs, order, limit)
+    items = qs[page * limit:(page + 1) * limit]
+    if sbundle is not None:
+        ids = list(qs.values_list('id', flat=True)[page * limit:(page + 1) * limit])
+        sbundle = dict(map(lambda x: (x['anime'], x), list(sbundle.filter(anime__in=ids))))
+        for item in items:
+            if item.id in sbundle:
+                item.rating = sbundle[item.id]['rating']
+                item.count = sbundle[item.id]['count']
+    return {'list': items, 'cachestr': cachestr,
+            'link': {
+                'link': link,
+                'order': order,
+                'user': None if user_id == user.id else user.id,
+                'status': status
+            },
+            'pages': pages, 'page': {'number': page, 'start': page*limit}}
+
+
 def search(field, string, request, attrs={}):
     #Rewrite this
     try:
@@ -194,3 +237,34 @@ def search(field, string, request, attrs={}):
         cache.set('search:%s' % cachestr, {'pages': pages, 'items': items, 'count': count})
     return {'response': 'search', 'text': {'pages': pages, 'items': items,
             'count': count, 'page': page, 'link': link, 'cachestr': cachestr}}
+
+
+def card(anime_id, user):
+    ret = cache.get('card:%s' % anime_id)
+    if not ret:
+        ret = {}
+        try:
+            anime = AnimeItem.objects.get(id=anime_id)
+        except AnimeItem.DoesNotExist:
+            raise
+        except Exception:
+            pass
+        else:
+            ret.update({'anime': anime, 'names': anime.animenames.values()})
+            if anime.bundle:
+                ret['bundles'] = anime.bundle.animeitems.values('id', 'title').all().order_by('releasedAt')
+            try:
+                ret['animelinks'] = anime.links.order_by('linkType').all()
+            except (AnimeLink.DoesNotExist, AttributeError):
+                pass
+            cache.set('card:%s' % anime_id, ret)
+    if user.is_authenticated() and 'anime' in ret:
+        userstatus = None
+        try:
+            userstatus = ret['anime'].statusbundles.values('state', 'count', 'rating').get(user=user)
+        except (UserStatusBundle.DoesNotExist, AttributeError):
+            pass
+        else:
+            userstatus['statusName'] = USER_STATUS[userstatus['state'] or 0][1]
+        ret['userstatus'] = userstatus
+    return ret

@@ -5,17 +5,12 @@ from django.utils.http import urlquote
 from django.contrib.auth.models import User
 from anime.models import AnimeItem
 
-def getVal(val, obj=None, default=''):
-    if obj and val in obj:
-        return obj[val]
-    return default
 
-
-def getAttr(obj, val, default=''):
+def last_record_pk(model):
     try:
-        return getattr(obj, val)
-    except AttributeError:
-        return default
+        return model.objects.values_list('pk').latest('pk')[0]
+    except:
+        return 0
 
 
 def getPages(link, page, qs, order, limit):

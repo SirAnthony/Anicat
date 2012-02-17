@@ -11,7 +11,8 @@ from anime.forms import json
 from anime.forms.create import createFormFromModel
 from anime.models import ( AnimeItem, AnimeBundle, AnimeName, AnimeLink,
     UserStatusBundle, AnimeRequest, AnimeImageRequest, DATE_FORMATS, )
-from anime.tests.functions import create_user, login, last_record
+from anime.tests.functions import create_user, login
+from anime.utils.catalog import last_record_pk
 
 
 
@@ -246,9 +247,9 @@ class FormsUserTests(TestCase):
         self.assertEquals(f.errors['email'][-1], f.error_messages['duplicate_email'])
         f = UserCreationFormMail({'register-email': 'new@example.com'})
         self.assertEquals(f.is_valid(), True)
-        c = last_record(User)
+        c = last_record_pk(User)
         f.save()
-        self.assertEquals(last_record(User), c+1)
+        self.assertEquals(last_record_pk(User), c+1)
 
     def test_NotActivePasswordResetForm(self):
         from anime.forms.User import NotActivePasswordResetForm, UNUSABLE_PASSWORD

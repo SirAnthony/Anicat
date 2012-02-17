@@ -8,7 +8,8 @@ from django.test import TestCase
 
 from anime import api
 from anime.models import AnimeItem, AnimeBundle, AnimeRequest, EDIT_MODELS
-from anime.tests.functions import create_user, login, check_response, fill_params, last_record
+from anime.tests.functions import create_user, login, check_response, fill_params
+from anime.utils.catalog import last_record_pk
 
 
 
@@ -165,7 +166,7 @@ class EditViewsTest(TestCase):
         a = api.Add()
         self.assertEquals(self.client.get(reverse('edit_add')).status_code, 200)
         params = fill_params(a)
-        count = last_record(AnimeItem)
+        count = last_record_pk(AnimeItem)
         response = self.client.post(reverse('edit_add'), params)
         self.assertRedirects(response, reverse('card', args=[count + 1]))
 
@@ -176,7 +177,7 @@ class EditViewsTest(TestCase):
             n = 0 if name == 'bundle' else 1
             params = fill_params(fields.get_params(name))
             if name == 'bundle':
-                c = last_record(AnimeBundle)
+                c = last_record_pk(AnimeBundle)
                 rlink = reverse('edit_item', kwargs={'model': name, 'item_id': c + 1})
             else:
                 rlink = reverse('card', args=[n])
@@ -184,7 +185,7 @@ class EditViewsTest(TestCase):
                 reverse('edit_item', kwargs={'model': name, 'item_id': n}), params)
             self.assertRedirects(response, rlink)
         # Test Image
-        c = last_record(AnimeRequest)
+        c = last_record_pk(AnimeRequest)
         with open(os.path.join(settings.MEDIA_ROOT, 'test', '1px.png'), 'r') as f:
             response = self.client.post(reverse('edit_item',
                     kwargs={'model': 'image', 'item_id': 1}), {'text': f})
@@ -216,7 +217,59 @@ class EditViewsRequestsTest(TestCase):
         for link in (reverse('edit_feedback'), reverse('edit_animerequest')):
             self.assertEquals(self.client.get(link).status_code, 200)
             self.assertEquals(self.client.post(link, {}).status_code, 200)
-            count = last_record(AnimeRequest)
+            count = last_record_pk(AnimeRequest)
             response = self.client.post(link, {'text': 'new'})
             self.assertRedirects(response, reverse('request_item', args=[count + 1]))
 
+
+class BaseViewsTest(TestCase):
+
+    fixtures = ['2trash.json']
+
+    def test_index(self):
+        self.assertEquals(self.client.get(reverse('index')).status_code, 200)
+        self.assertEquals(self.client.get(reverse('index', kwargs={
+                            'status': 1})).status_code, 200)
+        self.assertEquals(self.client.get(reverse('index', kwargs={
+                            'user': 2})).status_code, 404)
+        self.assertEquals(self.client.get(reverse('index', kwargs={
+                            'order': 'no'})).status_code, 404)
+
+    def test_search(self):
+        self.assertEquals(self.client.get(reverse('search', args=[1])).status_code, 200)
+        self.assertEquals(self.client.get(reverse('search', args=[' '])).status_code, 200)
+
+    def test_card(self):
+        self.assertEquals(self.client.get(reverse('card'), follow=True).status_code, 200)
+        self.assertEquals(self.client.get(reverse('card', args=[2])).status_code, 200)
+        self.assertEquals(self.client.get(reverse('card', args=[300])).status_code, 404)
+
+
+class BaseViewsRequestsTest(TestCase):
+
+    fixtures = ['requests.json']
+
+    def test_requests(self):
+        self.assertEquals(self.client.get(reverse('requests')).status_code, 200)
+        self.assertEquals(self.client.get(reverse('requests',
+                kwargs={'status': 1, 'rtype': 1, 'page': 1})).status_code, 200)
+
+    def test_card(self):
+        self.assertEquals(self.client.get(reverse('card'), follow=True).status_code, 200)
+
+
+class HistoryViewsTest(TestCase):
+    # Don't care about in this version
+
+    fixtures = ['2trash.json']
+
+    @create_user()
+    @login()
+    def test_add(self):
+        from django.contrib.auth.models import User
+        u = User.objects.get(id=1)
+        u.is_staff = True
+        u.save()
+        self.assertEquals(self.client.get('/history/add/').status_code, 200)
+        self.client.logout()
+        self.assertEquals(self.client.get('/history/add/').status_code, 200)
