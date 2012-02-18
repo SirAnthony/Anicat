@@ -1,5 +1,5 @@
 
-import anime.core as coreMethods
+import anime.core.base as coreMethods
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse

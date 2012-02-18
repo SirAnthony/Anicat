@@ -69,7 +69,6 @@ class EditDefaultTests(FormsTest):
             F.error_messages['bad_fields'], F, r, 1, 'anime', 'none')
 
     def test_EditableDefault_process(self):
-        from django.db import connection, transaction
         a = api.Forms()
         r = HttpRequest()
         r.user = User.objects.get(id=1)
@@ -94,18 +93,19 @@ class EditDefaultTests(FormsTest):
         result['form'] = json.FormSerializer(result['form'])
         check_response(result, {'text': {'title': [u'This field is required.']},
             'id': 1, 'form': a.get_fields('anime', 'title')})
-        anime = AnimeItem.objects.get(id=1)
-        f = EditableDefault(r, 1, 'anime')
-        af = api.Add.params.copy()
-        for field in af.keys():
-            if hasattr(anime, field):
-                af[field] = getattr(anime, field)
-        af['genre'] = (1, 2)
-        f.request.POST.update(af)
-        def exception():
-            raise Exception
-        f.last = exception
+        #anime = AnimeItem.objects.get(id=1)
+        #f = EditableDefault(r, 1, 'anime')
+        #af = api.Add.params.copy()
+        #for field in af.keys():
+        #    if hasattr(anime, field):
+        #        af[field] = getattr(anime, field)
+        #af['genre'] = (1, 2)
+        #f.request.POST.update(af)
+        #def exception():
+        #    raise Exception
+        #f.last = exception
         #Test may break here
+        #from django.db import connection, transaction
         #connection.cursor().execute('DROP TABLE anime_animeitem')
         #transaction.commit_unless_managed()
         #result = f.process('post')
@@ -115,7 +115,7 @@ class EditDefaultTests(FormsTest):
         #    'id': 1, 'form': result['form']})
 
     def test_EditableDefault_explore(self):
-        from anime.core import FieldExplorer as FE
+        from anime.core.explorer import FieldExplorer as FE
         r = HttpRequest()
         r.user = User.objects.get(id=1)
         f = EditableDefault(r, 1, 'anime', 'title')

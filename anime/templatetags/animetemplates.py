@@ -1,7 +1,7 @@
 from anime.forms.ModelError import AnimeForm
 from anime.forms.User import NotActiveAuthenticationForm, UserCreationFormMail
 from anime.models import USER_STATUS
-from anime.user import get_username
+from anime.core.user import get_username
 from django import template
 
 register = template.Library()

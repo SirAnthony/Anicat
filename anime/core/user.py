@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib import auth
+from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
@@ -12,30 +13,37 @@ from anime.malconvert import passFile
 from anime.models import AnimeRequest, UserStatusBundle, USER_STATUS
 
 
+ERROR_MESSAGES = {
+    'login': {'logined': _('Already logged in.'),},
+    'register': {'registred': _('Already registred.')},
+    'mallist': {'fast': _('You doing it too often. Try again in {0} minutes.')}
+}
+
+
 def get_username(user):
-    username = 'Anonymous'
     if getattr(user, 'first_name', None):
-        username = user.first_name
         if user.last_name:
-            username += u' ' + user.last_name
-    return username
+            return u'{0} {1}'.format(user.first_name, user.last_name)
+        else:
+            return user.first_name
+    return 'Anonymous'
 
 
 def latest_status(request, user_id=0):
     try:
         if user_id:
-            return UserStatusBundle.objects.filter(user=User.objects.get(id=user_id)).latest("changed").changed
-        return UserStatusBundle.objects.filter(user=request.user).latest("changed").changed
+            user = User.objects.get(id=user_id)
+        else:
+            user = request.user
+        return UserStatusBundle.objects.filter(user=user).latest("changed").changed
     except:
         return
 
 
-
 def login(request):
     response = {}
-    form = None
     if request.user.is_authenticated():
-        response['text'] = _('Already logged in.')
+        response['text'] = ERROR_MESSAGES['login']['logined']
     else:
         form = NotActiveAuthenticationForm(data=request.POST or None)
         if form.is_valid():
@@ -43,15 +51,15 @@ def login(request):
             auth.login(request, user)
             response.update({'response': True,
                 'text': {'name': get_username(user)}})
-        response['form'] = form
+        else:
+            response['form'] = form
     return response
 
 
 def register(request):
     response = {}
-    form = None
     if request.user.is_authenticated():
-        response['text'] = _('Already registred.')
+        response['text'] = ERROR_MESSAGES['register']['registred']
     else:
         form = UserCreationFormMail(request.POST or None)
         if form.is_valid():
@@ -59,22 +67,15 @@ def register(request):
             user = auth.authenticate(username=user.username, password=form.cleaned_data['password1'])
             auth.login(request, user)
             response.update({'response': True, 'text': {'name': get_username(user)}})
-    response['form'] = form or UserCreationFormMail()
+        else:
+            response['form'] = form
     return response
-
-
-def set_usernames(request):
-    response = {}
-    form = UserNamesForm(request.POST or None)
-    if form.is_valid():
-        form.save()
-        response.update({'response': True, 'text': {'name': get_username(user)}})
 
 
 def load_settings(request):
     res = {}
     if 'mallist' in request.POST:
-        res.update(loadMalList(request))
+        res.update(load_MalList(request))
     else:
         res['mallistform'] = UploadMalListForm()
     if 'usernames' in request.POST:
@@ -84,15 +85,15 @@ def load_settings(request):
     else:
         res['usernames'] = UserNamesForm(instance=request.user)
     if 'emailform' in request.POST:
-        res['emailForm'] = form = UserEmailForm(request.POST or None, instance=request.user)
+        res['emailform'] = form = UserEmailForm(request.POST or None, instance=request.user)
         if form.is_valid():
             form.save()
     else:
-        res['emailForm'] = UserEmailForm(instance=request.user)
+        res['emailform'] = UserEmailForm(instance=request.user)
     return res
 
 
-def loadMalList(request):
+def load_MalList(request):
     lastLoad = cache.get('MalList:%s' % request.user.id)
     form = UploadMalListForm(request.POST or None, request.FILES)
     if form.is_valid():
@@ -102,7 +103,7 @@ def loadMalList(request):
         except TypeError:
             lastLoad = {}
         if lastLoad and timeLeft > 0:
-            form.addError('You doing it too often. Try again in %s minutes.' % timeLeft)
+            form.addError(ERROR_MESSAGES['mallist']['fast'].format(timeLeft))
         else:
             status, error = passFile(request.FILES['file'],
                     request.user, form.cleaned_data['rewrite'])
@@ -113,7 +114,7 @@ def loadMalList(request):
     return {'mallistform': form, 'mallist': lastLoad}
 
 
-def getRequests(user, *keys):
+def get_requests(user, *keys):
     try:
         qs = AnimeRequest.objects.filter(user=user).order_by('status', '-id')
         qs = qs.exclude(Q(status__gt=2) & Q(changed__lte=datetime.now() - timedelta(days=20)))
@@ -122,18 +123,15 @@ def getRequests(user, *keys):
             qs = qs[:qs.count() - (c - settings.USER_PAGE_REQUEST_COUNT/2)]
         if keys:
             qs = qs.values(*keys)
-        try:
-            types = AnimeRequest._meta.get_field('requestType').choices
-        except:
-            types = None
+        types = AnimeRequest._meta.get_field('requestType').choices
         return {'requests': list(qs),
                 'requestTypes': types}
     except:
         return {}
 
 
-def getStatistics(user):
-    if not user or not hasattr(user, 'id'):
+def get_statistics(user):
+    if not user or not getattr(user, 'id', None):
         return None
     uid = user.id
     tuser = cache.get('Stat:%s' % uid)
@@ -145,6 +143,7 @@ def getStatistics(user):
                 select = {'full': 'SUM(anime_animeitem.episodesCount*anime_animeitem.duration)',
                           'custom': 'SUM(anime_animeitem.duration*anime_userstatusbundle.count)',
                           'count': 'COUNT(*)'}
+                #TODO: we need only one anime__X value for django orm works
                 ).values('anime__episodesCount', 'anime__duration', 'full', 'custom',
                 'count').select_related('anime__episodesCount', 'anime__duration').get()
             arr['name'] = status[1]
@@ -160,7 +159,9 @@ def getStatistics(user):
     return tuser
 
 
-def getStyles(user):
+def get_styles(user):
+    if not user or not getattr(user, 'id', None):
+        return None
     uid = user.id
     styles = cache.get('userCss:%s' % uid)
     if not styles:

@@ -5,9 +5,10 @@
 #            FormsFieldsTests, FormsJSONTests )
 #from anime.tests.edit import ( EditInitTest, EditDefaultTests,
 #            EditSimpleTests, EditRequestsTests, EditAnimebasedTests )
-from anime.tests.views import ( AjaxTest, UserViewsTest, EditViewsTest,
-            EditViewsRequestsTest, BaseViewsTest, BaseViewsRequestsTest,
-            HistoryViewsTest )
+#from anime.tests.views import ( AjaxTest, UserViewsTest, EditViewsTest,
+#            EditViewsRequestsTest, BaseViewsTest, BaseViewsRequestsTest,
+#            HistoryViewsTest )
+from anime.tests.core import UserTest, UserDBTest, UserRequestTest
 #import * - bad
 
 __test__= {
@@ -15,5 +16,6 @@ __test__= {
     #'errors': errors,
     #'forms': forms,
     #'edit': edit,
-    'views': views,
+    #'views': views,
+    'core': core,
 }

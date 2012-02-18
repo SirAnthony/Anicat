@@ -2,9 +2,9 @@
 from django.http import HttpResponse
 from django.utils import simplejson
 from django.utils.encoding import force_unicode
-import anime.core as coreMethods
+import anime.core.base as coreMethods
+import anime.core.user as userMethods
 import anime.edit as editMethods
-import anime.user as userMethods
 from anime.forms.json import FormSerializer, prepare_data
 
 
@@ -72,17 +72,15 @@ def add(request):
 @ajaxResponse
 def login(request):
     res = userMethods.login(request)
-    if 'response' in res and res['response']:
-        form = res['form']
-        return {'response': 'login', 'status': True,
-                    'text': {'name': userMethods.get_username(form.get_user())}}
+    if res.get('response', False):
+        return {'response': 'login', 'status': True, 'text': res.get('text')}
     return {'response': 'login', 'status': False, 'text': extract_errors(res)}
 
 
 @ajaxResponse
 def register(request):
     res = userMethods.register(request)
-    if 'response' in res:
+    if res.get('response', False):
         return {'response': 'login', 'status': True, 'text': res.get('text')}
     return {'response': 'register', 'status': False, 'text': extract_errors(res)}
 

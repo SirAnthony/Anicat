@@ -26,12 +26,12 @@
         <div>
             <b>E-mail: </b><a class="form" onclick="toggle(this.parentNode.nextSibling);">{{ user.email }}</a>
         </div>
-        <form method="POST" {% if not emailForm.errors and not emailForm.non_field_errors %}class="hidden"{% endif %} action="{% url settings %}">
+        <form method="POST" {% if not emailform.errors and not emailform.non_field_errors %}class="hidden"{% endif %} action="{% url settings %}">
             {% csrf_token %}
-            <div class="mainerror">{{ emailForm.non_field_errors }}</div>
-            {{ emailForm.email }}
+            <div class="mainerror">{{ emailform.non_field_errors }}</div>
+            {{ emailform.email }}
             <input type="submit" value="Set" name="emailform" />
-            {{ emailForm.errors }}
+            {{ emailform.errors }}
         </form>
         <a class="block" href="{% url password_change %}">Change password</a>
     </div>

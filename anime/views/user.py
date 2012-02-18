@@ -1,5 +1,5 @@
 
-import anime.user as userMethods
+import anime.core.user as userMethods
 
 from django.contrib import auth
 from django.contrib.auth.models import User
@@ -13,7 +13,7 @@ from annoying.decorators import render_to
 @render_to('anime/user/login.html')
 def login(request):
     res = userMethods.login(request)
-    return HttpResponseRedirect('/') if 'response' in res else res
+    return HttpResponseRedirect('/') if res.get('response', False) else res
 
 
 @render_to('anime/user/social-error.html')
@@ -30,7 +30,7 @@ def logout(request):
 @render_to('anime/user/register.html')
 def register(request):
     res = userMethods.register(request)
-    return HttpResponseRedirect('/') if 'response' in res else res
+    return HttpResponseRedirect('/') if res.get('response', False) else res
 
 
 @render_to('anime/settings.html')
@@ -38,7 +38,7 @@ def settings(request):
     if not request.user.is_authenticated():
         raise Http404
     response = userMethods.load_settings(request)
-    response.update(userMethods.getRequests(request.user))
+    response.update(userMethods.get_requests(request.user))
     return response
 
 
@@ -54,7 +54,7 @@ def statistics(request, user_id=0):
         user = request.user
     else:
         raise Http404
-    res = userMethods.getStatistics(user)
+    res = userMethods.get_statistics(user)
     return {'userid': getattr(user, 'id', None), 'stat': res}
 
 
@@ -62,5 +62,5 @@ def statistics(request, user_id=0):
 @condition(last_modified_func=userMethods.latest_status)
 @render_to('anime/user.css', 'text/css')
 def generate_css(request):
-    return {'style': userMethods.getStyles(request.user)}
+    return {'style': userMethods.get_styles(request.user)}
 
