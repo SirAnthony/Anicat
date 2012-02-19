@@ -260,9 +260,13 @@ class Search(Base):
                     'type': unicode,
                     'numberofep': int,
                     'release': unicode,
-                    'air': bool
+                    'air': bool,
             },]),
-            'page': int
+            'pages': {
+                'current': int,
+                'start': int,
+                'items': list,
+            }
         }
     }
 

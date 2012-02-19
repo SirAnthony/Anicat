@@ -147,7 +147,7 @@ var searcher = new ( function(){
                             onclick: ( function(i, j){
                                             return function(e){ cnt(i, j, e); };
                                         })('id', elem.id),
-                            innerText: Number(i) + 1 + rs.items.length * rs.page }},
+                            innerText: Number(i) + 1 + rs.pages.start }},
                         ]);
                 tr.push(row);
                 for(var column in elem){
@@ -161,8 +161,9 @@ var searcher = new ( function(){
             element.appendChild(this.result, [srctbl, ['thead', 'tbody', tr]]);
             if(rs.count > rs.items.length){
                 var pg = new Array();
+                //TODO: pages api changed
                 for( var i = 1; i <= Math.ceil(rs.count / 20); i++){
-                    if(rs.page == i-1){
+                    if(rs.pages.current == i-1){
                         pg.push(element.create('span', {innerText: '[' + i + ']'}));
                     }else{
                         pg.push(element.create('a', {innerText: i,

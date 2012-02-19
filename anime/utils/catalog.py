@@ -1,4 +1,5 @@
 #Some helpful functions
+from hashlib import sha1
 from django.core.cache import cache
 from django.utils.hashcompat import md5_constructor
 from django.utils.http import urlquote
@@ -47,6 +48,7 @@ def invalidateCacheKey(fragment_name, *variables):
     cache_key = 'template.cache.%s.%s' % (fragment_name, args.hexdigest())
     cache.delete(cache_key)
 
+#TODO: custom formatter to this
 
 def cleanTableCache(order, status, page, user, cuserid):
     link = '/'
@@ -79,6 +81,23 @@ def cleanRequestsCache(status, rtype, page):
     return link, cachestr
 
 
+def cleanSearchCache(string, field, order, page):
+    link = u'/search/'
+    if string is not None:
+        link += u'%s/' % string
+    if field is not None:
+        link += u'field/%s/' % field
+    if order != u'title':
+        link += u'sort/%s/' % order
+    hashlink = sha1(link.encode('utf-8')).hexdigest()
+    cachestr = sha1(link.encode('utf-8') + str(page)).hexdigest()
+    #You can clean cache part if you know original link, i.e. never.
+    if not _cleanCache('search', None, hashlink, page, cachestr):
+        cache.delete('search:%s' % cachestr)
+        #cache.delete('Pages:%s' % hashlink)
+    return link, cachestr, hashlink
+
+
 def _cleanCache(cachekey, first, second, third, cachestr, ckey=None):
     #cache = {first: {second: [third,]]}} or {second: [third,]]}
     ccontent = cache.get(cachekey)
@@ -107,9 +126,9 @@ def _cleanCache(cachekey, first, second, third, cachestr, ckey=None):
             ccontent[first] = firstcontent
         else:
             ccontent = firstcontent
-        cache.delete('Pages:%s' % cachestr)
         invalidateCacheKey(ckey or cachekey, cachestr)
         cache.set(cachekey, ccontent)
+    return cached
 
 
 def updateMainCaches(status=None):

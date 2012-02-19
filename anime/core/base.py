@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-from hashlib import sha1
 from django.conf import settings
 from django.core.cache import cache
 from django.utils.translation import ugettext_lazy as _
 from anime.core.explorer import GetError, FieldExplorer
 from anime.models import AnimeItem, AnimeLink, UserStatusBundle, USER_STATUS
-from anime.utils.catalog import getPages, createPages, updateMainCaches, cleanTableCache
+from anime.utils.catalog import ( getPages, createPages,
+                updateMainCaches, cleanTableCache, cleanSearchCache)
+
 
 ERROR_MESSAGES = {
     'get_data': {
@@ -13,8 +14,14 @@ ERROR_MESSAGES = {
         'bad_id': _('Invalid id'),
         'bad_fields': _('Bad request fields: {0}'),
         'no_fields': _('No fields passed'),
+    },
+    'search': {
+        'empty': _('Empty query.'),
+        'bad_field': _('This field not avaliable yet.'),
+        'cache_error': _('Cache error occured. Try again.'),
     }
 }
+
 
 def get_data(request):
     fields = []
@@ -86,63 +93,63 @@ def index(user, user_id, status, order, page):
             'pages': pages, 'page': {'number': page, 'start': page*limit}}
 
 
-def search(field, string, request, attrs={}):
+def search(field, string, **kwargs):
     #Rewrite this
+    ret = {
+        'count': 0,
+        'items': [],
+        'pages': {'current': 0, 'items': []}
+    }
+
     try:
         string = string.strip()
         if not string:
             raise AttributeError
     except AttributeError:
-        return {'text': 'Empty query.'}
+        return ERROR_MESSAGES['search']['empty']
     if not field:
         field = 'name'
-    limit = attrs.get('limit', 20)
+    elif field != 'name':
+        return ERROR_MESSAGES['search']['bad_field']
     try:
+        limit = kwargs.get('limit', settings.SEARCH_PAGE_LIMIT)
         limit = int(limit)
+        if limit > 30:
+            limit = 30
     except:
-        limit = 20
-    if limit > 30:
-        limit = 30
-    qs = None
-    link = '/search/'
-    if string:
-        link += string + '/'
-    if field:
-        link += 'field/%s/' % field
+        limit = settings.SEARCH_PAGE_LIMIT
+    try:
+        page = int(kwargs.get('page', 0))
+    except:
+        page = 0
     try:
         order = attrs.get('order')
         AnimeItem._meta.get_field(order)
-        if order != 'title':
-            link += 'sort/%s/' % order
     except Exception:
         order = 'title'
-    try:
-        page = int(attrs.get('page', 0))
-    except:
-        page = 0
-    #FIXME: Search cache lives its own life
-    cachestr = sha1(link.encode('utf-8') + str(page)).hexdigest()
+
+    (link, cachestr, hashlink) = cleanSearchCache(string, field, order, page)
     cached = cache.get('search:%s' % cachestr)
     if cached:
         try:
-            pages = cached['pages']
-            items = cached['items']
-            count = cached['count']
+            ret.update(cached)
         except KeyError:
             cache.delete('search:%s' % cachestr)
-            return {'text': 'Cache error occured. Try again.'}
+            return ERROR_MESSAGES['search']['cache_error']
     else:
+        qs = None
         if field == 'name':
             qs = AnimeItem.objects.filter(animenames__title__icontains=string)\
                                         .distinct().order_by(order)
-        else:
-            return {'text': 'This field not avaliable yet.'}
-        pages = createPages(qs, order, limit)
-        items = qs[page * limit:(page + 1) * limit]
-        count = qs.count()
-        cache.set('search:%s' % cachestr, {'pages': pages, 'items': items, 'count': count})
-    return {'response': 'search', 'text': {'pages': pages, 'items': items,
-            'count': count, 'page': page, 'link': link, 'cachestr': cachestr}}
+        pages = getPages(hashlink, page, qs, order, limit)
+        ret.update({'count': qs.count(),
+            'items': qs[page * limit:(page + 1) * limit],
+            'pages': {'current': page,
+                      'start': page * limit, 'items': pages}
+        })
+        cache.set('search:%s' % cachestr, ret)
+    ret.update({'link': link, 'cachestr': cachestr})
+    return ret
 
 
 def card(anime_id, user):

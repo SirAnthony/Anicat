@@ -89,19 +89,17 @@ def register(request):
 def search(request):
     if request.method != 'POST':
         return {'text': {'__all__': 'Only POST method allowed.'}}
-    response = coreMethods.search(request.POST.get('field'),
-        request.POST.get('string'), request, {
-            'page': request.POST.get('page', 0),
-            'order': request.POST.get('order'),
-            'limit': request.POST.get('limit')
-             })
-    if 'response' in response:
-        del response['text']['link']
-        del response['text']['cachestr']
-        del response['text']['pages']
-        items = response['text'].pop('items')
-        response['text']['items'] = [{'name': x.title, 'type': x.releaseTypeS,
+    response = {'response': 'search', 'status': True}
+    ret = coreMethods.search(request.POST.get('field'),
+        request.POST.get('string'), page=request.POST.get('page', 0),
+        order=request.POST.get('order'), limit=request.POST.get('limit'))
+    if type(ret) is dict:
+        del ret['link']
+        del ret['cachestr']
+        ret['items'] = [{'name': x.title, 'type': x.releaseTypeS,
             'numberofep': x.episodesCount, 'id': x.id, 'release': x.release,
-            'air': x.air} for x in items]
-    response['status'] = True
+            'air': x.air} for x in ret['items']]
+    else:
+        response['status'] = False
+    response['text'] = ret
     return response

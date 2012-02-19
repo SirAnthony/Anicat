@@ -63,20 +63,17 @@ def requests(request, status=None, rtype=None, page=0):
 
 @render_to('anime/search.html')
 def search(request, string=None, field=None, order=None, page=0):
-    limit = settings.SEARCH_PAGE_LIMIT
     string = string or request.POST.get('string') or ''
     field = field or request.POST.get('field')
     order = order or request.POST.get('sort')
-    ret = {'cachestr': 'badsearch', 'link': 'search/', 'string': string}
-    response = coreMethods.search(field, string, request, {
-                    'page': page or request.POST.get('page'), 'order': order})
-    if response.has_key('response'):
-        ret.update(response['text'])
-        page = ret['page']
-        ret['page'] = {'number': page, 'start': page*limit}
-    else:
-        ret['page'] = {'number': 0, 'start': 0}
-    return ret
+    page = page or request.POST.get('page')
+    response = {'cachestr': 'badsearch', 'link': 'search/', 'string': string}
+    ret = coreMethods.search(field, string, order=order, page=page)
+    try:
+        response.update(ret)
+    except ValueError:
+        pass
+    return response
 
 
 @render_to('anime/card.html')
