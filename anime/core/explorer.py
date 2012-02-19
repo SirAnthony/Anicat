@@ -10,13 +10,17 @@ class GetError(Exception):
 
 class FieldExplorer(object):
     CALLABLE_FIELDS = ['anime', 'state', 'name', 'genre', 'links',
-                       'type', 'releaseType', 'bundle']
+                       'release', 'type', 'releaseType', 'bundle']
     error_messages = {
         'bad_field': _('Bad field'),
         'error': _('Error: {0}'),
+        'bad_user': _('Anonymous users have no statistics.'),
     }
 
     def __init__(self, field):
+        self.set_field(field)
+
+    def set_field(self, field):
         if field == 'releasedAt,endedAt':
             field = 'release'
         self.field = field
@@ -55,7 +59,7 @@ class FieldExplorer(object):
 
     def state(self, anime, request):
         if not request.user.is_authenticated():
-            return 'Anonymous users have no statistics.'
+            return self.error_messages['bad_user']
         try:
             bundle = self.get_model().objects.get(anime=anime, user=request.user)
             status = int(bundle.state)
@@ -74,7 +78,7 @@ class FieldExplorer(object):
         return list(self.get_model().objects.filter(anime=anime).values_list('title', flat=True))
 
     def genre(self, anime, request):
-        return ', '.join(anime.genre.values_list('name', flat=True))
+        return u', '.join(anime.genre.values_list('name', flat=True))
 
     def links(self, anime, request):
         model = self.get_model()
@@ -88,6 +92,9 @@ class FieldExplorer(object):
                     d[name] = []
                 d[name].append(x[1])
             return d
+
+    def release(self, anime, request):
+        return anime.release
 
     def type(self, anime, request):
         return anime.releaseTypeS

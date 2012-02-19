@@ -101,7 +101,7 @@ class CatalogGetTypes(CallableDict):
                 'episodesCount': int,
                 'air': bool,
                 'name': FuzzyList([unicode,]),
-                'bundle': {'id': int, 'bundles': FuzzyList([{"elemid": int, "name": unicode}])},
+                'bundle': Noneable({'id': int, 'bundles': FuzzyList([{"elemid": int, "name": unicode}])}),
                 'links': NoneableDict([(x[1], FuzzyList([unicode,])) for x in LINKS_TYPES[1:]]),
                 'duration': int,
                 'state': {"state": int, "select": dict(map(lambda x: (unicode(x[0]), x[1]), USER_STATUS))},

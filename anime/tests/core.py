@@ -6,8 +6,11 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.http import HttpRequest
 from django.test import TestCase
 from anime import api
+from anime.core import explorer
 from anime.forms.json import FormSerializer as FS
-from anime.tests.functions import create_user, login
+from anime.models import AnimeItem
+from anime.tests.forms import FormsTest
+from anime.tests.functions import create_user, login, check_response
 
 
 class UserTest(TestCase):
@@ -169,3 +172,65 @@ class UserRequestTest(TestCase):
         #FIXME: No actual result check
         self.assertNotEquals(userMethods.get_requests(u), {})
         self.assertEquals(userMethods.get_requests(u, 'new_field'), {})
+
+
+class ExplorerTest(FormsTest):
+
+    fixtures = ['2trash.json']
+
+    def test_FieldExplorer(self):
+        ex = explorer.FieldExplorer(None)
+        anime = AnimeItem.objects.get(id=1)
+        self.assertEquals(ex.get_model(), None)
+        self.assertEquals(ex.get_value(None, None), None)
+        ex.set_field('set_field')
+        self.assertRaisesMessage(explorer.GetError,
+            ex.error_messages['error'].format(ex.error_messages['bad_field']),
+            ex.get_value, anime, None)
+        ex.set_field('_meta')
+        self.assertRaisesMessage(explorer.GetError,
+            ex.error_messages['error'].format(ex.error_messages['bad_field']),
+            ex.get_value, anime, None)
+
+    def test_FieldExplorer_fields(self):
+        from anime.models import AnimeName
+        fields = api.CatalogGetTypes()
+        ex = explorer.FieldExplorer('anime')
+        anime = AnimeItem.objects.get(id=1)
+        self.assertEquals(ex.get_value(anime, None), None)
+        for name in ['type', 'releaseType']:
+            ex.set_field(name)
+            self.assertEquals(ex.get_value(anime, None), anime.releaseTypeS)
+        ex.set_field('releasedAt,endedAt')
+        self.assertEquals(ex.get_value(anime, None), anime.release)
+        ex.set_field('genre')
+        self.assertEquals(len(ex.get_value(anime, None).split(', ')), anime.genre.count())
+        for item in ['title', 'name', 'links', 'bundle']:
+            ex.set_field(item)
+            check_response(ex.get_value(anime, None), fields.funcs[item])
+        anime.bundle = None
+        self.assertEquals(ex.get_value(anime, None), None)
+
+    @create_user()
+    def test_FieldExplorer_state(self):
+        from anime.models import UserStatusBundle, USER_STATUS
+        ex = explorer.FieldExplorer('state')
+        anime = AnimeItem.objects.get(id=1)
+        r = HttpRequest()
+        r.user = AnonymousUser()
+        self.assertEquals(ex.get_value(anime, r),
+                            ex.error_messages['bad_user'])
+        r.user = User.objects.get(id=1)
+        self.assertEquals(ex.get_value(anime, r),
+                            {'state': 1, 'select': dict(USER_STATUS)})
+        self.assertEquals(ex.get_value(AnimeItem.objects.get(id=2), r),
+                            {'state': 0, 'select': dict(USER_STATUS)})
+        sb = UserStatusBundle.objects.get(anime=anime, user=r.user)
+        sb.state = 3
+        sb.save()
+        self.assertEquals(ex.get_value(anime, r), {'state': 3,
+                            'select': dict(USER_STATUS), 'rating': 6})
+        sb.state = 2
+        sb.save()
+        self.assertEquals(ex.get_value(anime, r), {'state': 2,
+            'select': dict(USER_STATUS), 'completed': 1, 'all': 114})
