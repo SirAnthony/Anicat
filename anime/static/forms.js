@@ -93,13 +93,13 @@ var forms = new (function forms_class(){
             for(var g=0; g<bundles.length; g++){
                 var cur = bundles[g];
                 s.push('tr', [
-                    {'td': {innerText: (id == cur.elemid ? "►" : "")}},
+                    {'td': {innerText: (id == cur.id ? "►" : "")}},
                     {'td': {className: "bundle_number", innerText: g+1}},
                     'td', [{'a': {
-                        href: '/card/' + cur.elemid + '/',
-                        onclick: (function(c){ return function(e){ return Card.get(c, e); }})(cur.elemid),
-                        innerText: encd(cur.name),
-                        className: 's s' + cur.elemid
+                        href: '/card/' + cur.id + '/',
+                        onclick: (function(c){ return function(e){ return Card.get(c, e); }})(cur.id),
+                        innerText: encd(cur.title),
+                        className: 's s' + cur.id
                     }}]
                 ]);
             }

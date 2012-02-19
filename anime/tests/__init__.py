@@ -8,7 +8,7 @@
 #from anime.tests.views import ( AjaxTest, UserViewsTest, EditViewsTest,
 #            EditViewsRequestsTest, BaseViewsTest, BaseViewsRequestsTest,
 #            HistoryViewsTest )
-from anime.tests.core import ExplorerTest, UserTest, UserDBTest, UserRequestTest
+from anime.tests.core import BaseTest#, ExplorerTest, UserTest, UserDBTest, UserRequestTest
 #import * - bad
 
 __test__= {

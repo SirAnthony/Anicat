@@ -7,23 +7,30 @@ from anime.core.explorer import GetError, FieldExplorer
 from anime.models import AnimeItem, AnimeLink, UserStatusBundle, USER_STATUS
 from anime.utils.catalog import getPages, createPages, updateMainCaches, cleanTableCache
 
+ERROR_MESSAGES = {
+    'get_data': {
+        'bad_request': _('Only POST method allowed.'),
+        'bad_id': _('Invalid id'),
+        'bad_fields': _('Bad request fields: {0}'),
+        'no_fields': _('No fields passed'),
+    }
+}
 
-def get(request):
+def get_data(request):
     fields = []
     if request.method != 'POST':
-        # XXX: Антипаттерн, имя функции - get, но разрешен только пост
-        return {'text': 'Only POST method allowed.'}
+        return {'text': ERROR_MESSAGES['get_data']['bad_request']}
     try:
         aid = int(request.POST.get('id', 0))
         anime = AnimeItem.objects.get(id=aid)
-    except Exception, e:
-        return {'text': 'Invalid id: ' + str(e)}
+    except Exception:
+        return {'text': ERROR_MESSAGES['get_data']['bad_id']}
     try:
         fields.extend(request.POST.getlist('field'))
     except Exception, e:
-        return {'text': 'Bad request fields: ' + str(e)}
+        return {'text': ERROR_MESSAGES['get_data']['bad_fields'].format(e)}
     if not fields:
-        return {'text': 'No fields passed.'}
+        return {'text': ERROR_MESSAGES['get_data']['no_fields']}
     response = {'order': fields}
     for field in fields:
         field_expl = FieldExplorer(field)
@@ -151,11 +158,9 @@ def card(anime_id, user):
         else:
             ret.update({'anime': anime, 'names': anime.animenames.values()})
             if anime.bundle:
-                ret['bundles'] = anime.bundle.animeitems.values('id', 'title').all().order_by('releasedAt')
-            try:
-                ret['animelinks'] = anime.links.order_by('linkType').all()
-            except (AnimeLink.DoesNotExist, AttributeError):
-                pass
+                ret['bundle'] = anime.bundle.animeitems.values('id', 'title').all().order_by('releasedAt')
+            if anime.links:
+                ret['links'] = anime.links.order_by('linkType').all()
             cache.set('card:%s' % anime_id, ret)
     if user.is_authenticated() and 'anime' in ret:
         userstatus = None

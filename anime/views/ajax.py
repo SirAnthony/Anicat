@@ -28,7 +28,7 @@ def extract_errors(r):
 
 @ajaxResponse
 def get(request):
-    return coreMethods.get(request)
+    return coreMethods.get_data(request)
 
 
 @ajaxResponse

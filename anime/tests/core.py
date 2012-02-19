@@ -1,5 +1,6 @@
 
 import anime.core.user as userMethods
+import anime.core.base as coreMethods
 from django.conf import settings
 from django.core.cache import cache
 from django.contrib.auth.models import User, AnonymousUser
@@ -234,3 +235,64 @@ class ExplorerTest(FormsTest):
         sb.save()
         self.assertEquals(ex.get_value(anime, r), {'state': 2,
             'select': dict(USER_STATUS), 'completed': 1, 'all': 114})
+
+
+class BaseTest(TestCase):
+
+    fixtures = ['2trash.json']
+
+    def test_get_data(self):
+        from django.utils.datastructures import MultiValueDict
+        r = HttpRequest()
+        r.method = 'GET'
+        self.assertEquals(coreMethods.get_data(r), {'text':
+            coreMethods.ERROR_MESSAGES['get_data']['bad_request']})
+        r.method = 'POST'
+        self.assertEquals(coreMethods.get_data(r), {'text':
+            coreMethods.ERROR_MESSAGES['get_data']['bad_id']})
+        r.POST = {'id': 1}
+        self.assertEquals(coreMethods.get_data(r), {'text':
+            coreMethods.ERROR_MESSAGES['get_data']['bad_fields'].format(
+                "'dict' object has no attribute 'getlist'")})
+        r.POST = MultiValueDict({'id': '1'})
+        self.assertEquals(coreMethods.get_data(r), {'text':
+            coreMethods.ERROR_MESSAGES['get_data']['no_fields']})
+        r.POST.setlist('field', ['title', 'None'])
+        self.assertEquals(coreMethods.get_data(r), {'status': True,
+            'response': 'get', 'id': 1, 'text':
+                {'None': u'Error: Bad field', 'title': u'fe',
+                'order': ['title', 'None']}
+            })
+
+    def test_index(self):
+        pass
+
+    @create_user()
+    def test_card(self):
+        user = User.objects.get(id=1)
+        anime = AnimeItem.objects.get(id=1)
+        fields = api.CatalogGetTypes()
+        cache.delete('card:1')
+        self.assertRaises(AnimeItem.DoesNotExist, coreMethods.card, None, user)
+        self.assertEquals(coreMethods.card('none', AnonymousUser()), {})
+        result = coreMethods.card(1, user)
+        for item in result.keys():
+            if item == 'userstatus':
+                f = {'count': 1, 'rating': 6, 'state': 1, 'statusName': u'Want'}
+            elif item == 'anime':
+                f = anime
+            elif item == 'links':
+                f = anime.links.order_by('linkType').all()
+            elif item == 'bundle':
+                f = fields.funcs[item].type['bundles']
+            elif item == 'names':
+                f = anime.animenames.values()
+            else:
+                f = fields.funcs[item]
+            check_response(result[item], f)
+        AnimeItem.objects.get(id=2).links.all().delete()
+        cache.delete('card:2')
+        result = coreMethods.card(2, user)
+        self.assertEquals(list(result['links']), [])
+        cache.delete('card:2')
+        cache.delete('card:1')

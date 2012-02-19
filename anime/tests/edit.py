@@ -189,13 +189,13 @@ class EditSimpleTests(FormsTest):
         self.assertEqual(f.explore_result(), {'text': []})
         f.request.POST['currentid'] = 1
         self.assertEqual(f.explore_result(), {'currentid': 1, 'text': {
-            'bundles': [{'elemid': 2, 'name': u'dwkydani zjrq mj'},
-            {'elemid': 1, 'name': u'fe'}], 'id': 1}})
+            'bundles': [{'id': 2, 'title': u'dwkydani zjrq mj'},
+            {'id': 1, 'title': u'fe'}], 'id': 1}})
         f = Bundle(r, 1, 'bundle')
         r.POST['currentid'] = 0
         self.assertEqual(f.explore_result(), {'currentid': 2, 'text': {
-            'bundles': [{'elemid': 2, 'name': u'dwkydani zjrq mj'},
-            {'elemid': 1, 'name': u'fe'}], 'id': 1}})
+            'bundles': [{'id': 2, 'title': u'dwkydani zjrq mj'},
+            {'id': 1, 'title': u'fe'}], 'id': 1}})
         f.last()
 
 
