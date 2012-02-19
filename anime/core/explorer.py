@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.db.models.fields import FieldDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from anime.models import LINKS_TYPES, EDIT_MODELS, USER_STATUS
 
@@ -35,8 +36,9 @@ class FieldExplorer(object):
                 raise ValueError(self.error_messages['bad_field'])
             else:
                 try:
+                    anime._meta.get_field(self.field)
                     return getattr(anime, self.field)
-                except AttributeError:
+                except (FieldDoesNotExist, AttributeError):
                     raise ValueError(self.error_messages['bad_field'])
         except Exception, e:
             raise GetError(self.error_messages['error'].format(e))
