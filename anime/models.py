@@ -2,9 +2,9 @@
 import collections
 import os
 from audit_log.models.managers import AuditLog
-from django.db import models, IntegrityError
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import models, IntegrityError
 
 ANIME_TYPES = [
     (0, u'TV'),
@@ -435,6 +435,12 @@ EDIT_MODELS = {
     'image': AnimeImageRequest,
     'feedback': AnimeFeedbackRequest,
 }
+
+
+from anime.utils.cache import update_cache_on_save
+for model in ( AnimeBundle, AnimeItem, AnimeName, UserStatusBundle,
+               AnimeRequest ):
+    models.signals.post_save.connect(update_cache_on_save, sender=model)
 
 
 from social_auth.signals import socialauth_registered
