@@ -1,5 +1,5 @@
 {% extends "anime/base.html" %}
 
 {% block main %}
-    <div>Page not found.</div>
+    <div>{% if reason %}{{ reason }}{% else %}Page not found.{% endif %}</div>
 {% endblock %}

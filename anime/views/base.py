@@ -1,11 +1,12 @@
 
 import anime.core.base as coreMethods
+from annoying.decorators import render_to
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import Http404, HttpResponseRedirect
-from annoying.decorators import render_to
+from django.utils.translation import ugettext_lazy as _
 from anime.models import AnimeItem, AnimeRequest
 from anime.utils.catalog import last_record_pk, getPages, cleanRequestsCache
 from random import randint
@@ -90,5 +91,5 @@ def card(request, anime_id=0):
     try:
         ret = coreMethods.card(anime_id, request.user)
     except AnimeItem.DoesNotExist:
-        raise Http404
+        raise Http404(_('Record not found.'))
     return ret

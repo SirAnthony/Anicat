@@ -6,7 +6,10 @@ from django.db.models.loading import get_models, get_app
 admin.autodiscover()
 
 for m in get_models(get_app('anime')):
-    admin.site.register(m)
+    try:
+        admin.site.register(m)
+    except Exception, e:
+        print e
 
 urlpatterns = patterns('',
     # Example:

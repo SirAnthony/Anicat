@@ -4,18 +4,23 @@ from django.conf.urls.defaults import patterns, url
 from django.views.generic.simple import direct_to_template
 
 from anime.forms.User import NotActivePasswordResetForm
-
+from anime.views.classes import IndexListView
 
 # General
 urlpatterns = patterns(
     'anime.views.base',
-    (r'^$', 'index'),
     # TODO Split regexp
-    url(r'^(?:user/(?P<user>\d+)/)?(?:show/(?P<status>\d+)/)?(?:sort/(?P<order>-?\w+)/)?(?:(?P<page>\d+)/)?$', 'index', name='index'),
     url(r'^search/(?:(?P<string>[^/]+)/(?:field/(?P<field>\w+)/)?(?:sort/(?P<order>\w+)/)?(?:(?P<page>\d+)/)?)?$', 'search', name='search'),
     url(r'^card/(?:(?P<anime_id>\d+)/)?$', 'card', name='card'),
     # TODO Split regexp
     url(r'^requests/(?:status/(?P<status>\d+)/)?(?:type/(?P<rtype>\d+)/)?(?:(?P<page>\d+)/)?$', 'requests', name='requests'),
+)
+
+# Classes
+urlpatterns += patterns('',
+    (r'^$', IndexListView.as_view()),
+    url(r'^(?:user/(?P<user>\d+)/)?(?:show/(?P<status>\d+)/)?(?:sort/(?P<order>-?\w+)/)?(?:(?P<page>\d+)/)?$',
+        IndexListView.as_view(), name='index'),
 )
 
 # Direct
