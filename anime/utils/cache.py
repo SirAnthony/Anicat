@@ -1,6 +1,8 @@
 
 from datetime import datetime
 from django.core.cache import cache
+from django.utils.hashcompat import md5_constructor
+from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _
 from anime.models import ( AnimeBundle, AnimeItem, AnimeName,
                             UserStatusBundle, AnimeRequest)
@@ -12,15 +14,20 @@ ERROR_MESSAGES = {
 
 
 ITEM_TYPES = {
-
+    'IndexListView': [AnimeItem],
 }
 
-def latest(t, date, pks={}):
+
+def latest(t, cachestr, pks={}):
     '''Return True if date is greater than last_change
     pks is {'item type': 'item pk'} dict for using records caches
     instead of model's cache.
     '''
-    return  get_latest(t, pks) < date
+    date = cache.get(cachestr)
+    if not date:
+        update_named_cache(cachestr)
+        return False
+    return get_latest(t, pks) < date
 
 
 def get_latest(itemtype, pks={}):
@@ -64,3 +71,13 @@ def update_named_cache(name):
 def update_cache_on_save(sender, instance, signal, *args, **kwargs):
     update_cache(instance)
     update_cache(instance.__class__)
+
+
+def clean_cache(name, cachestr):
+    invalidate_cache_key(name, cachestr)
+
+
+def invalidate_cache_key(fragment_name, *variables):
+    args = md5_constructor(u':'.join([urlquote(var) for var in variables]))
+    cache_key = 'template.cache.%s.%s' % (fragment_name, args.hexdigest())
+    cache.delete(cache_key)

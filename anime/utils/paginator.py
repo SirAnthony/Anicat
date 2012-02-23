@@ -21,7 +21,7 @@ class Paginator(paginator.Paginator):
         self.cachekey = key
 
     def get_names(self):
-        names = None
+        names = []
         cachekey = getattr(self, 'cachekey', None)
         if getattr(self, 'names', None) is None:
             if cachekey is not None:
