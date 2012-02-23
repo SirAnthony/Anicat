@@ -56,11 +56,8 @@ class State(EditableDefault):
 
     def last(self):
         user = self.request.user
-        stat = cache.get('mainTable:%s' % user.id)
         for s in [self.status, self.oldstatus]:
-            if type(stat) is dict:
-                stat[s] = {}
-        cache.set('mainTable:%s' % user.id, stat)
+            cache.delete('userstatus:%s:%s' % (user.id, stat))
         cache.delete('userCss:%s' % user.id)
         cache.delete('Stat:%s' % user.id)
 

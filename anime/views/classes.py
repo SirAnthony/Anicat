@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.views.generic.list import ListView
-from anime.models import AnimeItem, USER_STATUS
+from anime.models import AnimeItem, UserStatusBundle, USER_STATUS
 from anime.utils import cache
 from anime.utils.paginator import Paginator
 
@@ -43,11 +43,21 @@ class AnimeListView(ListView):
         return context
 
     def updated(self, cachestr):
+        if not cache.key_valid(self.cache_name, cachestr):
+            return True
         return not cache.latest(self.__class__.__name__, cachestr)
 
     def get_link(self):
         "Implementation in subclasses"
         raise NotImplementedError
+
+    def check_args(self):
+        "Implementation in subclasses"
+        raise NotImplementedError
+
+    def get(self, request, *args, **kwargs):
+        self.check_args(request, *args, **kwargs)
+        return super(AnimeListView, self).get(request, *args, **kwargs)
 
 
 class IndexListView(AnimeListView):
@@ -75,7 +85,7 @@ class IndexListView(AnimeListView):
         link['link'] = link_name
         return link, cachestr
 
-    def get(self, request, user=None, status=None, order='title', page=1):
+    def check_args(self, request, user=None, status=None, order='title', page=1):
         if user is None or int(user) == request.user.id:
             user = request.user
         else:
@@ -105,8 +115,6 @@ class IndexListView(AnimeListView):
         self.status = status
         self.page = page or self.request.GET.get('page') or 1
 
-        return super(IndexListView, self).get(request, user, status, order, page)
-
     def get_queryset(self):
         qs = super(IndexListView, self).get_queryset()
         qs = qs.order_by(self.order)
@@ -124,3 +132,18 @@ class IndexListView(AnimeListView):
                 qs = qs.exclude(statusbundles__user=user,
                                 statusbundles__state__gte=1)
         return qs
+
+
+    def updated(self, cachestr):
+        if not cache.key_valid(self.cache_name, cachestr):
+            return True
+        ub = None
+        if self.status is not None:
+            cname = 'userstatus:{0}:{1}'.format(self.user.id, self.status)
+            ub = cache.get_cache(cname)
+            if not ub:
+                ub = list(UserStatusBundle.objects.filter(user=self.user,
+                    state=self.status).values_list('anime', flat=True))
+                cache.set_cache(cname, ub)
+        return not cache.latest(self.__class__.__name__, cachestr,
+                            keys={'UserStatusBundle': ub})
