@@ -48,17 +48,6 @@ def invalidateCacheKey(fragment_name, *variables):
     cache.delete(cache_key)
 
 
-def cleanRequestsCache(status, rtype, page):
-    link = '/requests/'
-    if status is not None:
-        link += 'status/%s/' % status
-    if rtype is not None:
-        link += 'type/%s/' % rtype
-    cachestr = link + str(page)
-    _cleanCache('requests', status, rtype, page, cachestr)
-    return link, cachestr
-
-
 def cleanSearchCache(string, field, order, page):
     link = u'/search/'
     if string is not None:
