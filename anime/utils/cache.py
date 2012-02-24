@@ -3,19 +3,19 @@ from datetime import datetime
 from django.core.cache import cache
 from django.utils.hashcompat import md5_constructor
 from django.utils.http import urlquote
-from django.utils.translation import ugettext_lazy as _
 from anime.forms.json import is_iterator
 from anime.models import ( AnimeBundle, AnimeItem, AnimeName,
                             UserStatusBundle, AnimeRequest)
 
 
 ERROR_MESSAGES = {
-    'bad_item_type': _('Bad item type passed: {0}')
+    'bad_item_type': 'Bad item type passed: {0}'
 }
 
 
 ITEM_TYPES = {
     'IndexListView': [AnimeItem],
+    'RequestsListView': [AnimeRequest],
 }
 
 
@@ -40,7 +40,9 @@ def get_latest(itemtype, keys={}):
         name = get_cache_name(x, keys.get(x.__name__))
         names.extend(name if type(name) is list else [name])
     c = get_named_cache(names)
-    if type(c) is dict:
+    if type(c) is datetime:
+        return c
+    elif type(c) is dict:
         c = c.values()
     return max(c)
 

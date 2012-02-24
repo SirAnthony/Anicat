@@ -6,8 +6,8 @@
 
 {% block main %}
 {% if user.is_authenticated %}
-{% cache 600 requests cachestr %}
-{% for request in requests %}
+{% cache 0 requests cachestr %}
+{% for request in list %}
     <div class="request">
         <div class="header">
             <span><b>№:</b><a href="/request/{{ request.id }}/">{{ request.id }}</a></span>
@@ -33,15 +33,17 @@
         {% endif %}
     </div>
 {% endfor %}
+{% if pages.items.num_pages > 1 %}
     <div id="pg">
-        {% for pname in pages %}
-            {% ifequal page.number forloop.counter0 %}
-                <span id="spanl">[{{ pname }}]</span>
+        {% for page in pages.items.page_range %}
+            {% ifequal pages.current forloop.counter %}
+                <span id="spanl">[{{ page }}]</span>
             {% else %}
-                <a href="{{ link }}{% ifnotequal forloop.counter0 0 %}{{forloop.counter0}}/{% endifnotequal %}">{{ pname }}</a>
+                <a href="{{ link.link }}{% ifnotequal forloop.counter 1 %}{{forloop.counter}}/{% endifnotequal %}">{{ page }}</a>
             {% endifequal %}
         {% endfor %}
     </div>
+{% endif %}
 {% endcache %}
 {% else %}
     <div>Pool's closed.</div>

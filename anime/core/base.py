@@ -4,8 +4,7 @@ from django.core.cache import cache
 from django.utils.translation import ugettext_lazy as _
 from anime.core.explorer import GetError, FieldExplorer
 from anime.models import AnimeItem, AnimeLink, UserStatusBundle, USER_STATUS
-from anime.utils.catalog import ( getPages, createPages,
-                updateMainCaches, cleanTableCache, cleanSearchCache)
+from anime.utils.catalog import ( getPages, cleanSearchCache)
 
 
 ERROR_MESSAGES = {
@@ -49,48 +48,6 @@ def get_data(request):
     r = 'card' if request.POST.get('card') else 'get'
     response = {'response': r, 'status': True, 'id': aid, 'text': response}
     return response
-
-
-def index(user, user_id, status, order, page):
-    limit = settings.INDEX_PAGE_LIMIT
-    qs = AnimeItem.objects.order_by(order)
-    sbundle = None
-    try:
-        status = int(status)
-        USER_STATUS[status]
-        if user.is_authenticated():
-            #Fixme: 2 useless queries when cached.
-            if status:
-                sbundle = UserStatusBundle.objects.filter(user=user, state=status)
-                ids = map(lambda x: x[0], sbundle.values_list('anime'))
-                qs = qs.filter(id__in=ids)
-                sbundle = sbundle.values('anime', 'count', 'rating')
-            else:
-                ids = map(lambda x: x[0], UserStatusBundle.objects.filter(
-                        user=user, state__gte=1).values_list('anime'))
-                qs = qs.exclude(id__in=ids)
-        else:
-            raise Exception
-    except:
-        status = None
-    (link, cachestr) = cleanTableCache(order, status, page, user, user_id)
-    pages = getPages(link, page, qs, order, limit)
-    items = qs[page * limit:(page + 1) * limit]
-    if sbundle is not None:
-        ids = list(qs.values_list('id', flat=True)[page * limit:(page + 1) * limit])
-        sbundle = dict(map(lambda x: (x['anime'], x), list(sbundle.filter(anime__in=ids))))
-        for item in items:
-            if item.id in sbundle:
-                item.rating = sbundle[item.id]['rating']
-                item.count = sbundle[item.id]['count']
-    return {'list': items, 'cachestr': cachestr,
-            'link': {
-                'link': link,
-                'order': order,
-                'user': None if user_id == user.id else user.id,
-                'status': status
-            },
-            'pages': pages, 'page': {'number': page, 'start': page*limit}}
 
 
 def search(field, string, **kwargs):

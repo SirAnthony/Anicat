@@ -4,7 +4,6 @@ from django.core.cache import cache
 from django.utils.hashcompat import md5_constructor
 from django.utils.http import urlquote
 from django.contrib.auth.models import User
-from anime.models import AnimeItem
 
 
 def last_record_pk(model):
@@ -47,27 +46,6 @@ def invalidateCacheKey(fragment_name, *variables):
     args = md5_constructor(u':'.join([urlquote(var) for var in variables]))
     cache_key = 'template.cache.%s.%s' % (fragment_name, args.hexdigest())
     cache.delete(cache_key)
-
-#TODO: custom formatter to this
-
-def cleanTableCache(order, status, page, user, cuserid):
-    link = '/'
-    if status is not None:
-        if user.id != cuserid:
-            link += 'user/%s/' % user.id
-        link += 'show/%s/' % status
-    if order != AnimeItem._meta.ordering[0]:
-        link += 'sort/%s/' % order
-    if status is not None:
-        cachestr = '%s:%s%s' % (user.id, link, page)
-    else:
-        cachestr = link + str(page)
-    if status is not None and user.is_authenticated():
-        maintablekey = 'mainTable:%s' % user.id
-    else:
-        maintablekey = 'mainTable'
-    _cleanCache(maintablekey, status, order, page, cachestr, 'mainTable')
-    return link, cachestr
 
 
 def cleanRequestsCache(status, rtype, page):

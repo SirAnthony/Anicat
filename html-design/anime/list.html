@@ -63,14 +63,16 @@
         </table>
     </div>
     <div id="card" class="right"></div>
-    <div id="pg">
-        {% for page in pages.items.get_names %}
-            {% ifequal pages.current forloop.counter %}
-                <span id="spanl">[{{ page }}]</span>
-            {% else %}
-                <a href="{{ link.link }}{% ifnotequal forloop.counter 1 %}{{forloop.counter}}/{% endifnotequal %}">{{ page }}</a>
-            {% endifequal %}
-        {% endfor %}
-    </div>
+    {% if pages.items.num_pages > 1 %}
+        <div id="pg">
+            {% for page in pages.items.get_names %}
+                {% ifequal pages.current forloop.counter %}
+                    <span id="spanl">[{{ page }}]</span>
+                {% else %}
+                    <a href="{{ link.link }}{% ifnotequal forloop.counter 1 %}{{forloop.counter}}/{% endifnotequal %}">{{ page }}</a>
+                {% endifequal %}
+            {% endfor %}
+        </div>
+    {% endif %}
 {% endcache %}
 {% endblock %}
