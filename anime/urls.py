@@ -4,13 +4,12 @@ from django.conf.urls.defaults import patterns, url
 from django.views.generic.simple import direct_to_template
 
 from anime.forms.User import NotActivePasswordResetForm
-from anime.views.list import IndexListView, RequestsListView
+from anime.views.list import IndexListView, RequestsListView, SearchListView
 
 # General
 urlpatterns = patterns(
     'anime.views.base',
     # TODO Split regexp
-    url(r'^search/(?:(?P<string>[^/]+)/(?:field/(?P<field>\w+)/)?(?:sort/(?P<order>\w+)/)?(?:(?P<page>\d+)/)?)?$', 'search', name='search'),
     url(r'^card/(?:(?P<anime_id>\d+)/)?$', 'card', name='card'),
 )
 
@@ -22,6 +21,8 @@ urlpatterns += patterns('',
     # TODO Split regexp
     url(r'^requests/(?:status/(?P<status>\d+)/)?(?:type/(?P<rtype>\d+)/)?(?:(?P<page>\d+)/)?$',
         RequestsListView.as_view(), name='requests'),
+    url(r'^search/(?:(?P<string>[^/]+)/(?:field/(?P<field>\w+)/)?(?:sort/(?P<order>-?\w+)/)?(?:(?P<page>\d+)/)?)?$',
+        SearchListView.as_view(), name='search'),
 )
 
 # Direct

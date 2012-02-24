@@ -6,6 +6,8 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
+from hashlib import sha1
+
 from anime.models import ( AnimeItem, AnimeRequest, UserStatusBundle,
                            USER_STATUS, REQUEST_TYPE, REQUEST_STATUS )
 from anime.views.classes import AnimeListView
@@ -150,3 +152,83 @@ class RequestsListView(AnimeListView):
             qs = qs.filter(requestType=self.rtype)
         qs = qs.select_related('anime')
         return qs
+
+
+class SearchListView(AnimeListView):
+    error_messages = {
+        'empty': _('Empty query.'),
+        'bad_field': _('This field not avaliable yet.'),
+        'bad_order': _('Bad order.'),
+        'cache_error': _('Cache error occured. Try again.'),
+    }
+
+    http_method_names = ['get', 'post']
+    model = AnimeItem
+    paginate_by = settings.SEARCH_PAGE_LIMIT
+    template_name = 'anime/search.html'
+    cache_name = 'search'
+    ajax = False
+
+    def get_link(self):
+        link = {}
+        string = None
+        if self.string is not None:
+            string = self.string
+            link['string'] = sha1(string.encode('utf-8')).hexdigest()
+        if self.field is not None and self.field != 'name':
+            link['field'] = self.field
+        if self.order != u'title':
+            link['order'] = self.order
+        hashed_link_name = reverse('search', kwargs=link)
+        cachestr = '%s%s' % (hashed_link_name, self.page)
+        if string:
+            link['string'] = string
+            link['link'] = reverse('search', kwargs=link)
+        else:
+            link['link'] = hashed_link_name
+        return link, cachestr
+
+    def check_parameters(self, request, string=None, field=None,
+                                        order=None, page=0):
+        try:
+            string = string or request.POST.get('string') or ''
+            string = string.strip()
+            if not string:
+                raise AttributeError
+        except AttributeError:
+            if request.path != reverse('search'):
+                raise ValueError(self.error_messages['empty'])
+
+        field = field or request.POST.get('field') or 'name'
+        if not field or field != 'name':
+            raise ValueError(self.error_messages['bad_field'])
+
+        try:
+            order = order or request.POST.get('sort') or 'title'
+            AnimeItem._meta.get_field(order[1:] if order.startswith('-') else order)
+        except Exception:
+            raise ValueError(self.error_messages['bad_order'])
+
+        self.string = string
+        self.field = field
+        self.order = order
+        self.page = page or request.POST.get('page') or 1
+
+    def get_queryset(self):
+        qs = super(SearchListView, self).get_queryset()
+        qs = qs.order_by(self.order)
+        if self.field == 'name':
+            qs = qs.filter(animenames__title__icontains=self.string).distinct()
+        return qs
+
+    def get(self, request, *args, **kwargs):
+        try:
+            self.check_parameters(request, *args, **kwargs)
+        except ValueError, e:
+            raise Http404(e)
+        return super(SearchListView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if not self.ajax:
+            return self.get(request, *args, **kwargs)
+
