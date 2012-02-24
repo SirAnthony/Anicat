@@ -15,7 +15,7 @@ ERROR_MESSAGES = {
 
 
 ITEM_TYPES = {
-    'IndexListView': [AnimeItem, UserStatusBundle],
+    'IndexListView': [AnimeItem],
 }
 
 
@@ -35,23 +35,14 @@ def get_latest(itemtype, keys={}):
     '''Return  last changed date for item type.'''
     if not itemtype in ITEM_TYPES:
         raise ValueError(ERROR_MESSAGES['bad_item_type'].format(itemtype))
-    m = []
+    names = []
     for x in ITEM_TYPES[itemtype]:
-        l = get_item_latest(x, keys.get(x.__name__))
-        if type(l) is list:
-            m.extend(l)
-        else:
-            m.append(l)
-    return max(m)
-
-
-def get_item_latest(t, pk=None):
-    name = get_cache_name(t, pk)
-    c = get_named_cache(name)
+        name = get_cache_name(x, keys.get(x.__name__))
+        names.extend(name if type(name) is list else [name])
+    c = get_named_cache(names)
     if type(c) is dict:
         c = c.values()
-    return c
-
+    return max(c)
 
 
 def get_cache_name(t, pk=None):
@@ -68,11 +59,6 @@ def get_cache_name(t, pk=None):
     return name
 
 
-def update_cache(t, pk=None):
-    return update_named_cache(get_cache_name(t, pk))
-
-
-
 def get_named_cache(name):
     if type(name) in (list, tuple):
         c = cache.get_many(name)
@@ -84,9 +70,9 @@ def get_named_cache(name):
 def update_named_cache(name):
     date = datetime.now()
     if type(name) in (list, tuple):
-        c = cache.set_many(dict([(x, date) for x in name]))
+        c = cache.set_many(dict([(x, date) for x in name]), 0)
     else:
-        cache.set(name, date)
+        cache.set(name, date, 0)
     return date
 
 
@@ -95,14 +81,16 @@ def get_cache(name):
 
 
 def set_cache(name, data):
-    return cache.set(name, data)
+    return cache.set(name, data, 0)
 
+
+def update_cache(t, pk=None):
+    return update_named_cache(get_cache_name(t, pk))
 
 
 def update_cache_on_save(sender, instance, signal, *args, **kwargs):
     update_cache(instance)
     update_cache(instance.__class__)
-
 
 
 def clean_cache(name, cachestr):

@@ -51,12 +51,12 @@ class AnimeListView(ListView):
         "Implementation in subclasses"
         raise NotImplementedError
 
-    def check_args(self):
+    def check_parameters(self, request, *args, **kwargs):
         "Implementation in subclasses"
         raise NotImplementedError
 
     def get(self, request, *args, **kwargs):
-        self.check_args(request, *args, **kwargs)
+        self.check_parameters(request, *args, **kwargs)
         return super(AnimeListView, self).get(request, *args, **kwargs)
 
 
@@ -85,7 +85,8 @@ class IndexListView(AnimeListView):
         link['link'] = link_name
         return link, cachestr
 
-    def check_args(self, request, user=None, status=None, order='title', page=1):
+    def check_parameters(self, request, user=None, status=None,
+                                        order='title', page=1):
         if user is None or int(user) == request.user.id:
             user = request.user
         else:
@@ -137,13 +138,11 @@ class IndexListView(AnimeListView):
     def updated(self, cachestr):
         if not cache.key_valid(self.cache_name, cachestr):
             return True
-        ub = None
         if self.status is not None:
+            #FIXME: Now userstatus lives its own life.
             cname = 'userstatus:{0}:{1}'.format(self.user.id, self.status)
             ub = cache.get_cache(cname)
             if not ub:
-                ub = list(UserStatusBundle.objects.filter(user=self.user,
-                    state=self.status).values_list('anime', flat=True))
-                cache.set_cache(cname, ub)
-        return not cache.latest(self.__class__.__name__, cachestr,
-                            keys={'UserStatusBundle': ub})
+                cache.update_named_cache(cname)
+                return True
+        return not cache.latest(self.__class__.__name__, cachestr)

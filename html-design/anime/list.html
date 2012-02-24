@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block main %}
-{% cache 600 mainTable cachestr %}
+{% cache 0 mainTable cachestr %}
     <div id="dvid">
         <table id="tbl" cellspacing="0" class="tbl">
             <thead class="thdtbl">
@@ -22,7 +22,7 @@
                         <a rel="nofollow" href="/">№</a>
                     </th>
                     <th class="name" id="name">
-                        <a rel="nofollow" href="{% if link.user %}/user/{{ link.user }}{% endif %}{% if link.status %}/show/{{ link.status }}{% endif %}/{% if link.order == 'title' %}sort/-title/{% endif %}">Name</a>
+                        <a rel="nofollow" href="{% if link.user %}/user/{{ link.user }}{% endif %}{% if link.status %}/show/{{ link.status }}{% endif %}/{% if link.order == 'title' or not link.order %}sort/-title/{% endif %}">Name</a>
                     </th>
                     <th class="numberofep" id="numberofep">
                         <a rel="nofollow" href="{% if link.user %}/user/{{ link.user }}{% endif %}{% if link.status %}/show/{{ link.status }}{% endif %}/sort/{% if link.order == 'episodesCount' %}-{% endif %}episodesCount/">Episodes</a>
@@ -48,7 +48,7 @@
                             <img alt="Go" src="/static/arrow.gif">
                         </a>
                     </td>
-                    <td onclick="cnt('id', '{{ title.id }}', event);" id="id{{ title.id }}" class="id">{{ forloop.counter|add:pages.start }}</td>
+                    <td onclick="cnt('id', '{{ title.id }}', event);" id="id{{ title.id }}" class="id">{{ forloop.counter0|add:pages.start }}</td>
                     <td onclick="cnt('name', '{{ title.id }}', event);" id="name{{ title.id }}" class="name">{{ title.title }}</td>
                     <td onclick="cnt('numberofep', '{{ title.id }}', event);" id="numberofep{{ title.id }}" class="numberofep">{% if title.count %}{{ title.count }}/{% endif %}{{ title.episodesCount }}</td>
                     <td onclick="cnt('release', '{{ title.id }}', event);" id="release{{ title.id }}" class="release">{{ title.release }}</td>

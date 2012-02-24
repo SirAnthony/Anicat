@@ -57,7 +57,7 @@ class State(EditableDefault):
     def last(self):
         user = self.request.user
         for s in [self.status, self.oldstatus]:
-            cache.delete('userstatus:%s:%s' % (user.id, stat))
+            cache.delete('userstatus:%s:%s' % (user.id, s))
         cache.delete('userCss:%s' % user.id)
         cache.delete('Stat:%s' % user.id)
 
