@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-from django.conf import settings
 from django.core.cache import cache
 from django.utils.translation import ugettext_lazy as _
 from anime.core.explorer import GetError, FieldExplorer
-from anime.models import AnimeItem, AnimeLink, UserStatusBundle, USER_STATUS
-from anime.utils.catalog import ( getPages, cleanSearchCache)
+from anime.models import AnimeItem, UserStatusBundle, USER_STATUS
 
 
 ERROR_MESSAGES = {
@@ -14,11 +12,6 @@ ERROR_MESSAGES = {
         'bad_fields': _('Bad request fields: {0}'),
         'no_fields': _('No fields passed'),
     },
-    'search': {
-        'empty': _('Empty query.'),
-        'bad_field': _('This field not avaliable yet.'),
-        'cache_error': _('Cache error occured. Try again.'),
-    }
 }
 
 
@@ -48,65 +41,6 @@ def get_data(request):
     r = 'card' if request.POST.get('card') else 'get'
     response = {'response': r, 'status': True, 'id': aid, 'text': response}
     return response
-
-
-def search(field, string, **kwargs):
-    #Rewrite this
-    ret = {
-        'count': 0,
-        'items': [],
-        'pages': {'current': 0, 'items': []}
-    }
-
-    try:
-        string = string.strip()
-        if not string:
-            raise AttributeError
-    except AttributeError:
-        return ERROR_MESSAGES['search']['empty']
-    if not field:
-        field = 'name'
-    elif field != 'name':
-        return ERROR_MESSAGES['search']['bad_field']
-    try:
-        limit = kwargs.get('limit', settings.SEARCH_PAGE_LIMIT)
-        limit = int(limit)
-        if limit > 30:
-            limit = 30
-    except:
-        limit = settings.SEARCH_PAGE_LIMIT
-    try:
-        page = int(kwargs.get('page', 0))
-    except:
-        page = 0
-    try:
-        order = attrs.get('order')
-        AnimeItem._meta.get_field(order)
-    except Exception:
-        order = 'title'
-
-    (link, cachestr, hashlink) = cleanSearchCache(string, field, order, page)
-    cached = cache.get('search:%s' % cachestr)
-    if cached:
-        try:
-            ret.update(cached)
-        except KeyError:
-            cache.delete('search:%s' % cachestr)
-            return ERROR_MESSAGES['search']['cache_error']
-    else:
-        qs = None
-        if field == 'name':
-            qs = AnimeItem.objects.filter(animenames__title__icontains=string)\
-                                        .distinct().order_by(order)
-        pages = getPages(hashlink, page, qs, order, limit)
-        ret.update({'count': qs.count(),
-            'items': qs[page * limit:(page + 1) * limit],
-            'pages': {'current': page,
-                      'start': page * limit, 'items': pages}
-        })
-        cache.set('search:%s' % cachestr, ret)
-    ret.update({'link': link, 'cachestr': cachestr})
-    return ret
 
 
 def card(anime_id, user):

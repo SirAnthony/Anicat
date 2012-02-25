@@ -9,7 +9,7 @@ from anime.edit.animebased import EditableAnimeBased
 class Request(EditableDefault):
 
     def last(self):
-        cache.delete('requests')
+        pass
 
     def explore_result(self):
         return {'form': self.form, 'text': None}

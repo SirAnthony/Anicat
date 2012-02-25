@@ -5,7 +5,6 @@ from django.utils.translation import ugettext_lazy as _
 from anime.core.explorer import FieldExplorer, GetError
 from anime.edit.default import EditableDefault, EditError
 from anime.models import AnimeItem, USER_STATUS
-from anime.utils.catalog import updateMainCaches
 
 
 
@@ -23,7 +22,6 @@ class Anime(EditableDefault):
         super(Anime, self).save(form, obj)
 
     def last(self):
-        updateMainCaches(USER_STATUS[0][0])
         super(Anime, self).last()
         if 'title' in self.fields and self.obj.bundle:
             for item in self.obj.bundle.animeitems.values_list('id').all():

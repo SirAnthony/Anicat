@@ -36,7 +36,9 @@
 {% cache 0 search cachestr %}
     {% ifnotequal link 'search/' %}
     {% if not list %}
+    {% if cachestr %}
     <p>Nothing found.</p>
+    {% endif %}
     {% else %}
     {% if link.field and link.field != 'name' %}
         {% url 'search' string=link.string field=link.field as sort_link %}

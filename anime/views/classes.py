@@ -1,11 +1,12 @@
 
 from django.core.cache import cache as basecache
-from django.views.generic.list import ListView
+from django.views.generic.base import TemplateResponseMixin
+from django.views.generic.list import BaseListView
 from anime.utils import cache
 from anime.utils.paginator import Paginator
 
 
-class AnimeListView(ListView):
+class AnimeListView(TemplateResponseMixin, BaseListView):
 
     http_method_names = ['get']
     paginator_class = Paginator

@@ -53,8 +53,7 @@ class SearchListView(AnimeAjaxListView):
             if not string:
                 raise AttributeError
         except AttributeError:
-            if request.path != reverse('search'):
-                raise Http404(self.error_messages['empty'])
+            raise Http404(self.error_messages['empty'])
 
         field = kwargs.get('field') or request.POST.get('field') or 'name'
         if not field or field != 'name':
@@ -80,11 +79,20 @@ class SearchListView(AnimeAjaxListView):
         self.page = kwargs.get('page') or request.POST.get('page') or 1
 
     def get_queryset(self):
+        if not self.string:
+            return AnimeItem.objects.none()
         qs = super(SearchListView, self).get_queryset()
         qs = qs.order_by(self.order)
         if self.field == 'name':
             qs = qs.filter(animenames__title__icontains=self.string).distinct()
         return qs
+
+    def get(self, request, *args, **kwargs):
+        #bad
+        if request.path == reverse('search') and request.method == 'GET':
+            return self.render_to_response({'cachestr': ''})
+        self.check_parameters(request, *args, **kwargs)
+        return super(SearchListView, self).get(request, *args, **kwargs)
 
     @ajaxResponse
     def ajax(self, request, *args, **kwargs):

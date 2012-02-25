@@ -83,23 +83,3 @@ def register(request):
     if res.get('response', False):
         return {'response': 'login', 'status': True, 'text': res.get('text')}
     return {'response': 'register', 'status': False, 'text': extract_errors(res)}
-
-
-@ajaxResponse
-def search(request):
-    if request.method != 'POST':
-        return {'text': {'__all__': 'Only POST method allowed.'}}
-    response = {'response': 'search', 'status': True}
-    ret = coreMethods.search(request.POST.get('field'),
-        request.POST.get('string'), page=request.POST.get('page', 0),
-        order=request.POST.get('order'), limit=request.POST.get('limit'))
-    if type(ret) is dict:
-        del ret['link']
-        del ret['cachestr']
-        ret['items'] = [{'name': x.title, 'type': x.releaseTypeS,
-            'episodes': x.episodesCount, 'id': x.id, 'release': x.release,
-            'air': x.air} for x in ret['items']]
-    else:
-        response['status'] = False
-    response['text'] = ret
-    return response
