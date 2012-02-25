@@ -254,7 +254,7 @@ class Search(Base):
         'status': True,
         'text': {
             'count': int,
-            'items': FuzzyList([{
+            'list': FuzzyList([{
                     'id': int,
                     'name': unicode,
                     'type': unicode,

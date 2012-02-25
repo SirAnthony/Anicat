@@ -13,7 +13,7 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-TEST_RUNNER = "code_coverage.run_tests"
+TEST_RUNNER = "code_coverage.CoveragedRunner"
 COVERAGE_REPORT_PATH = os.path.join(PROJECT_ROOT, 'coverage report')
 
 ADMINS = (

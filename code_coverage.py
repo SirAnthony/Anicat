@@ -5,23 +5,27 @@ Found in internets
 """
 import os
 
-from django.test import simple
+from django.test.simple import DjangoTestSuiteRunner
 from django.conf import settings
 
 SKIP_DIRS = ['migrations', 'tests']
 
-try:
-    from coverage import coverage as Coverage
-except ImportError:
-    run_tests = simple.run_tests
-else:
-    coverage = Coverage()
-    def run_tests(test_labels, verbosity=1, interactive=True, extra_tests=[]):
+class CoveragedRunner(DjangoTestSuiteRunner):
 
-        coverage.start()
-        test_results = simple.run_tests(test_labels, verbosity, interactive, extra_tests)
-        coverage.stop()
+    def run_tests(self, test_labels, *args, **kwargs):
+        try:
+            from coverage import coverage as Coverage
+        except ImportError:
+            return super(CoveragedRunner, self).run_tests(test_labels, *args, **kwargs)
+        else:
+            coverage = Coverage()
+            coverage.start()
+            test_results = super(CoveragedRunner, self).run_tests(test_labels, *args, **kwargs)
+            coverage.stop()
+            self.cover_results(coverage, test_labels, test_results)
+            return test_results
 
+    def cover_results(self, coverage, test_labels, test_results):
         coverage_modules = []
         for app in test_labels:
             try:
@@ -46,4 +50,4 @@ else:
         if coverage_modules or not test_labels:
             coverage.html_report(coverage_modules, directory=settings.COVERAGE_REPORT_PATH)
 
-        return test_results
+
