@@ -33,7 +33,7 @@ Search:
                     id: int
                     name: string,
                     type: string,
-                    numberofep: int, // Count of episodes
+                    episodes: int, // Count of episodes
                     release: string, // Release dates
                     air: bool
             }],

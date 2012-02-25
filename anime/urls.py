@@ -4,7 +4,8 @@ from django.conf.urls.defaults import patterns, url
 from django.views.generic.simple import direct_to_template
 
 from anime.forms.User import NotActivePasswordResetForm
-from anime.views.list import IndexListView, RequestsListView, SearchListView
+from anime.views.list import IndexListView, RequestsListView
+from anime.views.ajaxlist import SearchListView
 
 # General
 urlpatterns = patterns(
@@ -89,9 +90,12 @@ urlpatterns += patterns('anime.views.ajax',
     url(r'^ajax/add/$', 'add', name='ajax_add'),
     url(r'^ajax/login/$', 'login', name='ajax_login'),
     url(r'^ajax/register/$', 'register', name='ajax_register'),
-    url(r'^ajax/search/$', 'search', name='ajax_search'),
 )
 
+#Ajax classes
+urlpatterns += patterns('',
+    url(r'^ajax/search/$', SearchListView.as_view(ajax_call=True), name='ajax_search'),
+)
 
 urlpatterns += patterns('social_auth.views',
     url(r'^login/(?P<backend>[^/]+)/$', 'auth', name='socialauth_begin'),

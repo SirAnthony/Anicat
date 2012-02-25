@@ -97,7 +97,7 @@ def search(request):
         del ret['link']
         del ret['cachestr']
         ret['items'] = [{'name': x.title, 'type': x.releaseTypeS,
-            'numberofep': x.episodesCount, 'id': x.id, 'release': x.release,
+            'episodes': x.episodesCount, 'id': x.id, 'release': x.release,
             'air': x.air} for x in ret['items']]
     else:
         response['status'] = False

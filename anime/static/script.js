@@ -106,7 +106,7 @@ var searcher = new ( function(){
         if(!page) page = 0;
         var val;
         var sort;
-        if(this.input.value.length < 3 && val != 'numberofep' && val != 'type'){
+        if(this.input.value.length < 3 && val != 'episodes' && val != 'type'){
             element.removeAllChilds(this.result);
             element.appendChild(this.result, [{'p': {
                 innerText: 'Query must consist of at least 3 characters.'}}]);
@@ -126,12 +126,13 @@ var searcher = new ( function(){
         if(!this.loaded) return;
         message.hide();
         element.removeAllChilds(this.result);
-        if(!rs.count || !rs.items.length){
+        if(!rs.count || !rs.list.length){
            element.appendChild(this.result, [{'p': {innerText: 'Nothing found.'}}]);
         }else{
+            var pages = rs.pages;
             var tr = new Array();
-            for(var i=0; i<rs.items.length; i++){
-                var elem = rs.items[i];
+            for(var i=0; i<rs.list.length; i++){
+                var elem = rs.list[i];
                 var row = element.create('tr',
                     {className: (elem.air ? 'air a' : 'r') + elem.id}, [
                         {'td': {'id': 'link' + elem.id, className: 'link'}}, [
@@ -147,7 +148,7 @@ var searcher = new ( function(){
                             onclick: ( function(i, j){
                                             return function(e){ cnt(i, j, e); };
                                         })('id', elem.id),
-                            innerText: Number(i) + 1 + rs.pages.start }},
+                            innerText: Number(i) + pages.start }},
                         ]);
                 tr.push(row);
                 for(var column in elem){
@@ -159,15 +160,14 @@ var searcher = new ( function(){
             }
             var srctbl = element.create('table', {'id': 'srchtbl', className: 'tbl', cellSpacing: 0});
             element.appendChild(this.result, [srctbl, ['thead', 'tbody', tr]]);
-            if(rs.count > rs.items.length){
+            if(pages.items){
                 var pg = new Array();
-                //TODO: pages api changed
-                for( var i = 1; i <= Math.ceil(rs.count / 20); i++){
-                    if(rs.pages.current == i-1){
-                        pg.push(element.create('span', {innerText: '[' + i + ']'}));
+                for(var p=0; p < pages.items.length; p++){
+                    if(pages.current == p+1){
+                        pg.push(element.create('span', {innerText: '[' + pages.items[p] + ']'}));
                     }else{
-                        pg.push(element.create('a', {innerText: i,
-                                onclick: (function(pg){ return function(e){ searcher.send(pg, e);};})(i-1)}));
+                        pg.push(element.create('a', {innerText: pages.items[p],
+                            onclick: (function(pg){return function(e){ searcher.send(pg, e);};})(p+1)}));
                     }
                 }
                 element.appendChild(this.result, [{'div': {'id': 'srchpg'}}, pg]);
@@ -525,7 +525,7 @@ function cnt(tag, num, e){
         case 'name':
             qw['field'] = ['name', 'genre', 'links'];
         break;
-        case 'numberofep':
+        case 'episodes':
             qw['field'] = ['bundle', 'duration'];
         break;
         case 'id':

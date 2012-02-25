@@ -1,7 +1,9 @@
 
+from django.core.cache import cache as basecache
 from django.views.generic.list import ListView
 from anime.utils import cache
 from anime.utils.paginator import Paginator
+
 
 class AnimeListView(ListView):
 
@@ -12,28 +14,29 @@ class AnimeListView(ListView):
         (link, cachestr) = self.get_link()
         context = {'cachestr': cachestr, 'link': link}
         if self.updated(cachestr):
-            queryset = kwargs.pop('object_list')
-            page_size = self.get_paginate_by(queryset)
-            context_object_name = self.get_context_object_name(queryset)
-            paginator = None
-            if page_size:
-                paginator, page, queryset, is_paginated = self.paginate_queryset(queryset, page_size)
-                paginator.set_order(self.order)
-                paginator.set_cachekey(link['link'])
-                context.update({
-                    'pages': {'current': page.number,
-                        'start': page.start_index(),
-                        'items': paginator,
-                    },
-                    'list': queryset,
-                })
-            else:
-                context.update({'pages': {}, 'list': queryset})
+            context.update(self.create_context_data(cachestr, link, **kwargs))
             cache.update_named_cache(cachestr)
-            context.update(kwargs)
             cache.clean_cache(self.cache_name, cachestr)
-            if context_object_name is not None:
-                context[context_object_name] = queryset
+        return context
+
+    def create_context_data(self, cachestr, link, **kwargs):
+        queryset = kwargs.pop('object_list')
+        page_size = self.get_paginate_by(queryset)
+        paginator = None
+        if page_size:
+            paginator, page, queryset, is_paginated = self.paginate_queryset(queryset, page_size)
+            paginator.set_order(self.order)
+            paginator.set_cachekey(link['link'])
+            context = {
+                'pages': {'current': page.number,
+                    'start': page.start_index(),
+                    'items': paginator,
+                },
+                'list': queryset,
+            }
+        else:
+            context = {'pages': {}, 'list': queryset}
+        context.update(kwargs)
         return context
 
     def updated(self, cachestr):
@@ -54,4 +57,44 @@ class AnimeListView(ListView):
         return super(AnimeListView, self).get(request, *args, **kwargs)
 
 
+class AnimeAjaxListView(AnimeListView):
+
+    http_method_names = ['get', 'post']
+    ajax_call = False
+
+    def get_context_data(self, **kwargs):
+        (link, cachestr) = self.get_link()
+        context = {}
+        if not self.ajax_call:
+            context.update({'cachestr': cachestr, 'link': link})
+        if self.updated(cachestr):
+            context.update(self.create_context_data(cachestr, link, **kwargs))
+            cache.clean_cache(self.cache_name, cachestr)
+            if not self.ajax_call:
+                cache.update_named_cache(cachestr)
+            self.data = context
+            #FIXME: One useless query for caching paginator
+            basecache.set('%s:%s' % (self.ajax_cache_name, cachestr), context, 0)
+        elif self.data:
+            context = self.data
+        return context
+
+    def updated(self, cachestr):
+        if not self.ajax_call:
+            if not cache.key_valid(self.cache_name, cachestr):
+                return True
+        self.data = data = basecache.get('%s:%s' % (self.ajax_cache_name, cachestr))
+        if not data or not 'list' in data:
+            return True
+        return not cache.latest(self.__class__.__name__, cachestr)
+
+    def post(self, request, *args, **kwargs):
+        if not self.ajax_call:
+            return self.get(request, *args, **kwargs)
+        else:
+            return self.ajax(request, *args, **kwargs)
+
+    def ajax(self, request, *args, **kwargs):
+        "Implementation in subclasses"
+        raise NotImplementedError
 

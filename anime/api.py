@@ -258,7 +258,7 @@ class Search(Base):
                     'id': int,
                     'name': unicode,
                     'type': unicode,
-                    'numberofep': int,
+                    'episodes': int,
                     'release': unicode,
                     'air': bool,
             },]),
