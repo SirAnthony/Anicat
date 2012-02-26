@@ -19,6 +19,9 @@ ITEM_TYPES = {
     'SearchListView': [AnimeItem],
 }
 
+get = cache.get
+cset = cache.set
+
 
 def latest(t, cachestr, keys={}):
     '''Return True if date is greater than last_change
@@ -77,14 +80,6 @@ def update_named_cache(name):
     else:
         cache.set(name, date, 0)
     return date
-
-
-def get_cache(name):
-    return cache.get(name)
-
-
-def set_cache(name, data):
-    return cache.set(name, data, 0)
 
 
 def update_cache(t, pk=None):

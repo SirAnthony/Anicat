@@ -3,10 +3,13 @@ import json
 import os
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.utils.unittest.case import skip
 
 from anime import api
+from anime.utils.cache import invalidate_key
 from anime.models import AnimeItem, AnimeBundle, AnimeRequest, EDIT_MODELS
 from anime.tests.functions import create_user, login, check_response, fill_params
 from anime.utils.catalog import last_record_pk
@@ -61,12 +64,11 @@ class AjaxTest(TestCase):
     def test_search(self):
         a = api.Search()
         link = a.get_link()
-        self.send_request(link, {'string': 'b', 'limit': 'd', 'page': 'f'}, a.returns)
-        self.send_request(link, {'string': 'b', 'order': 'releasedAt', 'limit': 40, 'page': 2}, a.returns)
-        response = self.client.get(link, {})
-        self.assertEquals(json.loads(response._container[0]),
-            {u'text': {u'__all__': u'Only POST method allowed.'},
-             u'response': u'error'})
+        self.send_request(link, {'string': 'b', 'order': 'releasedAt', 'limit': 40, 'page': 1}, a.returns)
+        self.send_request(link, {'string': 'b', 'limit': 'd', 'page': 'f'}, a.error)
+        self.send_request(link, {'string': 'b', 'field': 'd'}, a.error)
+        self.send_request(link, {'string': 'b', 'sort': 'd'}, a.error)
+        self.send_request(link, {}, a.error)
 
     def test_get(self):
         a = api.Get()
@@ -205,7 +207,11 @@ class EditViewsRequestsTest(TestCase):
     def test_requests_page(self):
         self.assertEquals(self.client.get(reverse('requests')).status_code, 200)
         self.assertEquals(self.client.get(reverse('requests',
-                    kwargs={'status': 1, 'rtype': 1})).status_code, 200)
+                kwargs={'status': 1, 'rtype': 1, 'page': 1})).status_code, 200)
+        self.assertEquals(self.client.get(reverse('requests', kwargs={
+                            'status': 900})).status_code, 404)
+        self.assertEquals(self.client.get(reverse('requests', kwargs={
+                            'rtype': 900})).status_code, 404)
 
     @login()
     def test_requests(self):
@@ -226,19 +232,6 @@ class BaseViewsTest(TestCase):
 
     fixtures = ['2trash.json']
 
-    def test_index(self):
-        self.assertEquals(self.client.get(reverse('index')).status_code, 200)
-        self.assertEquals(self.client.get(reverse('index', kwargs={
-                            'status': 1})).status_code, 200)
-        self.assertEquals(self.client.get(reverse('index', kwargs={
-                            'user': 2})).status_code, 404)
-        self.assertEquals(self.client.get(reverse('index', kwargs={
-                            'order': 'no'})).status_code, 404)
-
-    def test_search(self):
-        self.assertEquals(self.client.get(reverse('search', args=[1])).status_code, 200)
-        self.assertEquals(self.client.get(reverse('search', args=[' '])).status_code, 200)
-
     def test_card(self):
         self.assertEquals(self.client.get(reverse('card'), follow=True).status_code, 200)
         self.assertEquals(self.client.get(reverse('card', args=[2])).status_code, 200)
@@ -249,13 +242,100 @@ class BaseViewsRequestsTest(TestCase):
 
     fixtures = ['requests.json']
 
-    def test_requests(self):
-        self.assertEquals(self.client.get(reverse('requests')).status_code, 200)
-        self.assertEquals(self.client.get(reverse('requests',
-                kwargs={'status': 1, 'rtype': 1, 'page': 1})).status_code, 200)
-
     def test_card(self):
         self.assertEquals(self.client.get(reverse('card'), follow=True).status_code, 200)
+
+
+class ClassesViewsTest(TestCase):
+
+    def blank(*args, **kwargs):
+        return '', ''
+
+    def test_AnimeListView(self):
+        from anime.views.classes import AnimeListView
+        v = AnimeListView()
+
+        self.assertRaises(NotImplementedError, v.get_link)
+        self.assertRaises(NotImplementedError, v.check_parameters, None)
+        v.get_link = self.blank
+        v.check_parameters = self.blank
+        v.cache_name = ''
+        self.assertEquals(v.get_context_data(object_list=None),
+                {'list': None, 'link': '', 'pages': {}, 'cachestr': ''})
+
+    def test_AnimeAjaxListView(self):
+        from anime.views.classes import AnimeAjaxListView
+        v = AnimeAjaxListView()
+        v.ajax_call = True
+        self.assertRaises(NotImplementedError, v.post, None)
+        v.cache_name = ''
+        v.ajax_cache_name = ''
+        cache.delete(':')
+        self.assertEquals(v.updated(''), True)
+        v.ajax_call = False
+        v.get_link = self.blank
+        v.check_parameters = self.blank
+        self.assertEquals(v.get_context_data(object_list=None),
+                {'list': None, 'link': '', 'pages': {}, 'cachestr': ''})
+
+
+class ListViewsTest(TestCase):
+
+    fixtures = ['2trash.json']
+
+    @create_user()
+    @create_user('2')
+    @login()
+    def test_IndexListView(self):
+        self.assertEquals(self.client.get(reverse('index')).status_code, 200)
+        self.assertEquals(self.client.get(reverse('index', kwargs={
+                'status': 0, 'order': 'releasedAt'})).status_code, 200)
+        self.assertEquals(self.client.get(reverse('index', kwargs={
+                'user': 2, 'status': 1})).status_code, 200)
+        self.assertEquals(self.client.get(reverse('index', kwargs={
+                            'user': 3})).status_code, 404)
+        self.assertEquals(self.client.get(reverse('index', kwargs={
+                            'order': 'no'})).status_code, 404)
+        self.client.logout()
+        self.assertEquals(self.client.get(reverse('index', kwargs={
+                            'status': 0})).status_code, 200)
+
+    @create_user()
+    def test_IndexListView_cache(self):
+        cache.delete('userstatus:1:0')
+        self.assertEquals(self.client.get(reverse('index', kwargs={
+                'user': 1, 'status': 0})).status_code, 200)
+        self.assertEquals(self.client.get(reverse('index', kwargs={
+                'user': 1, 'status': 0})).status_code, 200)
+
+
+class AjaxListViewsTest(TestCase):
+
+    def test_SearchListView(self):
+        from anime.views.ajaxlist import SearchListView
+        s = SearchListView()
+        s.string = ''
+        s.page = 1
+        s.field = s.order = 'a'
+        self.assertEquals(s.get_link(), ({'field': 'a',  'order': 'a',
+            'link': '/search/da39a3ee5e6b4b0d3255bfef95601890afd80709/field/a/sort/a/',
+            'string': 'da39a3ee5e6b4b0d3255bfef95601890afd80709'},
+            '/search/da39a3ee5e6b4b0d3255bfef95601890afd80709/field/a/sort/a/1'))
+        self.assertEquals(unicode(s.get_queryset()), unicode(AnimeItem.objects.none()))
+        self.assertEquals(self.client.get(reverse('search')).status_code, 200)
+        invalidate_key('search', '/search/4a0a19218e082a343a1b17e5333409af9d98f0f5/sort/releasedAt/1')
+        self.assertEquals(self.client.get(reverse('search', kwargs={
+                'string': 'f', 'order': 'releasedAt'})).status_code, 200)
+        cache.delete('ajaxsearch:/search/4a0a19218e082a343a1b17e5333409af9d98f0f5/sort/releasedAt/1')
+        self.assertEquals(self.client.get(reverse('search', kwargs={
+                'string': 'f', 'order': 'releasedAt'})).status_code, 200)
+        self.assertEquals(self.client.get(reverse('search', kwargs={
+                'string': 'f', 'order': 'releasedAt'})).status_code, 200)
+        self.assertEquals(self.client.post(reverse('search', kwargs={
+                'string': ' '})).status_code, 404)
+
+    def tearDown(self):
+        invalidate_key('search', '/search/4a0a19218e082a343a1b17e5333409af9d98f0f5/sort/releasedAt/1')
 
 
 class HistoryViewsTest(TestCase):

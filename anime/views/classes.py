@@ -1,5 +1,4 @@
 
-from django.core.cache import cache as basecache
 from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.list import BaseListView
 from anime.utils import cache
@@ -75,7 +74,7 @@ class AnimeAjaxListView(AnimeListView):
                 cache.update_named_cache(cachestr)
             self.data = context
             #FIXME: One useless query for caching paginator
-            basecache.set('%s:%s' % (self.ajax_cache_name, cachestr), context, 0)
+            cache.cset('%s:%s' % (self.ajax_cache_name, cachestr), context, 0)
         elif self.data:
             context = self.data
         return context
@@ -84,7 +83,7 @@ class AnimeAjaxListView(AnimeListView):
         if not self.ajax_call:
             if not cache.key_valid(self.cache_name, cachestr):
                 return True
-        self.data = data = basecache.get('%s:%s' % (self.ajax_cache_name, cachestr))
+        self.data = data = cache.get('%s:%s' % (self.ajax_cache_name, cachestr))
         if not data or not 'list' in data:
             return True
         return not cache.latest(self.__class__.__name__, cachestr)

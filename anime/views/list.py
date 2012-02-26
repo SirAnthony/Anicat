@@ -1,7 +1,6 @@
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import Http404
@@ -9,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from anime.models import ( AnimeItem, AnimeRequest, UserStatusBundle,
                            USER_STATUS, REQUEST_TYPE, REQUEST_STATUS )
-
+from anime.utils import cache
 from anime.views.classes import AnimeListView
 
 
@@ -96,7 +95,7 @@ class IndexListView(AnimeListView):
             cname = 'userstatus:{0}:{1}'.format(self.user.id, self.status)
             ub = cache.get(cname)
             if not ub:
-                cache.set(cname, 0)
+                cache.update_named_cache(cname)
                 return True
         return super(IndexListView, self).updated(cachestr)
 

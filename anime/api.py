@@ -270,6 +270,12 @@ class Search(Base):
         }
     }
 
+    error = {
+        'response': 'search',
+        'status': False,
+        'text': list,
+    }
+
 
 class Forms(Base):
 

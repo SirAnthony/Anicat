@@ -16,15 +16,7 @@ from anime.utils.catalog import last_record_pk
 
 
 
-class FormsTest(TestCase):
-
-    #remove in 1.4
-    def assertRaisesMessage(self, expected_exception, expected_message,
-                            callable_obj=None, *args, **kwargs):
-        return self.assertRaisesRegexp(expected_exception,
-            re.escape(expected_message), callable_obj, *args, **kwargs)
-
-class RequestsFormsTest(FormsTest):
+class RequestsFormsTest(TestCase):
 
     fixtures = ['2trash.json']
 
@@ -131,7 +123,7 @@ class FormsModelErrorTests(TestCase):
         F(instance=ub)
 
 
-class FormsDynamicTests(FormsTest):
+class FormsDynamicTests(TestCase):
 
     fixtures = ['2trash.json']
 
@@ -275,7 +267,7 @@ class FormsUserTests(TestCase):
         self.assertEquals(f.non_field_errors()[-1], f.error_messages['wrong'])
 
 
-class FormsFieldsTests(FormsTest):
+class FormsFieldsTests(TestCase):
 
     fixtures = ['2trash.json']
 
@@ -370,7 +362,7 @@ class FormsFieldsTests(FormsTest):
                 f.error_messages['invalid_image'].format(
                 u'Cannot identify image file'), f.to_python, data)
 
-class FormsJSONTests(FormsTest):
+class FormsJSONTests(TestCase):
 
     fixtures = ['2trash.json']
 

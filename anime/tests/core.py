@@ -10,7 +10,6 @@ from anime import api
 from anime.core import explorer
 from anime.forms.json import FormSerializer as FS
 from anime.models import AnimeItem
-from anime.tests.forms import FormsTest
 from anime.tests.functions import create_user, login, check_response
 
 
@@ -175,7 +174,7 @@ class UserRequestTest(TestCase):
         self.assertEquals(userMethods.get_requests(u, 'new_field'), {})
 
 
-class ExplorerTest(FormsTest):
+class ExplorerTest(TestCase):
 
     fixtures = ['2trash.json']
 
@@ -263,30 +262,6 @@ class BaseTest(TestCase):
                 {'None': u'Error: Bad field', 'title': u'fe',
                 'order': ['title', 'None']}
             })
-
-    @create_user()
-    def test_index(self):
-        user = AnonymousUser()
-        result = coreMethods.index(user, None, 1, 'title', 0)
-        self.assertEquals(result,
-            {'link': {'status': None, 'link': '/', 'order': 'title', 'user': None},
-             'page': {'start': 0, 'number': 0},
-             'list': result['list'],
-             'pages': [], 'cachestr': '/0'})
-        user = User.objects.get(id=1)
-        result = coreMethods.index(user, 1, 1, 'title', 0)
-        self.assertEquals(result,
-            {'link': {'status': 1, 'link': '/show/1/', 'order': 'title', 'user': None},
-             'page': {'start': 0, 'number': 0}, 'list': result['list'],
-             'pages': [], 'cachestr': '1:/show/1/0'})
-        result = coreMethods.index(user, 1, 0, 'title', 0)
-        self.assertEquals(result,
-            {'link': {'status': 0, 'link': '/show/0/', 'order': 'title', 'user': None},
-             'page': {'start': 0, 'number': 0}, 'list': result['list'],
-             'pages': [], 'cachestr': '1:/show/0/0'})
-
-    def test_search(self):
-        pass
 
     @create_user()
     def test_card(self):

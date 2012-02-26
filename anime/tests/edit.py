@@ -13,7 +13,6 @@ from anime.edit import ( edit, EditError, EditableDefault, Anime,
     State, Bundle, Name, Links, Request, Animerequest, Feedback, Image )
 from anime.forms import json
 from anime.models import AnimeItem
-from anime.tests.forms import FormsTest
 from anime.tests.functions import create_user, login, check_response, fill_params
 
 
@@ -38,7 +37,7 @@ class EditInitTest(TestCase):
         self.assertEquals(edit(r, modelname='bundle'), e)
 
 
-class EditDefaultTests(FormsTest):
+class EditDefaultTests(TestCase):
 
     fixtures = ['2trash.json']
 
@@ -133,7 +132,7 @@ class EditDefaultTests(FormsTest):
         self.assertEquals(repr(EditError(['a'])), u"EditError([u'a'])")
 
 
-class EditSimpleTests(FormsTest):
+class EditSimpleTests(TestCase):
 
     fixtures = ['2trash.json']
 
@@ -199,7 +198,7 @@ class EditSimpleTests(FormsTest):
         f.last()
 
 
-class EditRequestsTests(FormsTest):
+class EditRequestsTests(TestCase):
 
     fixtures = ['requests.json', '2trash.json']
 
@@ -231,7 +230,7 @@ class EditRequestsTests(FormsTest):
             os.unlink(resultname)
 
 
-class EditAnimebasedTests(FormsTest):
+class EditAnimebasedTests(TestCase):
 
     fixtures = ['2trash.json']
 

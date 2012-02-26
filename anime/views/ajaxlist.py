@@ -66,7 +66,8 @@ class SearchListView(AnimeAjaxListView):
             raise Http404(self.error_messages['bad_order'])
 
         try:
-            limit = int(kwargs.get('limit', settings.SEARCH_PAGE_LIMIT))
+            limit = int(kwargs.get('limit') or request.POST.get('limit') \
+                        or settings.SEARCH_PAGE_LIMIT)
             if not 0 < limit < settings.SEARCH_PAGE_LIMIT:
                 limit = settings.SEARCH_PAGE_LIMIT
         except:
@@ -77,6 +78,7 @@ class SearchListView(AnimeAjaxListView):
         self.order = order
         self.limit = limit
         self.page = kwargs.get('page') or request.POST.get('page') or 1
+        self.kwargs['page'] = self.page
 
     def get_queryset(self):
         if not self.string:
@@ -99,9 +101,6 @@ class SearchListView(AnimeAjaxListView):
         response = {'response': 'search', 'status': False}
         try:
             self.check_parameters(request, *args, **kwargs)
-        except Http404, e:
-            response['text'] = e
-        else:
             self.object_list = self.get_queryset()
             ret = self.get_context_data(object_list=self.object_list)
             ret['list'] = [{'name': x.title, 'type': x.releaseTypeS,
@@ -111,4 +110,6 @@ class SearchListView(AnimeAjaxListView):
             ret['count'] = paginator.count
             ret['pages']['items'] = paginator.page_range
             response.update({'status': True, 'text': ret})
+        except Http404, e:
+            response['text'] = e
         return response
