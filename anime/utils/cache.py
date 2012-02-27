@@ -21,6 +21,7 @@ ITEM_TYPES = {
 
 get = cache.get
 cset = cache.set
+delete = cache.delete
 
 
 def latest(t, cachestr, keys={}):

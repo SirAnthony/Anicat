@@ -7,8 +7,11 @@ from anime.tests.views import ( AjaxTest, UserViewsTest, EditViewsTest,
             EditViewsRequestsTest, BaseViewsTest, BaseViewsRequestsTest,
             ClassesViewsTest, ListViewsTest, AjaxListViewsTest,
             HistoryViewsTest )
-from anime.tests.core import BaseTest, ExplorerTest, UserTest, UserDBTest, UserRequestTest
-from anime.tests.templatetags import AnimeFiltersTests
+from anime.tests.core import ( BaseTest, ExplorerTest, UserTest,
+            UserDBTest, UserRequestTest )
+from anime.tests.utils import ( CacheTest, CatalogTest, ConfitTest,
+            MiscTest, PaginatorTest )
+from anime.tests.templatetags import AnimeFiltersTest, AnimeTemplatesTest
 #import * - bad
 
 __test__= {
@@ -16,5 +19,6 @@ __test__= {
     'edit': edit,
     'views': views,
     'core': core,
+    'utils': utils,
     'templatetags': templatetags,
 }
