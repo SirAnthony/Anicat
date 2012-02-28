@@ -126,11 +126,9 @@ class AnimeBundle(models.Model):
     def tie(cls, one, two):
         if not one or not two:
             raise ValueError('Blank field.')
+        bundle = None
         if not one.bundle or not two.bundle or one.bundle != two.bundle:
-            if isinstance(cls, AnimeBundle):
-                bundle = cls
-            else:
-                bundle = one.bundle or two.bundle or cls()
+            bundle = one.bundle or two.bundle or cls()
             if not bundle.id:
                 super(AnimeBundle, bundle).save()
             one.bundle = two.bundle = bundle
@@ -146,7 +144,7 @@ class AnimeBundle(models.Model):
         if bundle:
             item.bundle = None
             item.save()
-            removeLast(bundle)
+            cls.removeLast(bundle)
 
     @classmethod
     def removeLast(cls, bundle):
