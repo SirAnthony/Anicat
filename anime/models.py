@@ -201,7 +201,7 @@ class AnimeItem(models.Model):
                     self.endedAt.strftime(DATE_FORMATS[self.endedKnown]) if self.endedKnown != 7 else '?'
                 ])
             return self.releasedAt.strftime(DATE_FORMATS[self.releasedKnown]) if self.releasedKnown != 7 else '?'
-        except ValueError:
+        except (ValueError, TypeError, IndexError):
             return 'Bad value'
 
     releaseTypeS = property(_getReleaseTypeString)
@@ -310,17 +310,6 @@ class PeopleBundle(models.Model):
         unique_together = ("anime", "person", "job", "role")
 
 
-class StatusManager(models.Manager):
-    def get_for_user(self, items, user):
-        #TODO: Think about .values()
-        statuses = self.filter(
-                anime__in=[anime.id for anime in items], user=user)
-        status_dict = collections.defaultdict(lambda: None)
-        for status in statuses:
-            status_dict[status.anime_id] = status
-        return status_dict
-
-
 class UserStatusBundle(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="statusbundles")
     user = models.ForeignKey(User)
@@ -329,8 +318,6 @@ class UserStatusBundle(models.Model):
     rating = models.IntegerField(default=6, blank=True, null=True,
                 choices=((i, str(i)) for i in range(1, 11)))
     changed = models.DateTimeField(auto_now=True)
-
-    objects = StatusManager()
 
     class Meta:
         unique_together = ("anime", "user")
