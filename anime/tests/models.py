@@ -1,8 +1,12 @@
 
+import os
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import IntegrityError
 from django.test import TestCase
-from anime import models
 
+from anime import models
+from anime.tests.functions import create_user
 
 
 class ModelsTest(TestCase):
@@ -29,8 +33,15 @@ class ModelsTest(TestCase):
             i = m(name='a')
             self.assertEquals(unicode(i), u'a')
 
+    def test_AnimeItemRequest_AnimeImageRequest_AnimeFeedbackRequest(self):
+        rt = [models.AnimeItemRequest, models.AnimeImageRequest,
+             models.AnimeFeedbackRequest]
+        for i in range(0,3):
+            r = rt[i]()
+            self.assertEquals(r.requestType, i)
 
-class ModelsFixturesTest(TestCase):
+
+class ModelsAnimeFixturesTest(TestCase):
 
     fixtures = ['2trash.json']
 
@@ -63,19 +74,20 @@ class ModelsFixturesTest(TestCase):
 
     def test_AnimeItem(self):
         from datetime import datetime
+        date = datetime.now().strftime('%d.%m.%Y')
         a = models.AnimeItem(releasedAt=datetime.now(),
             episodesCount=230, title='d', releasedKnown=0,
             releaseType=5, endedKnown=0, duration=17)
         self.assertEquals(unicode(a), '')
         a.save()
         self.assertEquals(unicode(a), 'd [ONA]')
-        self.assertEquals(a.release, '29.02.2012')
+        self.assertEquals(a.release, date)
         self.assertEquals(a.releaseTypeS, 'ONA')
         a.title = 'd1'
         a.endedAt = datetime.now()
         models.AnimeName(anime=a, title='d1').save()
         a.save()
-        self.assertEquals(a.release, '29.02.2012 - 29.02.2012')
+        self.assertEquals(a.release, ' - '.join([date] * 2))
         a.releasedKnown = 55
         self.assertEquals(a.release, 'Bad value')
 
@@ -100,3 +112,36 @@ class ModelsFixturesTest(TestCase):
         ub.save()
         self.assertEquals(ub.count, ub.anime.episodesCount)
 
+
+class ModelsRequestsFixturesTest(TestCase):
+
+    fixtures = ['requests.json']
+
+    @create_user()
+    def test_AnimeRequest(self):
+        r = models.AnimeRequest()
+        self.assertEquals(r.status, 0)
+        r.requestType = 1
+        r.status = 2
+        r.text = 'test_image.png'
+        startfile = os.path.join(settings.MEDIA_ROOT, r.text)
+        endfile = os.path.join(settings.IMAGES_ROOT, ('%s.%s' % (r.anime_id, 'png')).lower())
+        if os.path.exists(startfile):
+            os.unlink(startfile)
+        if os.path.exists(endfile):
+            os.unlink(endfile)
+        r.user = User.objects.get(id=1)
+        self.assertRaises(IntegrityError, r.save)
+        r.anime = models.AnimeItem()
+        self.assertRaises(OSError, r.save)
+        open(startfile, 'w').close()
+        r.save()
+        self.assertEquals(os.path.exists(startfile), False)
+        self.assertEquals(os.path.exists(endfile), True)
+        self.assertEquals(r.status, 3)
+        os.unlink(endfile)
+        open(startfile, 'w').close()
+        r.status = 1
+        r.text = 'test_image.png'
+        r.save()
+        self.assertEquals(os.path.exists(startfile), False)

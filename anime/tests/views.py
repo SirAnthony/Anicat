@@ -6,7 +6,6 @@ from django.conf import settings
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-from django.utils.unittest.case import skip
 
 from anime import api
 from anime.utils.cache import invalidate_key

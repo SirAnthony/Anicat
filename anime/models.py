@@ -364,9 +364,8 @@ class AnimeRequest(models.Model):
                 raise OSError('File does not exists.')
             if self.status > 1:
                 ext = filename.rsplit('.', 1)[-1]
-                os.rename(filename,
-                        os.path.join(settings.IMAGES_ROOT,
-                            '%s.%s' % (self.anime_id, ext)))
+                os.rename(filename, os.path.join(settings.IMAGES_ROOT,
+                            ('%s.%s' % (self.anime_id, ext)).lower()))
                 self.status = 3
             else:
                 os.unlink(filename)
@@ -429,14 +428,6 @@ for model in ( AnimeBundle, AnimeItem, AnimeName, UserStatusBundle,
 
 
 from social_auth.signals import socialauth_registered
-from anime.utils.misc import generate_password, mail
-
-def new_user(sender, user, response, details, **kwargs):
-    password = generate_password()
-    user.set_password(password)
-    if getattr(user, 'email', None):
-        mail(user.email, {'username': user.username, 'password': password, 'openid': True},
-                    'anime/user/welcome.txt', 'anime/user/registred_email.html')
-    return True
+from anime.utils.misc import new_user
 
 socialauth_registered.connect(new_user, sender=None)

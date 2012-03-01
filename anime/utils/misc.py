@@ -17,6 +17,15 @@ def username_for_email(email, max_length=30):
     return "%s-%s" % (s[:max_length - 8], h.hexdigest()[:7])
 
 
+def new_user(sender, user, response, details, **kwargs):
+    password = generate_password()
+    user.set_password(password)
+    if getattr(user, 'email', None):
+        mail(user.email, {'username': user.username, 'password': password, 'openid': True},
+                    'anime/user/welcome.txt', 'anime/user/registred_email.html')
+    return True
+
+
 def generate_password():
     return random_string([u'bcdfgklmnprstxz', u'aejioqvuwy',
                           u'BCDFGKLMNPRSTXZ', u'AEJIOQVUWY',

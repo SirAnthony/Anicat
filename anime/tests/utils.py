@@ -2,11 +2,10 @@
 from datetime import datetime
 from django.core import mail
 from django.test import TestCase
+
 from anime.models import AnimeItem, Genre, AnimeRequest
+from anime.tests.functions import create_user
 from anime.utils import cache, misc, paginator
-
-from django.utils.unittest import skip
-
 
 
 class CacheTest(TestCase):
@@ -109,6 +108,13 @@ class MiscTest(TestCase):
 
     def test_username_for_email(self):
         self.assertEquals(misc.username_for_email('a@a.a'), 'a-d656370')
+
+    @create_user()
+    def test_new_user(self):
+        from django.contrib.auth.models import User
+        u = User.objects.get(id=1)
+        self.assertEquals(misc.new_user(None, u, None, None), True)
+        self.assertEquals(mail.outbox[0].to, [u.email])
 
     def test_generate_password(self):
         self.assertEquals(type(misc.generate_password()), unicode)
