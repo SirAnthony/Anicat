@@ -107,8 +107,8 @@ class MiscTest(TestCase):
     def test_is_iterator(self):
         from itertools import chain
         for item in (list(), tuple(), chain()):
-            self.assertEquals(json.is_iterator(item), True)
-        self.assertEquals(json.is_iterator(True), False)
+            self.assertEquals(misc.is_iterator(item), True)
+        self.assertEquals(misc.is_iterator(True), False)
 
     def test_safe_username(self):
         self.assertEquals(misc.safe_username('a@a.a'), 'a')

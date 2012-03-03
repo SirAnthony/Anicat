@@ -37,7 +37,7 @@ class UserTest(TestCase):
             '{0} {1}'.format(u.first_name, u.last_name))
 
     def test_login(self):
-        from anime.tests.functions import user, passwd
+        from anime.tests._functions import user, passwd
         from anime.forms.User import NotActiveAuthenticationForm as Form
         r = HttpRequest()
         r.user = u = User.objects.get(id=1)
