@@ -3,9 +3,9 @@ from datetime import datetime
 from django.core.cache import cache
 from django.utils.hashcompat import md5_constructor
 from django.utils.http import urlquote
-from anime.forms.json import is_iterator
 from anime.models import ( AnimeBundle, AnimeItem, AnimeName,
                             UserStatusBundle, AnimeRequest)
+from anime.utils.misc import is_iterator
 
 
 ERROR_MESSAGES = {

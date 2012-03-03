@@ -5,12 +5,13 @@ from django.conf import settings
 from django.core.cache import cache
 from django.contrib.auth.models import User, AnonymousUser
 from django.http import HttpRequest
-from django.test import TestCase
+
 from anime import api
 from anime.core import explorer
 from anime.forms.json import FormSerializer as FS
 from anime.models import AnimeItem
-from anime.tests.functions import create_user, login, check_response
+from anime.tests._classes import CleanTestCase as TestCase
+from anime.tests._functions import create_user, login, check_response
 
 
 class UserTest(TestCase):
@@ -18,6 +19,10 @@ class UserTest(TestCase):
     @create_user()
     def setUp(self):
         pass
+
+    def tearDown(self):
+        cache.delete('MalList:1')
+        super(TestCase, self).tearDown()
 
     def test_get_username(self):
         u = User.objects.get(id=1)
@@ -118,7 +123,7 @@ class UserTest(TestCase):
                 raise
             finally:
                 chmod(settings.MEDIA_ROOT, mode)
-        cache.delete('MalList:1')
+
 
 
 class UserDBTest(TestCase):
@@ -128,6 +133,11 @@ class UserDBTest(TestCase):
     @create_user()
     def setUp(self):
         pass
+
+    def tearDown(self):
+        cache.delete('Stat:1')
+        cache.delete('userCss:1')
+        super(TestCase, self).tearDown()
 
     def test_latest_status(self):
         from anime.models import UserStatusBundle

@@ -1,7 +1,8 @@
 import datetime
 
 from django.contrib.auth.models import User
-from anime.forms.json import is_iterator
+
+from anime.utils.misc import is_iterator
 from anime import api
 
 user = 'nobody'

@@ -91,7 +91,7 @@ class SearchListView(AnimeAjaxListView):
 
     def get(self, request, *args, **kwargs):
         #bad
-        if request.path == reverse('search') and request.method == 'GET':
+        if request.path == reverse('search'):
             return self.render_to_response({'cachestr': ''})
         self.check_parameters(request, *args, **kwargs)
         return super(SearchListView, self).get(request, *args, **kwargs)

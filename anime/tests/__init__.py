@@ -4,7 +4,7 @@ from anime.tests.forms import ( RequestsFormsTest, FormsErrorTests,
 from anime.tests.edit import ( EditInitTest, EditDefaultTests,
             EditSimpleTests, EditRequestsTests, EditAnimebasedTests )
 from anime.tests.views import ( AjaxTest, UserViewsTest, EditViewsTest,
-            EditViewsRequestsTest, BaseViewsTest, BaseViewsRequestsTest,
+            EditViewsRequestsTest, BaseViewsTest, BaseViewsNoFixturesTest,
             ClassesViewsTest, ListViewsTest, AjaxListViewsTest,
             HistoryViewsTest )
 from anime.tests.core import ( BaseTest, ExplorerTest, UserTest,
@@ -14,6 +14,7 @@ from anime.tests.utils import ( CacheTest, CatalogTest, ConfitTest,
 from anime.tests.templatetags import AnimeFiltersTest, AnimeTemplatesTest
 from anime.tests.models import ( ModelsTest, ModelsAnimeFixturesTest,
             ModelsRequestsFixturesTest )
+from anime.tests.orphans import UploadTest
 #import * - bad
 
 __test__= {
@@ -24,4 +25,5 @@ __test__= {
     'utils': utils,
     'templatetags': templatetags,
     'models': models,
+    'orphans': orphans,
 }

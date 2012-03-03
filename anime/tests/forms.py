@@ -5,13 +5,14 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile, TemporaryUploadedFile
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
-from django.test import TestCase
+
 from anime.forms import fields
 from anime.forms import json
 from anime.forms.create import createFormFromModel
 from anime.models import ( AnimeItem, AnimeBundle, AnimeName, AnimeLink,
     UserStatusBundle, AnimeRequest, AnimeImageRequest, DATE_FORMATS, )
-from anime.tests.functions import create_user, login
+from anime.tests._classes import CleanTestCase as TestCase
+from anime.tests._functions import create_user, login
 from anime.utils.catalog import last_record_pk
 
 
@@ -259,7 +260,7 @@ class FormsUserTests(TestCase):
 
     def test_NotActiveAuthenticationForm(self):
         from anime.forms.User import NotActiveAuthenticationForm
-        from anime.tests.functions import email, passwd
+        from anime.tests._functions import email, passwd
         f = NotActiveAuthenticationForm(data={'username': email, 'password': passwd})
         self.assertEquals(f.is_valid(), True)
         f = NotActiveAuthenticationForm(data={'username': 'a', 'password': 'b'})
@@ -365,12 +366,6 @@ class FormsFieldsTests(TestCase):
 class FormsJSONTests(TestCase):
 
     fixtures = ['2trash.json']
-
-    def test_is_iterator(self):
-        from itertools import chain
-        for item in (list(), tuple(), chain()):
-            self.assertEquals(json.is_iterator(item), True)
-        self.assertEquals(json.is_iterator(True), False)
 
     def test_prepare_data(self):
         from datetime import datetime, date

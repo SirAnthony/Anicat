@@ -5,6 +5,16 @@ from django.conf import settings
 from anime.utils.config import random_string
 
 
+def is_iterator(obj):
+    if isinstance(obj, (list, tuple)):
+        return True
+    try:
+        iter(obj)
+        return True
+    except TypeError:
+        return False
+
+
 def safe_username(email):
     return re.sub(r"[^a-z]+", '-', email[:email.index('@')]).strip('-')
 

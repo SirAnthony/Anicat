@@ -6,14 +6,14 @@ from django.contrib.auth.models import AnonymousUser, User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpRequest
 from django.utils.unittest import skip
-from django.test import TestCase
 
 from anime import api
 from anime.edit import ( edit, EditError, EditableDefault, Anime,
     State, Bundle, Name, Links, Request, Animerequest, Feedback, Image )
 from anime.forms import json
 from anime.models import AnimeItem
-from anime.tests.functions import create_user, login, check_response, fill_params
+from anime.tests._classes import CleanTestCase as TestCase
+from anime.tests._functions import create_user, login, check_response, fill_params
 
 
 class EditInitTest(TestCase):
@@ -85,33 +85,11 @@ class EditDefaultTests(TestCase):
         result['form'] = json.FormSerializer(result['form'])
         check_response(result, {'form': a.get_fields('bundle'),
             'status': True, 'id': 0, 'text': api.Noneable(None)}) #lol
-        #self.assertRaisesMessage(EditError,
-        #    f.error_messages['bad_form'], f.process, 'get')
         f = EditableDefault(r, 1, 'anime', 'title')
         result = f.process('post')
         result['form'] = json.FormSerializer(result['form'])
         check_response(result, {'text': {'title': [u'This field is required.']},
             'id': 1, 'form': a.get_fields('anime', 'title')})
-        #anime = AnimeItem.objects.get(id=1)
-        #f = EditableDefault(r, 1, 'anime')
-        #af = api.Add.params.copy()
-        #for field in af.keys():
-        #    if hasattr(anime, field):
-        #        af[field] = getattr(anime, field)
-        #af['genre'] = (1, 2)
-        #f.request.POST.update(af)
-        #def exception():
-        #    raise Exception
-        #f.last = exception
-        #Test may break here
-        #from django.db import connection, transaction
-        #connection.cursor().execute('DROP TABLE anime_animeitem')
-        #transaction.commit_unless_managed()
-        #result = f.process('post')
-        #result['form'] = json.FormSerializer(result['form'])
-        #self.assertEquals(result, {'text': {'__all__':
-        #    [f.error_messages['error'].format("no such table: anime_animeitem")]},
-        #    'id': 1, 'form': result['form']})
 
     def test_EditableDefault_explore(self):
         from anime.core.explorer import FieldExplorer as FE

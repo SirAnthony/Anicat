@@ -1,9 +1,10 @@
 
 from django.template import Template, Context, TemplateSyntaxError
-from django.test import TestCase
+
 from anime.forms.ModelError import AnimeForm
 from anime.forms.User import NotActiveAuthenticationForm, UserCreationFormMail
 from anime.models import USER_STATUS
+from anime.tests._classes import CleanTestCase as TestCase
 from anime.templatetags import animefilters
 
 

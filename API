@@ -1,81 +1,217 @@
-API:
-Ajax requests must be sent to /ajax/$target.
-Response is a json structure with 3 mandatory fields:
-    response - string, type of response,
-    status - bool, result of request process,
-    text - different, body of response.
-
-Login:
-    Request type: Post
-    Request target: login/
-    Request params:
-        username: string
-        password: string
-    Response:
-        response: "login"
-        text: {
-            name: string // Name of logged user
-        }
+API reference.
+Notes:
+    Ajax requests must be sent to /ajax/$target.
+    Response is a json structure with 3 mandatory fields:
+        response - string, type of response,
+        status - bool, result of request process,
+        text - different, body of response.
 
 Search:
-    Request type: Post
-    Request target: search/
+    No description.
+    Request target: /ajax/search/
     Request params:
-        field: string // Search field. Avaliable choises: [name]
-        string: string // Search string
-        page: int // Result page. Default: 0
-        limit: int // May be passed to get another count of results. Maximum is 30.
-    Response:
-        response: "search"
-        text: {
-            count: int // Count of found items,
-            items: [{
+        field: unicode or nothing,
+        order: unicode or nothing,
+        limit: int or nothing,
+        page: int or nothing,
+        string: unicode
+    Response object:
+        status: True,
+        text: 
+            count: int,
+            list: [
+                This list may have variable items count. All items have the same structure
+                    name: unicode,
+                    air: bool,
+                    episodes: int,
+                    release: unicode,
+                    type: unicode,
                     id: int
-                    name: string,
-                    type: string,
-                    episodes: int, // Count of episodes
-                    release: string, // Release dates
-                    air: bool
-            }],
-            page: int // Current page
-    }
-
-Add:
-    Request type: Post
-    Request target: add/
-    Request params:
-        Add form
-    Response:
-        response: "add"
-        id: int // New record id
+                ],
+            pages: 
+                current: int,
+                start: int,
+                items: list,
+        response: "search"
+    Error object:
+        status: False,
+        text: list,
+        response: "search"
 
 Get:
-    Request type: Post
-    Request target: get/
+    No description.
+    Request target: /ajax/get/
     Request params:
-        id: int // Anime id
-        field: string // Field name.
-                      // You can specify this parameter several times to pass multiple fields
-    Response:
-        response: "get"
-        id: int // Returned object id
-        order: array // Fields order
-        text: object // Result depends on which fields was requested.
+        field: tuple,
+        id: int
+    Response object:
+        status: True,
+        text: 
+            This dictionary may have one or many keys/values from bellow. Order of fields in "order" named list: 
+                episodesCount: int,
+                name: [
+                    This list may have variable items count. All items have the same structure
+                    unicode
+                    ],
+                links: 
+                    ANN: [
+                        This list may have variable items count. All items have the same structure
+                        unicode
+                        ],
+                    Wikipedia: [
+                        This list may have variable items count. All items have the same structure
+                        unicode
+                        ],
+                    AniDB: [
+                        This list may have variable items count. All items have the same structure
+                        unicode
+                        ],
+                    MAL: [
+                        This list may have variable items count. All items have the same structure
+                        unicode
+                        ],
+                    Other: [
+                        This list may have variable items count. All items have the same structure
+                        unicode
+                        ],
+                    Official page: [
+                        This list may have variable items count. All items have the same structure
+                        unicode
+                        ],
+                title: unicode,
+                duration: int,
+                bundle: 
+                    bundles: [
+                        This list may have variable items count. All items have the same structure
+                            id: int,
+                            title: unicode
+                        ],
+                    id: int,
+                air: bool,
+                genre: unicode,
+                state: 
+                    state: int,
+                    select: 
+                        1: "Want",
+                        0: "None",
+                        3: "Done",
+                        2: "Now",
+                        5: "Partially watched",
+                        4: "Dropped",
+                release: unicode,
+                order: tuple,
+                type: unicode,
+                id: int,
+        response: "get",
+        id: int
+    Error object:
+        No global errors for the get rerquest.
+        All fields errors in response text
+
+Login:
+    No description.
+    Request target: /ajax/login/
+    Request params:
+        username: unicode,
+        password: unicode
+    Response object:
+        status: True,
+        text: 
+            name: unicode,
+        response: "login"
+    Error object:
+        status: False,
+        text: dict,
+        response: "login"
+
+Forms:
+    No description.
+    Request target: /ajax/form/
+    Request params:
+        field: unicode or nothing,
+        model: unicode,
+        id: int
+    Response object:
+        status: True,
+        field: unicode or nothing,
+        form: [
+            This data is serialised form fields list. Field types:
+                bundle: [
+                    {'input': {'id': 'id_Bundle 0', 'name': 'Bundle 0', 'value': unicode or nothing, 'label': Bundle 0}}
+                    {'input': {'id': 'id_Bundle 1', 'name': 'Bundle 1', 'value': unicode or nothing, 'label': Bundle 1}}
+                    ],
+                state: {'select': {'name': 'state', 'choices': [(0, u'None'), (1, u'Want'), (2, u'Now'), (3, u'Done'), (4, u'Dropped'), (5, u'Partially watched')], 'id': 'id_state', 'value': int or nothing, 'label': State}},
+                anime: 
+                    releasedAt: {'input': {'id': 'id_releasedAt', 'name': 'releasedAt', 'value': date or nothing, 'label': Released}},
+                    episodesCount: {'input': {'id': 'id_episodesCount', 'name': 'episodesCount', 'value': int or nothing, 'label': EpisodesCount}},
+                    endedAt: {'input': {'id': 'id_endedAt', 'name': 'endedAt', 'value': date or nothing, 'label': Ended}},
+                    title: {'input': {'id': 'id_title', 'name': 'title', 'value': unicode or nothing, 'label': Title}},
+                    releaseType: {'select': {'name': 'releaseType', 'choices': [(0, u'TV'), (1, u'Movie'), (2, u'OAV'), (3, u'TV-Sp'), (4, u'SMovie'), (5, u'ONA'), (6, u'AMV'), (7, u'Other')], 'id': 'id_releaseType', 'value': int or nothing, 'label': ReleaseType}},
+                    air: {'input': {'id': 'id_air', 'name': 'air', 'value': unicode or nothing, 'label': Air}},
+                    duration: {'input': {'id': 'id_duration', 'name': 'duration', 'value': int or nothing, 'label': Duration}},
+                links: [
+                    {'input': {'id': 'id_Link 0', 'name': 'Link 0', 'value': unicode or nothing, 'label': Link 0}}
+                    {'select': {'name': 'Link type 0', 'choices': [(0, u'Auto'), (1, u'AniDB'), (2, u'ANN'), (3, u'MAL'), (4, u'Wikipedia'), (6, u'Official page'), (15, u'Other')], 'id': 'id_Link type 0', 'value': int or nothing, 'label': Link type 0}}
+                    ],
+                name: [
+                    {'input': {'id': 'id_Name 0', 'name': 'Name 0', 'value': unicode or nothing, 'label': Name 0}}
+                    {'input': {'id': 'id_Name 1', 'name': 'Name 1', 'value': unicode or nothing, 'label': Name 1}}
+                    ]
+            ],
+        model: unicode,
+        id: int,
+        response: "form"
+    Error object:
+        status: False,
+        text: unicode,
+        id: unicode,
+        field: unicode or nothing,
+        model: unicode,
+        response: "form"
+
+Add:
+    No description.
+    Request target: /ajax/add/
+    Request params:
+        releasedAt: {'input': {'id': 'id_releasedAt', 'name': 'releasedAt', 'value': date or nothing, 'label': ReleasedAt}},
+        episodesCount: {'input': {'id': 'id_episodesCount', 'name': 'episodesCount', 'value': int or nothing, 'label': EpisodesCount}},
+        endedAt: {'input': {'id': 'id_endedAt', 'name': 'endedAt', 'value': date or nothing, 'label': EndedAt}},
+        title: {'input': {'id': 'id_title', 'name': 'title', 'value': unicode or nothing, 'label': Title}},
+        releaseType: {'select': {'name': 'releaseType', 'choices': [(0, u'TV'), (1, u'Movie'), (2, u'OAV'), (3, u'TV-Sp'), (4, u'SMovie'), (5, u'ONA'), (6, u'AMV'), (7, u'Other')], 'id': 'id_releaseType', 'value': int or nothing, 'label': ReleaseType}},
+        air: {'input': {'id': 'id_air', 'name': 'air', 'value': bool or nothing, 'label': Air}},
+        duration: {'input': {'id': 'id_duration', 'name': 'duration', 'value': int or nothing, 'label': Duration}},
+        genre: [
+            {'input': {'id': 'id_genre', 'name': 'genre', 'value': 1, 'label': Genre}}
+            {'input': {'id': 'id_genre', 'name': 'genre', 'value': 2, 'label': Genre}}
+            ]
+    Response object:
+        status: True,
+        response: "add",
+        id: int
+    Error object:
+        status: False,
+        text: dict,
+        response: "add"
 
 Set:
-    Request type: Post
-    Request target: set/
+    No description.
+    Request target: /ajax/set/
     Request params:
-        id: int // Object id
-        model: string // Model name
-        field: string // Field name if needed.
-        set: bool // Unset this parameter to obtain a blank form.
-    Response:
-        response: 'edit'
-        id: int // Id of model.
-    //If error occured
-        status: False
-        text: object // Form errors.
-    //If set in request set to true
-        form: object // Form for processing by element.js.
-        text: none
+        field: unicode or nothing,
+        model: unicode,
+        id: int
+    Response object:
+        status: True,
+        field: unicode or nothing,
+        text: dict,
+        model: unicode,
+        id: int,
+        response: "edit"
+    Error object:
+        status: False,
+        text: dict,
+        id: int,
+        field: unicode or nothing,
+        model: unicode,
+        response: "form"
+

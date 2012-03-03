@@ -2,6 +2,7 @@
 import datetime
 
 from anime.models import DATE_FORMATS
+from anime.utils.misc import is_iterator
 
 from django import forms
 from django.forms import formsets
@@ -9,15 +10,6 @@ from django.forms import formsets
 from django.utils.encoding import smart_unicode, force_unicode
 from django.utils.functional import Promise
 
-
-def is_iterator(obj):
-    if isinstance(obj, (list, tuple)):
-        return True
-    try:
-        iter(obj)
-        return True
-    except TypeError:
-        return False
 
 def prepare_data(data, depth=None):
 

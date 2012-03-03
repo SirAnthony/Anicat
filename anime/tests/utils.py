@@ -1,14 +1,24 @@
 
 from datetime import datetime
 from django.core import mail
-from django.test import TestCase
 
 from anime.models import AnimeItem, Genre, AnimeRequest
-from anime.tests.functions import create_user
+from anime.tests._classes import CleanTestCase as TestCase
+from anime.tests._functions import create_user
 from anime.utils import cache, misc, paginator
 
 
 class CacheTest(TestCase):
+
+    def tearDown(self):
+        cache.delete('1')
+        cache.delete('AnimeItem')
+        cache.delete('AnimeItem:1')
+        cache.delete('a')
+        cache.delete('b')
+        cache.delete('Genre')
+        cache.delete('Genre:1')
+        super(TestCase, self).tearDown()
 
     def test_latest(self):
         self.assertEquals(cache.latest('IndexListView', '1'), False)
@@ -71,15 +81,6 @@ class CacheTest(TestCase):
         cache.clean_cache(fragment_name, *variables)
         self.assertEquals(cache.key_valid(fragment_name, *variables), False)
 
-    def tearDown(self):
-        cache.delete('1')
-        cache.delete('AnimeItem')
-        cache.delete('AnimeItem:1')
-        cache.delete('a')
-        cache.delete('b')
-        cache.delete('Genre')
-        cache.delete('Genre:1')
-
 
 class CatalogTest(TestCase):
 
@@ -102,6 +103,12 @@ class ConfitTest(TestCase):
 
 
 class MiscTest(TestCase):
+
+    def test_is_iterator(self):
+        from itertools import chain
+        for item in (list(), tuple(), chain()):
+            self.assertEquals(json.is_iterator(item), True)
+        self.assertEquals(json.is_iterator(True), False)
 
     def test_safe_username(self):
         self.assertEquals(misc.safe_username('a@a.a'), 'a')
@@ -132,6 +139,10 @@ class PaginatorTest(TestCase):
 
     pg = paginator.Paginator(AnimeItem.objects.all(), 1)
 
+    def tearDown(self):
+        cache.delete('Pages:c')
+        super(TestCase, self).tearDown()
+
     def test_name_length(self):
         self.assertEquals(self.pg.name_length, 4)
 
@@ -147,9 +158,6 @@ class PaginatorTest(TestCase):
         self.pg.set_order('-id')
         self.pg.set_cachekey('c')
         self.assertEquals(self.pg.get_names(), [u'2 - 2', u'1 - 1'])
-
-    def tearDown(self):
-        cache.delete('Pages:c')
 
     def test_iternames(self):
         # Exception raising only

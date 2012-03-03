@@ -3,10 +3,10 @@ import os
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import IntegrityError
-from django.test import TestCase
 
 from anime import models
-from anime.tests.functions import create_user
+from anime.tests._classes import CleanTestCase as TestCase
+from anime.tests._functions import create_user
 
 
 class ModelsTest(TestCase):
