@@ -66,7 +66,7 @@ var Card = new (function(){
         this.load();
     }
 
-    this.get = function(id){
+    this.get = function(id, e){
         var card = document.getElementById("card");
         if(card){
             var tbl = document.getElementById("tbl");
@@ -74,6 +74,7 @@ var Card = new (function(){
             element.removeAllChilds(card);
             card.style.width = w + 'px';
             if(w >= 500){
+                message.toEventPosition(e);
                 ajax.loadXMLDoc(url+'get/', {'id': id, 'card': true, 'field': [
                     'id', 'bundle', 'name', 'type', 'genre', 'episodesCount',
                     'duration', 'release', 'links', 'state']});
@@ -95,9 +96,9 @@ var Card = new (function(){
         else if(document.documentElement && document.documentElement.scrollTop)
             scry = document.documentElement.scrollTop;
         if(!user.logined){
-            var l = document.getElementById('logdv');
+            var l = document.getElementById('loginform');
             if(visible(l) && soffsety < l.scrollHeight)
-                soffsety = l.scrollHeight + 25 - (scry ? 0 : 40);
+                soffsety = l.scrollHeight + 30 - (scry ? 0 : 40);
         }
         card.style.top = soffsety + (scry ? 5 : 40) + 'px';
     }

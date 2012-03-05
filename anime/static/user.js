@@ -13,7 +13,7 @@ var user = new( function(){
         if(!info)
             throw new Error('Bad object passed for error rendering.');
         info.innerText = msg;
-        toggle(info, 1);
+        toggle(info.parentNode, 1);
         Card.place();
     }
 
@@ -30,37 +30,40 @@ var user = new( function(){
 
     this.toggle = function(){
         if(!this.loaded) return true;
-        var logdv = document.getElementById('logdv');
-        if(!logdv) return true;
-        toggle(logdv);
+        var loginform = document.getElementById('loginform');
+        if(!loginform) return true;
+        toggle(loginform);
         Card.place();
         return false;
     }
 
     this.more = function(){
         if(!this.loaded) return;
-        var logdv = document.getElementById('logdvmore');
-        if(!logdv) return;
-        toggle(logdv);
+        var ldvm = document.getElementById('logdvmore');
+        if(!ldvm) return;
+        toggle(ldvm);
         Card.place();
     }
 
-    this.login = function(){
+    this.login = function(e){
         if(!this.loaded || user.logined) return true;
-        toggle(document.getElementById('logininfo'), -1);
+        toggle(document.getElementById('logininfo').parentNode, -1);
         var rform = document.getElementById('login');
         var formData = getFormData(rform);
         ajax.loadXMLDoc(url+'login/', formData);
+        message.toEventPosition(e);
         return false;
     }
 
     this.alterlogin = function(url){
         if(!this.loaded || user.logined) return true;
         if(url == 'openid'){
-            toggle(document.getElementById('login_openid'));
-            toggle(document.getElementById('socialinfo'));
+            var l = document.getElementById('login_openid').parentNode;
+            toggle(l);
+            if(!visible(l))
+                toggle(document.getElementById('socialinfo').parentNode, -1);
         }else{
-            toggle(document.getElementById('socialinfo'), -1);
+            toggle(document.getElementById('socialinfo').parentNode, -1);
             var w = 700;
             var h = 500;
             var login_form = null;
@@ -73,18 +76,19 @@ var user = new( function(){
             if(login_form)
                 login_form.submit();
         }
+        Card.place()
         return false;
     }
 
     this.logout = function(){
         if(!this.loaded) return;
         this.logined = false;
-        var div = document.getElementById('logdiv');
+        var div = document.getElementById('usermenu');
         element.removeAllChilds(div);
         while(div.nextSibling)
             element.remove(div.nextSibling);
         element.appendChild(div, [{'a': {href: '', innerText: 'Account'}}]);
-        element.appendChild(div.parentNode, [{'div': {id: 'logdv'}}, [
+        element.appendChild(div.parentNode, [{'div': {id: 'loginform'}}, [
                                         {'form': {id: 'login', className: 'thdtbl',
                                             onsubmit: function(){ user.login(); return false;}}}, [
                                             {'input': {id: 'id_username', type: 'text', name: 'username'}},
@@ -92,15 +96,15 @@ var user = new( function(){
                                             {'input': {type: 'submit', value: 'Login'}},
                                             {'p': {id: 'logininfo', className: 'error'}}]]]);
         catalog_storage.disable();
-        window.location.replace('/logout/'); //Возможно, когда-нибудь будет без релоада, только зачем?
+        window.location.replace('/logout/'); //Возможно, когда-нибудь будет без релоада, но зачем?
     }
 
     this.loginSuccess = function(text){
         if(!this.loaded) return;
         var nick;
-        var form = document.getElementById('logdiv');
+        var form = document.getElementById('usermenu');
         ((text.name) ? nick = encd(text.name) : nick = '%USERNAME%');
-        element.remove(document.getElementById('logdv'));
+        element.remove(document.getElementById('loginform'));
         element.removeAllChilds(form);
         element.appendChild(form, [
             {'span': {className: 'delimiter', innerText: '|'}}, {'span': {}}, [
@@ -138,25 +142,31 @@ var user = new( function(){
             })(text), info);
     }
 
-    this.register = function(cncl){
+    this.register = function(e){
         if(!this.loaded) return true;
         var form = document.getElementById('register');
         var formData = getFormData(form);
-        var errors = getElementsByClassName('error', form);
+        var obj = document.getElementById('registerinfo');
+        var errors = getElementsByClassName('error', obj);
         element.remove(errors);
+        toggle(obj.parentNode, -1);
         ajax.loadXMLDoc(url+'register/', formData);
+        message.toEventPosition(e);
         return false;
     }
 
     this.registerFail = function(error){
         if(!this.loaded) return;
+        var obj = document.getElementById('registerinfo');
+        if(!obj)
+            return;
         for(var target in error){
-            var obj = document.getElementById('id_register-'+target);
-            if(!obj) continue;
             for(var e in error[target]){
-                element.insert(obj, {'span': {className: 'error left', innerText: error[target][e]}}, true);
+                element.appendChild(obj, {'span': {className: 'error', innerText: error[target][e]}}, true);
             }
         }
+        toggle(obj.parentNode, 1);
+        Card.place()
     }
 
 })();

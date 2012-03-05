@@ -1,7 +1,6 @@
 // Ну без копирайта неинтересно, правда?
 // Anicat js part v 1.99
 
-var mCur; // Хранит текущую позицию мыши
 var url = '/ajax/';
 var timer;
 var ua = navigator.userAgent.toLowerCase();
@@ -71,17 +70,6 @@ var pclass = new ( function(){
     }
 })();
 
-function clearOnFocus(text, obj){
-    if(obj){
-        obj.value = text;
-    }
-    return function(){
-        if(this.value == text){
-                this.value = '';
-            }
-    }
-}
-
 //##############################################################################
 //##############################    Misc   #####################################
 //##############################################################################
@@ -103,7 +91,7 @@ var searcher = new ( function(){
 
     this.send = function(page, e){
         if(!this.loaded) return;
-        if(!page) page = 0;
+        if(!page) page = 1;
         var val;
         var sort;
         if(this.input.value.length < 3 && val != 'episodes' && val != 'type'){
@@ -117,7 +105,7 @@ var searcher = new ( function(){
             var text = this.input.value.toLowerCase();
             if(!val) val = 'name';
             var qw = {'page': page, 'field': val, 'string': text, 'sort': sort};
-            message.toEventPosition();
+            message.toEventPosition(e);
             ajax.loadXMLDoc(url+'search/',qw);
         }
     }
@@ -197,7 +185,6 @@ var message = new (function(){
     this.create = function(str, timeout){
         this.clear();
         this.lock();
-        //this.toEventPosition();
         if(!isString(str) && !isNumber(str) && !isUndef(str) && !isError(str))
             this.addTree(str);
         else
@@ -246,39 +233,35 @@ var message = new (function(){
     this.toPosition = function(x, y){
         if(!this.getMenu())
             return;
-        this.menu.parentNode.style.left = x + 'px';
-        this.menu.parentNode.style.top = y + 'px';
+        this.menu.style.left = x + 'px';
+        this.menu.style.top = y + 'px';
+    }
+
+    this.eventPosition = function(e){
+        var x = 20;
+        var y = 20;
+        if(isIE)
+            e = event;
+        if(e.pageX || e.pageY){
+            x = e.pageX;
+            y = e.pageY;
+        }else if(e.clientX || e.clientY){
+            x = e.clientX + (document.documentElement.scrollLeft || document.body.scrollLeft) - document.documentElement.clientLeft;
+            y = e.clientY + (document.documentElement.scrollTop || document.body.scrollTop) - document.documentElement.clientTop;
+        }else if(e.target){
+            x = e.target.offsetLeft;
+            y = e.target.offsetTop;
+        }
+        return {x: x, y: y}
     }
 
     //Move messagebox to last event position.
     //Pop - старый костыль, но пока никак.
-    this.toEventPosition = function(pop){
-        var dv;
-        pop ? dv = document.getElementById('popup') : dv = document.getElementById('menu');
-
-        if(!dv)
+    this.toEventPosition = function(e){
+        if(!this.getMenu())
             return;
-        var x = 20;
-        var y = 20;
-        if(isIE){
-            e = event;
-            if(e.pageX || e.pageY){
-                x = e.pageX;
-                y = e.pageY;
-            }else if(e.clientX || e.clientY){
-                x = e.clientX + (document.documentElement.scrollLeft || document.body.scrollLeft) - document.documentElement.clientLeft;
-                y = e.clientY + (document.documentElement.scrollTop || document.body.scrollTop) - document.documentElement.clientTop;
-            }
-        }else{
-            if( mCur.y+170 >= document.firstChild.clientHeight )
-                mCur.y = mCur.y - 70;
-            if( mCur.x+200 >= document.firstChild.clientWidth )
-                mCur.x = mCur.x - 100;
-            y = mCur.y;
-            x = mCur.x;
-        }
-        dv.style.top = y + 'px';
-        dv.style.left = x + 'px';
+        var p = this.eventPosition(e);
+        this.toPosition(p.x, p.y);
     }
 
     // Prevents menu from closing
@@ -387,21 +370,29 @@ isKonqueror = (ua.indexOf("konqueror") != -1);
 function showFN(tbl, cn){
     var el = (tbl) ? tbl : document.getElementById('tbdid');
     var elms = getElementsByClassName((cn ? cn : "name"), el, 'td');
+    var pop = document.getElementById('popup');
+    var movepop = (function(pop){ return function(e){
+        var p = message.eventPosition(e);
+        if(visible(pop)){
+            pop.style.top = p.y + 10 +'px';
+            pop.style.left = p.x + 10 +'px';
+        }
+    }})(pop);
     for(i in elms){
         var el = elms[i];
-        //Как-то оно не так.
-        //if(el.nextSibling && el.offsetHeight < el.nextSibling.offsetHeight)
-        //    el.style.height = el.nextSibling.offsetHeight + 'px';
-        //pclass.add(el, 'left');
         if(el.offsetHeight < el.scrollHeight){
-            el.onmouseover = function(){
-                message.toEventPosition(1);
-                toggle(document.getElementById('popup'), 1);
-                document.getElementById('popups').innerText = this.innerText;
-            }
-            el.onmouseout = function(){
-                toggle(document.getElementById('popup'), -1);
-            }
+            addEvent(el, 'mouseover', (function(pop){ return function(e){
+                var p = message.eventPosition(e);
+                pop.style.top = p.y + 'px';
+                pop.style.left = p.x + 'px';
+                addEvent(this, 'mousemove', movepop);
+                toggle(pop, 1);
+                pop.firstChild.innerText = this.innerText;
+            }})(pop));
+            addEvent(el, 'mouseout', (function(pop){ return function(e){
+                removeEvent(this, 'mousemove', movepop);
+                toggle(pop, -1);
+            }})(pop));
         }
     }
 }
@@ -451,13 +442,6 @@ function encd(string){
     return string
 }
 
-function rsemicolon(prm){
-    var astr = prm;
-    astr = astr.replace(/;/g, "0x3B");
-    astr = astr.replace(/,/g, "0x2C");
-    return astr;
-}
-
 function capitalise(string){
     if(string)
         return string.charAt(0).toUpperCase() + string.slice(1);
@@ -493,25 +477,6 @@ function visible(elem){
     return false;
 }
 
-//################# Отсюда берется положение менюшки
-
-function mousePageXY(event){
-    var x = 0, y = 0;
-
-    if(document.attachEvent != null){ // Internet Explorer & Opera
-        x = window.event.clientX + (document.documentElement.scrollLeft ?
-            document.documentElement.scrollLeft : (document.body ? document.body.scrollLeft : 0));
-        y = window.event.clientY + (document.documentElement.scrollTop ?
-            document.documentElement.scrollTop : (document.body ? document.body.scrollTop : 0));
-    }else if(!document.attachEvent && document.addEventListener){ // Gecko
-        x = event.clientX + window.scrollX;
-        y = event.clientY + window.scrollY;
-    }else{// Do nothing
-        throw new Error('Bad browser.');
-    }
-    return {"x":x, "y":y};
-}
-
 //################# Get menu with info
 
 function cnt(tag, num, e){
@@ -519,7 +484,7 @@ function cnt(tag, num, e){
     if(!e) var e = window.event;
     e.cancelBubble = true;
     if(e.stopPropagation) e.stopPropagation();
-    message.toEventPosition();
+    message.toEventPosition(e);
     var qw = {'id': num}
     switch (tag){
         case 'name':
@@ -663,17 +628,7 @@ function getStylesheetRule(ruleName, field){
     return value;
 }
 
-
 addEvent(window, 'load', function(){
     searcher.init();
     showFN();
-});
-
-addEvent(document, 'mousemove', function(e){
-    mCur = mousePageXY(e);
-    var p = document.getElementById('popup');
-    if(visible(p)){
-        p.style.top = mCur.y + 10 +'px';
-        p.style.left = mCur.x + 10 +'px';
-    }
 });

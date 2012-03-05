@@ -20,6 +20,7 @@
     <script type="text/javascript" src="/static/user.js"></script>
     <script type="text/javascript" src="/static/ae.js"></script>
     <script type="text/javascript" src="/static/card.js"></script>
+    <script type="text/javascript" src="/static/modulargrid_debug.js"></script>
     {% if not user.is_authenticated %}<script type="text/javascript" src="/static/userstorage.js"></script>{% endif %}
     {% block customScripts %}{% endblock %}
     {% if user.is_authenticated %}{% addForm %}{{ AddForm.media.render }}{% endif %}
@@ -37,13 +38,13 @@
             {% endblock %}
             <a href="{% url faq %}">FAQ</a><span class="delimiter">|</span>
             <a href="{% url card %}" rel="nofollow">Random</a>
-        {% if user.is_authenticated %}
+    {% if user.is_authenticated %}
             {% block addLink %}
             <span class="delimiter">|</span>
             <a href="{% url edit_add %}" rel="nofollow" onclick="add.toggle(); return false;">Add⇣</a>
             {% endblock %}
         </div>
-        <div id="logdiv" class="rightmenu">
+        <div id="usermenu" class="rightmenu">
             <span class="delimiter">|</span>
             <span><a href="{% url settings %}" title="User settings">{% username user %}</a></span>
             <span class="delimiter">|</span>
@@ -68,70 +69,69 @@
             </div>
             {% endblock %}
         </div>
-        {% else %}
+    </div>
+    {% else %}
         </div>
-        <div id="logdiv" class="rightmenu">
+        <div id="usermenu" class="rightmenu">
             <a href="{% url login %}" onclick="return user.toggle();">Account</a>
         </div>
-        <div id="logdv" class="right">
-            {% loginForm %}
-            <dl>
-                <dd>
-                    <form method="POST" action="{% url login %}" id="login" onsubmit="return user.login();">
-                        {% csrf_token %}
-                        {{ LoginForm.username }}
-                        {{ LoginForm.password }}
-                        <input type="submit" value="Login" />
-                        <p id="logininfo" class="error"></p>
-                    </form>
-                </dd>
-                <dt><a id="register-more" class="inurl" onclick="user.more();">More⇣</a></dt>
-            </dl>
-            <dl id="logdvmore" class="right hidden">
-                <dd>
-                    <a rel="nofollow" href="{% url password_reset %}" class="inurl right">Restore password</a>
-                    <p>
-                    {% for name in social_auth.backends.openid %}
-                        {% if  name != "openid" %}
-                        <a rel="nofollow" target="_blank" onclick="return user.alterlogin('{% url socialauth_begin name %}');" class="inurl" href="{% url socialauth_begin name %}">{{ name|title }}</a>
-                        {% endif %}
-                    {% endfor %}
-                        <a rel="nofollow" onclick="return user.alterlogin('openid');" class="inurl">OpenID</a>
-                    </p>
-                    <form id="login_openid" action="{% url socialauth_begin 'openid' %}" target="Login" method="post" onsubmit="return user.alterlogin('{% url socialauth_begin 'openid' %}');">
-                        {% csrf_token %}
-                        <input id="openid_identifier" type="text" value="" name="openid_identifier" />
-                        <input type="submit" value="Login" />
-                    </form>
-                    <p id="socialinfo" class="error"></p>
-                </dd>
-                <dt class="inurl">Login with</dt>
-                <dd>
-                    <form method="POST" action="{% url registration %}" id="register" class="register"  onsubmit="return user.register();">
-                        {% csrf_token %}
-                        <p class="clear">
-                        {% for field in RegisterForm %}
-                            {{ field }}
-                            {% if field.errors %}
-                            <p class="error left">{{ field.errors }}</p>
-                            {% endif %}
-                        {% endfor %}
-                        <input type="submit" class="clear" value="Register" />
-                        </p>
-                        <p class="mainerror error">
-                            {{ RegisterForm.non_field_errors }}
-                        </p>
-                    </form>
-                </dd>
-                <dt class="inurl">Registration</dt>
-            </dl>
-        </div>
-        {% endif %}
     </div>
-    <br />
+    <div id="loginform" class="right">
+        {% loginForm %}
+        <dl>
+            <dd>
+                <form method="POST" action="{% url login %}" id="login" onsubmit="return user.login(event);">
+                    {% csrf_token %}
+                    {{ LoginForm.username }}
+                    {{ LoginForm.password }}
+                    <input type="submit" value="Login" />
+                </form>
+            </dd>
+            <dt><a id="register-more" class="inurl" onclick="user.more();">More⇣</a></dt>
+            <dd class="hidden"><p id="logininfo" class="error"></p></dd>
+            <div class="clear"></div>
+        </dl>
+        <dl id="logdvmore" class="right hidden">
+            <dd>
+                <a rel="nofollow" href="{% url password_reset %}" class="inurl right">Restore password</a>
+                <p>
+                {% for name in social_auth.backends.openid %}
+                    {% if  name != "openid" %}
+                    <a rel="nofollow" target="_blank" onclick="return user.alterlogin('{% url socialauth_begin name %}');" class="inurl" href="{% url socialauth_begin name %}">{{ name|title }}</a>
+                    {% endif %}
+                {% endfor %}
+                    <a rel="nofollow" onclick="return user.alterlogin('openid');" class="inurl">OpenID</a>
+                </p>
+            </dd>
+            <dt class="inurl">Login with</dt>
+            <dd class="hidden">
+                <form id="login_openid" action="{% url socialauth_begin 'openid' %}" target="Login" method="post" onsubmit="return user.alterlogin('{% url socialauth_begin 'openid' %}');">
+                    {% csrf_token %}
+                    <input id="openid_identifier" type="text" value="" name="openid_identifier" />
+                    <input type="submit" value="Login" />
+                </form>
+            </dd>
+            <dd class="hidden"><p id="socialinfo" class="error"></p></dd>
+            <dd>
+                <form method="POST" action="{% url registration %}" id="register" class="register"  onsubmit="return user.register(event);">
+                    {% csrf_token %}
+                    {% for field in RegisterForm %}
+                        {{ field }}
+                    {% endfor %}
+                    <input type="submit" class="clear" value="Register" />
+                    <p class="mainerror error">
+                        {{ RegisterForm.non_field_errors }}
+                    </p>
+                </form>
+            </dd>
+            <dt class="inurl">Registration</dt>
+            <dd class="hidden"><p id="registerinfo" class="error"></dd>
+        </dl>
+    </div>
+    {% endif %}
     {% block search %}
     <div id="srch" class="hidden">
-        <form method="POST" action="{% url search %}" id="srchp" onsubmit="searcher.send(); return false;">
+        <form method="POST" action="{% url search %}" id="srchp" onsubmit="searcher.send(1, event); return false;">
         {% csrf_token %}
             <input id="sin" name="string" type="text"/>
             <input type="submit" value="Search" />

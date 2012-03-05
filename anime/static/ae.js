@@ -41,6 +41,7 @@ var add = new (function add_class(){
         this.clearForm();
         var formData = getFormData(this.form);
         ajax.loadXMLDoc(url+'add/', formData);
+        message.toEventPosition(e);
     }
 
     this.processResponse = function(resp){
@@ -102,6 +103,7 @@ var edit = new (function edit_class(){
             ajax.processFormRequest({'status': true, 'id': id, 'model': field});
         else
             this.requestForm(id, field);
+        message.toEventPosition(e);
         return false;
     }
 
