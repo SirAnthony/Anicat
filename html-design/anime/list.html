@@ -10,6 +10,7 @@
 {% endblock %}
 
 {% block main %}
+    <h2 id="listtitle">{% if link.status %}{% statusname link.status %} list{% if link.user %} for {% username link.user %}{% endif %}{% endif %}</h1>
 {% cache 0 mainTable cachestr %}
     <div id="dvid">
         <table id="tbl" cellspacing="0" class="tbl">

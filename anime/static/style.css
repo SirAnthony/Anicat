@@ -114,11 +114,6 @@ a:hover{
 }
 
 
-#dvid{
-    overflow: auto;
-    margin-bottom: 9px;
-}
-
 #header{
     width: 100%;
     height: 26px; /* + 1px border */
@@ -130,6 +125,15 @@ a:hover{
 #header a, #loginform a{
     margin-left: 2px;
     margin-right: 3px;
+}
+
+#dvid{
+    overflow: auto;
+    margin-bottom: 9px;
+}
+
+#listtitle {
+    margin-bottom: 9px;
 }
 
 .tbl{
@@ -180,6 +184,12 @@ border: none;
 .footer{
     margin-top: 9px;
     clear: both;
+}
+
+tr.stat {
+    text-align: right;
+    border-spacing: 3;
+    line-height: 1.2em;
 }
 
 /*Спан, и шрифт для ссылок*/

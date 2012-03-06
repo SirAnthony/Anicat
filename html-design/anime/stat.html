@@ -29,7 +29,7 @@
             </thead>
             <tbody>
             {% for element in stat %}
-                <tr style="text-align: right;  border-spacing: 3;">
+                <tr class="stat">
                     <td style="text-align: left;">
                         {% if forloop.last %}<b>{% endif %}
                         {{ element.name|capfirst }}
