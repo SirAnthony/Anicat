@@ -476,6 +476,7 @@ select.linktype {
 .datetimeshortcuts {
     float: right;
     margin-top: -1px;
+    margin-right: 11px;
 }
 
 .editDiv {
@@ -582,6 +583,10 @@ select.linktype {
 #addform {
     top: 30px;
     left: 30px;
+}
+
+#requests, .column {
+    line-height: 1.2em;
 }
 
 .editDiv select#id_state{
