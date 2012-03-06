@@ -210,7 +210,7 @@ var edit = new (function edit_class(){
                 }
             }
 
-            if(field == 'name' || field == 'bundle'){
+            if(field == 'name' || field == 'bundle' || field == 'links'){
                 resp.form.push({'a': {name: 'id', className: 'right', innerText: 'Add field',
                 onclick: (function(name){ return function(){
                     var num = (function(el){
@@ -221,9 +221,18 @@ var edit = new (function edit_class(){
                         }while(el = el.nextSibling)
                         return num;
                     })(this.parentNode.firstChild);
-                    var nm = name + ' ' + num;
+                    if(field == 'links')
+                        var nm = 'Link ' + num;
+                    else
+                        var nm = name + ' ' + num;
                     element.insert(this,
                         {'input': {'type': 'text', 'id': 'id_'+nm, 'name': nm}});
+                    if(field == 'links'){
+                        var nmt = 'Link type ' + num;
+                        element.insert(this,
+                        {"select": {'name': nmt, "value": 0, "choices": [[0, "Auto"], [1, "AniDB"], [2, "ANN"], [3, "MAL"], [4, "Wikipedia"], [6, "Official page"], [15, "Other"]],
+                            "className": "linktype", "id": 'id_'+nm}});
+                    }
                 }})(capitalise(field))}});
             }
 
