@@ -495,7 +495,7 @@ function cnt(tag, num, e){
         break;
         case 'id':
             edit.status_menu_edit = true; //Fuuu
-            return edit.rf(num, 'state');
+            return edit.rf(num, 'state', e);
         break;
         default:
             qw['field'] = tag;

@@ -10,6 +10,12 @@ var forms = new (function forms_class(){
 
     this.title_bundle = function(fieldname, id, data){
         var fields = this.getField(fieldname, id, data);
+        if(!data || !data.id)
+            return [this.titledfield(fieldname,
+            ((data && data.id) ? data.id : 0), fields),
+            this.titledfield('this', id, [
+                {'a': {href: '/card/' + id, target: '_blank'}}, [
+                    {'': {innerText: '/card/' + id + '/'}}]])];
         return this.titledfield(fieldname,
             ((data && data.id) ? data.id : 0), fields);
     }
@@ -25,10 +31,11 @@ var forms = new (function forms_class(){
             case 'episodesCount': title = 'episodes:'; break;
             case 'release': title = 'released:'; break;
             case 'bundle': title = 'Bundled with:'; break;
+            case 'this': title = 'This card link:'; break;
             default: title = fieldname + ':'; break;
         }
         var childs = new Array();
-        if(edit)
+        if(edit && fieldname != 'this')
             childs.push({'a': {className: 'right',
                 'href': edit.getFieldLink(id, fieldname),
                 innerText: 'Edit', target: '_blank',

@@ -33,7 +33,7 @@ input, select {
 }
 
 form, #card, #pagecard {
-    line-height: 17px;
+    line-height: 18px;
 }
 
 /*select {
@@ -143,54 +143,43 @@ border: none;
 
 #tbl td, #tbl th, #srchtbl td{
     position: relative;
-    height: 27px;
-    text-align: left;
+    text-align: center;
     width: 190px;
     z-index: 0;
     overflow: hidden;
     padding: 0px 1px;
 }
+
+.tbl tr, .tbl td, .tbl th{
+    height: 27px;
+}
+
 .link{
     width: 24px !important;
 }
+
 .name{
     display: inline-block;
 }
+
 .id{
     width: 30px !important;
     background-color: #339966 !important;
     text-align: right !important;
     cursor: pointer;
 }
+
 .episodes {
     width: 64px !important;
 }
+
 .type, .rating {
     width: 58px !important;
 }
+
 .footer{
     margin-top: 9px;
     clear: both;
-}
-
-/* контент для меню */
-.cont_men {
-    padding: 7px 10px;
-    border: 1px solid;
-    border-color: #F0F0F0 #808080 #808080 #F0F0F0;
-    background-color: #D4D0C8;
-    position: absolute;
-    z-index: 5;
-    display: none;
-    line-height: 21px;
-}
-
-.cont_men td.bundle_number {
-    display: none;
-}
-
-#menu {
-    font-size: 14pt;
 }
 
 /*Спан, и шрифт для ссылок*/
@@ -216,7 +205,7 @@ border: none;
 }
 
 
-/* Ссылки*/
+/* Links */
 .leftmenu,
 .thdtbl a:link, .thdtbl a:visited, .thdtbl a:active, .thdtbl a:hover,
 #header .select span{
@@ -239,13 +228,35 @@ a.blacklink:hover {
     color: #0068ef !important;
 }
 
-/*Менюшки, etc.*/
+
+/* Menus */
 .leftmenu{
     float: left;
     margin: 0px 3px;
 }
 
-/*Форма входа*/
+#menu {
+    font-size: 14pt;
+}
+
+/* menu's content */
+.cont_men {
+    padding: 7px 10px;
+    border: 1px solid;
+    border-color: #F0F0F0 #808080 #808080 #F0F0F0;
+    background-color: #D4D0C8;
+    position: absolute;
+    z-index: 5;
+    display: none;
+    line-height: 21px;
+}
+
+.cont_men td.bundle_number {
+    display: none;
+}
+
+
+/* Login form */
 .rightmenu{
     float: right;
     margin: 0px 3px;
@@ -278,6 +289,10 @@ a.blacklink:hover {
     margin-left: 10px;
 }
 
+#loginform dt.inurl {
+    cursor: text;
+}
+
 #loginform dd.hidden{
     height: auto;
 }
@@ -291,8 +306,10 @@ a.blacklink:hover {
     line-height: 32px;
 }
 
-#loginform dt.inurl {
-    cursor: text;
+
+
+#loginform input[type="text"], #loginform input[type="password"] {
+    width: 185px;
 }
 
 #show {
@@ -317,11 +334,6 @@ a.blacklink:hover {
 }
 
 
-
-#lngs{
-font-size: 10pt;
-}
-
 /*Поиск и все с ним связанное.*/
 #srch{
     margin-bottom: 9px;
@@ -343,66 +355,33 @@ font-size: 10pt;
     margin-bottom: 9px;
 }
 
-#chtext{
-margin-top: 8px;
-margin-bottom: 5px;
-}
-#ids{
-position: fixed;
-left: 600px;
-top: 200px;
-background-color: #c0c0c0;
-padding: 5px 10px;
-}
-/*Автодополнение*/
-.app_div{
-position: absolute; /*fixed !important;*/
-background-color: transparent;
-z-index: 20;
-border: 1px solid black;
-background-color: Window;
-overflow: hidden;
-}
-.app_div ul {
-width: 100%;
-/*list-style-position: outside;
-list-style: none;*/
-}
-.app_div li {
-min-width: 211px;
-padding: 2px 5px;
-cursor: pointer;
-display: block;
-width: 100%;
-font: menu;
-font-size: 16px;
-overflow: hidden;
-}
 
-.app_over {
-background-color: Highlight;
-color: HighlightText;
-}
-
-/*Cards*/
-.cardelem{
-    margin-top: 5px;
-}
+/* Cards */
 .cardcol{
     float: left;
     margin: 0px 10px !important;
     min-width: 125px;
 }
+
 .cardcol div {
     clear: both;
     float: left;
     min-width: 190px;
-    /*margin-right: 10px;*/
-    margin-top: 3px;
+    margin-bottom: 3px;
 }
+.cardcol div div {
+    margin-bottom: 0px;
+}
+
 .cardcol input, .cardcol select {
     width: 190px;
+    margin-bottom: 0px;
 }
+
+.cardcol span {
+    margin-left: 2px;
+}
+
 .cardcol a.right {
     color: #000;
     font-size: 10pt;
@@ -411,28 +390,33 @@ color: HighlightText;
 .cardcol a.right:hover {
     color: #0068ef;
 }
+
 #card {
     position: absolute;
     right: 0px;
     background: #FFF;
 }
-#staff.cardcol{
-clear: left;
-}
+
 #main.cardcol{
-max-width: 600px;
-}
-#imagebun.cardcol{
-max-width: 400px;
-margin-bottom: 30px !important;
-}
-#imagebun img{
-max-width: 400px;
-}
-.elemlbl{
-font-weight: bold;
+    max-width: 600px;
 }
 
+#imagebun.cardcol{
+    max-width: 400px;
+    margin-bottom: 30px !important;
+}
+
+#imagebun img{
+    max-width: 400px;
+    display: block;
+    margin: 0 auto;
+}
+#cimg {
+    width: 100%;
+}
+
+
+/* Add form */
 #id_genre {
     height: 22px;
     padding-top: 2px;
@@ -582,6 +566,7 @@ select.linktype {
     cursor: pointer;
     color: #000;
 }
+
 
 /* Id's */
 #addform {

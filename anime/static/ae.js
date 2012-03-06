@@ -95,7 +95,7 @@ var edit = new (function edit_class(){
 
     this.edits = {'name': '/name', 'bundle': '/bundle',
                  'type': 'releaseType', 'release': 'releasedAt,endedAt',
-                 'links': '/links', 'state': '/state'};
+                 'links': '/links', 'state': '/state', 'image': '/image'};
     this.fields = {'releaseType': 'type', 'releasedAt,endedAt': 'release'};
 
     this.rf = function(id, field, e){

@@ -14,7 +14,7 @@ var Card = new (function(){
         if(card.clientWidth < 750){
             imgbun = (card.clientWidth < 600) ? 200 : 300;
             card.firstChild.style.maxWidth = imgbun + 'px';
-            card.firstChild.firstChild.lastChild.style.maxWidth = imgbun + 'px';
+            card.firstChild.firstChild.firstChild.style.maxWidth = imgbun + 'px';
             imgbun += 40;
         }else{
             imgbun = card.firstChild.clientWidth + 40;
@@ -25,20 +25,18 @@ var Card = new (function(){
     this.hideEdits = function(p){
         if(!p) return;
         var h = new Array();
-        var c = p.getElementsByTagName('h4');
-        for(var i=0; i<c.length; i++) //google chrome, lol
+        var c = getElementsByClassName('right', p);
+        for(var i=0; i<c.length; i++){
+            if(!c[i] || c[i].tagName != "A") continue;
             h.push(c[i]);
+        }
         if(!h.length) return;
-        h.push(document.getElementById("cimg").lastChild);
         for(var element=0; element<h.length; element++){
-            var c = h[element].previousSibling;
-            var parent = h[element].parentNode;
-            if(!c || c.tagName != "A")
-                continue;
+            var c = h[element];
             toggle(c, -1);
-            addEvent(parent, 'mouseover', (function(c){
+            addEvent(c.parentNode, 'mouseover', (function(c){
                 return function(){toggle(c, 1);}})(c));
-            addEvent(parent, 'mouseout', (function(c){
+            addEvent(c.parentNode, 'mouseout', (function(c){
                 return function(){toggle(c, -1);}})(c));
         }
     }
@@ -53,11 +51,19 @@ var Card = new (function(){
         for(var i=0; i<fields.length; i++){
             data.push(forms.getTitledField(fields[i], id, res[fields[i]]));
         }
+        var bundle = forms.getTitledField('bundle', id, res.bundle)
+        var link = null;
+        if(isArray(bundle)){
+            link = bundle.pop();
+            bundle = bundle.pop()
+        }
         element.appendChild(card, [
             {'div': {'id': 'imagebun', 'className': 'cardcol'}}, [
                 {'div': {'id': 'cimg'}}, [
-                    {'img': {'src': 'http://anicat.net/images/' + res.id + '/'}}],
-                forms.getTitledField('bundle', id, res.bundle)
+                    {'img': {'src': 'http://anicat.net/images/' + res.id + '/'}},
+                    {'a': {href: edit.getFieldLink(id, 'link'), className: 'right',
+                    innerText: 'Submit new', style: {display: "none"}, target: '_blank'}}],
+                link, bundle
             ],
             {'div': {'id': 'main', 'className': 'cardcol'}}, data
 

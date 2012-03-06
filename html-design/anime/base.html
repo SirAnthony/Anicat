@@ -20,7 +20,6 @@
     <script type="text/javascript" src="/static/user.js"></script>
     <script type="text/javascript" src="/static/ae.js"></script>
     <script type="text/javascript" src="/static/card.js"></script>
-    <script type="text/javascript" src="/static/modulargrid_debug.js"></script>
     {% if not user.is_authenticated %}<script type="text/javascript" src="/static/userstorage.js"></script>{% endif %}
     {% block customScripts %}{% endblock %}
     {% if user.is_authenticated %}{% addForm %}{{ AddForm.media.render }}{% endif %}

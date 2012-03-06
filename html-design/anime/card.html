@@ -15,8 +15,8 @@
     <div id="pagecard">
         <div id="imagebun" class="cardcol">
             <div id="cimg">
-                {% if user.is_authenticated %}<a href="/edit/image/{{ anime.id }}/" class="right">Edit</a>{%endif%}
                 <img src="http://anicat.net/images/{{ anime.id }}/" />
+                {% if user.is_authenticated %}<a href="/edit/image/{{ anime.id }}/" class="right">Submit new</a>{%endif%}
             </div>
             <div>
             {% if user.is_authenticated %}
@@ -44,7 +44,7 @@
             <div>
                 {% if user.is_authenticated %}<a href="/edit/name/{{ anime.id }}/" onclick="return edit.rf({{ anime.id }}, 'name', event);" class="right">Edit</a>{%endif%}
                 <h4>Name:</h4>
-                <span class="name{{ anime.id }}">{% for name in names %}{% if name.title == anime.title %}<i>{{ name.title }}</i>{% else %}{{ name.title }}{% endif %}<br/>{% endfor %}</span>
+                <div class="name{{ anime.id }}">{% for name in names %}{% if name.title == anime.title %}<i>{{ name.title }}</i>{% else %}{{ name.title }}{% endif %}<br/>{% endfor %}</div>
             </div>
             <div>
                 {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releaseType/" onclick="return edit.rf({{ anime.id }}, 'type', event);" class="right">Edit</a>{%endif%}
