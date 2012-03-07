@@ -61,7 +61,7 @@ var Card = new (function(){
             {'div': {'id': 'imagebun', 'className': 'cardcol'}}, [
                 {'div': {'id': 'cimg'}}, [
                     {'img': {'src': 'http://anicat.net/images/' + res.id + '/'}},
-                    {'a': {href: edit.getFieldLink(id, 'link'), className: 'right',
+                    {'a': {href: edit.getFieldLink(id, 'image'), className: 'right',
                     innerText: 'Submit new', style: {display: "none"}, target: '_blank'}}],
                 link, bundle
             ],

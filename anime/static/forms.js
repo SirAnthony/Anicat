@@ -13,9 +13,9 @@ var forms = new (function forms_class(){
         if(!data || !data.id)
             return [this.titledfield(fieldname,
             ((data && data.id) ? data.id : 0), fields),
-            this.titledfield('this', id, [
-                {'a': {href: '/card/' + id, target: '_blank'}}, [
-                    {'': {innerText: '/card/' + id + '/'}}]])];
+                this.titledfield('this', id, [{'a': {
+                    href: '/card/' + id, target: '_blank'}}, [
+                        {'': {innerText: '/card/' + id + '/'}}]])];
         return this.titledfield(fieldname,
             ((data && data.id) ? data.id : 0), fields);
     }
@@ -41,7 +41,8 @@ var forms = new (function forms_class(){
                 innerText: 'Edit', target: '_blank',
                 onclick: (function(i, f){ return function(e){
                     return edit.rf(i, f, e); }})(id, fieldname) }});
-        childs.push({'h4': {innerText: capitalise(title)}});
+        childs.push({'h4': {innerText: capitalise(title),
+            style: (fieldname == 'this' ? {display: 'inline', marginRight: '7px'} : null)}});
         if(isArray(fields))
             childs.push.apply(childs, fields); //lolo
         else
