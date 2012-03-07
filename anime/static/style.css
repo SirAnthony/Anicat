@@ -32,7 +32,7 @@ input, select {
     background-color: #FFF;
 }
 
-form, #card, #pagecard {
+form, #card, #pagecard, .request, .faq, .malresult {
     line-height: 18px;
 }
 

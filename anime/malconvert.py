@@ -4,11 +4,15 @@ import gzip
 import threading
 import mimetypes
 import xml.dom.minidom as xmlp
+
+from datetime import datetime
 from django.core.cache import cache
 from django.conf import settings
 from django.db.models import Q
+
 from anime.models import AnimeLink, AnimeName, UserStatusBundle
-from datetime import datetime
+from anime.utils.cache import invalidate_key
+
 
 
 MAL_STATUS = [
@@ -164,13 +168,22 @@ def addInBase(user, animeList, rewrite=True):
                         state=anime['my_status'], count=anime['my_watched_episodes'])
                 ub.save()
             anime['object'] = {'name': anime['object'].title, 'id': anime['object'].id}
-    cache.delete('mainTable:%s' % user.id)
     cache.delete('userCss:%s' % user.id)
     cache.delete('Stat:%s' % user.id)
 
 
-def addToCache(user, animeList):
-    lastload = {'list': animeList, 'date': datetime.now()}
+def addToCache(user, anime_list):
+    for key in anime_list.keys():
+        p = []
+        for item in anime_list[key]:
+            s = {'title': item['series_title']}
+            for n in ['unmatched', 'object']:
+                if item.get(n):
+                    s[n] = item[n]
+            p.append(s)
+        anime_list[key] = p
+    lastload = {'list': anime_list, 'date': datetime.now()}
+    invalidate_key('malList', user.id)
     cache.set('MalList:%s' % user.id, lastload)
 
 

@@ -1,5 +1,8 @@
 {% extends "anime/base.html" %}
+
 {% load animetemplates %}
+{% load cache %}
+
     {% block customScripts %}
     <link rel="stylesheet" href="/static/requests.css" />
     <script type="text/javascript" src="/static/settings.js"></script>
@@ -50,8 +53,9 @@
         <span class="helpText">Supported types: xml, gzip compressed xml(xml.gz).</span>
     </form>
     {% if mallist and mallist.list %}
+{% cache 3600 malList user.id %}
     <div class="clear malresult">
-        <p>Updated: {{ mallist.date|date:"d.m.Y f" }}</p>
+        <p>Updated: {{ mallist.date|date:"d.m.Y H:i" }}</p>
         {% if mallist.list.error %}
         <p class="error">{{ mallist.list.error }}</p>
         {% else %}
@@ -96,7 +100,7 @@
             <span class="helpText">Mal has a redundancy in the records. Please do not add items being a short(&lt;30 min) DVD-Specials related to exiting title, they will be deleted.</span>
             <dl>
             {% for record in mallist.list.notFound %}
-                <dt>{{ record.series_title }}</dt>
+                <dt>{{ record.title }}</dt>
                 {% if record.unmatched %}
                 <dd>
                     <ul>{% for variant in record.unmatched %}
@@ -111,6 +115,7 @@
         {% endif %}
         {% endif %}
     </div>
+{% endcache %}
     {%endif%}
     {% if requests %}
     <div id="requests">

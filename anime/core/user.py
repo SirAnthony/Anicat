@@ -73,11 +73,7 @@ def register(request):
 
 
 def load_settings(request):
-    res = {}
-    if 'mallist' in request.POST:
-        res.update(load_MalList(request))
-    else:
-        res['mallistform'] = UploadMalListForm()
+    res = load_MalList(request)
     if 'usernames' in request.POST:
         res['usernames'] = form = UserNamesForm(request.POST or None, instance=request.user)
         if form.is_valid():
@@ -95,7 +91,10 @@ def load_settings(request):
 
 def load_MalList(request):
     lastLoad = cache.get('MalList:%s' % request.user.id)
-    form = UploadMalListForm(request.POST or None, request.FILES)
+    if 'mallist' in request.POST:
+        form = UploadMalListForm(request.POST or None, request.FILES)
+    else:
+        form = UploadMalListForm()
     if form.is_valid():
         timeLeft = 0
         try:
@@ -111,6 +110,7 @@ def load_MalList(request):
                 form.addError(error)
             else:
                 lastLoad['updated'] = True
+        lastLoad = cache.get('MalList:%s' % request.user.id)
     return {'mallistform': form, 'mallist': lastLoad}
 
 
