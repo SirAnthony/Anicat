@@ -53,7 +53,6 @@
         <span class="helpText">Supported types: xml, gzip compressed xml(xml.gz).</span>
     </form>
     {% if mallist and mallist.list %}
-{% cache 3600 malList user.id %}
     <div class="clear malresult">
         <p>Updated: {{ mallist.date|date:"d.m.Y H:i" }}</p>
         {% if mallist.list.error %}
@@ -62,6 +61,7 @@
         {% if mallist.list.updated %}
         <p class="s3">Your list is processed. This may take some time. Reload page to see result.</p>
         {% else %}
+{% cache 3600 malList user.id %}
         <p class="helpText">This is alpha version of script which is only for facilitation of data transfer, please be patient.</p>
         <div class="column left">
             <span class="right">{{ mallist.list.withMal|length }}</span>
@@ -112,10 +112,10 @@
             {% endfor %}
             <dl>
         </div>
+{% endcache %}
         {% endif %}
         {% endif %}
     </div>
-{% endcache %}
     {%endif%}
     {% if requests %}
     <div id="requests">

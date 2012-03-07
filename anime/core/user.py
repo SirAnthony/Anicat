@@ -109,8 +109,7 @@ def load_MalList(request):
             if not status:
                 form.addError(error)
             else:
-                lastLoad['updated'] = True
-        lastLoad = cache.get('MalList:%s' % request.user.id)
+                lastLoad['list'] = {'updated': True}
     return {'mallistform': form, 'mallist': lastLoad}
 
 

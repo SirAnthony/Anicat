@@ -76,11 +76,14 @@ class UserTest(TestCase):
         r.user = u = User.objects.get(id=1)
         result = userMethods.load_settings(r)
         for name in result.keys():
+            if name == 'mallist':
+                continue
             result[name] = FS(result[name])
         self.assertEquals(result, {
                     'emailform': FS(UserEmailForm(instance=u)),
                     'usernames': FS(UserNamesForm(instance=u)),
-                    'mallistform': FS(UploadMalListForm())})
+                    'mallistform': FS(UploadMalListForm()),
+                    'mallist': None})
         r.POST.update({'mallist': True, 'usernames': True, 'emailform': True})
         result = userMethods.load_settings(r)
         for name in ['emailform', 'usernames', 'mallistform']:
@@ -102,10 +105,11 @@ class UserTest(TestCase):
         with open(filename, 'r') as fl:
             r.FILES={'file': SimpleUploadedFile(filename, fl.read())}
             cache.delete('MalList:1')
+            r.POST.update({'mallist': True})
             res = userMethods.load_MalList(r)
             self.assertEquals(res, {
                 'mallistform': res['mallistform'],
-                'mallist': {'updated': True}})
+                'mallist': {'list': {'updated': True}}})
             res = userMethods.load_MalList(r)
             self.assertEquals(res['mallistform'].errors, {'__all__': [
                 userMethods.ERROR_MESSAGES['mallist']['fast'].format(30)]

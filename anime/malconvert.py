@@ -85,7 +85,6 @@ def process(user, filename, rewrite=True):
         addInBase(user, result, rewrite)
     except Exception, e:
         result = {'error': str(e)}
-
     addToCache(user, result)
 
 
@@ -173,15 +172,16 @@ def addInBase(user, animeList, rewrite=True):
 
 
 def addToCache(user, anime_list):
-    for key in anime_list.keys():
-        p = []
-        for item in anime_list[key]:
-            s = {'title': item['series_title']}
-            for n in ['unmatched', 'object']:
-                if item.get(n):
-                    s[n] = item[n]
-            p.append(s)
-        anime_list[key] = p
+    if not 'error' in anime_list:
+        for key in anime_list.keys():
+            p = []
+            for item in anime_list[key]:
+                s = {'title': item['series_title']}
+                for n in ['unmatched', 'object']:
+                    if item.get(n):
+                        s[n] = item[n]
+                p.append(s)
+            anime_list[key] = p
     lastload = {'list': anime_list, 'date': datetime.now()}
     invalidate_key('malList', user.id)
     cache.set('MalList:%s' % user.id, lastload)
@@ -200,6 +200,7 @@ def passFile(file, user, rewrite=True):
         fileobj.close()
     except Exception, e:
         return False, e
+    invalidate_key('malList', user.id)
     t = threading.Thread(target=process, args=[user, filename, rewrite], kwargs={})
     t.setDaemon(True)
     t.start()
