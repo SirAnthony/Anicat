@@ -76,7 +76,7 @@ var Card = new (function(){
         var card = document.getElementById("card");
         if(card){
             var tbl = document.getElementById("tbl");
-            var w = document.documentElement.clientWidth - tbl.clientWidth - 100;
+            var w = document.documentElement.clientWidth - tbl.clientWidth - 70;
             element.removeAllChilds(card);
             card.style.width = w + 'px';
             if(w >= 500){

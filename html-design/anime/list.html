@@ -34,10 +34,15 @@
                     <th class="type" id="type">
                         <a rel="nofollow" href="{% if link.user %}/user/{{ link.user }}{% endif %}{% if link.status %}/show/{{ link.status }}{% endif %}/sort/{% if link.order == 'releaseType' %}-{% endif %}releaseType/">Type</a>
                     </th>
-                    {% if link.status == 3 %}
-                    <th id="rating" class="rating">
-                        <a href="#" rel="nofollow">Rated</a>
+                    {% if link.status %}
+                    <th id="changed" class="changed">
+                        <a rel="nofollow" href="{% if link.user %}/user/{{ link.user }}{% endif %}{% if link.status %}/show/{{ link.status }}{% endif %}/sort/{% if link.order == 'changed' %}-{% endif %}changed/">Changed</a>
                     </th>
+                        {% if link.status == 3 %}
+                    <th id="rating" class="rating">
+                        <a rel="nofollow" href="{% if link.user %}/user/{{ link.user }}{% endif %}{% if link.status %}/show/{{ link.status }}{% endif %}/sort/{% if link.order == 'rating' %}-{% endif %}rating/">Rated</a>
+                    </th>
+                        {% endif %}
                     {% endif %}
                 </tr>
             </thead>
@@ -54,10 +59,12 @@
                     <td onclick="cnt('episodes', '{{ title.id }}', event);" id="episodes{{ title.id }}" class="episodes">{% if title.count %}{{ title.count }}/{% endif %}{{ title.episodesCount }}</td>
                     <td onclick="cnt('release', '{{ title.id }}', event);" id="release{{ title.id }}" class="release">{{ title.release }}</td>
                     <td onclick="cnt('type', '{{ title.id }}', event);" id="type{{ title.id }}" class="type">{{ title.releaseTypeS }}</td>
-                    {% if link.status == 3 %}
+                    {% if link.status %}
+                    <td id="changed{{title.id}}" class="changed">{{ title.changed|date:"d.m.Y" }}</td>
+                        {% if link.status == 3 %}
                     <td id="rating{{title.id}}" class="rating">{{ title.rating }}</td>
+                        {% endif %}
                     {% endif %}
-                    {# custom fields #}
                 {% endfor %}
                 </tr>
             </tbody>

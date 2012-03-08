@@ -22,6 +22,7 @@ class IndexListView(AnimeListView):
     paginate_by = settings.INDEX_PAGE_LIMIT
     template_name = 'anime/list.html'
     cache_name = 'mainTable'
+    ADDITIONAL_FIELDS = ['rating', '-rating', 'changed', '-changed']
 
     def get_link(self):
         userid = self.kwargs.get('user_id')
@@ -50,13 +51,6 @@ class IndexListView(AnimeListView):
             except User.DoesNotExist:
                 raise Http404(self.error_messages['bad_user'])
 
-        if order is None:
-            order = 'title'
-        try:
-            AnimeItem._meta.get_field(order[1:] if order.startswith('-') else order)
-        except:
-            raise Http404(self.error_messages['bad_order'])
-
         try:
             status = int(status)
             USER_STATUS[status]
@@ -64,6 +58,14 @@ class IndexListView(AnimeListView):
                 raise Exception
         except:
             status = None
+
+        if order is None:
+            order = 'title'
+        try:
+            AnimeItem._meta.get_field(order[1:] if order.startswith('-') else order)
+        except:
+            if not status or order not in self.ADDITIONAL_FIELDS:
+                raise Http404(self.error_messages['bad_order'])
 
         self.user = user
         self.current_user = request.user
@@ -82,7 +84,8 @@ class IndexListView(AnimeListView):
                                 statusbundles__state=state
                     ).extra(select={
                         'count': 'anime_userstatusbundle.count',
-                        'rating': 'anime_userstatusbundle.rating'
+                        'rating': 'anime_userstatusbundle.rating',
+                        'changed': 'anime_userstatusbundle.changed',
                     })
             else:
                 qs = qs.exclude(statusbundles__user=user,

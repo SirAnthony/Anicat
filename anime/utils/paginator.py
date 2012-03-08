@@ -42,13 +42,13 @@ class Paginator(paginator.Paginator):
             raise TypeError('iternames only works with QuerySets as item list.')
         for i in range(0, self.count, self.per_page):
             if not i:
-                zero = unicode(getattr(qs.only(order)[i], order)).strip()[:length]
+                zero = unicode(qs.values(order)[i].get(order)).strip()[:length]
             else:
-                (second, first) = qs.only(order)[i - 1:i + 1]
+                (second, first) = qs.values(order)[i - 1:i + 1]
                 yield u'{0} - {1}'.format(zero,
-                    unicode(getattr(second, order)).strip()[:length])
-                zero = unicode(getattr(first, order)).strip()[:length]
-        yield u'{0} - {1}'.format(zero, unicode(getattr(
-            qs.order_by(self.reverse + order).only(order)[0], order
-            )).strip()[:length])
+                    unicode(second.get(order)).strip()[:length])
+                zero = unicode(first.get(order)).strip()[:length]
+        yield u'{0} - {1}'.format(zero, unicode(
+            qs.order_by(self.reverse + order).values(order)[0].get(order)
+            ).strip()[:length])
 

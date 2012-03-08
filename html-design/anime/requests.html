@@ -1,6 +1,7 @@
 {% extends "anime/base.html" %}
 
 {% load cache %}
+{% load url from future %}
 
 {% block customScripts %}<link rel="stylesheet" href="/static/requests.css" />{% endblock %}
 
@@ -10,13 +11,13 @@
 {% for request in list %}
     <div class="request">
         <div class="header">
-            <span><b>№:</b><a href="/request/{{ request.id }}/">{{ request.id }}</a></span>
+            <span><b>№:</b><a href="{% url 'request_item' request.id %}">{{ request.id }}</a></span>
             <span class="right"><b>Type:</b>{{ request.get_requestType_display }}</span>
             {% if request.anime %}
             <br/>
             <span>
                 <b>Anime:</b>
-                <a href="/card/{{ request.anime.id }}/">{{ request.anime }}</a>
+                <a href="{% url 'card' request.anime.id %}">{{ request.anime }}</a>
             </span>
             {% endif %}
         </div>

@@ -181,6 +181,10 @@ border: none;
     width: 58px !important;
 }
 
+.changed {
+    width: 100px !important;
+}
+
 .footer{
     margin-top: 9px;
     clear: both;
