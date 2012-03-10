@@ -10,7 +10,7 @@ from django.core.cache import cache
 from django.conf import settings
 from django.db.models import Q
 
-from anime.models import AnimeLink, AnimeName, UserStatusBundle
+from anime.models import AnimeLink, AnimeName, UserStatusBundle, USER_STATUS
 from anime.utils.cache import invalidate_key
 
 
@@ -160,7 +160,10 @@ def addInBase(user, animeList, rewrite=True):
                     ub.state = anime['my_status']
                     ub.count = anime['my_watched_episodes']
                     ub.changed = anime['my_finish_date']
-                    ub.rating = anime['my_score']
+                    try:
+                        ub.rating = int(anime['my_score'])
+                    except:
+                        ub.rating = 6
                     ub.save()
             except UserStatusBundle.DoesNotExist:
                 ub = UserStatusBundle(anime=anime['object'],
@@ -170,6 +173,8 @@ def addInBase(user, animeList, rewrite=True):
             anime['object'] = {'name': anime['object'].title, 'id': anime['object'].id}
     cache.delete('userCss:%s' % user.id)
     cache.delete('Stat:%s' % user.id)
+    for s in range(1, len(USER_STATUS)+1):
+        cache.delete('userstatus:%s:%s' % (user.id, s))
 
 
 def addToCache(user, anime_list):
