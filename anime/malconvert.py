@@ -160,6 +160,7 @@ def addInBase(user, animeList, rewrite=True):
                     ub.state = anime['my_status']
                     ub.count = anime['my_watched_episodes']
                     ub.changed = anime['my_finish_date']
+                    ub.rating = anime['my_score']
                     ub.save()
             except UserStatusBundle.DoesNotExist:
                 ub = UserStatusBundle(anime=anime['object'],

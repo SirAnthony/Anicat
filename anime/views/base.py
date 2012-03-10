@@ -14,7 +14,7 @@ def card(request, anime_id=0):
     if not anime_id:
         anime_id = randint(0, last_record_pk(AnimeItem))
         try:
-            anime_id = AnimeItem.objects.values_list('id').filter(pk__gte=anime_id)[0][0]
+            anime_id = AnimeItem.objects.values_list('id').order_by('id').filter(pk__gte=anime_id)[0][0]
         except:
             return {}
         else:
