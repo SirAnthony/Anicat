@@ -80,7 +80,7 @@ var Card = new (function(){
             element.removeAllChilds(card);
             card.style.width = w + 'px';
             if(w >= 500){
-                message.toEventPosition(e);
+                if(e) message.toEventPosition(e);
                 ajax.loadXMLDoc(url+'get/', {'id': id, 'card': true, 'field': [
                     'id', 'bundle', 'name', 'type', 'genre', 'episodesCount',
                     'duration', 'release', 'links', 'state']});

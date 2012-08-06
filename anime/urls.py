@@ -54,6 +54,7 @@ urlpatterns += patterns('anime.views.user',
 urlpatterns += patterns('django.contrib.auth.views',
     (r'^password/reset/$', 'password_reset', {
         'post_reset_redirect': '/password/reset/sent/',
+        'subject_template_name': 'anime/user/password_reset_subject.txt',
         'email_template_name': 'anime/user/password_reset_email.html',
         'template_name': 'anime/user/password.html',
         'password_reset_form': NotActivePasswordResetForm,},

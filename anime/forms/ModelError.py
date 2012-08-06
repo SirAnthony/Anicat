@@ -73,7 +73,7 @@ class AnimeForm(ErrorModelForm):
 
     class Meta():
         model = AnimeItem
-        exclude = ('bundle', 'locked', 'releasedKnown', 'endedKnown')
+        exclude = ('air', 'bundle', 'locked', 'releasedKnown', 'endedKnown')
 
 
 class UserStatusForm(ErrorModelForm):

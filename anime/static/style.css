@@ -502,8 +502,15 @@ select.linktype {
 
 
 .addform input[type="submit"] {
+    margin-top: 29px;
     margin-right: 13px;
-    margin-bottom: 2px;
+    clear: none;
+}
+
+.addform span.s3 {
+    margin-top: 31px;
+    margin-left: 6px;
+    display: inline-block;
 }
 
 .addform div {
