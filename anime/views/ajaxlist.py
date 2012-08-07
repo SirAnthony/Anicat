@@ -49,6 +49,8 @@ class SearchListView(AnimeAjaxListView):
     def check_parameters(self, request, **kwargs):
         try:
             string = kwargs.get('string') or request.POST.get('string') or ''
+            if request.method == 'GET':
+                string = string.replace('+', ' ')
             string = string.strip()
             if not string:
                 raise AttributeError

@@ -9,6 +9,22 @@ class Paginator(paginator.Paginator):
         return getattr(self, '_name_length', 4)
     name_length = property(_get_name_length)
 
+    def _get_count(self):
+        "Returns the total number of objects, across all pages."
+        if self._count is None:
+            try:
+                if getattr(self, 'order', None):
+                    self._count = self.object_list.values(self.order).count()
+                else:
+                    self._count = self.object_list.count()
+            except (AttributeError, TypeError):
+                # AttributeError if object_list has no count() method.
+                # TypeError if object_list.count() requires arguments
+                # (i.e. is of type list).
+                self._count = len(self.object_list)
+        return self._count
+    count = property(_get_count)
+
     def set_order(self, order):
         if order.startswith('-'):
             self.order = order[1:]
@@ -16,6 +32,7 @@ class Paginator(paginator.Paginator):
         else:
             self.order = order
             self.reverse = '-'
+        self._count = None
 
     def set_cachekey(self, key):
         self.cachekey = key
