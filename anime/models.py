@@ -253,6 +253,13 @@ class AnimeName(models.Model):
     def __unicode__(self):
         return self.title
 
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        if not self._get_pk_val() or not other._get_pk_val():
+            return self.anime == other.anime and self.title == other.title
+        return self._get_pk_val() == other._get_pk_val()
+
 
 class AnimeLink(models.Model):
     anime = models.ForeignKey(AnimeItem, related_name="links")

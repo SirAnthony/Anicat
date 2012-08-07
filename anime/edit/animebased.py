@@ -25,16 +25,17 @@ class Name(EditableAnimeBased):
     def save(self, form, obj):
         if not obj or not obj.id:
             raise ValueError(self.error_messages['not_exists'].format(type(obj).__name__))
-        names = obj.animenames.all()
-        cleaned = form.cleaned_data.values()
-        newNames = filter(lambda x: x and x not in names, cleaned)
-        oldNames = filter(lambda x: x and x not in cleaned, names)
+        names = set(obj.animenames.all())
+        cleaned = set(form.cleaned_data.values())
+        cleaned.discard(None)
+        oldNames = names.difference(cleaned)
+        newNames = cleaned.difference(names)
         if not newNames and len(oldNames) == len(names):
             raise EditError(self.error_messages['no_names'])
         for name in oldNames:
             try:
                 newname = newNames.pop()
-            except IndexError:
+            except KeyError:
                 name.delete()
                 if obj.title == name.title:
                     newname = obj.animenames.all()[0]
