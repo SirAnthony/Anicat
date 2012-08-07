@@ -590,9 +590,8 @@ function addStylesheetRules (decls) {
         }
 
         if (s.insertRule) {
-            s.insertRule(selector + '{' + rulesStr + '}', s.cssRules.length);
-        }
-        else { /* IE */
+            s.insertRule(selector + '{' + rulesStr + '}', s.cssRules ? s.cssRules.length: 0);
+        } else { /* IE */
             s.addRule(selector, rulesStr);
         }
     }
