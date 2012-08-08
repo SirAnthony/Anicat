@@ -1,6 +1,11 @@
 
 var Card = new (function(){
 
+    var processor = new RequestProcessor(function(resp){
+                message.hide();
+                Card.create(resp.id, resp.text);
+        }, 'card');
+
     this.init = function(){
         Card.load();
     }
@@ -83,7 +88,7 @@ var Card = new (function(){
                 if(e) message.toEventPosition(e);
                 ajax.loadXMLDoc(url+'get/', {'id': id, 'card': true, 'field': [
                     'id', 'bundle', 'name', 'type', 'genre', 'episodesCount',
-                    'duration', 'release', 'links', 'state']});
+                    'duration', 'release', 'links', 'state']}, processor);
                 return false;
             }
         }

@@ -545,6 +545,39 @@ select.linktype {
     margin-left: 5px;
 }
 
+.addform div#TitleHelperForm {
+    margin-right: 5px;
+    margin-top: 0;
+    padding: 7px 8px;
+    width: auto;
+}
+
+.addform div#TitleHelperForm li {
+    white-space: nowrap;
+    margin-bottom: 3px;
+    padding: 0px 5px;
+    cursor: pointer;
+}
+
+.addform div#TitleHelperForm li:hover {
+    background-color: #808080;
+}
+
+.addform div#TitleHelperForm li p {
+    margin-bottom: -5px;
+}
+
+.addform div#TitleHelperForm span {
+    font-size: 10pt;
+    line-height: 12px;
+    display: inline-block;
+    float: none;
+    height: auto;
+    width: 180px;
+}
+
+
+
 .fileform {
     margin-bottom: 10px;
 }

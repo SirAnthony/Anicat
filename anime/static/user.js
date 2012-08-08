@@ -50,7 +50,16 @@ var user = new( function(){
         toggle(document.getElementById('logininfo').parentNode, -1);
         var rform = document.getElementById('login');
         var formData = getFormData(rform);
-        ajax.loadXMLDoc(url+'login/', formData);
+        ajax.loadXMLDoc(url+'login/', formData, new RequestProcessor(
+            function(resp){
+                message.hide();
+                if(resp.status){
+                    user.loginSuccess(resp.text);
+                    updateStylesheets('/css/');
+                }else
+                    user.loginFail(resp.text);
+            }
+        ), 'login');
         message.toEventPosition(e);
         return false;
     }
@@ -150,7 +159,16 @@ var user = new( function(){
         var errors = getElementsByClassName('error', obj);
         element.remove(errors);
         toggle(obj.parentNode, -1);
-        ajax.loadXMLDoc(url+'register/', formData);
+        ajax.loadXMLDoc(url+'register/', formData, new RequestProcessor(
+            function(resp){
+                message.hide();
+                if(!resp.status){
+                    user.registerFail(resp.text);
+                }else{
+                    user.loginSuccess(resp.text);
+                    updateStylesheets('/css/');
+                }
+            }, 'register'));
         message.toEventPosition(e);
         return false;
     }

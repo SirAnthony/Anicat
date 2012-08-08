@@ -7,11 +7,78 @@ var add = new (function add_class(){
 
     var form = null;
     var loaded = false;
+    var processor = null;
 
     this.init = function(){
         add.form = document.getElementById('addform');
         if(!add.form || !add.createForm()) return;
         add.loaded = true;
+        add.processor = new RequestProcessor(this.processResponse, 'add');
+
+        addEvent(document.getElementById('id_releaseType'), 'change', function(){
+            var ecount = document.getElementById('id_episodesCount');
+            switch(this.value){
+                case "":
+                    ecount.value = "";
+                    break;
+                case "0": // TV
+                    ecount.value = 13;
+                    break;
+                case "2": // OAV
+                    ecount.value = 2;
+                    break;
+                default:
+                    ecount.value = 1;
+                    break;
+            }
+        });
+        add.genreHelperInit();
+    }
+
+    this.genreHelperInit = function(){
+        var genre = document.getElementById('id_genre');
+        element.insert(genre, [{'span': {className: 'datetimeshortcuts'}},
+            [{'a': {innerText: 'From title', onclick: function(){
+                var form = document.getElementById('TitleHelperForm')
+                if(toggle(form)) form.firstChild.focus(); }
+            }}]]);
+        element.insert(genre, [{'div': {'id': 'TitleHelperForm', 'className': 'cont_men'}},
+            [{'input': {'type': 'text', onkeyup: function(){
+                    if(this.textLength < 3 || this._lastlength == this.textLength) return;
+                    this._lastlength = this.textLength;
+                    var ul = this.nextSibling;
+                    ajax.loadXMLDoc(url+'search/', {'field': 'name', 'limit': 8, 'string': this.value},
+                        new RequestProcessor(function(resp){
+                            element.removeAllChilds(ul);
+                            if(!resp.status)
+                                element.appendChild(ul, {'li': {'innerText': resp.text}});
+                            else{
+                                var list = resp.text.list;
+                                for(var i in list){
+                                    element.appendChild(ul, [{'li': {'onclick': (function(id){ return function(){
+                                        ajax.loadXMLDoc(url+'get/', {'id': id, 'field': 'genre_list'},
+                                            new RequestProcessor(function(resp){
+                                                if(!resp.status) return;
+                                                var opts = ul.parentNode.nextSibling.options;
+                                                map(function(elem){ if(elem) elem.selected = false;}, opts);
+                                                map(function(g){
+                                                    for(var o in opts)
+                                                        if(opts[o] && opts[o].innerText == g){
+                                                            opts[o].selected = true; break; }
+                                                    }, resp.text.genre_list);
+                                                toggle(ul.parentNode);
+                                            }, 'get'));
+                                    }})(list[i].id)}}, [
+                                        {'p' : {'innerText': list[i].name}},
+                                        {'span' : {'innerText': '[' + list[i].type + ']'}},
+                                        {'span' : {'innerText': list[i].release}},
+                                    ]]);
+                                }
+                            }
+                        }, 'search'));
+                }}},
+                {'ul': {}}
+            ]]);
     }
 
     this.toggle = function(){
@@ -40,7 +107,7 @@ var add = new (function add_class(){
             return;
         this.clearForm();
         var formData = getFormData(this.form);
-        ajax.loadXMLDoc(url+'add/', formData);
+        ajax.loadXMLDoc(url+'add/', formData, this.processor);
         message.toEventPosition(e);
     }
 
@@ -91,6 +158,11 @@ var add = new (function add_class(){
 
 var edit = new (function edit_class(){
 
+    var processorForm = new RequestProcessor(function(resp){
+                                edit.processForm(resp); }, 'form');
+    var processorSet = new RequestProcessor(function(resp){
+                                edit.processResponse(resp); }, 'edit');
+
     this.status_menu_edit = false;
 
     this.edits = {'name': '/name', 'bundle': '/bundle',
@@ -99,9 +171,12 @@ var edit = new (function edit_class(){
     this.fields = {'releaseType': 'type', 'releasedAt,endedAt': 'release'};
 
     this.rf = function(id, field, e){
-        if(!user.logined && field == 'state')
-            ajax.processFormRequest({'status': true, 'id': id, 'model': field});
-        else
+        if(!user.logined && field == 'state'){
+            processorForm.setRequest()
+            processorForm.parse({'response': 'form', 'status': true,
+                                    'id': id, 'model': field});
+            message.unlock()
+        }else
             this.requestForm(id, field);
         message.toEventPosition(e);
         return false;
@@ -122,7 +197,7 @@ var edit = new (function edit_class(){
                 q['field'] = this.edits[field];
             }
         }
-        ajax.loadXMLDoc(url+'form/', q);
+        ajax.loadXMLDoc(url+'form/', q, processorForm);
     }
 
     this.getFieldLink = function(id, name){
@@ -146,10 +221,13 @@ var edit = new (function edit_class(){
             return;
         var formData = this.getFormData(form);
         if(!user.logined && formData.model == 'state'){
+            processorSet.setRequest();
             formData['set'] = true;
-            ajax.processSetRequest(formData);
+            formData['response'] = 'edit';
+            processorSet.parse(formData);
+            message.unlock()
         }else{
-            ajax.loadXMLDoc(url+'set/', formData);
+            ajax.loadXMLDoc(url+'set/', formData, processorSet);
         }
         var errors = getElementsByClassName('error', form);
         element.remove(errors);

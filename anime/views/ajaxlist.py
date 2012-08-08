@@ -37,6 +37,8 @@ class SearchListView(AnimeAjaxListView):
             link['field'] = self.field
         if self.order != u'title':
             link['order'] = self.order
+        if self.paginate_by != settings.SEARCH_PAGE_LIMIT:
+            link['limit'] = self.paginate_by
         hashed_link_name = reverse('search', kwargs=link)
         cachestr = '%s%s' % (hashed_link_name, self.page)
         if string:
@@ -68,17 +70,16 @@ class SearchListView(AnimeAjaxListView):
             raise Http404(self.error_messages['bad_order'])
 
         try:
-            limit = int(kwargs.get('limit') or request.POST.get('limit') \
+            self.paginate_by = int(kwargs.get('limit') or request.POST.get('limit') \
                         or settings.SEARCH_PAGE_LIMIT)
-            if not 0 < limit < settings.SEARCH_PAGE_LIMIT:
-                limit = settings.SEARCH_PAGE_LIMIT
+            if not 3 < self.paginate_by < settings.SEARCH_PAGE_LIMIT:
+                self.paginate_by = settings.SEARCH_PAGE_LIMIT
         except:
             raise Http404(self.error_messages['bad_limit'])
 
         self.string = string
         self.field = field
         self.order = order
-        self.limit = limit
         self.page = kwargs.get('page') or request.POST.get('page') or 1
         self.kwargs['page'] = self.page
 

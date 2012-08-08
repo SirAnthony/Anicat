@@ -9,7 +9,7 @@ class GetError(Exception):
 
 
 class FieldExplorer(object):
-    CALLABLE_FIELDS = ['anime', 'state', 'name', 'genre', 'links',
+    CALLABLE_FIELDS = ['anime', 'state', 'name', 'genre', 'genre_list', 'links',
                        'release', 'type', 'releaseType', 'bundle']
     error_messages = {
         'bad_field': _('Bad field'),
@@ -79,6 +79,9 @@ class FieldExplorer(object):
 
     def genre(self, anime, request):
         return u', '.join(anime.genre.values_list('name', flat=True))
+
+    def genre_list(self, anime, request):
+        return anime.genre.values_list('name', flat=True)
 
     def links(self, anime, request):
         model = self.get_model()

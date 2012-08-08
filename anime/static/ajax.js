@@ -4,18 +4,52 @@
 
 var ajax = new (function(){
 
-    var xmlHttp = null;
     var cookie = cookies;
 
+    var defaultProcessor = new RequestProcessor(function(resp){
+        throw new Error('Bad request processor');
+    })
+
     //################# Вызов аяксового обьекта.
-    this.loadXMLDoc = function(url, qry){
-        var request = '';
+    this.loadXMLDoc = function(url, qry, processor){
         if(!isHash(qry)){
             alert('Input is old');
             return;
         }
 
-        setRequest();
+        if(!isHash(processor) || !isFunction(processor.process))
+            processor = defaultProcessor;
+
+        var xmlHttp = null;
+        if(window.XMLHttpRequest){
+            try{
+                xmlHttp = new XMLHttpRequest();
+            }catch(e){}
+        }else if(window.ActiveXObject){
+            try{
+                xmlHttp = new ActiveXObject('Msxml2.XMLHTTP');
+            }catch(e){
+                try{
+                    xmlHttp = new ActiveXObject('Microsoft.XMLHTTP');
+                }catch(e){}
+            }
+        }
+        processor.setRequest();
+
+        var data = makeRequest(url, qry);
+
+        if(data.request){
+            if (xmlHttp){
+                xmlHttp.open("POST", url, true);
+                xmlHttp.onreadystatechange = processor.process;
+                xmlHttp.setRequestHeader("Content-type", "multipart/form-data; boundary=" + data.boundary);
+                xmlHttp.send(data.request);
+            }
+        }
+    }
+
+    var makeRequest = function(url, qry){
+        var request = '';
 
         if(!(/^http:.*/.test(url) || /^https:.*/.test(url)))
             qry['csrfmiddlewaretoken'] = cookie.get('csrftoken');
@@ -41,165 +75,71 @@ var ajax = new (function(){
         }
         request += '--' + boundary + '--'
 
-        xmlHttp = null;
-        if(window.XMLHttpRequest){
-            try{
-                xmlHttp = new XMLHttpRequest();
-            }catch(e){}
-        }else if(window.ActiveXObject){
-            try{
-                xmlHttp = new ActiveXObject('Msxml2.XMLHTTP');
-            }catch(e){
-                try{
-                    xmlHttp = new ActiveXObject('Microsoft.XMLHTTP');
-                }catch(e){}
-            }
-        }
-
-        if (request){
-            if (xmlHttp){
-                xmlHttp.open("POST", url, true);
-                xmlHttp.onreadystatechange = handleRequestStateChange;
-                xmlHttp.setRequestHeader("Content-type", "multipart/form-data; boundary=" + boundary);
-                xmlHttp.send(request);
-            }
-        }
+        return {'request': request, 'boundary': boundary};
     }
 
-    this.processGetRequest = function(opts){
-        setRequest();
-        processingResult({'response': 'get', "status": true, 'text': opts});
-        message.unlock()
-    }
+})();
 
-    this.processFormRequest = function(opts){
-        setRequest();
-        opts.response = 'form';
-        processingResult(opts);
-        message.unlock()
-    }
 
-    this.processSetRequest = function(opts){
-        setRequest();
-        opts.response = 'edit';
-        processingResult(opts);
-        message.unlock()
-    }
+//################# Request processor
+function RequestProcessor(parser, response){
 
-    var setRequest = function(){
+    this.parser = parser;
+    this.response = response;
+
+    this.setRequest = function(){
         message.create('Processing Request');
         message.addTree(element.create('img', {src: '/static/loader.gif'}));
         message.show();
         message.lock();
     }
 
-    //################# обработка результатов
-    var handleRequestStateChange = function(){
+
+    // Process closure
+    this.process = (function(processor){
+        return function(){ processor._process.call(this, processor); }
+    })(this);
+
+
+    // This calls as xmlHttp.onreadystatechange, 'this' variable is xmlHttp object
+    this._process = function(processor){
         try{
-            //if (!app.appajax){
-                /*if (xmlHttp.readyState == 1) { //Мозила
-                    setRequest();
-                }
-                if (xmlHttp.readyState == 2) { //А это специально для эстета оперы, которая статус 1 признавать не хочет.
-                    setRequest();
-                }*/
-            //}
-            //if (xmlHttp.readyState == 3){}
-            if (xmlHttp.readyState == 4) {
-                //app.appajax = null;
-                if (xmlHttp.status == 200){
-                    var resp = xmlHttp.responseText.replace(/\n/gi,'');
+            if(this.readyState == 4) {
+                if(this.status == 200){
+                    var resp = this.responseText.replace(/\n/gi,'');
                     if( /^\{.*\}$/.test(resp)){
                         resp = eval("("+resp+")");
-                        processingResult(resp);
-                    }else if(xmlHttp.responseXML){ //Опера не отличает жсон от xml. лол.
-                        //ajxedt(xmlHttp.responseXML.documentElement);
+                        processor.parse(resp);
+                    }else if(this.responseXML){ //Опера не отличает жсон от xml. лол.
+                        //ajxedt(this.responseXML.documentElement);
                     }
                     message.unlock();
                 }else{
-                    message.create('Status: '+xmlHttp.status);
-                    message.add('Не удалось получить данные: \u000A'+xmlHttp.statusText);
-                    message.addHTML(xmlHttp.responseText);
+                    message.create('Status: ' + this.status);
+                    message.add('Data receiving failed: \u000A' + this.statusText);
+                    message.addHTML(this.responseText);
                     message.show();
                 }
             }
         }catch(e){
-            alert('Caught Exception: ' + e);
+            message.create('Caught Exception: ' + e);
+            message.show();
         }
     }
 
-    var processingResult = function(resp){
+
+    // Error catcher in parser call
+    this.parse = function(resp){
         try{
-            switch(resp['response']){
-
-                /*case 'app':
-                    app.retfunct(resp['text']);
-                break;*/
-
-                case 'add':
-                    add.processResponse(resp);
-                break;
-
-                case 'edit':
-                    edit.processResponse(resp);
-                break;
-
-                case 'form':
-                    edit.processForm(resp);
-                break;
-
-                case 'error':
-                    if(resp.text){
-                        throw new Error(resp.text);
-                    }else{
-                        throw new Error('Unknown error.');
-                    }
-                break;
-
-                case 'get':
-                    message.create();
-                    for(var i in resp.text.order){
-                        var curname = resp.text.order[i];
-                        if(!curname || !resp.text[curname]) continue;
-                        var current = resp.text[curname];
-                        var label = element.create('label', { 'for': curname + resp.id,
-                                        innerText: capitalise(curname) + ':'});
-                        var field = forms.getField(curname, resp.id, current);
-                        message.addTree(label);
-                        message.addTree(field);
-                    }
-                    message.show();
-                break;
-
-                case 'card':
-                    message.hide();
-                    Card.create(resp.id, resp.text);
-                break;
-
-                case 'login':
-                    message.hide();
-                    if(resp.status){
-                        user.loginSuccess(resp.text);
-                        updateStylesheets('/css/');
-                    }else{
-                        user.loginFail(resp.text);
-                    }
-                break;
-
-                case 'register':
-                    message.hide();
-                    if(!resp.status){
-                        user.registerFail(resp.text);
-                    }else{
-                        user.loginSuccess(resp.text);
-                        updateStylesheets('/css/');
-                    }
-                break;
-
-                case 'search':
-                    searcher.putResult(resp.text);
-                break;
-            }
+            if(resp.response == 'error'){
+                if(resp.text)
+                    throw new Error(resp.text); // FIXME: doubling
+                else
+                    throw new Error('Unknown error.');
+            }else if(response && resp.response != response){
+                throw new Error('Unexpected response type: ' + resp.response);
+            }else
+                this.parser(resp);
         }catch(e){
             message.create(e);
             if(resp.text){
@@ -210,4 +150,4 @@ var ajax = new (function(){
         }
     }
 
-})();
+};

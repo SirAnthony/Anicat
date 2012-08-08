@@ -76,11 +76,15 @@ var pclass = new ( function(){
 
 var searcher = new ( function(){
 
+    var processor = null;
+
     this.init = function(){
         this.sobj = document.getElementById('srch');
         this.result = document.getElementById('srchres');
         this.input = document.getElementById('sin'); //это как-то по другому нужно.
         if(this.sobj && this.result && this.input) this.loaded = true;
+        processor = new RequestProcessor(function(resp){
+                        searcher.putResult(resp.text); }, 'search')
     }
 
     this.toggle = function(){
@@ -106,7 +110,7 @@ var searcher = new ( function(){
             if(!val) val = 'name';
             var qw = {'page': page, 'field': val, 'string': text, 'sort': sort};
             message.toEventPosition(e);
-            ajax.loadXMLDoc(url+'search/',qw);
+            ajax.loadXMLDoc(url+'search/', qw, processor);
         }
     }
 
@@ -500,7 +504,18 @@ function cnt(tag, num, e){
         default:
             qw['field'] = tag;
     }
-    ajax.loadXMLDoc(url+'get/', qw);
+    ajax.loadXMLDoc(url+'get/', qw, new RequestProcessor(function(resp){
+        message.create();
+        for(var i in resp.text.order){
+            var curname = resp.text.order[i];
+            if(!curname || !resp.text[curname]) continue;
+            var current = resp.text[curname];
+            message.addTree(element.create('label', { 'for': curname + resp.id,
+                            innerText: capitalise(curname) + ':'}));
+            message.addTree(forms.getField(curname, resp.id, current));
+        }
+        message.show();
+        }, 'get'));
 
 }
 
