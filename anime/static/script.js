@@ -619,7 +619,8 @@ function getStylesheetRule(ruleName, field){
     for( var i = 0; i < document.styleSheets.length; i++){
         var sheet = document.styleSheets[i];
         var rules = sheet.cssRules ? sheet.cssRules : sheet.rules;
-        for( j = 0; j < rules.length; j++){
+        var rlength = rules ? rules.length: 0
+        for( j = 0; j < rlength; j++){
             var rule = rules[j];
             if(!rule.selectorText)
                 continue;

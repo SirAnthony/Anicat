@@ -44,8 +44,8 @@ var add = new (function add_class(){
             }}]]);
         element.insert(genre, [{'div': {'id': 'TitleHelperForm', 'className': 'cont_men'}},
             [{'input': {'type': 'text', onkeyup: function(){
-                    if(this.textLength < 3 || this._lastlength == this.textLength) return;
-                    this._lastlength = this.textLength;
+                    if(this.value.length < 3 || this._lastlength == this.value.length) return;
+                    this._lastlength = this.value.length;
                     var ul = this.nextSibling;
                     ajax.loadXMLDoc(url+'search/', {'field': 'name', 'limit': 8, 'string': this.value},
                         new RequestProcessor(function(resp){
