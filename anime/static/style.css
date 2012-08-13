@@ -657,6 +657,11 @@ select.linktype {
     padding: 0px 5px;
 }
 
+.filter.nano > a {
+    cursor: pointer;
+    padding-right: 8px;
+}
+
 .filter ul li {
     width: 50px;
     display: inline-block;
@@ -675,12 +680,6 @@ select.linktype {
     text-align: center;
 }
 
-.filter dd {
-    width: 110px;
-}
-.filter dt {
-    width: 20px;
-}
 
 .filter select {
     display: block;
@@ -715,7 +714,8 @@ div#id_filter_type_container {
     height: 157px;
 }
 div#id_filter_status_container {
-    height: 270px;
+    height: 156px;
+    margin-bottom: 120px;
 }
 
 

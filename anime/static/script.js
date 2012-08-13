@@ -326,14 +326,21 @@ function getFormData(form){
     var formData = {};
     element.downTree(function _f(elm){
         if(elm.tagName == "INPUT" || elm.tagName == "TEXTAREA" || elm.tagName == "SELECT"){
-            if(elm.type == "checkbox"){
-                formData[elm.name] = elm.checked;
-            }else if(elm.type == "select-multiple"){
-                var values = new Array();
-                element.downTree(function(opt){if(opt.selected) values.push(opt.value);}, elm);
-                formData[elm.name] = values;
-            }else if(elm.type != "button"){
-                formData[elm.name] = elm.value;
+            switch(elm.type){
+                case "checkbox":
+                    formData[elm.name] = elm.checked;
+                    break;
+                case "radio":
+                    if(elm.checked)
+                        formData[elm.name] = elm.checked;
+                    break;
+                case "select-multiple":
+                    formData[elm.name] = filter(function(opt){
+                        return opt.selected; }, elm.childNodes);
+                    break;
+                default:
+                    formData[elm.name] = elm.value;
+                    break;
             }
         }else{
             element.downTree(_f, elm);
@@ -537,24 +544,32 @@ function map(callback, array, environ){
     if(!isFunction(callback))
         throw new TypeError(callback + " is not a function");
     var ret;
-    if(isHash(array))
+    if(isHash(array) && !isNodeList(array)){
         ret = {}
-    else
+        for(var i in array)
+            ret[i] = callback.call(environ, array[i]);
+    }else{
         ret = new Array();
-    for(var i in array)
-        ret[i] = callback.call(environ, array[i]);
+        for(var i = 0; i < array.length; i++)
+            ret.push(callback.call(environ, array[i]));
+    }
     return ret;
 }
 
 function filter(callback, array, environ){
     if(!isFunction(callback))
         throw new TypeError(callback + " is not a function");
-    if(!isArray(array))
-        throw new TypeError("filter avaliable only for arrays");
-    var ret = new Array();
-    for(var i in array)
-        if(callback.call(environ, array[i]))
-            ret.push(array[i]);
+    var ret;
+    if(isArray(array) || isNodeList(array)){
+        ret = new Array();
+        for(var i = 0; i < array.length; i++)
+            if(callback.call(environ, array[i])) ret.push(array[i]);
+    }else if(isHash(array)){
+        ret = new Object();
+        for(var i in array)
+            if(callback.call(environ, array[i])) ret[i] = array[i];
+    }else
+        throw new TypeError((typeof array) + " not supported by filter.");
     return ret;
 }
 
