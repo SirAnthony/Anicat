@@ -324,22 +324,21 @@ var message = new (function(){
 
 function getFormData(form){
     var formData = {};
-    var f = function(elm){
-    if(elm.tagName == "INPUT" || elm.tagName == "TEXTAREA" || elm.tagName == "SELECT"){
-        if(elm.type == "checkbox"){
-            formData[elm.name] = elm.checked;
-        }else if(elm.type == "select-multiple"){
-            var values = new Array();
-            element.downTree(function(opt){if(opt.selected) values.push(opt.value);}, elm);
+    element.downTree(function _f(elm){
+        if(elm.tagName == "INPUT" || elm.tagName == "TEXTAREA" || elm.tagName == "SELECT"){
+            if(elm.type == "checkbox"){
+                formData[elm.name] = elm.checked;
+            }else if(elm.type == "select-multiple"){
+                var values = new Array();
+                element.downTree(function(opt){if(opt.selected) values.push(opt.value);}, elm);
                 formData[elm.name] = values;
             }else if(elm.type != "button"){
-                    formData[elm.name] = elm.value;
+                formData[elm.name] = elm.value;
             }
         }else{
-            element.downTree(f, elm);
+            element.downTree(_f, elm);
         }
-    }
-    element.downTree(f, form);
+    }, form);
     return formData;
 }
 
@@ -399,6 +398,18 @@ function showFN(tbl, cn){
             }})(pop));
         }
     }
+}
+
+function hideRadio(s){
+    var cld = s.parentNode.childNodes;
+    map(function(pel){
+        map(function(el){ if(el != s && el.type == "radio") el._chk = false }, pel.childNodes)},
+        s.parentNode.parentNode.childNodes);
+    if(s._chk){
+        s._chk = s.checked = false;
+        return;
+    }
+    s._chk = true;
 }
 
 function numHash(numh){ //for hash with numeric keys only
@@ -519,6 +530,7 @@ function cnt(tag, num, e){
 
 }
 
+
 // Additional functions
 
 function map(callback, array, environ){
@@ -529,9 +541,20 @@ function map(callback, array, environ){
         ret = {}
     else
         ret = new Array();
-    for(var i in array){
+    for(var i in array)
         ret[i] = callback.call(environ, array[i]);
-    }
+    return ret;
+}
+
+function filter(callback, array, environ){
+    if(!isFunction(callback))
+        throw new TypeError(callback + " is not a function");
+    if(!isArray(array))
+        throw new TypeError("filter avaliable only for arrays");
+    var ret = new Array();
+    for(var i in array)
+        if(callback.call(environ, array[i]))
+            ret.push(array[i]);
     return ret;
 }
 
@@ -543,6 +566,21 @@ function range(start, end){
         }
     }
     return s;
+}
+
+function extend(oobj){
+    var obj = oobj;
+    var type = typeof obj;
+    if(arguments.length >= 1)
+        for(var i = 1; i < arguments.length; i++){
+            var arg = arguments[i];
+            if(!arg) continue;
+            if(typeof arg != type)
+                throw new TypeError('Argument type does not match');
+            for(var name in arg)
+                if(arg.hasOwnProperty(name)) obj[name] = arg[name];
+        }
+    return obj;
 }
 
 // Cross-browser event handlers.

@@ -31,6 +31,7 @@ urlpatterns += patterns('',
     (r'^changes/$', direct_to_template, {'template': 'anime/changes.html'}, 'changes'),
     (r'^faq/$', direct_to_template, {'template': 'anime/faq.html'}, 'faq'),
     (r'^blank/$', direct_to_template, {'template': 'anime/blank.html'}, 'blank'),
+    (r'^filter/$', direct_to_template, {'template': 'anime/filter.html'}, 'filter'),
 )
 
 # History

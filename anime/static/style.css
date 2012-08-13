@@ -15,6 +15,10 @@ body * {
     padding: 0px;
 }
 
+form, #card, #pagecard, .request, .faq, .malresult {
+    line-height: 18px;
+}
+
 input, select {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -32,13 +36,11 @@ input, select {
     background-color: #FFF;
 }
 
-form, #card, #pagecard, .request, .faq, .malresult {
-    line-height: 18px;
+input[type=radio], input[type=checkbox] {
+    margin-right: 3px;
+    opacity: 0.6;
+    margin-top: 0px !important;
 }
-
-/*select {
-    width: 185px;
-}*/
 
 input[type=button], input[type=submit] {
     background-color:#ededed;
@@ -53,6 +55,7 @@ input[type=button], input[type=submit] {
     /*top: 1px;*/
     text-shadow: 1px 1px 5px #ffffff;
 }
+
 input[type=button]:hover, input[type=submit]:hover {
     background-color:#f5f5f5;
 }
@@ -125,6 +128,7 @@ a:hover{
 #header a, #loginform a{
     margin-left: 2px;
     margin-right: 3px;
+    cursor: pointer;
 }
 
 #dvid{
@@ -257,8 +261,9 @@ a.blacklink:hover {
 .cont_men {
     padding: 7px 10px;
     border: 1px solid;
-    border-color: #F0F0F0 #808080 #808080 #F0F0F0;
+    border-color: #B0B0B0;
     background-color: #D4D0C8;
+    border-radius: 2px;
     position: absolute;
     z-index: 5;
     display: none;
@@ -447,7 +452,7 @@ select.linktype {
 }
 
 .calendarbox {
-    border-color: #FFFFFF #FFFFFF #808080 #808080;
+    border-color: #B0B0B0;
     background-color: #D4D0C8;
     padding: 5px;
 }
@@ -485,6 +490,19 @@ select.linktype {
 
 .editDiv {
     min-height: 22px;
+}
+
+/* Add */
+#addform {
+    left: 30px;
+}
+#addform, .filterform {
+    background-color: #EAE8DF;
+    border: 1px solid #B0B0B0;
+    border-top: none;
+    border-radius: 0px 0px 3px 3px;
+    position: absolute;
+    top: 27px;
 }
 
 .addform {
@@ -622,13 +640,86 @@ select.linktype {
     color: #000;
 }
 
-
-/* Id's */
-#addform {
-    top: 30px;
-    left: 30px;
+/* Filter */
+.filterform {
+    width: 730px;
+    padding: 5px 10px;
 }
 
+.filterform input[type=button]{
+    margin-right: 5px;
+}
+
+
+.filter {
+    width: 195px;
+    float: left;
+    padding: 0px 5px;
+}
+
+.filter ul li {
+    width: 50px;
+    display: inline-block;
+    margin: 0px 5px;
+}
+
+.filter div.filter_tristate input {
+    margin: 0px 20px;
+}
+.filter div.filter_tristate input:checked {
+    opacity: 0;
+}
+.filter div.filter_tristate span {
+    position: absolute;
+    width: 50px;
+    text-align: center;
+}
+
+.filter dd {
+    width: 110px;
+}
+.filter dt {
+    width: 20px;
+}
+
+.filter select {
+    display: block;
+    width: 165px;
+    height: 100%;
+    scroll: none;
+    margin-top: 0px;
+}
+
+div.filter.nano {
+    width: 155px;
+    padding-left: 15px;
+    padding-bottom: 1px;
+}
+
+.filter div.content {
+    top: 25px;
+    padding-left: 15px;
+    width: 148px;
+    overflow: hidden;
+    border-right: 1px solid #B0B0B0;
+    border-radius: 2px 2px 2px 2px;
+}
+.filter div.pane {
+    top: 25px;
+}
+
+div#id_filter_genre_container {
+    height: 330px;
+}
+div#id_filter_type_container {
+    height: 157px;
+}
+div#id_filter_status_container {
+    height: 270px;
+}
+
+
+/* Id's */
 #requests, .column {
     line-height: 1.2em;
 }

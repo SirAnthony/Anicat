@@ -11,11 +11,14 @@
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
     <link rel="search" type="application/opensearchdescription+xml" title="Anime catalog" href="/static/srch.xml" />
     <link href="/static/style.css" type="text/css" rel="stylesheet" />
+    <link href="/static/nanoscroller.css" type="text/css" rel="stylesheet" />
     <link href="{% url user_css %}" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="/jsi18n/"></script>
     <script type="text/javascript" src="/static/js/element.js"></script>
     <script type="text/javascript" src="/static/script.js"></script>
     <script type="text/javascript" src="/static/ajax.js"></script>
+    <script type="text/javascript" src="/static/nanoscroller.js"></script>
+    <script type="text/javascript" src="/static/filter.js"></script>
     <script type="text/javascript" src="/static/forms.js"></script>
     <script type="text/javascript" src="/static/user.js"></script>
     <script type="text/javascript" src="/static/ae.js"></script>
@@ -36,7 +39,8 @@
             <span class="delimiter">|</span>
             {% endblock %}
             <a href="{% url faq %}">FAQ</a><span class="delimiter">|</span>
-            <a href="{% url card %}" rel="nofollow">Random</a>
+            <a href="{% url card %}" rel="nofollow">Random</a><span class="delimiter">|</span>
+            <a onclick="filter.toggle(); return false;">Filter⇣</a>
     {% if user.is_authenticated %}
             {% block addLink %}
             <span class="delimiter">|</span>

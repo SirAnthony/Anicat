@@ -41,6 +41,19 @@ class ErrorModelForm(ModelForm):
         pass
 
 
+class FilterForm(ReadOnlyModelForm, ErrorModelForm):
+    releasedAt = UnknownDateField(label='Released')
+    endedAt = UnknownDateField(label='Ended', required=False)
+
+    def __init__(self, *args, **kwargs):
+        super(FilterForm, self).__init__(*args, **kwargs)
+        self.readonly()
+
+    class Meta():
+        model = AnimeItem
+        exclude = ('title', 'releaseType', 'genre', 'bundle', 'releasedKnown', 'endedKnown', 'air')
+
+
 class AnimeForm(ErrorModelForm):
     releasedAt = UnknownDateField(label='Released')
     endedAt = UnknownDateField(label='Ended', required=False)
@@ -70,10 +83,9 @@ class AnimeForm(ErrorModelForm):
                             name.anime.title, name.anime.id)))
                     return
 
-
     class Meta():
         model = AnimeItem
-        exclude = ('air', 'bundle', 'locked', 'releasedKnown', 'endedKnown')
+        exclude = ('air', 'bundle', 'releasedKnown', 'endedKnown')
 
 
 class UserStatusForm(ErrorModelForm):

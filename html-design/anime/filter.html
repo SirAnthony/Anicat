@@ -1,0 +1,65 @@
+{% extends "anime/base.html" %}
+
+{% load cache %}
+{% load animetemplates %}
+
+
+{% block main %}
+{% filterForm %}
+<div class="filterform" id="id_filter_container">
+    <div class="filter">
+    {% for field in FilterForm.anime %}
+        <div>
+            <p>{{ field.label_tag }}:</p>
+            {{ field }}
+            <ul>
+                <li>
+                    <input type="radio" name="{{ field.label }}" onclick="hideRadio(this)">
+                    <span>less</span>
+                </li>
+                <li>
+                    <input type="radio" name="{{ field.label }}" onclick="hideRadio(this)">
+                    <span>more</span>
+                </li>
+                <li>
+                    <input type="checkbox" name="{{ field.label }}">
+                    <span>equal</span>
+                </li>
+            </ul>
+        </div>
+    {% endfor %}
+    </div>
+    <div class="filter nano" id="id_filter_type_container">
+        <label for="id_filter_type">Type</label>:
+        <div class="content">
+            <select class="scrollcontent" name="type" id="id_filter_type" multiple="true">
+            {% for field in FilterForm.type %}
+                <option value="{{ field.0 }}">{{ field.1 }}</option>
+            {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="filter nano" id="id_filter_genre_container">
+        <label for="id_filter_genre">Genre</label>:
+        <div class="content">
+            <select class="scrollcontent" name="genre" id="id_filter_genre" multiple="true">
+            {% for field in FilterForm.genre %}
+                <option value="{{ field.0 }}">{{ field.1 }}</option>
+            {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="filter nano" id="id_filter_status_container">
+        <label for="id_filter_status">State</label>:
+        <div id="id_filter_status">
+        {% for field in FilterForm.status %}
+            <dt class="right"><input type="checkbox" name="{{ field.0 }}" checked="true"></dt>
+            <dd><span>{{ field.1 }}</span></dd>
+        {% endfor %}
+        </div>
+    </div>
+    <input type="button" value="Clear" class="right" onclick="filter.clear()" />
+    <input type="button" value="Apply" class="right" onclick="filter.apply()" />
+    <div class="clear"></div>
+</div>
+{% endblock %}

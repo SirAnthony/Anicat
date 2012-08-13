@@ -1,14 +1,10 @@
-from anime.forms.ModelError import AnimeForm
+from anime.forms.ModelError import AnimeForm, FilterForm
 from anime.forms.User import NotActiveAuthenticationForm, UserCreationFormMail
-from anime.models import USER_STATUS
+from anime.models import Genre, ANIME_TYPES, USER_STATUS
 from anime.core.user import get_username
 from django import template
 
 register = template.Library()
-
-
-def addForm(parser, token):
-    return AddFormNode()
 
 
 class AddFormNode(template.Node):
@@ -17,15 +13,28 @@ class AddFormNode(template.Node):
         return ''
 
 
-def loginForm(parser, token):
-    return loginFormNode()
-
-
-class loginFormNode(template.Node):
+class LoginFormNode(template.Node):
     def render(self, context):
         context['LoginForm'] = NotActiveAuthenticationForm()
         context['RegisterForm'] = UserCreationFormMail()
         return ''
+
+
+class FilterFormNode(template.Node):
+    def render(self, context):
+        context['FilterForm'] = {
+            'anime': FilterForm,
+            'type': ANIME_TYPES,
+            'genre': Genre.objects.values_list(flat=True),
+            'status': USER_STATUS
+        }
+        return ''
+
+
+register.tag('addForm', lambda parser, token: AddFormNode())
+register.tag('loginForm', lambda parser, token: LoginFormNode())
+register.tag('filterForm', lambda parser, token: FilterFormNode())
+
 
 
 def username(parser, token):
@@ -33,7 +42,6 @@ def username(parser, token):
         tag_name, user = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError("%r tag requires exactly one argument" % token.contents.split()[0])
-
     return UsernameNode(user)
 
 
@@ -61,9 +69,6 @@ class StatusNameNode(template.Node):
         except:
             return u"Bad status"
 
-
-register.tag('addForm', addForm)
-register.tag('loginForm', loginForm)
 register.tag('username', username)
 register.tag('statusname', statusname)
 
