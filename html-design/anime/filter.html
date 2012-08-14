@@ -1,62 +1,46 @@
-{% extends "anime/base.html" %}
 
-{% load cache %}
 {% load animetemplates %}
 
-
-{% block main %}
+{% block filter %}
 {% filterForm %}
 <div class="filterform" id="id_filter_container">
     <div class="filter">
-    {% for field in FilterForm.anime %}
         <div>
-            <p>{{ field.label_tag }}:</p>
-            {{ field }}
-            <ul>
-                <li>
-                    <input type="radio" name="{{ field.label }}_less" onclick="hideRadio(this)">
-                    <span>less</span>
-                </li>
-                <li>
-                    <input type="radio" name="{{ field.label }}_more" onclick="hideRadio(this)">
-                    <span>more</span>
-                </li>
-                <li>
-                    <input type="checkbox" name="{{ field.label }}_equal" value="equal">
-                    <span>equal</span>
-                </li>
-            </ul>
+            <p>{{ FilterForm.episodesCount.label_tag }}:</p>
+            {{ FilterForm.episodesCount }}
         </div>
-    {% endfor %}
+        <div>
+            <p>{{ FilterForm.duration.label_tag }}:</p>
+            {{ FilterForm.duration }}
+        </div>
+        <div>
+            <p>{{ FilterForm.releasedAt.label_tag }}:</p>
+            {{ FilterForm.releasedAt }}
+        </div>
+        <div>
+            <p>{{ FilterForm.endedAt.label_tag }}:</p>
+            {{ FilterForm.endedAt }}
+        </div>
     </div>
-    <div class="filter nano" id="id_filter_type_container">
-        <label for="id_filter_type">Type</label>:
-        <div class="content">
-            <select class="scrollcontent" name="type" id="id_filter_type" multiple="true">
-            {% for field in FilterForm.type %}
-                <option value="{{ field.0 }}">{{ field.1 }}</option>
-            {% endfor %}
-            </select>
+    <div class="filter">
+        <div class="nano" id="id_filter_type_container">
+            <label for="id_filter_type">{{ FilterForm.releaseType.label_tag }}</label>:
+            <div class="content">
+                {{ FilterForm.releaseType }}
+                </select>
+            </div>
+        </div>
+        <div class="nano" id="id_filter_state_container">
+            <label for="id_filter_state">{{ FilterForm.state.label_tag }}</label>:
+            <div class="content">
+                {{ FilterForm.state }}
+            </div>
         </div>
     </div>
     <div class="filter nano" id="id_filter_genre_container">
-        <label for="id_filter_genre">Genre</label>:
+        <label for="id_filter_genre">{{ FilterForm.genre.label_tag }}</label>:
         <div class="content">
-            <select class="scrollcontent" name="genre" id="id_filter_genre" multiple="true">
-            {% for field in FilterForm.genre %}
-                <option value="{{ field.0 }}">{{ field.1 }}</option>
-            {% endfor %}
-            </select>
-        </div>
-    </div>
-    <div class="filter nano" id="id_filter_status_container">
-        <label for="id_filter_status">State</label>:
-        <div class="content">
-            <select class="scrollcontent" name="status" id="id_filter_status" multiple="true">
-            {% for field in FilterForm.type %}
-                <option value="{{ field.0 }}">{{ field.1 }}</option>
-            {% endfor %}
-            </select>
+            {{ FilterForm.genre }}
         </div>
     </div>
     <input type="button" value="Clear" class="right" onclick="Filter.clear()" />

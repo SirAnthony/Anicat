@@ -5,6 +5,10 @@ from anime.models import AnimeItem, AnimeName, DATE_FORMATS
 from django.core.exceptions import ValidationError
 from django.core.validators import EMPTY_VALUES
 from django.forms import CharField, TextInput, URLField, DateField, ImageField
+from django.forms.widgets import CheckboxInput, RadioSelect, MultiWidget
+# format_html in django trunk
+# from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -150,7 +154,8 @@ class CalendarWidget(TextInput):
 
     def __init__(self, attrs={}):
         self._known = 0
-        super(CalendarWidget, self).__init__(attrs={'class': 'vDateField'})
+        attrs['class'] = 'vDateField'
+        super(CalendarWidget, self).__init__(attrs=attrs)
 
     def render(self, name, value, attrs=None):
         if isinstance(value, datetime.date):
@@ -286,3 +291,38 @@ class CardImageField(ImageField):
         if hasattr(f, 'seek') and callable(f.seek):
             f.seek(0)
         return f
+
+
+class LabeledCheckboxInput(CheckboxInput):
+    def render(self, name=None, value=None, attrs=None):
+        if 'id' in self.attrs:
+            label_for = format_html(' for="{0}_{1}"', self.attrs['id'], self.index)
+        else:
+            label_for = ''
+        choice_label = self.attrs['label']
+        checkbox = super(LabeledCheckboxInput, self).render(name, value, attrs)
+        # format_html in django trunk
+        #return format_html('<label{0}>{1} {2}</label>', label_for, checkbox, choice_label)
+        return mark_safe('<label{0}>{1} {2}</label>'.format(label_for, checkbox, choice_label))
+
+
+def create_filter_widget(widget):
+    class _FilterWidget(MultiWidget):
+        def __init__(self, attrs={}):
+            _widgets = (
+                widget(attrs=attrs),
+                RadioSelect(attrs={'onclick': 'hideRadio(this);'}, choices=(('1', 'less'), ('2', 'more'))),
+                LabeledCheckboxInput(attrs={'label': 'equal'}),
+            )
+            super(_FilterWidget, self).__init__(_widgets, attrs)
+
+        def decompress(self, value):
+            return [getattr(value, 'value', None),
+                    getattr(value, 'relation', None),
+                    getattr(value, 'equal', None)]
+    return _FilterWidget
+
+FilterWidget = create_filter_widget(TextInput);
+
+class FilterUnknownDateField(UnknownDateField):
+    widget = create_filter_widget(CalendarWidget)

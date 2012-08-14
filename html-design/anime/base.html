@@ -40,7 +40,7 @@
             {% endblock %}
             <a href="{% url faq %}">FAQ</a><span class="delimiter">|</span>
             <a href="{% url card %}" rel="nofollow">Random</a><span class="delimiter">|</span>
-            <a onclick="filter.toggle(); return false;">Filter⇣</a>
+            <a onclick="Filter.toggle(); return false;">Filter⇣</a>
     {% if user.is_authenticated %}
             {% block addLink %}
             <span class="delimiter">|</span>
@@ -144,6 +144,11 @@
     {% endblock %}
     {% block main %}
     {% endblock %}
+{% cache 0 filter request.session.session_key %}
+    {% include "anime/filter.html" %}
+    {% block filter %}
+    {% endblock %}
+{% endcache %}
 {% cache 0 footer user.is_authenticated %}
     <div class="cont_men" id="menu"></div>
     <div class="cont_men" id="popup">

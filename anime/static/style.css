@@ -642,7 +642,7 @@ select.linktype {
 
 /* Filter */
 .filterform {
-    width: 730px;
+    width: 670px;
     padding: 5px 10px;
 }
 
@@ -652,20 +652,29 @@ select.linktype {
 
 
 .filter {
-    width: 195px;
+    max-width: 190px;
+    min-width: 155px;
     float: left;
     padding: 0px 5px;
 }
 
-.filter.nano > a {
+.filter.nano > a, .filter div.nano > a {
     cursor: pointer;
-    padding-right: 8px;
+    margin-right: 8px;
+}
+.filter .datetimeshortcuts {
+    margin-right: 2px;
 }
 
+.filter ul {
+    width: 130px;
+    display: inline;
+    margin-right: 10px;
+}
 .filter ul li {
-    width: 50px;
+    width: 52px;
     display: inline-block;
-    margin: 0px 5px;
+    margin: 0px 4px;
 }
 
 .filter div.filter_tristate input {
@@ -680,7 +689,6 @@ select.linktype {
     text-align: center;
 }
 
-
 .filter select {
     display: block;
     width: 165px;
@@ -689,10 +697,14 @@ select.linktype {
     margin-top: 0px;
 }
 
-div.filter.nano {
+div.filter.nano, div.filter div.nano {
     width: 155px;
     padding-left: 15px;
     padding-bottom: 1px;
+}
+
+div.filter div.nano {
+    height: 161px;
 }
 
 .filter div.content {
@@ -708,14 +720,7 @@ div.filter.nano {
 }
 
 div#id_filter_genre_container {
-    height: 330px;
-}
-div#id_filter_type_container {
-    height: 157px;
-}
-div#id_filter_status_container {
-    height: 156px;
-    margin-bottom: 120px;
+    height: 323px;
 }
 
 

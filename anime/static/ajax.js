@@ -60,7 +60,7 @@ var ajax = new (function(){
             var crlf = '\r\n'
             var s = '--' + boundary + crlf;
             s += 'Content-Disposition: form-data; name="' + name + '"' + crlf;
-            s += crlf + value + crlf;
+            s += crlf + (!isString(value) ? jsonToString(value) : value) + crlf;
             return s;
         }
 

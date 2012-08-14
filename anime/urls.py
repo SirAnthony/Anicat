@@ -31,7 +31,6 @@ urlpatterns += patterns('',
     (r'^changes/$', direct_to_template, {'template': 'anime/changes.html'}, 'changes'),
     (r'^faq/$', direct_to_template, {'template': 'anime/faq.html'}, 'faq'),
     (r'^blank/$', direct_to_template, {'template': 'anime/blank.html'}, 'blank'),
-    (r'^filter/$', direct_to_template, {'template': 'anime/filter.html'}, 'filter'),
 )
 
 # History
@@ -88,6 +87,7 @@ urlpatterns += patterns('anime.views.edit',
 urlpatterns += patterns('anime.views.ajax',
     url(r'^ajax/get/$', 'get', name='ajax_get'),
     url(r'^ajax/set/$', 'change', name='ajax_set'),
+    url(r'^ajax/filter/$', 'afilter', name='ajax_filter'),
     url(r'^ajax/form/$', 'form', name='ajax_form'),
     url(r'^ajax/add/$', 'add', name='ajax_add'),
     url(r'^ajax/login/$', 'login', name='ajax_login'),

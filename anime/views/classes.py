@@ -1,4 +1,6 @@
 
+import urllib
+
 from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.list import BaseListView
 from anime.utils import cache
@@ -11,6 +13,7 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
     paginator_class = Paginator
 
     def get_context_data(self, **kwargs):
+        self.filter()
         (link, cachestr) = self.get_link()
         context = {'cachestr': cachestr, 'link': link}
         if self.updated(cachestr):
@@ -43,6 +46,10 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
         if not cache.key_valid(self.cache_name, cachestr):
             return True
         return not cache.latest(self.__class__.__name__, cachestr)
+
+    def filter(self):
+        pass
+        #raise Exception(urllib.unquote(self.request.COOKIES['filter']))
 
     def get_link(self):
         "Implementation in subclasses"

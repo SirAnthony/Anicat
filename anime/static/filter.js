@@ -48,8 +48,13 @@ var Filter = new (function(){
                         processed[names[0]]['value'] = el[name];
                 }
             }, data);
-        processed = filter(function(p){ if(isArray(p) || p.value) return true; }, processed);
-        cookies.set('filter', jsonToString(processed));
+        ajax.loadXMLDoc(url+'filter/', processed, new RequestProcessor(
+            function(resp){
+                message.hide();
+                if(!resp.status)
+                    throw resp;
+            }
+        ), 'filter');
     }
 
 })();

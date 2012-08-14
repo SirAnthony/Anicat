@@ -22,12 +22,7 @@ class LoginFormNode(template.Node):
 
 class FilterFormNode(template.Node):
     def render(self, context):
-        context['FilterForm'] = {
-            'anime': FilterForm,
-            'type': ANIME_TYPES,
-            'genre': Genre.objects.values_list(flat=True),
-            'status': USER_STATUS
-        }
+        context['FilterForm'] = FilterForm
         return ''
 
 

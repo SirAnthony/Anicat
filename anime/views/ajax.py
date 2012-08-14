@@ -40,6 +40,11 @@ def change(request):
 
 
 @ajaxResponse
+def afilter(request):
+    return coreMethods.filter_list(request)
+
+
+@ajaxResponse
 def form(request):
     response = editMethods.edit(request, request.POST.get('id', 0),
                                 request.POST.get('model', None),

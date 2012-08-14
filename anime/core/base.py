@@ -70,3 +70,8 @@ def card(anime_id, user):
             userstatus['statusName'] = USER_STATUS[userstatus['state'] or 0][1]
         ret['userstatus'] = userstatus
     return ret
+
+def filter_list(request):
+    form = FilterForm(data=request.POST)
+    if form.is_valid():
+        pass
