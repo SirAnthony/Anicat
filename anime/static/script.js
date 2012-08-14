@@ -469,6 +469,23 @@ function capitalise(string){
         return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+var jsonToString = function(obj){
+    if(isString(obj)) return "'" + obj + "'";
+    else if(isArray(obj)){
+        var ret = '';
+        for(var i = 0; i < obj.length; i++)
+            ret += jsonToString(obj[i]) + ',';
+        return '[' + ret + ']';
+    }else if(isHash(obj)){
+        var ret = '';
+        for(var i in obj)
+            if(obj.hasOwnProperty(i))
+                ret += jsonToString(i) + ': ' + jsonToString(obj[i]) + ',';
+        return '{' + ret + '}';
+    }
+    return obj;
+}
+
 //Режимы отображения
 
 function setshow(){

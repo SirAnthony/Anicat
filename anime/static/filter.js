@@ -49,7 +49,7 @@ var Filter = new (function(){
                 }
             }, data);
         processed = filter(function(p){ if(isArray(p) || p.value) return true; }, processed);
-        cookies.set('filter', processed);
+        cookies.set('filter', jsonToString(processed));
     }
 
 })();
