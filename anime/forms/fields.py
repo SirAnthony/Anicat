@@ -5,6 +5,7 @@ from anime.models import AnimeItem, AnimeName, DATE_FORMATS
 from django.core.exceptions import ValidationError
 from django.core.validators import EMPTY_VALUES
 from django.forms import CharField, TextInput, URLField, DateField, ImageField
+from django.forms.fields import IntegerField
 from django.forms.widgets import CheckboxInput, RadioSelect, MultiWidget
 # format_html in django trunk
 # from django.utils.html import format_html
@@ -149,8 +150,6 @@ class TextToAnimeLinkField(URLField):
 
 
 class CalendarWidget(TextInput):
-    class Media:
-        js = ("calendar.js", "DateTimeShortcuts.js")
 
     def __init__(self, attrs={}):
         self._known = 0
@@ -307,11 +306,12 @@ class LabeledCheckboxInput(CheckboxInput):
 
 
 def create_filter_widget(widget):
+
     class _FilterWidget(MultiWidget):
         def __init__(self, attrs={}):
             _widgets = (
                 widget(attrs=attrs),
-                RadioSelect(attrs={'onclick': 'hideRadio(this);'}, choices=(('1', 'less'), ('2', 'more'))),
+                RadioSelect(attrs={'onclick': 'hideRadio(this);'}, choices=(('__lt', 'less'), ('__gt', 'more'))),
                 LabeledCheckboxInput(attrs={'label': 'equal'}),
             )
             super(_FilterWidget, self).__init__(_widgets, attrs)
@@ -320,9 +320,33 @@ def create_filter_widget(widget):
             return [getattr(value, 'value', None),
                     getattr(value, 'relation', None),
                     getattr(value, 'equal', None)]
+
+        def value_from_datadict(self, data, files, name):
+            value = [None, None, None]
+            for d in filter(lambda x: x.startswith(name), data):
+                index = int(d[len(name)+1:])
+                value[index] = data[d]
+            return value
+
     return _FilterWidget
+
 
 FilterWidget = create_filter_widget(TextInput);
 
+
+class FilterIntegerField(IntegerField):
+    def clean(self, value):
+        ret = [super(FilterIntegerField, self).clean(value[0]), value[1], value[2]]
+        if ret[0]:
+            return ret
+        return None
+
+
 class FilterUnknownDateField(UnknownDateField):
     widget = create_filter_widget(CalendarWidget)
+
+    def clean(self, value):
+        ret = [super(FilterUnknownDateField, self).clean(value[0]), value[1], value[2]]
+        if ret[0]:
+            return ret
+        return None

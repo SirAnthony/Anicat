@@ -1,4 +1,5 @@
-from anime.forms.ModelError import AnimeForm, FilterForm
+from anime.forms.ModelError import AnimeForm
+from anime.forms.Error import FilterForm
 from anime.forms.User import NotActiveAuthenticationForm, UserCreationFormMail
 from anime.models import Genre, ANIME_TYPES, USER_STATUS
 from anime.core.user import get_username
@@ -22,7 +23,8 @@ class LoginFormNode(template.Node):
 
 class FilterFormNode(template.Node):
     def render(self, context):
-        context['FilterForm'] = FilterForm
+        context['FilterForm'] = FilterForm(
+                    initial=context['request'].session.get('filter', None))
         return ''
 
 

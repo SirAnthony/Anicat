@@ -2,6 +2,8 @@
 
 var Filter = new (function(){
 
+    this.errorobj = null;
+
     this.init = function(){
         createScroll(document.getElementById('id_filter_genre_container'));
         map(function(el){
@@ -11,6 +13,8 @@ var Filter = new (function(){
                     this.parentNode.getElementsByTagName('option'))}}});
             }, getElementsByClassName('nano',
                 document.getElementById("id_filter_container")));
+        Filter.errorobj = getElementsByClassName('mainerror',
+                        document.getElementById('id_filter_container'))[0];
     }
 
     this.toggle = function(){
@@ -18,6 +22,7 @@ var Filter = new (function(){
     }
 
     this.clear = function(){
+        element.removeAllChilds(this.errorobj);
         map(function(el){
             element.downTree(function _f(elm){
                 if(elm.tagName == "INPUT" || elm.tagName == "SELECT"){
@@ -32,29 +37,32 @@ var Filter = new (function(){
     }
 
     this.apply = function(){
+        element.removeAllChilds(this.errorobj);
         var data = map(getFormData, getElementsByClassName('filter', document));
         var processed = {};
         map(function(el){
             for(var name in el)
                 if(isArray(el[name]))
                     processed[name] = map(function(o){ return o.value; }, el[name]);
-                else if(el[name]){
-                    var names = name.toLowerCase().split('_');
-                    if(!processed[names[0]])
-                        processed[names[0]] = {};
-                    if(names[1])
-                        processed[names[0]][names[1]] = el[name];
-                    else
-                        processed[names[0]]['value'] = el[name];
-                }
+                else if(el[name])
+                    processed[name] = el[name];
             }, data);
         ajax.loadXMLDoc(url+'filter/', processed, new RequestProcessor(
             function(resp){
                 message.hide();
                 if(!resp.status)
-                    throw resp;
+                    Filter.processError(resp.text);
             }
         ), 'filter');
+    }
+
+    this.processError = function(error){
+        for(var target in error){
+            if(!target) continue;
+            for(var e in error[target])
+                element.appendChild(this.errorobj, element.create('span', {
+                        className: 'error', innerText: target + ': '+ error[target][e]}), 1);
+        }
     }
 
 })();

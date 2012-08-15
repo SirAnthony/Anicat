@@ -1,16 +1,12 @@
 
 from django.core.exceptions import ValidationError
-from django.forms import ModelForm, CharField, ChoiceField, \
-                         MultipleChoiceField, ModelMultipleChoiceField
+from django.forms import ModelForm, ChoiceField
 from django.forms.forms import BoundField
-from django.forms.widgets import Select, SelectMultiple
 from django.utils.encoding import force_unicode
 from django.utils.html import conditional_escape
 from django.utils.translation import ugettext_lazy as _
-from anime.forms.fields import UnknownDateField, FilterWidget, \
-                               FilterUnknownDateField
-from anime.models import AnimeItem, AnimeName, UserStatusBundle, \
-                         Genre, ANIME_TYPES, USER_STATUS
+from anime.forms.fields import UnknownDateField
+from anime.models import AnimeItem, AnimeName, UserStatusBundle
 
 
 class ReadOnlyModelForm(ModelForm):
@@ -43,31 +39,6 @@ class ErrorModelForm(ModelForm):
 
     class Meta:
         pass
-
-
-class FilterForm(ReadOnlyModelForm, ErrorModelForm):
-    episodesCount = CharField(label="Episodes", required=False,
-                        widget=FilterWidget)
-    duration = CharField(label="Duration", required=False, widget=FilterWidget)
-    releasedAt = FilterUnknownDateField(label='Released', required=False)
-    endedAt = FilterUnknownDateField(label='Ended', required=False)
-    releaseType = MultipleChoiceField(label="Type", required=False,
-        choices=ANIME_TYPES, widget=SelectMultiple(attrs={
-            'id': 'id_filter_releaseType', 'class': 'scrollcontent'}))
-    state = MultipleChoiceField(label="State", required=False,
-        choices=USER_STATUS, widget=SelectMultiple(attrs={
-            'id': 'id_filter_state', 'class': 'scrollcontent'}))
-    genre = ModelMultipleChoiceField(label="Type", required=False,
-        queryset=Genre.objects.all(),
-        widget=SelectMultiple(attrs={'id': 'id_filter_genre', 'class': 'scrollcontent'}))
-
-    def __init__(self, *args, **kwargs):
-        super(FilterForm, self).__init__(*args, **kwargs)
-        self.readonly()
-
-    class Meta():
-        model = AnimeItem
-        exclude = ('title', 'bundle', 'releasedKnown', 'endedKnown', 'air')
 
 
 class AnimeForm(ErrorModelForm):

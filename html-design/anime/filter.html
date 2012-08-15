@@ -2,7 +2,6 @@
 {% load animetemplates %}
 
 {% block filter %}
-{% filterForm %}
 <div class="filterform" id="id_filter_container">
     <div class="filter">
         <div>
@@ -45,6 +44,6 @@
     </div>
     <input type="button" value="Clear" class="right" onclick="Filter.clear()" />
     <input type="button" value="Apply" class="right" onclick="Filter.apply()" />
-    <div class="clear"></div>
+    <div class="clear mainerror"></div>
 </div>
 {% endblock %}

@@ -332,7 +332,7 @@ function getFormData(form){
                     break;
                 case "radio":
                     if(elm.checked)
-                        formData[elm.name] = elm.checked;
+                        formData[elm.name] = elm.value;
                     break;
                 case "select-multiple":
                     formData[elm.name] = filter(function(opt){

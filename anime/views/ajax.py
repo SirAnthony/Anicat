@@ -41,7 +41,11 @@ def change(request):
 
 @ajaxResponse
 def afilter(request):
-    return coreMethods.filter_list(request)
+    result = coreMethods.filter_list(request)
+    if result.get('status', None):
+        return {'response': 'filter', 'status': True, 'text': None}
+    return {'response': 'filter', 'status': False, 'text': extract_errors(result)}
+
 
 
 @ajaxResponse

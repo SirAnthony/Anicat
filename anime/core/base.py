@@ -2,7 +2,9 @@
 from django.core.cache import cache
 from django.utils.translation import ugettext_lazy as _
 from anime.core.explorer import GetError, FieldExplorer
+from anime.forms.Error import FilterForm
 from anime.models import AnimeItem, UserStatusBundle, USER_STATUS
+from anime.utils.cache import invalidate_key
 
 
 ERROR_MESSAGES = {
@@ -71,7 +73,12 @@ def card(anime_id, user):
         ret['userstatus'] = userstatus
     return ret
 
+
 def filter_list(request):
     form = FilterForm(data=request.POST)
     if form.is_valid():
-        pass
+        request.session['filter'] = dict(
+                    (k, v) for k, v in form.cleaned_data.items() if v)
+        invalidate_key('filter', request.session.session_key)
+        return {'status': True}
+    return {'form': form}

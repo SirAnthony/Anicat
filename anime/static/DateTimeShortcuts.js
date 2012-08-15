@@ -16,10 +16,10 @@ var DateTimeShortcuts = {
         // value in the hopes that someone will examine HTTP requests and see it.
 
         var ftype = ['vDateField', 'vTimeField'];
-        var dates = getElementsByClassName(ftype[0], document, 'input');
-        for(var date=0; date<dates.length; date++){
-            DateTimeShortcuts.addCalendar(dates[date]);
-        }
+        map(function(date){
+            if(date.type == 'text')
+                DateTimeShortcuts.addCalendar(date);
+        }, getElementsByClassName(ftype[0], document, 'input'));
     },
 
     // Add calendar widget to a given field.

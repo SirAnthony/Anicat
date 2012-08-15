@@ -1,20 +1,64 @@
 
 import urllib
-
+from hashlib import sha1
 from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.list import BaseListView
 from anime.utils import cache
 from anime.utils.paginator import Paginator
 
 
+
+class AnimeListFilter(object):
+
+    def __init__(self, data):
+        if type(data) == dict:
+            self.data = data
+        else:
+            self.data = {}
+
+    def get_cachename(self, cachestr):
+        return sha1(cachestr + str(self.data)).hexdigest()
+
+    def get_queryset(self, queryset):
+        for key, value in self.data.items():
+            field = getattr(self, key, None)
+            if callable(field):
+                queryset = field(queryset, value)
+            else:
+                filtercase = key + self.get_relation(*value[1:])
+                queryset = queryset.filter(**{filtercase: value[0]})
+        return queryset
+
+    def get_relation(self, relation, equal):
+        if relation in ['__lt', '__gt']:
+            return relation + 'e' * bool(equal)
+        elif equal:
+            return '__exact'
+        return ''
+
+    def releaseType(self, queryset, value):
+        return queryset.filter(releaseType__in=value)
+
+    def genre(self, queryset, value):
+        return queryset.filter(genre__in=value)
+
+    def state(self, queryset, value):
+        return queryset
+
+
 class AnimeListView(TemplateResponseMixin, BaseListView):
 
     http_method_names = ['get']
     paginator_class = Paginator
+    listfilter = None
+
+    def get_queryset(self):
+        queryset = super(AnimeListView, self).get_queryset()
+        return self.get_filter().get_queryset(queryset)
 
     def get_context_data(self, **kwargs):
-        self.filter()
         (link, cachestr) = self.get_link()
+        cachestr = self.get_filter().get_cachename(cachestr)
         context = {'cachestr': cachestr, 'link': link}
         if self.updated(cachestr):
             context.update(self.create_context_data(cachestr, link, **kwargs))
@@ -47,9 +91,10 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
             return True
         return not cache.latest(self.__class__.__name__, cachestr)
 
-    def filter(self):
-        pass
-        #raise Exception(urllib.unquote(self.request.COOKIES['filter']))
+    def get_filter(self):
+        if not self.listfilter:
+            self.listfilter = AnimeListFilter(self.request.session.get('filter', None))
+        return self.listfilter
 
     def get_link(self):
         "Implementation in subclasses"
