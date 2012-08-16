@@ -10,10 +10,10 @@ var add = new (function add_class(){
     var processor = null;
 
     this.init = function(){
-        add.form = document.getElementById('addform');
-        if(!add.form || !add.createForm()) return;
-        add.loaded = true;
-        add.processor = new RequestProcessor(this.processResponse, 'add');
+        this.form = document.getElementById('addform');
+        if(!this.form || !this.createForm()) return;
+        this.loaded = true;
+        this.processor = new RequestProcessor(this.processResponse, 'add', this);
 
         addEvent(document.getElementById('id_releaseType'), 'change', function(){
             var ecount = document.getElementById('id_episodesCount');
@@ -32,7 +32,7 @@ var add = new (function add_class(){
                     break;
             }
         });
-        add.genreHelperInit();
+        this.genreHelperInit();
     }
 
     this.genreHelperInit = function(){
@@ -50,9 +50,9 @@ var add = new (function add_class(){
                     ajax.loadXMLDoc(url+'search/', {'field': 'name', 'limit': 8, 'string': this.value},
                         new RequestProcessor(function(resp){
                             element.removeAllChilds(ul);
-                            if(!resp.status)
+                            if(!resp.status){
                                 element.appendChild(ul, {'li': {'innerText': resp.text}});
-                            else{
+                            }else{
                                 var list = resp.text.list;
                                 for(var i in list){
                                     element.appendChild(ul, [{'li': {'onclick': (function(id){ return function(){
@@ -158,10 +158,8 @@ var add = new (function add_class(){
 
 var edit = new (function edit_class(){
 
-    var processorForm = new RequestProcessor(function(resp){
-                                edit.processForm(resp); }, 'form');
-    var processorSet = new RequestProcessor(function(resp){
-                                edit.processResponse(resp); }, 'edit');
+    var processorForm = null;
+    var processorSet = null;
 
     this.status_menu_edit = false;
 
@@ -213,7 +211,9 @@ var edit = new (function edit_class(){
     }
 
     this.init = function(){
-        edit.loaded = true;
+        this.loaded = true;
+        processorForm = new RequestProcessor(this.processForm, 'form', this);
+        processorSet = new RequestProcessor(this.processResponse, 'edit', this);
     }
 
     this.send = function(form){
@@ -460,5 +460,5 @@ var edit = new (function edit_class(){
 
 })();
 
-addEvent(window, 'load', add.init);
-addEvent(window, 'load', edit.init);
+addEvent(window, 'load', function(){ add.init.call(add); });
+addEvent(window, 'load', function(){ edit.init.call(edit); });

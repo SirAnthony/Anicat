@@ -169,10 +169,9 @@ def addInBase(user, animeList, rewrite=True):
                         rating=anime['my_score'])
                 ub.save()
             anime['object'] = {'name': anime['object'].title, 'id': anime['object'].id}
-    cache.delete('userCss:%s' % user.id)
-    cache.delete('Stat:%s' % user.id)
-    for s in range(1, len(USER_STATUS)+1):
-        cache.delete('userstatus:%s:%s' % (user.id, s))
+    cache.delete('userCss:{0}'.format(user.id))
+    cache.delete('Stat:{0}'.format(user.id))
+    cache.delete('lastuserbundle:{0}'.format(user.id))
 
 
 def addToCache(user, anime_list):

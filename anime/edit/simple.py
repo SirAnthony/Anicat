@@ -54,10 +54,11 @@ class State(EditableDefault):
 
     def last(self):
         user = self.request.user
-        for s in [self.status, self.oldstatus]:
-            cache.delete('userstatus:%s:%s' % (user.id, s))
-        cache.delete('userCss:%s' % user.id)
-        cache.delete('Stat:%s' % user.id)
+        # We can setup it here instead of deleting, but expirience says:
+        # NEVER TRUST THE CACHE
+        cache.delete('lastuserbundle:{0}'.format(user.id))
+        cache.delete('userCss:{0}'.format(user.id))
+        cache.delete('Stat:{0}'.format(user.id))
 
 
 class Bundle(EditableDefault):

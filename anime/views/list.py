@@ -93,14 +93,12 @@ class IndexListView(AnimeListView):
         return qs
 
     def updated(self, cachestr):
-        if self.status is not None:
-            #FIXME: Now userstatus lives its own life.
-            cname = 'userstatus:{0}:{1}'.format(self.user.id, self.status)
-            ub = cache.get(cname)
-            if not ub:
-                cache.update_named_cache(cname)
-                return True
-        return super(IndexListView, self).updated(cachestr)
+        pk = cache.get('lastuserbundle:{0}'.format(self.user.id))
+        if not pk:
+            pk = UserStatusBundle.objects.filter(user=self.user) \
+                    .values('pk').latest('changed').get('pk', None)
+            cache.set('lastuserbundle:{0}'.format(self.user.id), pk)
+        return super(IndexListView, self).updated(cachestr, {'UserStatusBundle': pk})
 
 
 class RequestsListView(AnimeListView):

@@ -14,7 +14,7 @@ ERROR_MESSAGES = {
 
 
 ITEM_TYPES = {
-    'IndexListView': [AnimeItem],
+    'IndexListView': [AnimeItem, UserStatusBundle],
     'RequestsListView': [AnimeRequest],
     'SearchListView': [AnimeItem],
 }

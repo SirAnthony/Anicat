@@ -10,7 +10,8 @@ from anime.utils.paginator import Paginator
 
 class AnimeListFilter(object):
 
-    def __init__(self, data):
+    def __init__(self, data, user):
+        self.user = user
         if type(data) == dict:
             self.data = data
         else:
@@ -43,7 +44,8 @@ class AnimeListFilter(object):
         return queryset.filter(genre__in=value)
 
     def state(self, queryset, value):
-        return queryset
+        return queryset.filter(statusbundles__user=self.user,
+                               statusbundles__state__in=value)
 
 
 class AnimeListView(TemplateResponseMixin, BaseListView):
@@ -86,14 +88,15 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
         context.update(kwargs)
         return context
 
-    def updated(self, cachestr):
+    def updated(self, cachestr, keys={}):
         if not cache.key_valid(self.cache_name, cachestr):
             return True
-        return not cache.latest(self.__class__.__name__, cachestr)
+        return not cache.latest(self.__class__.__name__, cachestr, keys)
 
     def get_filter(self):
         if not self.listfilter:
-            self.listfilter = AnimeListFilter(self.request.session.get('filter', None))
+            self.listfilter = AnimeListFilter(
+                self.request.session.get('filter', None), self.request.user)
         return self.listfilter
 
     def get_link(self):

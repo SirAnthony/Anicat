@@ -335,8 +335,8 @@ function getFormData(form){
                         formData[elm.name] = elm.value;
                     break;
                 case "select-multiple":
-                    formData[elm.name] = filter(function(opt){
-                        return opt.selected; }, elm.childNodes);
+                    formData[elm.name] = map(function(opt){return opt.value},
+                        filter(function(opt){ return opt.selected; }, elm.childNodes));
                     break;
                 default:
                     formData[elm.name] = elm.value;

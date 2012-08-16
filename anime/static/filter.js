@@ -13,7 +13,7 @@ var Filter = new (function(){
                     this.parentNode.getElementsByTagName('option'))}}});
             }, getElementsByClassName('nano',
                 document.getElementById("id_filter_container")));
-        Filter.errorobj = getElementsByClassName('mainerror',
+        this.errorobj = getElementsByClassName('mainerror',
                         document.getElementById('id_filter_container'))[0];
     }
 
@@ -33,20 +33,18 @@ var Filter = new (function(){
                 }else
                     element.downTree(_f, elm);
             }, el)}, getElementsByClassName('filter', document));
-        cookies.del('filter');
     }
 
     this.apply = function(){
         element.removeAllChilds(this.errorobj);
-        var data = map(getFormData, getElementsByClassName('filter', document));
-        var processed = {};
+        var processed = {}
         map(function(el){
-            for(var name in el)
-                if(isArray(el[name]))
-                    processed[name] = map(function(o){ return o.value; }, el[name]);
-                else if(el[name])
-                    processed[name] = el[name];
-            }, data);
+            var data = getFormData(el);
+            for(var i in data){
+                if(data.hasOwnProperty(i))
+                    processed[i] = data[i];
+            }
+        }, getElementsByClassName('filter', document));
         ajax.loadXMLDoc(url+'filter/', processed, new RequestProcessor(
             function(resp){
                 message.hide();
@@ -68,4 +66,4 @@ var Filter = new (function(){
 })();
 
 
-addEvent(window, 'load', Filter.init);
+addEvent(window, 'load', function(){ Filter.init.call(Filter); });

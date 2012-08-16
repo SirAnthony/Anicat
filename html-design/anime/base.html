@@ -1,6 +1,7 @@
 {% spaceless %}
 {% load animetemplates %}
 {% load cache %}
+{% load compress %}
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
@@ -14,6 +15,7 @@
     <link href="/static/nanoscroller.css" type="text/css" rel="stylesheet" />
     <link href="{% url user_css %}" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="/jsi18n/"></script>
+{% compress js %}
     <script type="text/javascript" src="/static/js/element.js"></script>
     <script type="text/javascript" src="/static/script.js"></script>
     <script type="text/javascript" src="/static/ajax.js"></script>
@@ -25,6 +27,7 @@
     <script type="text/javascript" src="/static/card.js"></script>
     <script type="text/javascript" src="/static/calendar.js"></script>
     <script type="text/javascript" src="/static/DateTimeShortcuts.js"></script>
+{% endcompress %}
     {% if not user.is_authenticated %}<script type="text/javascript" src="/static/userstorage.js"></script>{% endif %}
     {% block customScripts %}{% endblock %}
 </head>

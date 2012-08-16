@@ -82,10 +82,12 @@ var ajax = new (function(){
 
 
 //################# Request processor
-function RequestProcessor(parser, response){
+function RequestProcessor(parser, response, caller){
 
     this.parser = parser;
     this.response = response;
+    this.caller = caller;
+    if(!this.caller) this.caller = this;
 
     this.setRequest = function(){
         message.create('Processing Request');
@@ -138,8 +140,9 @@ function RequestProcessor(parser, response){
                     throw new Error('Unknown error.');
             }else if(response && resp.response != response){
                 throw new Error('Unexpected response type: ' + resp.response);
-            }else
-                this.parser(resp);
+            }else{
+                this.parser.call(caller, resp);
+            }
         }catch(e){
             message.create(e);
             if(resp.text){

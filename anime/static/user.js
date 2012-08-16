@@ -20,12 +20,12 @@ var user = new( function(){
     this.init = function(){
         var info = document.getElementById('logininfo');
         if(!info){
-            user.logined = true;
+            this.logined = true;
             catalog_storage.disable();
         }else{
             catalog_storage.enable();
         }
-        user.loaded = true;
+        this.loaded = true;
     }
 
     this.toggle = function(){
@@ -236,4 +236,4 @@ var catalog_storage = new (function(){
 
 })();
 
-addEvent(window, 'load', user.init);
+addEvent(window, 'load', function(){ user.init.call(user); });
