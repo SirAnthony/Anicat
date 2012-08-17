@@ -253,6 +253,10 @@ a.blacklink:hover {
     margin: 0px 3px;
 }
 
+.app_over {
+    background-color: #808080;
+}
+
 #menu {
     font-size: 14pt;
 }
@@ -577,8 +581,8 @@ select.linktype {
     cursor: pointer;
 }
 
-.addform div#TitleHelperForm li:hover {
-    background-color: #808080;
+.addform .cont_men {
+    background-color: #EAE8DF;
 }
 
 .addform div#TitleHelperForm li p {

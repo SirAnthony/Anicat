@@ -97,7 +97,7 @@ class IndexListView(AnimeListView):
         if not pk:
             pk = UserStatusBundle.objects.filter(user=self.user) \
                     .values('pk').latest('changed').get('pk', None)
-            cache.set('lastuserbundle:{0}'.format(self.user.id), pk)
+            cache.cset('lastuserbundle:{0}'.format(self.user.id), pk)
         return super(IndexListView, self).updated(cachestr, {'UserStatusBundle': pk})
 
 

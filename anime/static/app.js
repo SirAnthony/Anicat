@@ -2,206 +2,191 @@
 //##############################    Автодополнение   ###########################
 //##############################################################################
 
-var app = {
-        
-    appobj: null,
-    appdiv: null,
-    apparea: null,
-    keyCode: null,
-    res: new Array(),
-    appajax: null,
-    text: null,
-    selected: -1,
-    retfunct: null,
-    appurl: '/cgi-bin/app.pl',
-    timeout: null,    
-    opts: {
-        delay: 7500,
-        kdelay: 1000,
+function Autocomplete(object, objectattrs, types, retval){
+    this.object = object;
+    this.node = null;
+    this.types = types;
+    this.retfield = retval;
+    this.text = '';
+    this.processor = null;
+    this.retintypes = false;
+    this.opts = {
+        delay: 1000,
         left: 0,
-        top: 0
-    },    
-    
-    acomp: function(obj, ar, e){        
-        
-        this.appobj = obj;
-        this.setFocus(this.appobj);
-        this.apparea = ar;
-        if(!this.appdiv){
-            this.appdiv = element.create('div', {className: 'app_div'});
-            element.appendChild(document.body, [this.appdiv]);
+        top: 0,
+        limit: 8,
+    },
+
+    this.selected = null;
+
+    var timeout = null;
+
+    for(var t in types){
+        if(retval == types[t]){
+            this.retintypes = true;
+            break;
         }
-        if(!e) e = window.event;
-        this.keyCode = e.keyCode;
-        switch(e.keyCode) {
+    }
+
+    if(types.indexOf('id') < 0){
+        types.push('id');
+    }
+
+
+    this.init = function(){
+        this.node = element.create('ul', objectattrs);
+        element.insert(this.object, this.node, true);
+        addEvent(this.object, 'keyup', (function(app){
+                return function(e){ return app.keyevent.call(app, e); }})(this))
+        this.text = this.object.value;
+        this.processor = new RequestProcessor(this.processResponse, 'search', this)
+    }
+
+    this.visible = function(){
+        return this.node.style.display == 'block';
+    }
+
+    this.keyevent = function(event){
+        if(!event) event = window.event;
+        var ret = true;
+        var prevent = function(e){
+            if(e.preventDefault) e.preventDefault();
+            else e.returnValue = false;
+            ret = false;
+        }
+        switch(event.keyCode){
             case 38: // up
-                if(this.appdiv.style.display == 'block') this.moveSelect(-1);
-                if(e.preventDefault) e.preventDefault();
-                else e.returnValue = false;
+                if(this.visible()) this.moveSelection(-1);
+                prevent(event);
                 break;
             case 40: // down
-                if(this.appdiv.style.display == 'block') this.moveSelect(1);
-                if(e.preventDefault) e.preventDefault();
-                else e.returnValue = false;
+                if(this.visible()) this.moveSelection(1);
+                prevent(event);
                 break;
             case 9:  // tab
             case 13: // return
-                if(this.appdiv.style.display == 'block' && this.selected >= 0){
-                    this.selectCur();
-                    this.appobj.blur();
-                }
-                if(e.preventDefault) e.preventDefault();
-                else e.returnValue = false;
+                if(this.visible() && this.selected)
+                    this.setValue.call(this, this.selected);
+                prevent(event);
             break;
             default:
-                if(e.keyCode > 32) this.hideRes();
-                this.selected = -1;
+                if(event.keyCode > 32) this.hide();
+                this.selected = null;
                 if (this.timeout) clearTimeout(this.timeout);
-                this.timeout = setTimeout(function(){app.change();}, this.opts.kdelay);
+                this.timeout = setTimeout((function(t){
+                    return function(){ t.process.call(t); }})(this),
+                    this.opts.delay);
             break;
-        }        
-    },
-    
-    change: function(){
-        if( this.keyCode == 46 || (this.keyCode > 8 && this.keyCode < 32) ) 
-            return this.hideRes();
-        if( this.text != this.appobj.value){        
-            this.text = this.appobj.value;            
-            if(this.appobj.textLength > 2){                                
-                this.setpos(this.appdiv, this.appobj);
-                var params = {
-                    method: 'auto',
-                    value: this.appobj.value,
-                    area: this.apparea
-                }
-                this.getarr(this.autores, params);                 
-            }else{
-                this.hideRes();
-            }
-        }        
-    },
-    
-    moveSelect: function(step){
-        
-        if (this.timeout) clearTimeout(this.timeout);
-        var lis = this.appdiv.firstChild.childNodes;
-        element.downTree(function(el){pclass.remove(el, "app_over");}, this.appdiv.firstChild);                         
-        this.selected += step;
-        if(this.selected <= 0){
-            this.selected = 0;
-        }else if(this.selected >= lis.length){
-            this.selected = lis.length - 1;
         }
-        pclass.add(lis[this.selected], "app_over");
+        return ret;
+    }
+
+    this.hide = function(){
+        toggle(this.node, false);
+    }
+
+    this.setSelection = function(elem){
+        element.downTree(function(el){pclass.remove(el, "app_over");}, this.node);
+        this.selected = elem;
+        this.object.focus();
+        pclass.add(this.selected, "app_over");
+    }
+
+    this.removeSelection = function(elem){
+        element.downTree(function(el){pclass.remove(el, "app_over");}, this.node);
+        if(this.selected == elem){
+            this.selected = null;
+        }
+    }
+
+    this.moveSelection = function(step){
+        if(this.timeout)
+            clearTimeout(this.timeout);
+        element.downTree(function(el){pclass.remove(el, "app_over");}, this.node);
+        var sign = step/Math.abs(step);
+        if(!this.selected){
+            this.selected = this.node.firstChild;
+        }else{
+            for(var i = 0; i < Math.abs(step); i++){
+                var sel = ((sign > 0) ?
+                    this.selected.nextSibling : this.selected.previousSibling);
+                if(sel)
+                    this.selected = sel;
+            }
+        }
+        pclass.add(this.selected, "app_over");
     },
 
-    getarr: function(funct,params){
-        
-        this.retfunct = funct;
-        this.appajax = '1';
-        qw = 'method='+
-        ((params['method']) ? params['method'] : "none") +
-        ((params['value']) ? "&string="+params['value'] : "") +
-        ((params['area']) ? "&area="+params['area']: "") +
-        ((params['local']) ? "&local="+params['local']: "");                        
-        loadXMLDoc(this.appurl, qw);
-    },
-    
-    autores: function(text){
-        this.res = eval(text);
-        if(this.appdiv.firstChild)
-            this.appdiv.removeChild(this.appdiv.firstChild);
-        var ul = document.element.createent('ul');                
-        for (var i=0; i < this.res.length; i++) {
-            var li = element.create('li', {
-                innerHTML: this.highLight(this.res[i].name),  // change to append
-                selectValue: this.res[i],
-                onmouseover: function(){
-                    if(app.timeout) clearTimeout(app.timeout);
-                    var sel = (function(obj,c){
-                        for(var i=0; i<c.length; i++){if(c[i]==obj)    return i;}
-                    })(this, this.parentNode.childNodes);
-                    if(app.selected >= 0){
-                        var old = this.parentNode.childNodes[app.selected];
-                        pclass.remove(old, "app_over");
-                    }
-                    pclass.add(this, "app_over");
-                    app.selected = sel;
-                },
-                onmouseout: function(){
-                    app.timeout = setTimeout(function(){app.hideRes();}, app.opts.delay);
-                    pclass.remove(this, "app_over");
-                    app.selected = -1;
-                },
-                onclick: function(e){
-                    if(e.stopPropagation) e.stopPropagation();
-                    else e.cancelBubble = true;
-                    if(e.preventDefault) e.preventDefault();
-                    else e.returnValue = false;                     
-                    app.selectCur(this);
-                }
-            });
-            element.appendChild(ul,[li]);
-        }                
-        element.appendChild(this.appdiv, [ul]);
-        this.retfunct = null;        
-        this.appdiv.style.display = 'block';
-        if (this.timeout) clearTimeout(this.timeout);
-        this.timeout = setTimeout(function(){app.hideRes();}, this.opts.delay);  
-    },
-    
-    hideRes: function(){
-        if (this.timeout) clearTimeout(this.timeout);
-        if(this.appdiv.firstChild)
-            this.appdiv.removeChild(this.appdiv.firstChild);
-        this.appdiv.style.display = 'none';            
-    },
-    
-    hideResult: function() {
-        if (this.timeout) clearTimeout(this.timeout);
-        this.timeout = setTimeout(function(){app.hideRes();}, 150);
-    },
-    
-    selectCur: function(item){        
-        if (this.timeout) clearTimeout(this.timeout);
-        var s;
-        if(item){
-            s = item;            
+    this.process = function(){
+        if(this.object.value.length < 2 || this.text == this.object.value)
+            return;
+        this.text = this.object.value;
+        ajax.loadXMLDoc(url+'search/', {'fields': this.types,
+                        'limit': this.opts.limit, 'string': this.text},
+            this.processor);
+    }
+
+    this.processResponse = function(resp){
+        var ul = this.object.nextSibling;
+        element.removeAllChilds(ul);
+        toggle(ul, true);
+        if(!resp.status){
+            element.appendChild(ul, {'li': {'innerText': resp.text}});
         }else{
-            var f = function(obj){if(pclass.hasClass(obj, "app_over")) return obj;}
-            s = element.downTree(f, this.appdiv.firstChild, 1);
+            var list = resp.text.list;
+            for(var i in list){
+                var content = map(function(t){
+                    return {'input': {'type': 'hidden', 'name': t, 'value': list[i][t]}};
+                    }, types);
+                content.push.apply(content, this.view(list[i]));
+                element.appendChild(ul, [{'li': {'onclick': (function(app){
+                    return function(){ app.setValue.call(app, this); }})(this),
+                    'onmouseover': (function(app){
+                    return function(){ app.setSelection.call(app, this); }})(this),
+                    'onmouseout': (function(app){
+                    return function(){ app.removeSelection.call(app, this); }})(this),
+                    }}, content]);
+            }
         }
-        this.appobj.value = ((s.selectValue) ? s.selectValue.name : s.innerHTML);
-        if(s.selectValue && s.selectValue.id){
-            var id = ((this.appobj.nextSibling.name == "pid") ? this.appobj.nextSibling : (function(obj){
-                    var el = element.create('input', {type: 'hidden', name: 'pid'});
-                    obj.parentNode.insertBefore(el, obj.nextSibling);
-                    return el;})(this.appobj));
-            id.value = s.selectValue.id;
+    }
+
+    this.setValue = function(elem){
+        if(this.retintypes){
+            var value = ''
+            element.downTree(function(el){
+                if(el.tagName == 'INPUT' && el.type == 'hidden' && el.name == retfield)
+                    value = el.value;
+            }, elem);
+        }else{
+            var id;
+            element.downTree(function(el){
+                if(el.tagName == 'INPUT' && el.type == 'hidden' && el.name == 'id')
+                    id = el.value;
+            }, elem);
+            if(!id) return;
+            ajax.loadXMLDoc(url+'get/', {'id': id, 'field': this.retfield},
+                new RequestProcessor(this.ajaxProcessor, 'get', this));
         }
-        this.text = this.appobj.value;        
-        this.hideRes();
-    },    
-    
-    highLight: function(str){
+        element.downTree(function(el){pclass.remove(el, "app_over");}, this.node);
+        this.selected = null;
+    }
+
+    this.view = function(){
+        return []
+    }
+
+    // Ajax processor calls with Autocomplete object as this
+    this.ajaxProcessor = function(resp){};
+
+
+    this.highlight = function(str){
         if(this.text){
-            var re = new RegExp("("+this.text+")", "ig");            
+            var re = new RegExp("("+this.text+")", "ig");
             return str.replace(re, "<b>$1</b>");
         }
         return str;
     },
-    
-    setFocus: function(obj){
-        if(!this.appobj.onfocus)
-            this.appobj.onfocus = function(){this.hasFocus = true;};
-        if(!this.appobj.onblur)
-            this.appobj.onblur = function(){this.hasFocus = false; app.hideResult();};
-    },
-        
-    setpos: function(){
-        var os = getOffset(this.appobj);
-        this.appdiv.style.top = os.top+this.appobj.offsetHeight+this.opts.top+'px';
-        this.appdiv.style.left= os.left-this.appobj.offsetLeft+this.opts.left+'px';
-    }
-    
+
+
+    this.init();
 }

@@ -96,9 +96,8 @@ var searcher = new ( function(){
     this.send = function(page, e){
         if(!this.loaded) return;
         if(!page) page = 1;
-        var val;
         var sort;
-        if(this.input.value.length < 3 && val != 'episodes' && val != 'type'){
+        if(this.input.value.length < 3){
             element.removeAllChilds(this.result);
             element.appendChild(this.result, [{'p': {
                 innerText: 'Query must consist of at least 3 characters.'}}]);
@@ -107,8 +106,7 @@ var searcher = new ( function(){
             element.appendChild(this.result, [{'p': {innerText: 'Invalid request.'}}]);
         }else{
             var text = this.input.value.toLowerCase();
-            if(!val) val = 'name';
-            var qw = {'page': page, 'field': val, 'string': text, 'sort': sort};
+            var qw = {'page': page, 'string': text, 'sort': sort};
             message.toEventPosition(e);
             ajax.loadXMLDoc(url+'search/', qw, processor);
         }

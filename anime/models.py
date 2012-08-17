@@ -204,8 +204,9 @@ class AnimeItem(models.Model):
         except (ValueError, TypeError, IndexError):
             return 'Bad value'
 
-    releaseTypeS = property(_getReleaseTypeString)
+    type = property(_getReleaseTypeString)
     release = property(_getRelease)
+    episodes = property(episodesCount)
 
     def save(self, *args, **kwargs):
         try:

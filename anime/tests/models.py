@@ -82,7 +82,7 @@ class ModelsAnimeFixturesTest(TestCase):
         a.save()
         self.assertEquals(unicode(a), 'd [ONA]')
         self.assertEquals(a.release, date)
-        self.assertEquals(a.releaseTypeS, 'ONA')
+        self.assertEquals(a.type, 'ONA')
         a.title = 'd1'
         a.endedAt = datetime.now()
         models.AnimeName(anime=a, title='d1').save()

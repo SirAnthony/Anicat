@@ -214,7 +214,7 @@ class ExplorerTest(TestCase):
         self.assertEquals(ex.get_value(anime, None), None)
         for name in ['type', 'releaseType']:
             ex.set_field(name)
-            self.assertEquals(ex.get_value(anime, None), anime.releaseTypeS)
+            self.assertEquals(ex.get_value(anime, None), anime.type)
         ex.set_field('releasedAt,endedAt')
         self.assertEquals(ex.get_value(anime, None), anime.release)
         ex.set_field('genre')

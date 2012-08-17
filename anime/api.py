@@ -345,7 +345,6 @@ class Search(Base):
 
     params = {
         'string': unicode,
-        'field': Noneable(unicode, 'name'),
         'order': Noneable(unicode, 'title'),
         'page': Noneable(int, 0),
         'limit': Noneable(int, 30)

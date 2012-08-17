@@ -8,6 +8,7 @@ var add = new (function add_class(){
     var form = null;
     var loaded = false;
     var processor = null;
+    var genreImport = null;
 
     this.init = function(){
         this.form = document.getElementById('addform');
@@ -42,43 +43,27 @@ var add = new (function add_class(){
                 var form = document.getElementById('TitleHelperForm')
                 if(toggle(form)) form.firstChild.focus(); }
             }}]]);
-        element.insert(genre, [{'div': {'id': 'TitleHelperForm', 'className': 'cont_men'}},
-            [{'input': {'type': 'text', onkeyup: function(){
-                    if(this.value.length < 3 || this._lastlength == this.value.length) return;
-                    this._lastlength = this.value.length;
-                    var ul = this.nextSibling;
-                    ajax.loadXMLDoc(url+'search/', {'field': 'name', 'limit': 8, 'string': this.value},
-                        new RequestProcessor(function(resp){
-                            element.removeAllChilds(ul);
-                            if(!resp.status){
-                                element.appendChild(ul, {'li': {'innerText': resp.text}});
-                            }else{
-                                var list = resp.text.list;
-                                for(var i in list){
-                                    element.appendChild(ul, [{'li': {'onclick': (function(id){ return function(){
-                                        ajax.loadXMLDoc(url+'get/', {'id': id, 'field': 'genre_list'},
-                                            new RequestProcessor(function(resp){
-                                                if(!resp.status) return;
-                                                var opts = ul.parentNode.nextSibling.options;
-                                                map(function(elem){ if(elem) elem.selected = false;}, opts);
-                                                map(function(g){
-                                                    for(var o in opts)
-                                                        if(opts[o] && opts[o].innerText == g){
-                                                            opts[o].selected = true; break; }
-                                                    }, resp.text.genre_list);
-                                                toggle(ul.parentNode);
-                                            }, 'get'));
-                                    }})(list[i].id)}}, [
-                                        {'p' : {'innerText': list[i].name}},
-                                        {'span' : {'innerText': '[' + list[i].type + ']'}},
-                                        {'span' : {'innerText': list[i].release}},
-                                    ]]);
-                                }
-                            }
-                        }, 'search'));
-                }}},
-                {'ul': {}}
-            ]]);
+        var input = element.create('input', {'type': 'text'});
+        element.insert(genre, [{'div': {'id': 'TitleHelperForm',
+            'className': 'cont_men'}}, [input]]);
+        genreImport = new Autocomplete(input, {}, ['title', 'type', 'release'], 'genre_list');
+        genreImport.view = function(data){
+            return [{'p' : {'innerText': data.title}},
+                {'span' : {'innerText': '[' + data.type + ']'}},
+                {'span' : {'innerText': data.release}}
+            ]
+        }
+        genreImport.ajaxProcessor = function(resp){
+            if(!resp.status) return;
+            var opts = this.node.parentNode.nextSibling.options;
+            map(function(elem){ if(elem) elem.selected = false;}, opts);
+            map(function(g){
+                for(var o in opts)
+                    if(opts[o] && opts[o].innerText == g){
+                        opts[o].selected = true; break; }
+                }, resp.text.genre_list);
+            toggle(this.node.parentNode);
+        }
     }
 
     this.toggle = function(){

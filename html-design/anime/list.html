@@ -58,7 +58,7 @@
                     <td onclick="cnt('name', '{{ title.id }}', event);" id="name{{ title.id }}" class="name">{{ title.title }}</td>
                     <td onclick="cnt('episodes', '{{ title.id }}', event);" id="episodes{{ title.id }}" class="episodes">{% if title.count %}{{ title.count }}/{% endif %}{{ title.episodesCount }}</td>
                     <td onclick="cnt('release', '{{ title.id }}', event);" id="release{{ title.id }}" class="release">{{ title.release }}</td>
-                    <td onclick="cnt('type', '{{ title.id }}', event);" id="type{{ title.id }}" class="type">{{ title.releaseTypeS }}</td>
+                    <td onclick="cnt('type', '{{ title.id }}', event);" id="type{{ title.id }}" class="type">{{ title.type }}</td>
                     {% if link.status %}
                     <td id="changed{{title.id}}" class="changed">{{ title.changed|date:"d.m.Y" }}</td>
                         {% if link.status == 3 %}

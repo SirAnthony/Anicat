@@ -81,7 +81,7 @@
                     <td onclick="cnt('name', '{{ title.id }}', event);" id="name{{ title.id }}" class="name">{{ title.title }}</td>
                     <td onclick="cnt('episodes', '{{ title.id }}', event);" id="episodes{{ title.id }}" class="episodes">{{ title.episodesCount }}</td>
                     <td onclick="cnt('release', '{{ title.id }}', event);" id="release{{ title.id }}" class="release">{{ title.release }}</td>
-                    <td onclick="cnt('type', '{{ title.id }}', event);" id="type{{ title.id }}" class="type">{{ title.releaseTypeS }}</td>
+                    <td onclick="cnt('type', '{{ title.id }}', event);" id="type{{ title.id }}" class="type">{{ title.type }}</td>
                     {# custom fields #}
                 {% endfor %}
                 </tr>
