@@ -7,6 +7,7 @@ from django.utils.html import conditional_escape
 from django.utils.translation import ugettext_lazy as _
 from anime.forms.fields import UnknownDateField
 from anime.models import AnimeItem, AnimeName, UserStatusBundle
+from anime.utils.json import JSONFunctionCaller
 
 
 class ReadOnlyModelForm(ModelForm):
@@ -86,6 +87,9 @@ class UserStatusForm(ErrorModelForm):
         else:
             self.fields['count'] = ChoiceField(choices=(
                 (i, i) for i in range(1, self.instance.anime.episodesCount+1)))
+        for field in self.fields.values():
+            field.widget.attrs['onchange'] = JSONFunctionCaller(
+                            'edit.send', 'this.parentNode.parentNode')
 
     class Meta:
         model = UserStatusBundle

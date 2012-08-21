@@ -1,48 +1,10 @@
 # -*- coding: utf-8 -*-
-import datetime
 
-from anime.models import DATE_FORMATS
-from anime.utils.misc import is_iterator
+from anime.utils.json import prepare_data, JSONFunction
 
 from django import forms
 from django.forms import formsets
 
-from django.utils.encoding import smart_unicode, force_unicode
-from django.utils.functional import Promise
-
-
-def prepare_data(data, depth=None):
-
-    #Not works with 0
-    depth = depth or 7
-
-    if depth <= 0:
-        return smart_unicode(data)
-
-    if isinstance(data, basestring):
-        return smart_unicode(data)
-
-    elif isinstance(data, (bool, int, long, float, complex)):
-        return data
-
-    elif data is None:
-        return data
-
-    elif isinstance(data, datetime.datetime) or \
-         isinstance(data, datetime.date):
-        return data.strftime(DATE_FORMATS[0])
-
-    elif isinstance(data, Promise):
-        return force_unicode(data)
-
-    elif isinstance(data, dict):
-        return dict((key, prepare_data(value, depth - 1))
-                            for key, value in data.iteritems())
-
-    elif is_iterator(data):
-        return [prepare_data(value, depth - 1) for value in data]
-
-    return smart_unicode(data)
 
 
 class FormSerializer(object):
@@ -80,6 +42,20 @@ class FormSerializer(object):
             return 'hidden'
         return 'text'
 
+    def compact_choices(self, choices):
+        #TODO: move it to form generation.
+        if type(choices) is list and choices[0][1] == '---------':
+            del choices[:1]
+        #FIXME: no additional tests
+        try:
+            ranged = len(filter(lambda x: int(x[0]) == int(x[1]), choices))
+            if ranged == len(choices):
+                s = choices[0][0] or choices[1][0]
+                choices = JSONFunction('range', s, choices[-1][0])
+        except (ValueError, TypeError):
+            pass
+        return choices
+
     def field_to_dict(self, bound_field):
         field_dict = {}
         field = bound_field.field
@@ -92,23 +68,7 @@ class FormSerializer(object):
                 field_dict[attr_name] = attr
 
         if 'choices' in field_dict:
-            #TODO: move it to form generation.
-            if type(field_dict['choices']) is list and \
-               field_dict['choices'][0][1] == '---------':
-                del field_dict['choices'][:1]
-            #FIXME: no additional tests
-            try:
-                for elem in field_dict['choices']:
-                    if int(elem[0]) != int(elem[1]):
-                        raise ValueError
-                if field_dict['choices'][0][0]:
-                    s = field_dict['choices'][0][0]
-                else:
-                    s = field_dict['choices'][1][0]
-                field_dict['choices'] = 'range(%s, %s)' % (
-                    s, field_dict['choices'][-1][0])
-            except (TypeError, ValueError):
-                pass
+            field_dict['choices'] = self.compact_choices(field_dict['choices'])
 
         field_dict['id'] = bound_field.auto_id
         field_dict['name'] = bound_field.html_name
@@ -150,8 +110,8 @@ class FormSerializer(object):
             if 'type' in field and field['type'] == 'hidden':
                 if form_instance.errors:
                     top_errors.extend([
-                        u'(Hidden field %s) %s' % (
-                            name, force_unicode(e)
+                        u'(Hidden field {0}) {1}'.format(
+                            name, prepare_data(e)
                         ) for e in form_instance.errors
                     ])
                 hidden_fields.append(field)

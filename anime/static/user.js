@@ -6,6 +6,7 @@ var user = new( function(){
 
     var loaded = false;
     var logined = false;
+    var processor = null;
 
     this.inform = function(msg, obj){
         if(!this.loaded) return;
@@ -26,6 +27,24 @@ var user = new( function(){
             catalog_storage.enable();
         }
         this.loaded = true;
+        processor = new RequestProcessor({'login': function(resp){
+                message.hide();
+                if(resp.status){
+                    this.loginSuccess(resp.text);
+                    updateStylesheets('/css/');
+                }else
+                    this.loginFail(resp.text);
+            },
+            'register': function(resp){
+                message.hide();
+                if(!resp.status){
+                    this.registerFail(resp.text);
+                }else{
+                    this.loginSuccess(resp.text);
+                    updateStylesheets('/css/');
+                }
+            }
+        }, this);
     }
 
     this.toggle = function(){
@@ -50,16 +69,7 @@ var user = new( function(){
         toggle(document.getElementById('logininfo').parentNode, -1);
         var rform = document.getElementById('login');
         var formData = getFormData(rform);
-        ajax.loadXMLDoc(url+'login/', formData, new RequestProcessor(
-            function(resp){
-                message.hide();
-                if(resp.status){
-                    user.loginSuccess(resp.text);
-                    updateStylesheets('/css/');
-                }else
-                    user.loginFail(resp.text);
-            }
-        ), 'login');
+        ajax.loadXMLDoc(url+'login/', formData, processor);
         message.toEventPosition(e);
         return false;
     }
@@ -159,16 +169,7 @@ var user = new( function(){
         var errors = getElementsByClassName('error', obj);
         element.remove(errors);
         toggle(obj.parentNode, -1);
-        ajax.loadXMLDoc(url+'register/', formData, new RequestProcessor(
-            function(resp){
-                message.hide();
-                if(!resp.status){
-                    user.registerFail(resp.text);
-                }else{
-                    user.loginSuccess(resp.text);
-                    updateStylesheets('/css/');
-                }
-            }, 'register'));
+        ajax.loadXMLDoc(url+'register/', formData, processor);
         message.toEventPosition(e);
         return false;
     }

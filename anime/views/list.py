@@ -94,9 +94,12 @@ class IndexListView(AnimeListView):
 
     def updated(self, cachestr):
         pk = cache.get('lastuserbundle:{0}'.format(self.user.id))
-        if not pk:
-            pk = UserStatusBundle.objects.filter(user=self.user) \
+        if not pk and self.user.is_authenticated():
+            try:
+                pk = UserStatusBundle.objects.filter(user=self.user) \
                     .values('pk').latest('changed').get('pk', None)
+            except:
+                pk = None
             cache.cset('lastuserbundle:{0}'.format(self.user.id), pk)
         return super(IndexListView, self).updated(cachestr, {'UserStatusBundle': pk})
 

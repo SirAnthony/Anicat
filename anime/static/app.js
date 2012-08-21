@@ -1,6 +1,12 @@
 //##############################################################################
-//##############################    Автодополнение   ###########################
+//##############################    Autocomplete   ###########################
 //##############################################################################
+
+function add_auto(obj, attrs, types, retval){
+    var comp = new Autocomplete(obj, attrs, types, retval);
+    //TODO: event removing
+    obj.onfocus = undefined;
+}
 
 function Autocomplete(object, objectattrs, types, retval){
     this.object = object;
@@ -21,6 +27,10 @@ function Autocomplete(object, objectattrs, types, retval){
 
     var timeout = null;
 
+    if(types.indexOf('id') < 0){
+        types.push('id');
+    }
+
     for(var t in types){
         if(retval == types[t]){
             this.retintypes = true;
@@ -28,18 +38,16 @@ function Autocomplete(object, objectattrs, types, retval){
         }
     }
 
-    if(types.indexOf('id') < 0){
-        types.push('id');
-    }
-
 
     this.init = function(){
-        this.node = element.create('ul', objectattrs);
+        attrs = {'className': 'app'};
+        attrs = extend(attrs, objectattrs);
+        this.node = element.create('ul', attrs);
         element.insert(this.object, this.node, true);
         addEvent(this.object, 'keyup', (function(app){
                 return function(e){ return app.keyevent.call(app, e); }})(this))
         this.text = this.object.value;
-        this.processor = new RequestProcessor(this.processResponse, 'search', this)
+        this.processor = new RequestProcessor({'search': this.processResponse}, this)
     }
 
     this.visible = function(){
@@ -79,6 +87,10 @@ function Autocomplete(object, objectattrs, types, retval){
             break;
         }
         return ret;
+    }
+
+    this.show = function(){
+        toggle(this.node, true);
     }
 
     this.hide = function(){
@@ -127,11 +139,10 @@ function Autocomplete(object, objectattrs, types, retval){
     }
 
     this.processResponse = function(resp){
-        var ul = this.object.nextSibling;
-        element.removeAllChilds(ul);
-        toggle(ul, true);
+        message.hide();
+        element.removeAllChilds(this.node);
         if(!resp.status){
-            element.appendChild(ul, {'li': {'innerText': resp.text}});
+            element.appendChild(this.node, {'li': {'innerText': resp.text}});
         }else{
             var list = resp.text.list;
             for(var i in list){
@@ -139,7 +150,7 @@ function Autocomplete(object, objectattrs, types, retval){
                     return {'input': {'type': 'hidden', 'name': t, 'value': list[i][t]}};
                     }, types);
                 content.push.apply(content, this.view(list[i]));
-                element.appendChild(ul, [{'li': {'onclick': (function(app){
+                element.appendChild(this.node, [{'li': {'onclick': (function(app){
                     return function(){ app.setValue.call(app, this); }})(this),
                     'onmouseover': (function(app){
                     return function(){ app.setSelection.call(app, this); }})(this),
@@ -148,15 +159,17 @@ function Autocomplete(object, objectattrs, types, retval){
                     }}, content]);
             }
         }
+        this.show();
     }
 
     this.setValue = function(elem){
         if(this.retintypes){
             var value = ''
             element.downTree(function(el){
-                if(el.tagName == 'INPUT' && el.type == 'hidden' && el.name == retfield)
+                if(el.tagName == 'INPUT' && el.type == 'hidden' && el.name == retval)
                     value = el.value;
             }, elem);
+            this.object.value = value;
         }else{
             var id;
             element.downTree(function(el){
@@ -165,14 +178,19 @@ function Autocomplete(object, objectattrs, types, retval){
             }, elem);
             if(!id) return;
             ajax.loadXMLDoc(url+'get/', {'id': id, 'field': this.retfield},
-                new RequestProcessor(this.ajaxProcessor, 'get', this));
+                new RequestProcessor({'get': this.ajaxProcessor}, this));
         }
-        element.downTree(function(el){pclass.remove(el, "app_over");}, this.node);
-        this.selected = null;
+        this.removeSelection();
+        this.hide();
     }
 
-    this.view = function(){
-        return []
+    // This function accepts data for current returned item and returns
+    // its representation. Redefine this defenition for your data.
+    this.view = function(data){
+        return [{'p' : {'innerText': data.title}},
+            {'span' : {'innerText': '[' + data.type + ']'}},
+            {'span' : {'innerText': data.release}}
+        ]
     }
 
     // Ajax processor calls with Autocomplete object as this

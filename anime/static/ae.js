@@ -14,7 +14,7 @@ var add = new (function add_class(){
         this.form = document.getElementById('addform');
         if(!this.form || !this.createForm()) return;
         this.loaded = true;
-        this.processor = new RequestProcessor(this.processResponse, 'add', this);
+        this.processor = new RequestProcessor({'add': this.processResponse}, this);
 
         addEvent(document.getElementById('id_releaseType'), 'change', function(){
             var ecount = document.getElementById('id_episodesCount');
@@ -47,12 +47,6 @@ var add = new (function add_class(){
         element.insert(genre, [{'div': {'id': 'TitleHelperForm',
             'className': 'cont_men'}}, [input]]);
         genreImport = new Autocomplete(input, {}, ['title', 'type', 'release'], 'genre_list');
-        genreImport.view = function(data){
-            return [{'p' : {'innerText': data.title}},
-                {'span' : {'innerText': '[' + data.type + ']'}},
-                {'span' : {'innerText': data.release}}
-            ]
-        }
         genreImport.ajaxProcessor = function(resp){
             if(!resp.status) return;
             var opts = this.node.parentNode.nextSibling.options;
@@ -143,8 +137,7 @@ var add = new (function add_class(){
 
 var edit = new (function edit_class(){
 
-    var processorForm = null;
-    var processorSet = null;
+    var processor = null;
 
     this.status_menu_edit = false;
 
@@ -155,8 +148,8 @@ var edit = new (function edit_class(){
 
     this.rf = function(id, field, e){
         if(!user.logined && field == 'state'){
-            processorForm.setRequest()
-            processorForm.parse({'response': 'form', 'status': true,
+            processor.setRequest()
+            processor.parse({'response': 'form', 'status': true,
                                     'id': id, 'model': field});
             message.unlock()
         }else
@@ -180,7 +173,7 @@ var edit = new (function edit_class(){
                 q['field'] = this.edits[field];
             }
         }
-        ajax.loadXMLDoc(url+'form/', q, processorForm);
+        ajax.loadXMLDoc(url+'form/', q, processor);
     }
 
     this.getFieldLink = function(id, name){
@@ -197,8 +190,8 @@ var edit = new (function edit_class(){
 
     this.init = function(){
         this.loaded = true;
-        processorForm = new RequestProcessor(this.processForm, 'form', this);
-        processorSet = new RequestProcessor(this.processResponse, 'edit', this);
+        processor = new RequestProcessor({'form': this.processForm,
+                                    'edit': this.processResponse}, this);
     }
 
     this.send = function(form){
@@ -206,13 +199,13 @@ var edit = new (function edit_class(){
             return;
         var formData = this.getFormData(form);
         if(!user.logined && formData.model == 'state'){
-            processorSet.setRequest();
+            processor.setRequest();
             formData['set'] = true;
             formData['response'] = 'edit';
-            processorSet.parse(formData);
+            processor.parse(formData);
             message.unlock()
         }else{
-            ajax.loadXMLDoc(url+'set/', formData, processorSet);
+            ajax.loadXMLDoc(url+'set/', formData, processor);
         }
         var errors = getElementsByClassName('error', form);
         element.remove(errors);
@@ -261,29 +254,13 @@ var edit = new (function edit_class(){
                 message.addTree(forms.getField(field, resp.id));
                 message.show();
             }
-            for(var fld=0; fld<resp.form.length; fld++){
-                for(var type in resp.form[fld]){
-                    var f = resp.form[fld];
-                    if(type == 'select'){
-                        if(f[type].choices && isString(f[type].choices) && /^range\(/.test(f[type].choices))
-                            resp.form[fld][type].choices = eval(f[type].choices);
-                        if(resp.model == 'state')
-                            resp.form[fld][type].onchange = function(){ edit.send(this.parentNode.parentNode); };
-                    }
-                }
-            }
 
             if(field == 'name' || field == 'bundle' || field == 'links'){
                 resp.form.push({'a': {name: 'id', className: 'right', innerText: 'Add field',
                 onclick: (function(name){ return function(){
-                    var num = (function(el){
-                        var num = 0;
-                        do{
-                            if(el.tagName == 'INPUT' && el.type == 'text')
-                                num += 1;
-                        }while(el = el.nextSibling)
-                        return num;
-                    })(this.parentNode.firstChild);
+                    var num = filter(function(el){
+                        return (el.tagName == 'INPUT' && el.type == 'text');
+                        }, this.parentNode.childNodes).length;
                     if(field == 'links')
                         var nm = 'Link ' + num;
                     else

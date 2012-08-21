@@ -6,9 +6,7 @@ var ajax = new (function(){
 
     var cookie = cookies;
 
-    var defaultProcessor = new RequestProcessor(function(resp){
-        throw new Error('Bad request processor');
-    })
+    var defaultProcessor = new RequestProcessor({})
 
     //################# Вызов аяксового обьекта.
     this.loadXMLDoc = function(url, qry, processor){
@@ -82,10 +80,9 @@ var ajax = new (function(){
 
 
 //################# Request processor
-function RequestProcessor(parser, response, caller){
+function RequestProcessor(parsers, caller){
 
-    this.parser = parser;
-    this.response = response;
+    this.parsers = parsers;
     this.caller = caller;
     if(!this.caller) this.caller = this;
 
@@ -109,6 +106,7 @@ function RequestProcessor(parser, response, caller){
             if(this.readyState == 4) {
                 if(this.status == 200){
                     var resp = this.responseText.replace(/\n/gi,'');
+                    resp = resp.replace(/"\$(.+?)\$"/gi,'$1');
                     if( /^\{.*\}$/.test(resp)){
                         resp = eval("("+resp+")");
                         processor.parse(resp);
@@ -138,10 +136,11 @@ function RequestProcessor(parser, response, caller){
                     throw new Error(resp.text); // FIXME: doubling
                 else
                     throw new Error('Unknown error.');
-            }else if(response && resp.response != response){
-                throw new Error('Unexpected response type: ' + resp.response);
             }else{
-                this.parser.call(caller, resp);
+                var parser = this.parsers[resp.response];
+                if(!parser)
+                    throw new Error('Unexpected response type: ' + resp.response);
+                parser.call(caller, resp);
             }
         }catch(e){
             message.create(e);

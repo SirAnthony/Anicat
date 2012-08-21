@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from django.http import HttpResponse
-from django.utils import simplejson
 from django.utils.encoding import force_unicode
 import anime.core.base as coreMethods
 import anime.core.user as userMethods
 import anime.edit as editMethods
-from anime.forms.json import FormSerializer, prepare_data
+from anime.forms.json import FormSerializer
+from anime.utils.json import simplejson, prepare_data, JSONFunctionEncoder
 
 
 def ajaxResponse(fn):
@@ -17,9 +17,10 @@ def ajaxResponse(fn):
             if ret[key] is None:
                 del ret[key]
         ret = prepare_data(ret)
-        return HttpResponse(simplejson.dumps(ret),
+        return HttpResponse(simplejson.dumps(ret, cls=JSONFunctionEncoder),
                 mimetype='application/javascript')
     return new
+
 
 def extract_errors(r):
     return getattr(r.get('form'), 'errors', None) \

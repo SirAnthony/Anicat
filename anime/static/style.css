@@ -257,6 +257,31 @@ a.blacklink:hover {
     background-color: #808080;
 }
 
+.app li p {
+    margin-bottom: -5px;
+}
+
+.app li {
+    list-style: none;
+    padding: 2px 7px;
+}
+
+.app span {
+    font-size: 10pt;
+    line-height: 12px;
+    display: inline-block;
+    float: none;
+    height: auto;
+    width: 180px;
+}
+
+.bundle_app {
+    background-color: #EAE8DF;
+    border-radius: 0px 3px 3px 3px;
+    position: absolute;
+}
+
+
 #menu {
     font-size: 14pt;
 }
@@ -584,20 +609,6 @@ select.linktype {
 .addform .cont_men {
     background-color: #EAE8DF;
 }
-
-.addform div#TitleHelperForm li p {
-    margin-bottom: -5px;
-}
-
-.addform div#TitleHelperForm span {
-    font-size: 10pt;
-    line-height: 12px;
-    display: inline-block;
-    float: none;
-    height: auto;
-    width: 180px;
-}
-
 
 
 .fileform {

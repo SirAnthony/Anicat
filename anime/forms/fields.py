@@ -2,6 +2,7 @@ import datetime
 import re
 import time
 from anime.models import AnimeItem, AnimeName, DATE_FORMATS
+from anime.utils.json import JSONFunctionCaller
 from django.core.exceptions import ValidationError
 from django.core.validators import EMPTY_VALUES
 from django.forms import CharField, TextInput, URLField, DateField, ImageField
@@ -50,6 +51,9 @@ class TextToAnimeItemField(CharField):
     extra_error_messages = {
         'multiple': _(u'Too many items with such title, try to use id instead title.'),
     }
+    widget = TextInput(attrs={'onfocus': JSONFunctionCaller('add_auto',
+                        'this', {'className': 'app bundle_app'},
+                        ['title', 'type', 'release'], "'id'")})
 
     def __init__(self, *args, **kwargs):
         super(TextToAnimeItemField, self).__init__(*args, **kwargs)

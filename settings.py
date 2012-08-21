@@ -8,13 +8,16 @@ try:
 except ImportError:
     pass
 
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+OUR_ROOT = os.path.realpath(os.path.dirname(__file__))
+
+PROJECT_ROOT = OUR_ROOT
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+DEPLOY = False
 
 TEST_RUNNER = "code_coverage.CoveragedRunner"
-COVERAGE_REPORT_PATH = os.path.join(PROJECT_ROOT, 'coverage report')
+COVERAGE_REPORT_PATH = os.path.join(OUR_ROOT, 'coverage report')
 
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
@@ -70,9 +73,9 @@ USE_L10N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'files')
+MEDIA_ROOT = os.path.join(OUR_ROOT, 'files')
 
-IMAGES_ROOT = os.path.join(PROJECT_ROOT, 'images')
+IMAGES_ROOT = os.path.join(OUR_ROOT, 'images')
 
 FILE_UPLOAD_HANDLERS = (
     'django.core.files.uploadhandler.MemoryFileUploadHandler',
@@ -86,7 +89,7 @@ MEDIA_URL = '/media/'
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.join(OUR_ROOT, 'static')
 
 # URL that handles the static files served from STATICFILES_ROOT.
 # Example: "http://static.lawrence.com/", "http://example.com/static/"

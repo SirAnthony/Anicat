@@ -45,13 +45,13 @@ var Filter = new (function(){
                     processed[i] = data[i];
             }
         }, getElementsByClassName('filter', document));
-        ajax.loadXMLDoc(url+'filter/', processed, new RequestProcessor(
-            function(resp){
+        ajax.loadXMLDoc(url+'filter/', processed, new RequestProcessor({
+            'filter': function(resp){
                 message.hide();
                 if(!resp.status)
                     Filter.processError(resp.text);
             }
-        ), 'filter');
+        }));
     }
 
     this.processError = function(error){

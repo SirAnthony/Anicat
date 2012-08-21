@@ -115,10 +115,13 @@ urlpatterns += patterns('',
         'django.views.i18n.javascript_catalog'),
 )
 
-if settings.DEBUG:
+if not settings.DEPLOY:
     urlpatterns += patterns('', url(r'^media/(.*)$',
         'django.views.static.serve', kwargs={
         'document_root': settings.MEDIA_ROOT}),
                                 url(r'^images/(.*)$',
         'django.views.static.serve', kwargs={
-        'document_root': settings.IMAGES_ROOT}), )
+        'document_root': settings.IMAGES_ROOT}),
+                                url(r'^static/(.*)$',
+        'django.views.static.serve', kwargs={
+        'document_root': settings.STATIC_ROOT}), )

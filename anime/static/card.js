@@ -1,10 +1,10 @@
 
 var Card = new (function(){
 
-    var processor = new RequestProcessor(function(resp){
+    var processor = new RequestProcessor({'card': function(resp){
                 message.hide();
                 Card.create(resp.id, resp.text);
-        }, 'card');
+        }});
 
     this.init = function(){
         Card.load();

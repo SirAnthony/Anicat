@@ -83,8 +83,8 @@ var searcher = new ( function(){
         this.result = document.getElementById('srchres');
         this.input = document.getElementById('sin'); //это как-то по другому нужно.
         if(this.sobj && this.result && this.input) this.loaded = true;
-        processor = new RequestProcessor(function(resp){
-                        searcher.putResult(resp.text); }, 'search')
+        processor = new RequestProcessor({'search': function(resp){
+                        searcher.putResult(resp.text); }})
     }
 
     this.toggle = function(){
@@ -537,7 +537,8 @@ function cnt(tag, num, e){
         default:
             qw['field'] = tag;
     }
-    ajax.loadXMLDoc(url+'get/', qw, new RequestProcessor(function(resp){
+    ajax.loadXMLDoc(url+'get/', qw, new RequestProcessor({
+        'get': function(resp){
         message.create();
         for(var i in resp.text.order){
             var curname = resp.text.order[i];
@@ -548,7 +549,7 @@ function cnt(tag, num, e){
             message.addTree(forms.getField(curname, resp.id, current));
         }
         message.show();
-        }, 'get'));
+        }}));
 
 }
 
