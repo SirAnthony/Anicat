@@ -103,7 +103,7 @@ class FieldExplorer(object):
         return anime.type
 
     def releaseType(self, anime, request):
-        return anime.releaseType
+        return anime.type
 
     def bundle(self, anime, request):
         if anime.bundle:

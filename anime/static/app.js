@@ -56,26 +56,25 @@ function Autocomplete(object, objectattrs, types, retval){
 
     this.keyevent = function(event){
         if(!event) event = window.event;
-        var ret = true;
         var prevent = function(e){
-            if(e.preventDefault) e.preventDefault();
-            else e.returnValue = false;
-            ret = false;
+            if(e.preventDefault)
+                e.preventDefault();
+            else
+                e.returnValue = false;
+            e.stopPropagation();
+            return false;
         }
         switch(event.keyCode){
             case 38: // up
                 if(this.visible()) this.moveSelection(-1);
-                prevent(event);
                 break;
             case 40: // down
                 if(this.visible()) this.moveSelection(1);
-                prevent(event);
                 break;
             case 9:  // tab
             case 13: // return
                 if(this.visible() && this.selected)
                     this.setValue.call(this, this.selected);
-                prevent(event);
             break;
             default:
                 if(event.keyCode > 32) this.hide();
@@ -86,7 +85,7 @@ function Autocomplete(object, objectattrs, types, retval){
                     this.opts.delay);
             break;
         }
-        return ret;
+        return prevent(event);;
     }
 
     this.show = function(){
@@ -94,6 +93,7 @@ function Autocomplete(object, objectattrs, types, retval){
     }
 
     this.hide = function(){
+        element.removeAllChilds(this.node);
         toggle(this.node, false);
     }
 

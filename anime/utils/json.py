@@ -54,9 +54,8 @@ class JSONFunction(object):
 
 
 class JSONFunctionCaller(JSONFunction):
-    def __unicode__(self):
-        return u'function(){{return {0}({1});}}'.format(
-                        self.name, ','.join(self.args))
+    def toJSON(self):
+        return u'$function(){{return {0};}}$'.format(unicode(self))
 
 
 class JSONFunctionEncoder(simplejson.JSONEncoder):

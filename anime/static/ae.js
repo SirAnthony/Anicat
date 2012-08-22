@@ -255,26 +255,7 @@ var edit = new (function edit_class(){
                 message.show();
             }
 
-            if(field == 'name' || field == 'bundle' || field == 'links'){
-                resp.form.push({'a': {name: 'id', className: 'right', innerText: 'Add field',
-                onclick: (function(name){ return function(){
-                    var num = filter(function(el){
-                        return (el.tagName == 'INPUT' && el.type == 'text');
-                        }, this.parentNode.childNodes).length;
-                    if(field == 'links')
-                        var nm = 'Link ' + num;
-                    else
-                        var nm = name + ' ' + num;
-                    element.insert(this,
-                        {'input': {'type': 'text', 'id': 'id_'+nm, 'name': nm}});
-                    if(field == 'links'){
-                        var nmt = 'Link type ' + num;
-                        element.insert(this,
-                        {"select": {'name': nmt, "value": 0, "choices": [[0, "Auto"], [1, "AniDB"], [2, "ANN"], [3, "MAL"], [4, "Wikipedia"], [6, "Official page"], [15, "Other"]],
-                            "className": "linktype", "id": 'id_'+nm}});
-                    }
-                }})(capitalise(field))}});
-            }
+            resp.form.push.apply(resp.form, this.addField(field));
 
             var spans = getElementsByClassName(field+resp.id, null);
             resp.form.push({'input': {type: 'hidden', name: 'id', value: resp.id}});
@@ -340,19 +321,47 @@ var edit = new (function edit_class(){
         }
     }
 
+    this.addField = function(field){
+        if(field != 'name' && field != 'bundle' && field != 'links')
+            return [];
+        var add_field = element.create('a', {name: 'id',
+            className: 'right', innerText: 'Add field',
+            onclick: (function(name){ return function(){
+                var num = filter(function(el){
+                    return (el.tagName == 'INPUT' && el.type == 'text');
+                    }, this.parentNode.childNodes).length;
+                var nm =  ((name == 'Links') ? 'Link' : name ) + ' ' + num;
+                var input = element.create('input', {'type': 'text', 'id': 'id_'+nm, 'name': nm});
+                element.insert(this, input);
+                if(name == 'Links'){
+                    var nmt = 'Link type ' + num;
+                    var choices = map(function(el){
+                        return [el.value, el.innerText];
+                    }, document.getElementById('id_Link type 0').childNodes);
+                    element.insert(this, {"select": {'name': nmt,
+                        "value": 0, "choices": choices,
+                        "className": "linktype", "id": 'id_'+nm}});
+                }
+                if(name == 'Bundle')
+                    Autocomplete(input, {'className': 'app bundle_app'},
+                    ['title', 'type', 'release'], 'id');
+            }})(capitalise(field))});
+        return [add_field];
+    }
+
     this.fillField = function(fieldname, resp){
-        var func = this['field_'+fieldname];
+        var func = this['fill_'+fieldname];
         if(!func)
-            func = this.field_default;
+            func = this.fill_default;
         func.call(this, fieldname, resp);
     }
 
-    this.field_default = function(field, resp){
+    this.fill_default = function(field, resp){
         var divs = getElementsByClassName('edit_' + field + resp.id, null, 'div');
         this.putFields.call(this, divs, field, resp.id, resp);
     }
 
-    this.field_bundle = function(field, resp){
+    this.fill_bundle = function(field, resp){
         var divs = getElementsByClassName('edit_' + field + resp.id, null, 'div');
         if(!divs || divs.length == 0){
             if(resp.id){
@@ -380,7 +389,7 @@ var edit = new (function edit_class(){
         this.putFields.call(this, divs, field, id, resp);
     }
 
-    this.field_state = function(field, resp){
+    this.fill_state = function(field, resp){
         if(!user.logined){
             catalog_storage.addStatus(resp.id, resp.text.state);
         }
@@ -410,10 +419,10 @@ var edit = new (function edit_class(){
                 true);
             element.remove(divs[i].parentNode.firstChild);
 
-            addEvent(divs[i].parentNode, 'mouseover', (function(c){
-                return function(){toggle(c, 1);}})(divs[i].parentNode.firstChild));
-            addEvent(divs[i].parentNode, 'mouseout', (function(c){
-                return function(){toggle(c, -1);}})(divs[i].parentNode.firstChild));
+            addEvent(divs[i].parentNode, 'mouseover', function(){
+                    toggle(this.firstChild, 1); });
+            addEvent(divs[i].parentNode, 'mouseout', function(){
+                    toggle(this.firstChild, -1); });
 
             element.insert(divs[i], s);
             element.remove(divs[i]);
