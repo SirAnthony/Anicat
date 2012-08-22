@@ -4,8 +4,8 @@ from django.conf.urls.defaults import patterns, url
 from django.views.generic.simple import direct_to_template
 
 from anime.forms.User import NotActivePasswordResetForm
-from anime.views.list import IndexListView, RequestsListView
-from anime.views.ajaxlist import SearchListView
+from anime.views.list import RequestsListView
+from anime.views.ajaxlist import IndexListView, SearchListView
 
 # General
 urlpatterns = patterns(
@@ -96,6 +96,7 @@ urlpatterns += patterns('anime.views.ajax',
 
 #Ajax classes
 urlpatterns += patterns('',
+    url(r'^ajax/list/$', IndexListView.as_view(ajax_call=True), name='ajax_list'),
     url(r'^ajax/search/$', SearchListView.as_view(ajax_call=True), name='ajax_search'),
 )
 

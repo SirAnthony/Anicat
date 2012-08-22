@@ -1,8 +1,11 @@
-// Ну без копирайта неинтересно, правда?
-// Anicat js part v 1.99
+/*
+ * This file is part of Anicat.
+ *
+ * Anicat is distributed under the terms of Anicat License.
+ * See <http://www.anicat.net/LICENSE/> for feature details.
+ *
+ */
 
-var url = '/ajax/';
-var timer;
 var ua = navigator.userAgent.toLowerCase();
 
 //##############################################################################
@@ -108,7 +111,7 @@ var searcher = new ( function(){
             var text = this.input.value.toLowerCase();
             var qw = {'page': page, 'string': text, 'sort': sort};
             message.toEventPosition(e);
-            ajax.loadXMLDoc(url+'search/', qw, processor);
+            ajax.loadXMLDoc('search', qw, processor);
         }
     }
 
@@ -265,7 +268,7 @@ var message = new (function(){
         }
         if(checkParent(target)){
             m.hide();
-            clearTimeout(timer);
+            clearTimeout(this.timeout);
         }
     }
 
@@ -523,7 +526,7 @@ function cnt(tag, num, e){
         default:
             qw['field'] = tag;
     }
-    ajax.loadXMLDoc(url+'get/', qw, new RequestProcessor({
+    ajax.loadXMLDoc('get', qw, new RequestProcessor({
         'get': function(resp){
         message.create();
         for(var i in resp.text.order){

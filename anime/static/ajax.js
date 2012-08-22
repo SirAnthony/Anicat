@@ -1,12 +1,22 @@
-//##############################################################################
-//###############################   Аякс    ####################################
-//##############################################################################
+/*
+ * This file is part of Anicat.
+ *
+ * Anicat is distributed under the terms of Anicat License.
+ * See <http://www.anicat.net/LICENSE/> for feature details.
+ *
+ * AJAX module
+ *
+ */
+
+//################# Ajax worker
 
 var ajax = new (function(){
 
     var cookie = cookies;
 
     var defaultProcessor = new RequestProcessor({})
+
+    this.url = '/ajax/'
 
     //################# Вызов аяксового обьекта.
     this.loadXMLDoc = function(url, qry, processor){
@@ -38,7 +48,7 @@ var ajax = new (function(){
 
         if(data.request){
             if (xmlHttp){
-                xmlHttp.open("POST", url, true);
+                xmlHttp.open("POST", this.url + url + '/', true);
                 xmlHttp.onreadystatechange = processor.process;
                 xmlHttp.setRequestHeader("Content-type", "multipart/form-data; boundary=" + data.boundary);
                 xmlHttp.send(data.request);
@@ -80,6 +90,7 @@ var ajax = new (function(){
 
 
 //################# Request processor
+
 function RequestProcessor(parsers, caller){
 
     this.parsers = parsers;

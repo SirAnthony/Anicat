@@ -1,3 +1,13 @@
+/*
+ * This file is part of Anicat.
+ *
+ * Anicat is distributed under the terms of Anicat License.
+ * See <http://www.anicat.net/LICENSE/> for feature details.
+ *
+ * Field builder module
+ *
+ */
+
 
 var forms = new (function forms_class(){
 

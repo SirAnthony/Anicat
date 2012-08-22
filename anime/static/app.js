@@ -1,6 +1,13 @@
-//##############################################################################
-//##############################    Autocomplete   ###########################
-//##############################################################################
+/*
+ * This file is part of Anicat.
+ *
+ * Anicat is distributed under the terms of Anicat License.
+ * See <http://www.anicat.net/LICENSE/> for feature details.
+ *
+ * Autocomplete classes module
+ *
+ */
+
 
 function add_auto(obj, attrs, types, retval){
     var comp = new Autocomplete(obj, attrs, types, retval);
@@ -133,7 +140,7 @@ function Autocomplete(object, objectattrs, types, retval){
         if(this.object.value.length < 2 || this.text == this.object.value)
             return;
         this.text = this.object.value;
-        ajax.loadXMLDoc(url+'search/', {'fields': this.types,
+        ajax.loadXMLDoc('search', {'fields': this.types,
                         'limit': this.opts.limit, 'string': this.text},
             this.processor);
     }
@@ -177,7 +184,7 @@ function Autocomplete(object, objectattrs, types, retval){
                     id = el.value;
             }, elem);
             if(!id) return;
-            ajax.loadXMLDoc(url+'get/', {'id': id, 'field': this.retfield},
+            ajax.loadXMLDoc('get', {'id': id, 'field': this.retfield},
                 new RequestProcessor({'get': this.ajaxProcessor}, this));
         }
         this.removeSelection();

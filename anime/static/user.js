@@ -1,6 +1,13 @@
-//################# Работа с аккуантом
+/*
+ * This file is part of Anicat.
+ *
+ * Anicat is distributed under the terms of Anicat License.
+ * See <http://www.anicat.net/LICENSE/> for feature details.
+ *
+ * User module
+ *
+ */
 
-//FIXME: как-то здесь плохо все
 
 var user = new( function(){
 
@@ -69,7 +76,7 @@ var user = new( function(){
         toggle(document.getElementById('logininfo').parentNode, -1);
         var rform = document.getElementById('login');
         var formData = getFormData(rform);
-        ajax.loadXMLDoc(url+'login/', formData, processor);
+        ajax.loadXMLDoc('login', formData, processor);
         message.toEventPosition(e);
         return false;
     }
@@ -169,7 +176,7 @@ var user = new( function(){
         var errors = getElementsByClassName('error', obj);
         element.remove(errors);
         toggle(obj.parentNode, -1);
-        ajax.loadXMLDoc(url+'register/', formData, processor);
+        ajax.loadXMLDoc('register', formData, processor);
         message.toEventPosition(e);
         return false;
     }

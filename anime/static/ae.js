@@ -1,4 +1,13 @@
-//add-edit classes module
+/*
+ * This file is part of Anicat.
+ *
+ * Anicat is distributed under the terms of Anicat License.
+ * See <http://www.anicat.net/LICENSE/> for feature details.
+ *
+ * add/edit classes module
+ *
+ */
+
 //################################################################
 //##################### Add #######################################
 //################################################################
@@ -86,7 +95,7 @@ var add = new (function add_class(){
             return;
         this.clearForm();
         var formData = getFormData(this.form);
-        ajax.loadXMLDoc(url+'add/', formData, this.processor);
+        ajax.loadXMLDoc('add', formData, this.processor);
         message.toEventPosition(e);
     }
 
@@ -173,7 +182,7 @@ var edit = new (function edit_class(){
                 q['field'] = this.edits[field];
             }
         }
-        ajax.loadXMLDoc(url+'form/', q, processor);
+        ajax.loadXMLDoc('form', q, processor);
     }
 
     this.getFieldLink = function(id, name){
@@ -205,7 +214,7 @@ var edit = new (function edit_class(){
             processor.parse(formData);
             message.unlock()
         }else{
-            ajax.loadXMLDoc(url+'set/', formData, processor);
+            ajax.loadXMLDoc('set', formData, processor);
         }
         var errors = getElementsByClassName('error', form);
         element.remove(errors);

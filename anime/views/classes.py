@@ -135,14 +135,14 @@ class AnimeAjaxListView(AnimeListView):
             context = self.data
         return context
 
-    def updated(self, cachestr):
+    def updated(self, cachestr, keys={}):
         if not self.ajax_call:
             if not cache.key_valid(self.cache_name, cachestr):
                 return True
         self.data = data = cache.get('%s:%s' % (self.ajax_cache_name, cachestr))
         if not data or not 'list' in data:
             return True
-        return not cache.latest(self.__class__.__name__, cachestr)
+        return not cache.latest(self.__class__.__name__, cachestr, keys={})
 
     def post(self, request, *args, **kwargs):
         if not self.ajax_call:

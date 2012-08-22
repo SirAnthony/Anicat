@@ -1,3 +1,13 @@
+/*
+ * This file is part of Anicat.
+ *
+ * Anicat is distributed under the terms of Anicat License.
+ * See <http://www.anicat.net/LICENSE/> for feature details.
+ *
+ * Card module
+ *
+ */
+
 
 var Card = new (function(){
 
@@ -86,7 +96,7 @@ var Card = new (function(){
             card.style.width = w + 'px';
             if(w >= 500){
                 if(e) message.toEventPosition(e);
-                ajax.loadXMLDoc(url+'get/', {'id': id, 'card': true, 'field': [
+                ajax.loadXMLDoc('get', {'id': id, 'card': true, 'field': [
                     'id', 'bundle', 'name', 'type', 'genre', 'episodesCount',
                     'duration', 'release', 'links', 'state']}, processor);
                 return false;

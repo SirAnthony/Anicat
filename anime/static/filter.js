@@ -1,4 +1,12 @@
-
+/*
+ * This file is part of Anicat.
+ *
+ * Anicat is distributed under the terms of Anicat License.
+ * See <http://www.anicat.net/LICENSE/> for feature details.
+ *
+ * Filter module
+ *
+ */
 
 var Filter = new (function(){
 
@@ -45,7 +53,7 @@ var Filter = new (function(){
                     processed[i] = data[i];
             }
         }, getElementsByClassName('filter', document));
-        ajax.loadXMLDoc(url+'filter/', processed, new RequestProcessor({
+        ajax.loadXMLDoc('filter', processed, new RequestProcessor({
             'filter': function(resp){
                 message.hide();
                 if(!resp.status)

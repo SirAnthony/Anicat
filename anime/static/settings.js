@@ -1,4 +1,12 @@
-
+/*
+ * This file is part of Anicat.
+ *
+ * Anicat is distributed under the terms of Anicat License.
+ * See <http://www.anicat.net/LICENSE/> for feature details.
+ *
+ * Settings functions
+ *
+ */
 
 function hideType(){
     var sel = document.getElementById("requestDisplay");
