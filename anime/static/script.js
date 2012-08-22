@@ -119,50 +119,11 @@ var searcher = new ( function(){
         if(!rs.count || !rs.list.length){
            element.appendChild(this.result, [{'p': {innerText: 'Nothing found.'}}]);
         }else{
-            var pages = rs.pages;
-            var tr = new Array();
-            for(var i=0; i<rs.list.length; i++){
-                var elem = rs.list[i];
-                var row = element.create('tr',
-                    {className: (elem.air ? 'air a' : 'r') + elem.id}, [
-                        {'td': {'id': 'link' + elem.id, className: 'link'}}, [
-                            {'a': {className: 'cardurl', 'target': '_blank',
-                                'href': '/card/'+elem.id+'/',
-                                onclick: ( function(id){
-                                            return function(e){return Card.get(id, e);};
-                                        })(elem.id)}}, [
-                                {'img': {'src': '/static/arrow.gif', 'alt': 'Go'}},
-                            ]
-                        ],
-                        {'td': {'id': 'id' + elem.id, className: 'id',
-                            onclick: ( function(i, j){
-                                            return function(e){ cnt(i, j, e); };
-                                        })('id', elem.id),
-                            innerText: Number(i) + pages.start }},
-                        ]);
-                tr.push(row);
-                for(var column in elem){
-                    if(column == 'air' || column == 'id') continue;
-                    element.appendChild(row, [{'td': {'id': column + elem.id, className: column,
-                                onclick: (function(i, j){ return function(e){ cnt(i, j, e); };})(column, elem.id),
-                                    innerText: encd(elem[column])}}]);
-                }
-            }
-            var srctbl = element.create('table', {'id': 'srchtbl', className: 'tbl', cellSpacing: 0});
-            element.appendChild(this.result, [srctbl, ['thead', 'tbody', tr]]);
-            if(pages.items){
-                var pg = new Array();
-                for(var p=0; p < pages.items.length; p++){
-                    if(pages.current == p+1){
-                        pg.push(element.create('span', {innerText: '[' + pages.items[p] + ']'}));
-                    }else{
-                        pg.push(element.create('a', {innerText: pages.items[p],
-                            onclick: (function(pg){return function(e){ searcher.send(pg, e);};})(p+1)}));
-                    }
-                }
-                element.appendChild(this.result, [{'div': {'id': 'srchpg'}}, pg]);
-            }
-            showFN(srctbl);
+            element.appendChild(this.result, [{'table': {
+                'id': 'srchtbl', className: 'tbl', cellSpacing: 0}},
+                ['thead', 'tbody', table.buildContent(rs.list, rs.pages.start)]]);
+            element.appendChild(this.result, [{'div': {'id': 'srchpg'}},
+                        table.buildPages(rs.pages, this.send, this)]);
         }
     }
 
@@ -318,6 +279,60 @@ var message = new (function(){
 
 })();
 
+
+//######################## Setup popups on long names
+var popup = new (function(){
+
+    var _pop = null;
+
+    this.pop = function(){
+        if(!_pop)
+            _pop = document.getElementById('popup');
+        return _pop;
+    }
+
+    this.move = function(e){
+        var p = message.eventPosition(e);
+        if(visible(popup.pop())){
+            popup.pop().style.top = p.y + 10 +'px';
+            popup.pop().style.left = p.x + 10 +'px';
+        }
+    }
+
+    this.over = function(e){
+        var p = message.eventPosition(e);
+        popup.pop().style.top = p.y + 'px';
+        popup.pop().style.left = p.x + 'px';
+        addEvent(this, 'mousemove', popup.move);
+        toggle(popup.pop(), 1);
+        popup.pop().firstChild.innerText = this.innerText;
+    };
+
+    this.out = function(e){
+        removeEvent(this, 'mousemove', popup.move);
+        toggle(popup.pop(), -1);
+    }
+
+    this.add = function(el){
+        if(isArray(el) || isNodeList(el)){
+            for(var i = 0; i < el.length; i++)
+                this.add(el[i]);
+        }else if(isElement(el)){
+            if(el.offsetHeight >= el.scrollHeight)
+                return;
+            addEvent(el, 'mouseover', this.over);
+            addEvent(el, 'mouseout', this.out);
+        }
+    }
+
+    this.addToTable = function(node, cn){
+        var el = (node) ? node : document.getElementById('tbdid');
+        this.add(getElementsByClassName((cn ? cn : "title"), el, 'td'));
+    }
+
+})();
+
+
 //####################### Form data
 
 function getFormData(form){
@@ -359,6 +374,8 @@ if(!Array.prototype.indexOf){
     }
 }
 
+
+
 // Internet Explorer
 isIE = (ua.indexOf("msie") != -1 &&  ua.indexOf("webtv") == -1);
 // Internet Explorer < 8
@@ -373,37 +390,6 @@ isSafari = (ua.indexOf("safari") != -1);
 isKonqueror = (ua.indexOf("konqueror") != -1);
 */
 
-
-//Расставляет попапы с тем, что скрыто
-function showFN(tbl, cn){
-    var el = (tbl) ? tbl : document.getElementById('tbdid');
-    var elms = getElementsByClassName((cn ? cn : "name"), el, 'td');
-    var pop = document.getElementById('popup');
-    var movepop = (function(pop){ return function(e){
-        var p = message.eventPosition(e);
-        if(visible(pop)){
-            pop.style.top = p.y + 10 +'px';
-            pop.style.left = p.x + 10 +'px';
-        }
-    }})(pop);
-    for(i in elms){
-        var el = elms[i];
-        if(el.offsetHeight < el.scrollHeight){
-            addEvent(el, 'mouseover', (function(pop){ return function(e){
-                var p = message.eventPosition(e);
-                pop.style.top = p.y + 'px';
-                pop.style.left = p.x + 'px';
-                addEvent(this, 'mousemove', movepop);
-                toggle(pop, 1);
-                pop.firstChild.innerText = this.innerText;
-            }})(pop));
-            addEvent(el, 'mouseout', (function(pop){ return function(e){
-                removeEvent(this, 'mousemove', movepop);
-                toggle(pop, -1);
-            }})(pop));
-        }
-    }
-}
 
 function hideRadio(s){
     var cld = s.parentNode.childNodes;
@@ -524,7 +510,7 @@ function cnt(tag, num, e){
     message.toEventPosition(e);
     var qw = {'id': num}
     switch (tag){
-        case 'name':
+        case 'title':
             qw['field'] = ['name', 'genre', 'links'];
         break;
         case 'episodes':
@@ -714,5 +700,5 @@ function getStylesheetRule(ruleName, field){
 
 addEvent(window, 'load', function(){
     searcher.init();
-    showFN();
+    popup.addToTable();
 });

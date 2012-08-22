@@ -206,7 +206,7 @@ class AnimeItem(models.Model):
 
     type = property(_getReleaseTypeString)
     release = property(_getRelease)
-    episodes = property(episodesCount)
+    episodes = property(lambda self: self.episodesCount)
 
     def save(self, *args, **kwargs):
         try:
