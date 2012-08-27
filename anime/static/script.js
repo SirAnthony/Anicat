@@ -122,11 +122,9 @@ var searcher = new ( function(){
         if(!rs.count || !rs.list.length){
            element.appendChild(this.result, [{'p': {innerText: 'Nothing found.'}}]);
         }else{
-            element.appendChild(this.result, [{'table': {
-                'id': 'srchtbl', className: 'tbl', cellSpacing: 0}},
-                ['thead', 'tbody', table.buildContent(rs.list, rs.pages.start)]]);
-            element.appendChild(this.result, [{'div': {'id': 'srchpg'}},
-                        table.buildPages(rs.pages, this.send, this)]);
+            table.build(this.result, {'table': {'id': 'srchtbl'}}, rs);
+            element.appendChild(this.result, table.buildPages(rs.pages,
+                                    {'id': 'srchpg'}, this.send, this));
         }
     }
 

@@ -1,0 +1,55 @@
+{% extends "anime/base.html" %}
+
+{% load cache %}
+
+{% load url from future %}
+
+{% block searchlink %}
+{% endblock %}
+
+
+{% block search %}
+    <div id="srch">
+        <form method="POST" action="/search/" id="srchp">
+            {% csrf_token %}
+            {% comment %}
+            <!--<p id="chtext"><input type="checkbox" id="chsrch" onClick="searcher.showAdvance();" />Advanced Search</p>-->
+            <!--<select id="advsrch" class="advsrch">
+                <option value="null" selected="selected">Find by:</option>
+                <option value="genre">Genre</option>
+            </select>
+            <select id="sortsrch" class="advsrch">
+                <option value="null" selected="selected">Sort by:</option>
+                <option value="genre">Genre</option>
+            </select>
+            -->
+            <!--<input type="text" onkeyup="app.acomp(this, 'catalog', event);" /><br/>-->
+            {% endcomment %}
+            <input id="sin" name="string" type="text" value="{{ link.string }}"/>
+            <input type="submit" value="Search" />
+        </form>
+    </div>
+{% endblock %}
+
+
+{% block main %}
+{# cache 0 search cachestr #}
+    {% ifnotequal link 'search/' %}
+        {% if not list %}
+            {% if cachestr %}
+            <p>Nothing found.</p>
+            {% endif %}
+        {% else %}
+            {% url 'search' string=link.string as link_order %}
+    <div id="dvid">
+        <table id="tbl" cellspacing="0" class="tbl">
+            {% include "anime/base/listhead.html" %}
+            {% include "anime/base/listbody.html" %}
+        </table>
+    </div>
+    <div id="card" class="right"></div>
+    {% include "anime/base/listpages.html" %}
+        {% endif %}
+    {% endifnotequal %}
+{# endcache #}
+{% endblock %}

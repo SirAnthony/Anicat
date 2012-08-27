@@ -10,28 +10,31 @@
 
 var table = new ( function(){
 
-    this.build = function(obj, data){
-
+    this.build = function(obj, attrs, data){
+        if(!obj)
+            return;
+        attrs = extend({'table': {}, 'head': {}, 'body': {}}, attrs);
+        element.removeAllChilds(obj);
+        element.appendChild(obj, [{'table':
+            extend({className: 'tbl', cellSpacing: 0}, attrs.table)},[
+                {'thead': extend({className: 'thdtbl'}, attrs.head)},
+                this.buildHeader(data.head),
+                {'tbody': attrs.body},
+                this.buildContent(data.list, data.pages.start)
+            ]
+        ]);
     }
 
     this.buildHeader = function(data){
-
-    }
-
-    this.buildPages = function(pages, callback, scope){
-        if(!pages.items)
+        if(!data || !isArray(data))
             return [];
-        var pg = new Array();
-        for(var p=0; p < pages.items.length; p++){
-            if(pages.current == p+1){
-                pg.push(element.create('span', {innerText: '[' + pages.items[p] + ']'}));
-            }else{
-                pg.push(element.create('a', {innerText: pages.items[p],
-                    onclick: (function(num){ return function(e){
-                         callback.call(scope, num, e);};})(p+1)}));
-            }
-        }
-        return pg;
+        return ['tr', map(function(name){
+            if(name == 'air')
+                return {'th': {className: 'link'}};
+            else if(name == 'id')
+                return {'th': {className: 'id', innerText: '№'}};
+            return {'th': {className: name, innerText: capitalise(name)}};
+        }, data)];
     }
 
     this.buildContent = function(data, first){
@@ -66,6 +69,22 @@ var table = new ( function(){
             }
         }
         return rows;
+    }
+
+    this.buildPages = function(pages, attrs, callback, scope){
+        if(!pages.items)
+            return [];
+        var pg = new Array();
+        for(var p=0; p < pages.items.length; p++){
+            if(pages.current == p+1){
+                pg.push(element.create('span', {className: 'spanl', innerText: '[' + pages.items[p] + ']'}));
+            }else{
+                pg.push(element.create('a', {innerText: pages.items[p],
+                    onclick: (function(num){ return function(e){
+                         callback.call(scope, num, e);};})(p+1)}));
+            }
+        }
+        return [{'div': attrs}, pg];
     }
 
     this.cell_default = function(id, name, data){

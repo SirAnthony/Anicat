@@ -202,7 +202,7 @@ tr.stat {
 
 /*Спан, и шрифт для ссылок*/
 
-#pg a, #spanl{
+#pg a, #pg span{
     font: bold 12pt sans-serif;
 }
 
@@ -211,7 +211,7 @@ tr.stat {
     /*color: #339966;*/
 }
 
-#spanl{
+.spanl{
     color: #000;
 }
 

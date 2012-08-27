@@ -1,0 +1,34 @@
+
+
+<thead class="thdtbl">
+    <tr>
+        <th class="link">
+            <a rel="nofollow" href=""></a>
+        </th>
+        <th class="id">
+            <a rel="nofollow" href="/">№</a>
+        </th>
+        <th class="title">
+            <a rel="nofollow" href="{{ link_order|default:'/' }}{% if link.order == 'title' or not link.order %}sort/-title/{% endif %}">Name</a>
+        </th>
+        <th class="episodes">
+            <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == 'episodesCount' %}-{% endif %}episodesCount/">Episodes</a>
+        </th>
+        <th class="release">
+            <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == 'releasedAt' %}-{% endif %}releasedAt/">Released</a>
+        </th>
+        <th class="type">
+            <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == 'releaseType' %}-{% endif %}releaseType/">Type</a>
+        </th>
+        {% if link.status %}
+        <th class="changed">
+            <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == 'changed' %}-{% endif %}changed/">Changed</a>
+        </th>
+            {% if link.status == 3 %}
+        <th class="rating">
+            <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == 'rating' %}-{% endif %}rating/">Rated</a>
+        </th>
+            {% endif %}
+        {% endif %}
+    </tr>
+</thead>

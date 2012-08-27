@@ -21,7 +21,7 @@ class IndexListView(AnimeAjaxListView):
 
     model = AnimeItem
     paginate_by = settings.INDEX_PAGE_LIMIT
-    template_name = 'anime/list.html'
+    template_name = 'anime/base/list.html'
     cache_name = 'mainTable'
     ajax_cache_name = 'ajaxlist'
     ADDITIONAL_FIELDS = ['rating', '-rating', 'changed', '-changed']
@@ -113,13 +113,14 @@ class IndexListView(AnimeAjaxListView):
             self.check_parameters(request, *args, **kwargs)
             self.object_list = self.get_queryset()
             ret = self.get_context_data(object_list=self.object_list)
-            fields = ['title', 'type', 'episodes', 'id', 'release', 'air']
+            fields = ['air', 'id', 'title', 'episodes', 'release', 'type']
             ret['list'] = [
                     dict([(name, getattr(x, name)) for name in fields]) \
                     for x in ret['list'] ]
             paginator = ret['pages']['items']
+            ret['head'] = fields
             ret['count'] = paginator.count
-            ret['pages']['items'] = paginator.page_range
+            ret['pages']['items'] = paginator.get_names()
             response.update({'status': True, 'text': ret})
         except Http404, e:
             response['text'] = e
@@ -137,7 +138,7 @@ class SearchListView(AnimeAjaxListView):
 
     model = AnimeItem
     paginate_by = settings.SEARCH_PAGE_LIMIT
-    template_name = 'anime/search.html'
+    template_name = 'anime/base/search.html'
     cache_name = 'search'
     ajax_cache_name = 'ajaxsearch'
 

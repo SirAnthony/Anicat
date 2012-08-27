@@ -1,0 +1,26 @@
+{% extends "anime/base.html" %}
+
+{% load cache %}
+{% load url from future %}
+
+{% load animetemplates %}
+
+{% block title %}{% if link.status %} - {% statusname link.status %} list{% endif %}{% endblock %}
+
+{% block mainlink %}
+{% endblock %}
+
+{% block main %}
+    <h2 id="listtitle">{% if link.status %}{% statusname link.status %} list{% if link.user %} for {% username link.user %}{% endif %}{% endif %}</h1>
+{# cache 0 mainTable cachestr #}
+    {% url 'index' status=link.status user=link.user as link_order %}
+    <div id="dvid">
+        <table id="tbl" cellspacing="0" class="tbl">
+            {% include "anime/base/listhead.html" %}
+            {% include "anime/base/listbody.html" %}
+        </table>
+    </div>
+    <div id="card" class="right"></div>
+    {% include "anime/base/listpages.html" %}
+{# endcache #}
+{% endblock %}

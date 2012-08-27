@@ -96,7 +96,7 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
     def get_filter(self):
         if not self.listfilter:
             self.listfilter = AnimeListFilter(
-                self.request.session.get('filter', None), self.request.user)
+                self.request.session.get('filter', None), self.request.user.id)
         return self.listfilter
 
     def get_link(self):
@@ -121,8 +121,6 @@ class AnimeAjaxListView(AnimeListView):
         (link, cachestr) = self.get_link()
         cachestr = self.get_filter().get_cachename(cachestr)
         context = {}
-        if not self.ajax_call:
-            context.update({'cachestr': cachestr, 'link': link})
         if self.updated(cachestr):
             context.update(self.create_context_data(cachestr, link, **kwargs))
             cache.clean_cache(self.cache_name, cachestr)
@@ -133,6 +131,10 @@ class AnimeAjaxListView(AnimeListView):
             cache.cset('%s:%s' % (self.ajax_cache_name, cachestr), context, 0)
         elif self.data:
             context = self.data
+        if not self.ajax_call:
+            context.update({'cachestr': cachestr, 'link': link})
+        else:
+            context['link'] = link.get('link', '')
         return context
 
     def updated(self, cachestr, keys={}):

@@ -5,6 +5,7 @@ from anime.models import Genre, ANIME_TYPES, USER_STATUS
 from anime.core.user import get_username
 from django import template
 
+
 register = template.Library()
 
 
@@ -34,29 +35,6 @@ register.tag('filterForm', lambda parser, token: FilterFormNode())
 
 
 
-def username(parser, token):
-    try:
-        tag_name, user = token.split_contents()
-    except ValueError:
-        raise template.TemplateSyntaxError("%r tag requires exactly one argument" % token.contents.split()[0])
-    return UsernameNode(user)
-
-
-class UsernameNode(template.Node):
-    def __init__(self, user):
-        self.user = template.Variable(user)
-    def render(self, context):
-        return get_username(self.user.resolve(context))
-
-
-def statusname(parser, token):
-    try:
-        tag_name, status = token.split_contents()
-    except ValueError:
-        raise template.TemplateSyntaxError("%r tag requires exactly one argument" % token.contents.split()[0])
-    return StatusNameNode(status)
-
-
 class StatusNameNode(template.Node):
     def __init__(self, status):
         self.status = template.Variable(status)
@@ -66,7 +44,29 @@ class StatusNameNode(template.Node):
         except:
             return u"Bad status"
 
-register.tag('username', username)
-register.tag('statusname', statusname)
+
+class UsernameNode(template.Node):
+    def __init__(self, user):
+        self.user = template.Variable(user)
+    def render(self, context):
+        return get_username(self.user.resolve(context))
+
+
+@register.tag
+def statusname(parser, token):
+    try:
+        tag_name, status = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError("%r tag requires exactly one argument" % token.contents.split()[0])
+    return StatusNameNode(status)
+
+
+@register.tag
+def username(parser, token):
+    try:
+        tag_name, user = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError("%r tag requires exactly one argument" % token.contents.split()[0])
+    return UsernameNode(user)
 
 
