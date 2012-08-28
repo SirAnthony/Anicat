@@ -5,7 +5,7 @@
     <tr class="{% if title.air %}air a{% else %}r{% endif %}{{ title.id }}">
         <td id="link{{ title.id }}" class="link">
             <a target="_blank" class="cardurl" href="/card/{{ title.id }}/" onclick="return Card.get({{ title.id }}, event);">
-                <img alt="Go" src="/static/arrow.gif">
+                <img alt="Go" src="/static/arrow.png">
             </a>
         </td>
         <td onclick="cnt('id', '{{ title.id }}', event);" id="id{{ title.id }}" class="id">{{ forloop.counter0|add:pages.start }}</td>
