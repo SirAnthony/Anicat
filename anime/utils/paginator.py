@@ -57,6 +57,8 @@ class Paginator(paginator.Paginator):
         zero = None
         if type(qs) is not QuerySet:
             raise TypeError('iternames only works with QuerySets as item list.')
+        if not self.count:
+            return
         for i in range(0, self.count, self.per_page):
             if not i:
                 zero = unicode(qs.values(order)[i].get(order)).strip()[:length]
@@ -67,5 +69,4 @@ class Paginator(paginator.Paginator):
                 zero = unicode(first.get(order)).strip()[:length]
         yield u'{0} - {1}'.format(zero, unicode(
             qs.order_by(self.reverse + order).values(order)[0].get(order)
-            ).strip()[:length])
-
+                ).strip()[:length])

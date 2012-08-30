@@ -13,12 +13,18 @@
 {% block main %}
     <h2 id="listtitle">{% if link.status %}{% statusname link.status %} list{% if link.user %} for {% username link.user %}{% endif %}{% endif %}</h1>
 {% cache 0 mainTable cachestr %}
-    {% url 'index' status=link.status user=link.user as link_order %}
     <div id="dvid">
+        {% if not list %}
+            {% if cachestr %}
+        <p>Nothing to display.</p>
+            {% endif %}
+        {% else %}
+            {% url 'index' status=link.status user=link.user as link_order %}
         <table id="tbl" cellspacing="0" class="tbl">
             {% include "anime/base/listhead.html" %}
             {% include "anime/base/listbody.html" %}
         </table>
+        {% endif %}
     </div>
     {% include "anime/base/listpages.html" %}
     <div id="card" class="right"></div>

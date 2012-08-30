@@ -8,18 +8,46 @@
  *
  */
 
+//######################## URI Hash
+function parseHash(string){
+    var re = new RegExp('^/?((search/([^/]+))|(user/(\\d+)/show/(\\d+))?)/(sort/(-?\\w+)/)?((\\d+)/?)?');
+    string = string.replace(/^#?\/?/g, '');
+    var match = re.exec(string);
+    if(!match) return;
+    var request = null;
+    var ret = {};
+    var processor = null;
+    if(match[2] && match[3]){
+        request = 'search';
+        ret['string'] = match[3];
+        processor = searcher.processor;
+    }else if(match[4] && match[5] && !isUndef(match[6])){
+        request = 'list';
+        ret = extend(ret, {'user': match[5], 'status': match[6]});
+        processor = list.processor;
+    }
+    ret = extend(ret, {'order': match[8], 'page': match[10]});
+    return [request, ret, processor];
+}
+
+function loadURIHash(string){
+    var link = parseHash(string ? string : document.location.hash);
+    if(!link || !link[0]) return;
+    ajax.loadXMLDoc.apply(ajax, link);
+}
+
+
 //######################## Search
 var searcher = new ( function(){
 
-    var processor = null;
+    this.processor = new RequestProcessor({'search': function(resp){
+                        this.putResult(resp.text); }}, this);
 
     this.init = function(){
         this.sobj = document.getElementById('srch');
         this.result = document.getElementById('srchres');
         this.input = document.getElementById('sin'); //это как-то по другому нужно.
         if(this.sobj && this.result && this.input) this.loaded = true;
-        processor = new RequestProcessor({'search': function(resp){
-                        searcher.putResult(resp.text); }})
     }
 
     this.toggle = function(){
@@ -31,20 +59,21 @@ var searcher = new ( function(){
     this.send = function(page, e){
         if(!this.loaded) return;
         if(!page) page = 1;
-        var sort;
         if(this.input.value.length < 3){
             element.removeAllChilds(this.result);
             element.appendChild(this.result, [{'p': {
                 innerText: 'Query must consist of at least 3 characters.'}}]);
-        }else if( /\.{2,3}/.test(this.input.value) || /\.{1}(\s{1}|\S{1})\.{1}/.test(this.input.value) ){
-            element.removeAllChilds(this.result);
-            element.appendChild(this.result, [{'p': {innerText: 'Invalid request.'}}]);
         }else{
             var text = this.input.value.toLowerCase();
-            var qw = {'page': page, 'string': text, 'sort': sort};
             message.toEventPosition(e);
-            ajax.loadXMLDoc('search', qw, processor);
+            this.loadCall({'string': text}, page);
         }
+    }
+
+    this.loadCall = function(link, number, event){
+        ajax.loadXMLDoc('search', extend(link, {'page': number,
+                'link': undefined}), this.processor);
+        return false;
     }
 
     this.putResult = function(rs){
@@ -54,9 +83,12 @@ var searcher = new ( function(){
         if(!rs.count || !rs.list.length){
            element.appendChild(this.result, [{'p': {innerText: 'Nothing found.'}}]);
         }else{
+            var page = (rs.pages.current) ? rs.pages.current + '/' : '';
+            document.location.hash = rs.link.link + page;
+            toggle(this.sobj, true);
             table.build(this.result, {'table': {'id': 'srchtbl'},
                 'pages': {'id': 'srchpg'}}, rs,
-                {'pages': {'func': this.send, 'scope': this}});
+                {'pages': {'func': this.loadCall, 'scope': this}});
         }
     }
 
@@ -78,6 +110,8 @@ var list = new ( function(){
 
     this.create = function(data){
         var dvid = document.getElementById('dvid');
+        var page = (data.pages.current) ? data.pages.current + '/' : '';
+        document.location.hash = data.link.link + page;
         element.remove(document.getElementById('pg'));
         table.build(dvid, {'table': {'id': 'tbl'},
             'body': {'id': 'tbdid'}, 'pages': {'id': 'pg'}}, data, {
@@ -117,14 +151,18 @@ var table = new ( function(){
         attrs = extend({'table': {}, 'head': {}, 'body': {}, 'pages': {}}, attrs);
         calls = extend({'head': {}, 'pages': {}}, calls);
         element.removeAllChilds(obj);
-        element.appendChild(obj, [{'table':
-            extend({className: 'tbl', cellSpacing: 0}, attrs.table)},[
-                {'thead': extend({className: 'thdtbl'}, attrs.head)},
-                this.buildHeader(data.head, data.link, calls.head),
-                {'tbody': attrs.body},
-                this.buildContent(data.list, data.pages.start)
-            ], this.buildPages(data, attrs.pages, calls.pages)
-        ]);
+        if(isArray(data.list) && data.list.length){
+            element.appendChild(obj, [{'table':
+                extend({className: 'tbl', cellSpacing: 0}, attrs.table)},[
+                    {'thead': extend({className: 'thdtbl'}, attrs.head)},
+                    this.buildHeader(data.head, data.link, calls.head),
+                    {'tbody': attrs.body},
+                    this.buildContent(data.list, data.pages.start)
+                ], this.buildPages(data, attrs.pages, calls.pages)
+            ]);
+        }else{
+            element.appendChild(obj, {'p': {'innerText': 'Nothing to display'}});
+        }
     }
 
     this.buildHeader = function(data, link, callback){
@@ -144,9 +182,8 @@ var table = new ( function(){
                 var href = link.link.replace(/(.+)?\/sort\/\-?\w+\/?/gi, '$1'
                     ) + 'sort/' + lname + '/';
                 th.push.apply(th, [{'th': {className: name}}, [{'a': {
-                'innerText': capitalise(name), //'href': href,
+                'innerText': capitalise(name), 'href': href,
                 'onclick': function(ev) {
-                    document.location.hash = href;
                     return callback.func.call(callback.scope, link, lname, ev);
                 }}}]]);
             }
@@ -200,7 +237,6 @@ var table = new ( function(){
                 var href = data.link.link + (p+1) + '/';
                 pg.push(element.create('a', {innerText: pages.items[p],
                     'onclick': (function(num){ return function(e){
-                        document.location.hash = href;
                         return callback.func.call(callback.scope, data.link, num, e);};})(p+1),
                     'href': href
                     }));
@@ -224,3 +260,8 @@ var table = new ( function(){
     }
 
 })();
+
+addEvent(window, 'load', function(){
+    searcher.init();
+    loadURIHash();
+});

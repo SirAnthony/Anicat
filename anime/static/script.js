@@ -646,7 +646,5 @@ function getStylesheetRule(ruleName, field){
     return value;
 }
 
-addEvent(window, 'load', function(){
-    searcher.init();
-    popup.addToTable();
-});
+
+addEvent(window, 'load', function(){ popup.addToTable(); });

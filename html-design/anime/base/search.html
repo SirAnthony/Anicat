@@ -34,22 +34,20 @@
 
 {% block main %}
 {% cache 0 search cachestr %}
-    {% ifnotequal link 'search/' %}
+    <div id="dvid">
         {% if not list %}
             {% if cachestr %}
-            <p>Nothing found.</p>
+        <p>Nothing found.</p>
             {% endif %}
         {% else %}
             {% url 'search' string=link.string as link_order %}
-    <div id="dvid">
         <table id="tbl" cellspacing="0" class="tbl">
             {% include "anime/base/listhead.html" %}
             {% include "anime/base/listbody.html" %}
         </table>
+        {% endif %}
     </div>
     {% include "anime/base/listpages.html" %}
     <div id="card" class="right"></div>
-        {% endif %}
-    {% endifnotequal %}
 {% endcache %}
 {% endblock %}
