@@ -37,17 +37,7 @@ var Filter = new (function(){
                 message.hide();
                 if(!resp.status)
                     this.processError(resp.text);
-                var dvid = document.getElementById('dvid');
-                table.build(dvid, {'table': {'id': 'tbl'},
-                                    'body': {'id': 'tbdid'}}, resp.text);
-                var pgp = document.getElementById('pg');
-                if(pgp){
-                    pgp = pgp.previousSibling;
-                    element.remove(pgp.nextSibling);
-                }else
-                    pgp = (dvid.nextSibling) ? dvid.nextSibling : dvid;
-                element.insert(pgp, table.buildPages(resp.text.pages,
-                        {'id': 'pg'}));
+                list.create(resp.text);
             }
         }, this);
     }

@@ -17,7 +17,7 @@ class AnimeListFilter(object):
         else:
             self.data = {}
 
-    def get_cachename(self, cachestr):
+    def get_cachestring(self, cachestr):
         return sha1(cachestr + str(self.data)).hexdigest()
 
     def get_queryset(self, queryset):
@@ -60,7 +60,7 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
 
     def get_context_data(self, **kwargs):
         (link, cachestr) = self.get_link()
-        cachestr = self.get_filter().get_cachename(cachestr)
+        cachestr = self.Filter.get_cachestring(cachestr)
         context = {'cachestr': cachestr, 'link': link}
         if self.updated(cachestr):
             context.update(self.create_context_data(cachestr, link, **kwargs))
@@ -75,7 +75,7 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
         if page_size:
             paginator, page, queryset, is_paginated = self.paginate_queryset(queryset, page_size)
             paginator.set_order(self.order)
-            paginator.set_cachekey(link['link'])
+            paginator.set_cachekey(self.Filter.get_cachestring(link['link']))
             context = {
                 'pages': {'current': page.number,
                     'start': page.start_index(),
@@ -98,6 +98,7 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
             self.listfilter = AnimeListFilter(
                 self.request.session.get('filter', None), self.request.user.id)
         return self.listfilter
+    Filter = property(get_filter)
 
     def get_link(self):
         "Implementation in subclasses"
@@ -119,8 +120,8 @@ class AnimeAjaxListView(AnimeListView):
 
     def get_context_data(self, **kwargs):
         (link, cachestr) = self.get_link()
-        cachestr = self.get_filter().get_cachename(cachestr)
-        context = {}
+        cachestr = self.Filter.get_cachestring(cachestr)
+        context = {'link': link}
         if self.updated(cachestr):
             context.update(self.create_context_data(cachestr, link, **kwargs))
             cache.clean_cache(self.cache_name, cachestr)
@@ -132,9 +133,7 @@ class AnimeAjaxListView(AnimeListView):
         elif self.data:
             context = self.data
         if not self.ajax_call:
-            context.update({'cachestr': cachestr, 'link': link})
-        else:
-            context['link'] = link.get('link', '')
+            context['cachestr'] = cachestr
         return context
 
     def updated(self, cachestr, keys={}):

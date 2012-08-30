@@ -33,7 +33,7 @@
 
 
 {% block main %}
-{# cache 0 search cachestr #}
+{% cache 0 search cachestr %}
     {% ifnotequal link 'search/' %}
         {% if not list %}
             {% if cachestr %}
@@ -47,9 +47,9 @@
             {% include "anime/base/listbody.html" %}
         </table>
     </div>
-    <div id="card" class="right"></div>
     {% include "anime/base/listpages.html" %}
+    <div id="card" class="right"></div>
         {% endif %}
     {% endifnotequal %}
-{# endcache #}
+{% endcache %}
 {% endblock %}

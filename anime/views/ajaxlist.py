@@ -75,6 +75,7 @@ class IndexListView(AnimeAjaxListView):
         self.order = order
         self.status = status
         self.page = _get('page', 1)
+        self.kwargs['page'] = self.page
 
     def get_queryset(self):
         qs = super(IndexListView, self).get_queryset()

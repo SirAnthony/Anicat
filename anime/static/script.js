@@ -77,59 +77,6 @@ var pclass = new ( function(){
 //##############################    Misc   #####################################
 //##############################################################################
 
-var searcher = new ( function(){
-
-    var processor = null;
-
-    this.init = function(){
-        this.sobj = document.getElementById('srch');
-        this.result = document.getElementById('srchres');
-        this.input = document.getElementById('sin'); //это как-то по другому нужно.
-        if(this.sobj && this.result && this.input) this.loaded = true;
-        processor = new RequestProcessor({'search': function(resp){
-                        searcher.putResult(resp.text); }})
-    }
-
-    this.toggle = function(){
-        if(!this.loaded) return;
-        if(toggle(this.sobj))
-            this.input.focus();
-    }
-
-    this.send = function(page, e){
-        if(!this.loaded) return;
-        if(!page) page = 1;
-        var sort;
-        if(this.input.value.length < 3){
-            element.removeAllChilds(this.result);
-            element.appendChild(this.result, [{'p': {
-                innerText: 'Query must consist of at least 3 characters.'}}]);
-        }else if( /\.{2,3}/.test(this.input.value) || /\.{1}(\s{1}|\S{1})\.{1}/.test(this.input.value) ){
-            element.removeAllChilds(this.result);
-            element.appendChild(this.result, [{'p': {innerText: 'Invalid request.'}}]);
-        }else{
-            var text = this.input.value.toLowerCase();
-            var qw = {'page': page, 'string': text, 'sort': sort};
-            message.toEventPosition(e);
-            ajax.loadXMLDoc('search', qw, processor);
-        }
-    }
-
-    this.putResult = function(rs){
-        if(!this.loaded) return;
-        message.hide();
-        element.removeAllChilds(this.result);
-        if(!rs.count || !rs.list.length){
-           element.appendChild(this.result, [{'p': {innerText: 'Nothing found.'}}]);
-        }else{
-            table.build(this.result, {'table': {'id': 'srchtbl'}}, rs);
-            element.appendChild(this.result, table.buildPages(rs.pages,
-                                    {'id': 'srchpg'}, this.send, this));
-        }
-    }
-
-})();
-
 //######################## Messages process
 
 var message = new (function(){
@@ -433,7 +380,7 @@ function getElementsByClassName(searchClass, node, tag) {
 function encd(string){
     //Convert codes into characters
     if(!string)
-        return '';
+        return (isUndef(string) ? '' : string);
     string = string.toString();
     string = string.replace(/\&quot;/gi, "\"");
     string = string.replace(/\&#37;/gi, "%");

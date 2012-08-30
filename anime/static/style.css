@@ -168,13 +168,18 @@ border: none;
 
 .title{
     display: inline-block;
+    line-height: 27px;
+    padding-left: 5px !important;
 }
 
 .id{
-    width: 30px !important;
+    width: auto !important;
     background-color: #339966 !important;
     text-align: right !important;
     cursor: pointer;
+    color: #FFFFCC;
+    font-weight: bold;
+    padding: 0px 3px 0px 5px !important;
 }
 
 .episodes {
