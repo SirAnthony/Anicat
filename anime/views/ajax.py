@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.utils.encoding import force_unicode
 import anime.core.base as coreMethods
 import anime.core.user as userMethods
@@ -93,3 +93,12 @@ def register(request):
     if res.get('response', False):
         return {'response': 'login', 'status': True, 'text': res.get('text')}
     return {'response': 'register', 'status': False, 'text': extract_errors(res)}
+
+
+@ajaxResponse
+def statistics(request):
+    try:
+        res = userMethods.get_statistics(request)
+    except Http404, e:
+        return {'response': 'stat', 'status': False, 'text': e}
+    return {'response': 'stat', 'status': True, 'text': res}

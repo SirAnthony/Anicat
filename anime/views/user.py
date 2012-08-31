@@ -2,9 +2,8 @@
 import anime.core.user as userMethods
 
 from django.contrib import auth
-from django.contrib.auth.models import User
 from django.contrib.messages.api import get_messages
-from django.http import Http404, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
@@ -35,8 +34,6 @@ def register(request):
 
 @render_to('anime/settings.html')
 def settings(request):
-    if not request.user.is_authenticated():
-        raise Http404
     response = userMethods.load_settings(request)
     response.update(userMethods.get_requests(request.user))
     return response
@@ -45,17 +42,7 @@ def settings(request):
 @condition(last_modified_func=userMethods.latest_status)
 @render_to('anime/stat.html')
 def statistics(request, user_id=0):
-    if user_id:
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            raise Http404
-    elif request.user.is_authenticated():
-        user = request.user
-    else:
-        raise Http404
-    res = userMethods.get_statistics(user)
-    return {'userid': getattr(user, 'id', None), 'stat': res}
+    return userMethods.get_statistics(request, user_id)
 
 
 @cache_control(private=True, no_cache=True)

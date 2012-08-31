@@ -5,6 +5,7 @@ from django.contrib import auth
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db.models import Q
+from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 from anime.forms.Error import UploadMalListForm
 from anime.forms.User import ( UserNamesForm, UserEmailForm,
@@ -16,7 +17,8 @@ from anime.models import AnimeRequest, UserStatusBundle, USER_STATUS
 ERROR_MESSAGES = {
     'login': {'logined': _('Already logged in.'),},
     'register': {'registred': _('Already registred.')},
-    'mallist': {'fast': _('You doing it too often. Try again in {0} minutes.')}
+    'mallist': {'fast': _('You doing it too often. Try again in {0} minutes.')},
+    'user': {'bad': _('No such user.')}
 }
 
 
@@ -73,6 +75,8 @@ def register(request):
 
 
 def load_settings(request):
+    if not request.user.is_authenticated():
+        raise Http404(ERROR_MESSAGES['user']['bad'])
     res = load_MalList(request)
     if 'usernames' in request.POST:
         res['usernames'] = form = UserNamesForm(request.POST or None, instance=request.user)
@@ -129,9 +133,16 @@ def get_requests(user, *keys):
         return {}
 
 
-def get_statistics(user):
-    if not user or not getattr(user, 'id', None):
-        return None
+def get_statistics(request, user_id = 0):
+    user = user_id or request.POST.get('user_id', 0) or request.user
+    try:
+        if isinstance(user, User):
+            if not user.is_authenticated():
+                raise User.DoesNotExist
+        else:
+            user = User.objects.get(id=user_id)
+    except (User.DoesNotExist, ValueError):
+        raise Http404(ERROR_MESSAGES['user']['bad'])
     uid = user.id
     tuser = cache.get('Stat:%s' % uid)
     if not tuser:
@@ -155,7 +166,7 @@ def get_statistics(user):
             tuser.append(arr)
         tuser.append(total)
         cache.set('Stat:%s' % uid, tuser)
-    return tuser
+    return {'userid': uid, 'stat': tuser}
 
 
 def get_styles(user):

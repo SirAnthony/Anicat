@@ -92,6 +92,7 @@ urlpatterns += patterns('anime.views.ajax',
     url(r'^ajax/add/$', 'add', name='ajax_add'),
     url(r'^ajax/login/$', 'login', name='ajax_login'),
     url(r'^ajax/register/$', 'register', name='ajax_register'),
+    url(r'^ajax/stat/$', 'statistics', name='ajax_statistics'),
 )
 
 #Ajax classes
