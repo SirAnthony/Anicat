@@ -6,27 +6,27 @@
             <a rel="nofollow" href=""></a>
         </th>
         <th class="id">
-            <a rel="nofollow" href="/">№</a>
+            <a rel="nofollow" href="/" onclick="return loadURIHash(this.href)">№</a>
         </th>
         <th class="title">
-            <a rel="nofollow" href="{{ link_order|default:'/' }}{% if link.order == 'title' or not link.order %}sort/-title/{% endif %}">Name</a>
+            <a rel="nofollow" href="{{ link_order|default:'/' }}{% if link.order == 'title' or not link.order %}sort/-title/{% endif %}" onclick="return loadURIHash(this.href)">Name</a>
         </th>
         <th class="episodes">
-            <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == 'episodesCount' %}-{% endif %}episodesCount/">Episodes</a>
+            <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == 'episodesCount' %}-{% endif %}episodesCount/" onclick="return loadURIHash(this.href)">Episodes</a>
         </th>
         <th class="release">
-            <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == 'releasedAt' %}-{% endif %}releasedAt/">Released</a>
+            <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == 'releasedAt' %}-{% endif %}releasedAt/" onclick="return loadURIHash(this.href)">Released</a>
         </th>
         <th class="type">
-            <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == 'releaseType' %}-{% endif %}releaseType/">Type</a>
+            <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == 'releaseType' %}-{% endif %}releaseType/" onclick="return loadURIHash(this.href)">Type</a>
         </th>
         {% if link.status %}
         <th class="changed">
-            <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == 'changed' %}-{% endif %}changed/">Changed</a>
+            <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == 'changed' %}-{% endif %}changed/" onclick="return loadURIHash(this.href)">Changed</a>
         </th>
             {% if link.status == 3 %}
         <th class="rating">
-            <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == 'rating' %}-{% endif %}rating/">Rated</a>
+            <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == 'rating' %}-{% endif %}rating/" onclick="return loadURIHash(this.href)">Rated</a>
         </th>
             {% endif %}
         {% endif %}

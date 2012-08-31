@@ -6,7 +6,7 @@
         {% ifequal pages.current forloop.counter %}
             <span class="spanl">[{{ page }}]</span>
         {% else %}
-            <a href="{{ link.link }}{% ifnotequal forloop.counter 1 %}{{forloop.counter}}/{% endifnotequal %}">{{ page }}</a>
+            <a href="{{ link.link }}{% ifnotequal forloop.counter 1 %}{{forloop.counter}}/{% endifnotequal %}" onclick="return loadURIHash(this.href)">{{ page }}</a>
         {% endifequal %}
     {% endfor %}
 </div>

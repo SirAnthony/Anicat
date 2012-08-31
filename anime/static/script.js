@@ -418,17 +418,6 @@ var jsonToString = function(obj){
     return obj;
 }
 
-//Режимы отображения
-
-function setshow(){
-    var mode = document.getElementById('show').value;
-    if(!mode && !isNumber(mode))
-        return;
-    (mode == 'a') ? mode = '/' : mode = '/show/'+mode+'/';
-    if(window.location.pathname != mode){
-        window.location.href = mode;
-    }
-}
 
 function toggle(elem, force){
     if(elem){

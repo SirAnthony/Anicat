@@ -10,30 +10,42 @@
 
 //######################## URI Hash
 function parseHash(string){
-    var re = new RegExp('^/?((search/([^/]+))|(user/(\\d+)/show/(\\d+))?)/(sort/(-?\\w+)/)?((\\d+)/?)?');
-    string = string.replace(/^#?\/?/g, '');
+    var re = new RegExp('^/?((search/([^/]+))|((user/(\\d+)/)?show/(\\d+))?)/(sort/(-?\\w+)/)?((\\d+)/?)?');
+    string = string.replace(/^#?/g, '');
     var match = re.exec(string);
     if(!match) return;
-    var request = null;
+    var request = 'list';
     var ret = {};
-    var processor = null;
+    var processor = list.processor;
     if(match[2] && match[3]){
         request = 'search';
         ret['string'] = match[3];
         processor = searcher.processor;
-    }else if(match[4] && match[5] && !isUndef(match[6])){
-        request = 'list';
-        ret = extend(ret, {'user': match[5], 'status': match[6]});
-        processor = list.processor;
+    }else if(match[4] && !isUndef(match[7])){
+        ret = extend(ret, {'user': match[6], 'status': match[7]});
     }
-    ret = extend(ret, {'order': match[8], 'page': match[10]});
+    ret = extend(ret, {'order': match[9], 'page': match[11]});
     return [request, ret, processor];
 }
 
 function loadURIHash(string){
+    if(document.location.pathname.match(/^\/search\//))
+        return true;
+    if(string)
+        string = string.replace(/http:\/\/[^\/]+/g,'');
     var link = parseHash(string ? string : document.location.hash);
     if(!link || !link[0]) return;
     ajax.loadXMLDoc.apply(ajax, link);
+    return false;
+}
+
+//######################## Display mode
+function setshow(){
+    var mode = document.getElementById('show').value;
+    if(!mode && !isNumber(mode))
+        return;
+    (mode == 'a') ? mode = '/' : mode = '/show/'+mode+'/';
+    loadURIHash(mode);
 }
 
 
@@ -83,7 +95,7 @@ var searcher = new ( function(){
         if(!rs.count || !rs.list.length){
            element.appendChild(this.result, [{'p': {innerText: 'Nothing found.'}}]);
         }else{
-            var page = (rs.pages.current) ? rs.pages.current + '/' : '';
+            var page = (rs.pages.current > 1) ? rs.pages.current + '/' : '';
             document.location.hash = rs.link.link + page;
             toggle(this.sobj, true);
             table.build(this.result, {'table': {'id': 'srchtbl'},
@@ -110,7 +122,7 @@ var list = new ( function(){
 
     this.create = function(data){
         var dvid = document.getElementById('dvid');
-        var page = (data.pages.current) ? data.pages.current + '/' : '';
+        var page = (data.pages.current > 1) ? data.pages.current + '/' : '';
         document.location.hash = data.link.link + page;
         element.remove(document.getElementById('pg'));
         table.build(dvid, {'table': {'id': 'tbl'},
@@ -140,9 +152,14 @@ var table = new ( function(){
 
     var shortnames = {'type': 'releaseType', 'release': 'releasedAt',
                        'episodes': 'episodesCount'};
+    var headnames = {'title': 'name', 'release': 'released'}
 
-    this.getLongName = function(n){
+    this.longName = function(n){
         return (shortnames[n] ? shortnames[n] : n);
+    }
+
+    this.headName = function(n){
+        return (headnames[n] ? headnames[n] : n);
     }
 
     this.build = function(obj, attrs, data, calls){
@@ -174,16 +191,19 @@ var table = new ( function(){
                 th.push({'th': {className: 'link'}});
             }else if(name == 'id'){
                 th.push.apply(th, [{'th': {className: 'id'}}, [
-                    {'a': {'innerText': '№', 'href': '/'}}]]);
+                    {'a': {'innerText': '№', 'href': '/',
+                    'onclick': function(ev) {
+                        return callback.func.call(callback.scope, {}, '', ev);}
+                    }}]]);
             }else{
-                var lname = table.getLongName(name);
+                var lname = table.longName(name);
                 if(link.order == ((lname == 'title') ? undefined : lname))
                     lname = '-' + lname;
                 var href = link.link.replace(/(.+)?\/sort\/\-?\w+\/?/gi, '$1'
                     ) + 'sort/' + lname + '/';
                 th.push.apply(th, [{'th': {className: name}}, [{'a': {
-                'innerText': capitalise(name), 'href': href,
-                'onclick': function(ev) {
+                'innerText': capitalise(table.headName(name)),
+                'href': href, 'onclick': function(ev) {
                     return callback.func.call(callback.scope, link, lname, ev);
                 }}}]]);
             }
