@@ -34,7 +34,7 @@ var Card = new (function(){
         }else{
             imgbun = card.firstChild.clientWidth + 40;
         }
-        card.lastChild.style.maxWidth = card.clientWidth - imgbun + 'px';
+        card.lastChild.previousSibling.style.maxWidth = card.clientWidth - imgbun - 20 + 'px';
     }
 
     this.hideEdits = function(p){
@@ -80,11 +80,19 @@ var Card = new (function(){
                     innerText: 'Submit new', style: {display: "none"}, target: '_blank'}}],
                 link, bundle
             ],
-            {'div': {'id': 'main', 'className': 'cardcol'}}, data
+            {'div': {'id': 'main', 'className': 'cardcol'}}, data,
+            {'div': {'className': 'left'}}, [
+                {'a': {'innerText': '✕', 'onclick': this.close}},
+                {'a': {'innerText': '↪', 'href': '/card/' + id + '/', target: '_blank'}},
+            ]
 
         ]);
         this.place();
         this.load();
+    }
+
+    this.close = function(){
+        toggle(document.getElementById("card"), -1);
     }
 
     this.get = function(id, e){
@@ -108,6 +116,7 @@ var Card = new (function(){
     this.place = function(){
         var card = document.getElementById("card");
         if(!card) return;
+        toggle(card, true);
         var soffsety = (document.documentElement.scrollTop || document.body.scrollTop) - document.documentElement.clientTop;
         var scry = 0;
         if(isNumber(window.pageYOffset))

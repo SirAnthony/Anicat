@@ -440,7 +440,7 @@ a.blacklink:hover {
     font-size: 10pt;
     cursor: pointer;
 }
-.cardcol a.right:hover {
+.cardcol a.right:hover, #card div.left a:hover {
     color: #0068ef;
 }
 
@@ -448,6 +448,12 @@ a.blacklink:hover {
     position: absolute;
     right: 0px;
     background: #FFF;
+}
+
+#card div.left a {
+    display: block;
+    color: #000;
+    cursor: pointer;
 }
 
 #main.cardcol{

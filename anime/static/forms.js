@@ -20,12 +20,6 @@ var forms = new (function forms_class(){
 
     this.title_bundle = function(fieldname, id, data){
         var fields = this.getField(fieldname, id, data);
-        if(!data || !data.id)
-            return [this.titledfield(fieldname,
-            ((data && data.id) ? data.id : 0), fields),
-                this.titledfield('this', id, [{'a': {
-                    href: '/card/' + id, target: '_blank'}}, [
-                        {'': {innerText: '/card/' + id + '/'}}]])];
         return this.titledfield(fieldname,
             ((data && data.id) ? data.id : 0), fields);
     }
