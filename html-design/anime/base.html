@@ -30,7 +30,11 @@
     <script type="text/javascript" src="/static/calendar.js"></script>
     <script type="text/javascript" src="/static/DateTimeShortcuts.js"></script>
 {% endcompress %}
-    {% if not user.is_authenticated %}<script type="text/javascript" src="/static/userstorage.js"></script>{% endif %}
+    {% if not user.is_authenticated %}
+        <script type="text/javascript" src="/static/userstorage.js"></script>
+    {% else %}
+        <script type="text/javascript" src="/static/statistic.js"></script>
+    {% endif %}
     {% block customScripts %}{% endblock %}
 </head>
 <body>
@@ -57,10 +61,10 @@
             <span class="delimiter">|</span>
             <span><a href="{% url settings %}" title="User settings">{% username user %}</a></span>
             <span class="delimiter">|</span>
-            <a href="{% url logout %}" onclick="user.logout();  return false;">Logout</a>
+            <a href="{% url logout %}" onclick="user.logout(); return false;">Logout</a>
         </div>
         <div class="rightmenu">
-            <a href="{% url statistics %}">Statistics</a>
+            <a href="{% url statistics %}" onclick="statistics.toggle(); return false;">Statistics⇣</a>
             {% block selectView %}
             <span class="delimiter">|</span>
             <div class="select">
@@ -79,6 +83,7 @@
             {% endblock %}
         </div>
     </div>
+    {% block statdiv %}<div id="statistic" class="right"></div>{% endblock %}
     {% else %}
         </div>
         <div id="usermenu" class="rightmenu">

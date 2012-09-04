@@ -130,8 +130,12 @@ var user = new( function(){
         var nick;
         var form = document.getElementById('usermenu');
         ((text.name) ? nick = encd(text.name) : nick = '%USERNAME%');
-        element.remove(document.getElementById('loginform'));
+        var loginform = document.getElementById('loginform');
+        element.insert(loginform, {'div': {'id': 'statistic', 'className': 'right'}});
+        element.remove(loginform);
         element.removeAllChilds(form);
+        loadModule('ae');
+        loadModule('statistic');
         element.appendChild(form, [
             {'span': {className: 'delimiter', innerText: '|'}}, {'span': {}}, [
                 {'a': {'href': '/settings/', title: 'User settings', innerText: nick}}],
@@ -140,7 +144,9 @@ var user = new( function(){
         ]);
         element.appendChild(form.parentNode, [
             {'div': {className: 'rightmenu'}}, [
-                {'a': {href: '/stat/', innerText: 'Statistics'}},
+                {'a': {href: '/stat/', innerText: 'Statistics⇣',
+                    'onclick': function(){
+                        statistics.toggle(); return false; }}},
                 {'span': {className: 'delimiter', innerText: '|'}},
                 {'div': {className: 'select'}}, [
                     {'select': {id: 'show', onchange: function(){setshow();}}},
@@ -149,9 +155,6 @@ var user = new( function(){
                     {'span': {innerText: 'Display Mode\xa0\xa0⇵'}},
                 ]
             ]
-        ]);
-        element.appendChild(document.getElementsByTagName("head")[0], [
-            {'script': {'type': 'text/javascript', 'src': '/static/ae.js'}}
         ]);
         this.logined = true;
         catalog_storage.disable();

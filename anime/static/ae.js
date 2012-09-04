@@ -440,5 +440,12 @@ var edit = new (function edit_class(){
 
 })();
 
-addEvent(window, 'load', function(){ add.init.call(add); });
-addEvent(window, 'load', function(){ edit.init.call(edit); });
+
+
+if(document.readyState === "complete"){
+    add.init();
+    edit.init();
+}else{
+    addEvent(window, 'load', function(){ add.init(); });
+    addEvent(window, 'load', function(){ edit.init(); });
+}

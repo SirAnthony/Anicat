@@ -140,8 +140,8 @@ def get_statistics(request, user_id = 0):
             if not user.is_authenticated():
                 raise User.DoesNotExist
         else:
-            user = User.objects.get(id=user_id)
-    except (User.DoesNotExist, ValueError):
+            user = User.objects.get(id=user)
+    except (User.DoesNotExist, ValueError, TypeError):
         raise Http404(ERROR_MESSAGES['user']['bad'])
     uid = user.id
     tuser = cache.get('Stat:%s' % uid)

@@ -98,6 +98,10 @@ a:hover{
     display: block;
 }
 
+.textleft {
+    text-align: left;
+}
+
 /* Trash */
 
 /* Classes */
@@ -536,7 +540,7 @@ select.linktype {
 #addform {
     left: 30px;
 }
-#addform, .filterform {
+#addform, .filterform, #statistic.right {
     background-color: #EAE8DF;
     border: 1px solid #B0B0B0;
     border-top: none;
@@ -751,6 +755,21 @@ div#id_filter_genre_container {
 
 
 /* Id's */
+#statistic th {
+    padding: 0 10px;
+}
+
+#statistic .stattotal {
+    font-weight: bold;
+}
+
+#statistic.right {
+    padding: 5px 30px 10px 20px;
+    background-color: #FFF;
+    right: 6px;
+}
+
+
 #requests, .column {
     line-height: 1.2em;
 }

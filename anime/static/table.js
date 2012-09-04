@@ -31,6 +31,8 @@ function parseHash(string){
 function loadURIHash(string){
     if(document.location.pathname.match(/^\/search\//))
         return true;
+    if(!document.getElementById('dvid') && !searcher.loaded)
+        return true;
     if(string)
         string = string.replace(/http:\/\/[^\/]+/g,'');
     var link = parseHash(string ? string : document.location.hash);

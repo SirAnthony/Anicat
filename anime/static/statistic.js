@@ -9,23 +9,47 @@
  */
 
 
-var stat = new ( function(){
+var statistics = new ( function(){
 
     this.hrs = null;
+    this.stat = null;
+    this.processor = new RequestProcessor({'stat': function(resp){
+        if(!this.stat)
+            throw Error('Statistics panel not exists.');
+        message.hide();
+        element.removeAllChilds(this.stat);
+        if(!resp.status)
+            element.appendChild(this.stat, [
+                {'p': {'className': 'error', 'innerText': 'Error:'}},
+                map(function(er){
+                    return {'p': {'className': 'error', 'innerText': er}}
+                }, resp.text)
+            ]);
+        else
+            this.load(resp.text);
+    }}, this);
+
 
     this.init = function(){
-        stat.hrs = element.create('div', {id: 'tohrs',
+        this.hrs = element.create('div', {id: 'tohrs',
                 className: 'cont_men', style: {position: 'absolute'}});
-        element.appendChild(document.body, [stat.hrs]);
-        var el = document.getElementsByName('num');
+        this.stat = document.getElementById("statistic");
+        element.appendChild(document.body, [this.hrs]);
+        this.hrsSetup();
+    }
+
+    this.hrsSetup = function(){
+        var el = getElementsByClassName('num', this.stat);
         for(var i in el){
             addEvent(el[i], 'mouseover', function(){
                 var offset = element.getOffset(this);
-                stat.hrsShow(this.textContent, offset.left + this.offsetWidth/1.6, offset.top - this.offsetHeight*2.8);
+                statistics.hrsShow(this.textContent,
+                    offset.left + this.offsetWidth/1.6,
+                    offset.top - this.offsetHeight*2.8);
             });
             addEvent(el[i], 'mouseout', (function(h){
                 return function(){toggle(h, -1)} }
-            )(stat.hrs));
+            )(this.hrs));
         }
     }
 
@@ -38,6 +62,55 @@ var stat = new ( function(){
         toggle(this.hrs, 1);
     }
 
+    this.load = function(data){
+        if(!this.stat)
+            return;
+        var counter = 0;
+        element.appendChild(this.stat, [
+            'table', ['thead', ['th', {'th': {'innerText': 'Items'}},
+                {'th': {'innerText': 'Full duration', 'colSpan': '2'}},
+                {'th': {'innerText': 'Watched', 'colSpan': '2'}}, 'th'],
+                'tbody', map(function(el){
+                    counter++;
+                    return element.create('tr', {'className': 'stat'}, [
+                        {'td': {'className': 'textleft stat' + el.name.toLowerCase(),
+                            'innerText': capitalise(el.name) + ':'}},
+                        {'td': {'innerText': el.count || 0 }},
+                        {'td': {'innerText': el.full || 0, 'className': 'num'}},
+                        {'td': {'className': 'textleft', 'innerText': 'min.'}},
+                        {'td': {'innerText': el.custom || 0, 'className': 'num'}},
+                        {'td': {'className': 'textleft', 'innerText': 'min.'}},
+                        (el.name.toLowerCase() != 'total') ? {'a':
+                            {'target': '_blank', 'className': 'blacklink',
+                            'innerText': '↪', 'href': '/user/' +
+                                + data.userid + '/show/' + counter +'/',
+                            'onclick': function(){ return loadURIHash(this.href); }}
+                            } : null
+                    ]);
+                }, data.stat)
+            ]
+        ]);
+        this.hrsSetup();
+    }
+
+    this.getStat = function(){
+        ajax.loadXMLDoc('stat', {}, this.processor);
+    }
+
+    this.toggle = function(){
+        if(!this.stat)
+            return;
+        if(!this.stat.childNodes.length)
+            this.getStat();
+        toggle(this.stat);
+    }
+
 })();
 
-addEvent(window, 'load', stat.init);
+
+
+if(document.readyState === "complete"){
+    statistics.init();
+}else{
+    addEvent(window, 'load', function(){ statistics.init(); });
+}

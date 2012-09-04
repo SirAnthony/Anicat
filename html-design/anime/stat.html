@@ -2,8 +2,7 @@
 
 {% load animetemplates %}
 
-{% block customScripts %}
-<script type="text/javascript" src="/static/statistic.js"></script>
+{% block statdiv %}
 {% endblock %}
 
 {% block main %}
@@ -18,7 +17,7 @@
         <p><b>Statistics link</b>: <a href="http://anicat.net/stat/{{ userid }}/">anicat.net/stat/{{ userid }}/</a></p>
         {% endifequal %}
     </div>
-    <div>
+    <div id="statistic">
         <p>Statistics:</p>
         <table style="border-collapse: separate;">
             <thead>
@@ -33,16 +32,12 @@
             <tbody>
             {% for element in stat %}
                 <tr class="stat">
-                    <td style="text-align: left;">
-                        {% if forloop.last %}<b>{% endif %}
-                        {{ element.name|capfirst }}
-                        {% if forloop.last %}</b>{% endif %}:
-                    </td>
+                    <td class="textleft stat{{ element.name|lower }}">{{ element.name|capfirst }}:</td>
                     <td>{{ element.count|default_if_none:0 }}</td>
-                    <td name="num">{{ element.full|default_if_none:0 }}</td>
-                    <td>min.</td>
-                    <td name="num">{{ element.custom|default_if_none:0 }}</td>
-                    <td>min.</td>
+                    <td class="num">{{ element.full|default_if_none:0 }}</td>
+                    <td class="textleft">min.</td>
+                    <td class="num">{{ element.custom|default_if_none:0 }}</td>
+                    <td class="textleft">min.</td>
                     <td>{% if forloop.counter < 6 %}<a target="_blank" class="blacklink" href="/user/{{ userid }}/show/{{forloop.counter}}/">↪</a>{% endif %}</td>
                 </tr>
             {% endfor %}
