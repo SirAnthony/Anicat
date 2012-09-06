@@ -27,15 +27,18 @@ var add = new (function add_class(){
 
         addEvent(document.getElementById('id_releaseType'), 'change', function(){
             var ecount = document.getElementById('id_episodesCount');
+            var edur = document.getElementById('id_duration');
             switch(this.value){
                 case "":
                     ecount.value = "";
                     break;
                 case "0": // TV
                     ecount.value = 13;
+                    if(!edur.value) edur.value = 25;
                     break;
                 case "2": // OAV
                     ecount.value = 2;
+                    if(!edur.value) edur.value = 30;
                     break;
                 default:
                     ecount.value = 1;
@@ -155,6 +158,18 @@ var edit = new (function edit_class(){
                  'links': '/links', 'state': '/state', 'image': '/image'};
     this.fields = {'releaseType': 'type', 'releasedAt,endedAt': 'release'};
 
+    var restorable_elems = {};
+
+    this.hideChild = function(){ toggle(this.firstChild, -1); }
+    this.showChild = function(){ toggle(this.firstChild, 1); }
+
+
+    this.getFieldName = function(n){
+        if(this.fields[n])
+            return this.fields[n];
+        return n;
+    }
+
     this.rf = function(id, field, e){
         if(!user.logined && field == 'state'){
             processor.setRequest()
@@ -244,13 +259,15 @@ var edit = new (function edit_class(){
 
         message.hide();
 
-        var field = (resp.field ? resp.field : resp.model);
-        if(this.fields[field]) field = this.fields[field];
+        var field = this.getFieldName(resp.field ? resp.field : resp.model);
+
 
         if(!user.logined && resp.model == 'state'){
             var s = catalog_storage.getStatus(resp.id, (resp.text ? resp.text.select : null));
             resp.form = [{"select": {"name": "state", "required": true, "value": s.state, "label": "State", "choices": [["0", "None"], ["1", "Want"], ["2", "Now"], ["3", "Done"], ["4", "Dropped"], ["5", "Partially watched"]], "id": "id_state"}}];
         }
+
+        var fid = field+resp.id;
 
         if(resp.status){
             if(!resp.form)
@@ -266,22 +283,30 @@ var edit = new (function edit_class(){
 
             resp.form.push.apply(resp.form, this.addField(field));
 
-            var spans = getElementsByClassName(field+resp.id, null);
+            var spans = getElementsByClassName(fid, null);
+            restorable_elems[fid] = spans;
+
             resp.form.push({'input': {type: 'hidden', name: 'id', value: resp.id}});
             resp.form.push({'input': {type: 'hidden', name: 'model', value: resp.model}});
 
             if(resp.field)
                 resp.form.push({'input': {type: 'hidden', name: 'field', value: resp.field}});
             for(var i = 0; i < spans.length; i++){
-                var s = element.create('div', {className: 'editDiv edit_' + field + resp.id}, resp.form);
+                var s = element.create('div', {className: 'editDiv edit_' + fid}, resp.form);
                 if(!this.status_menu_edit){
+                    var pnfc = spans[i].parentNode.firstChild;
                     s.style.width = (field != 'links') ? '190px' : '300px';
-                    element.insert(spans[i].parentNode.firstChild, {'a': {className: 'right',
-                        innerText: 'Save', onclick: function(e){ edit.send(this.parentNode, e); }}}, true);
-                    element.remove(spans[i].parentNode.firstChild);
+                    element.insert(pnfc, {'a': {'className': 'right', 'innerText': 'Cancel',
+                        'onclick': function(e){ edit.restore(this.parentNode, e); }}});
+                    element.insert(pnfc, {'span': {'className': 'right', 'innerText': '|'}});
+                    element.insert(pnfc, {'a': {'className': 'right', 'innerText': 'Save',
+                            'onclick': function(e){ edit.send(this.parentNode, e); }}});
+                    removeEvent(pnfc.parentNode, 'mouseover', this.showChild);
+                    removeEvent(pnfc.parentNode, 'mouseout', this.hideChild);
+                    element.remove(pnfc);
                 }
                 element.insert(spans[i], s);
-                element.remove(spans[i]);
+                element.remove(spans[i], true);
             }
             if(this.status_menu_edit)
                 this.status_menu_edit = false;
@@ -290,7 +315,7 @@ var edit = new (function edit_class(){
                 for(var target in resp.text){
                     var obj;
                     if(target == '__all__'){
-                        obj = document.getElementsByClassName('edit_' + field + resp.id);
+                        obj = document.getElementsByClassName('edit_' + fid);
                         if(obj) obj = obj[0].previousSibling;
                     }else{
                         obj = document.getElementById('id_'+target);
@@ -314,8 +339,7 @@ var edit = new (function edit_class(){
 
         message.hide();
 
-        var field = (resp.field ? resp.field : resp.model);
-        if(this.fields[field]) field = this.fields[field];
+        var field = this.getFieldName(resp.field ? resp.field : resp.model);
 
         if(resp.status){
 
@@ -328,6 +352,22 @@ var edit = new (function edit_class(){
             // This should not occur
             throw new Error(resp.text);
         }
+    }
+
+    this.restore = function(elem, e){
+        var data = getFormData(elem);
+        var field =  this.getFieldName(data.field ? data.field : data.model);
+        var fid = field + data.id;
+        element.remove(getElementsByClassName('right', elem));
+        element.remove(getElementsByClassName('editDiv', elem));
+        element.insert(elem.firstChild, {'a': {
+                className: 'right', 'href': this.getFieldLink(data.id, field),
+                innerText: 'Edit', style: {display: "none"}, target: '_blank',
+                onclick: function(e){ return edit.rf(data.id, field, e); }}});
+        addEvent(elem, 'mouseover', this.showChild);
+        addEvent(elem, 'mouseout', this.hideChild);
+        element.appendChild(elem, restorable_elems[fid]);
+        delete restorable_elems[fid];
     }
 
     this.addField = function(field){
@@ -403,7 +443,7 @@ var edit = new (function edit_class(){
             catalog_storage.addStatus(resp.id, resp.text.state);
         }
 
-        this.field_default.call(this, field, resp);
+        this.fill_default.call(this, field, resp);
 
         var rs = getStylesheetRule('.rs'+resp.text.state, 'background-color');
         rs = rs ? rs : '#FFF';
@@ -415,23 +455,21 @@ var edit = new (function edit_class(){
                     ['.a'+resp.id, ['background-color', as]],
                     ['.s'+resp.id, ['color', sl, true]]];
         addStylesheetRules(rules);
+        if(statistics)
+            statistics.getStat();
     }
 
     this.putFields = function(divs, field, id, resp){
         var text = (resp.text[resp.field] ? resp.text[resp.field] : resp.text);
         for(var i = 0; i < divs.length; i++){
             var s = forms.getField(field, id, text);
+            element.remove(getElementsByClassName('right', divs[i].parentNode));
             element.insert(divs[i].parentNode.firstChild, {'a': {
                 className: 'right', 'href': this.getFieldLink(resp.id, field),
                 innerText: 'Edit', style: {display: "none"}, target: '_blank',
-                onclick: function(e){ return edit.rf(resp.id, field, e); }}},
-                true);
-            element.remove(divs[i].parentNode.firstChild);
-
-            addEvent(divs[i].parentNode, 'mouseover', function(){
-                    toggle(this.firstChild, 1); });
-            addEvent(divs[i].parentNode, 'mouseout', function(){
-                    toggle(this.firstChild, -1); });
+                onclick: function(e){ return edit.rf(resp.id, field, e); }}});
+            addEvent(divs[i].parentNode, 'mouseover', this.showChild);
+            addEvent(divs[i].parentNode, 'mouseout', this.hideChild);
 
             element.insert(divs[i], s);
             element.remove(divs[i]);

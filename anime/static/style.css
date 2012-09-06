@@ -149,8 +149,8 @@ a:hover{
 }
 
 .thdtbl{
-background-color: #339966;
-border: none;
+    background-color: #339966;
+    border: none;
 }
 
 #tbl td, #tbl th, #srchtbl td{
@@ -446,6 +446,10 @@ a.blacklink:hover {
 }
 .cardcol a.right:hover, #card div.left a:hover {
     color: #0068ef;
+}
+.cardcol div > span.right {
+    margin: 0px 3px;
+    font-size: 10pt;
 }
 
 #card {
@@ -767,6 +771,7 @@ div#id_filter_genre_container {
     padding: 5px 30px 10px 20px;
     background-color: #FFF;
     right: 6px;
+    z-index: 2;
 }
 
 

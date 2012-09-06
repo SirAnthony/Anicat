@@ -49,10 +49,13 @@ var Card = new (function(){
         for(var element=0; element<h.length; element++){
             var c = h[element];
             toggle(c, -1);
-            addEvent(c.parentNode, 'mouseover', (function(c){
-                return function(){toggle(c, 1);}})(c));
-            addEvent(c.parentNode, 'mouseout', (function(c){
-                return function(){toggle(c, -1);}})(c));
+            if(c.previousSibling){
+                addEvent(c.parentNode, 'mouseover', function(){ toggle(this.lastChild, 1); });
+                addEvent(c.parentNode, 'mouseout', function(){ toggle(this.lastChild, -1); });
+            }else{
+                addEvent(c.parentNode, 'mouseover', edit.showChild);
+                addEvent(c.parentNode, 'mouseout', edit.hideChild);
+            }
         }
     }
 
