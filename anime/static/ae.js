@@ -218,6 +218,7 @@ var edit = new (function edit_class(){
                                     'edit': this.processResponse}, this);
     }
 
+
     this.send = function(form){
         if(!form)
             return;
@@ -234,6 +235,7 @@ var edit = new (function edit_class(){
         var errors = getElementsByClassName('error', form);
         element.remove(errors);
     }
+
 
     this.getFormData = function(form){
         var formData = getFormData(form);
@@ -252,6 +254,7 @@ var edit = new (function edit_class(){
         return formData;
     }
 
+
     this.processForm = function(resp){
 
         if(!resp.id)
@@ -260,6 +263,13 @@ var edit = new (function edit_class(){
         message.hide();
 
         var field = this.getFieldName(resp.field ? resp.field : resp.model);
+        var fid = field+resp.id;
+
+        if(!resp.status)
+            return this.processError(resp.text, fid);
+
+        if(!resp.form)
+            throw new Error('Server did not return form.')
 
 
         if(!user.logined && resp.model == 'state'){
@@ -270,70 +280,53 @@ var edit = new (function edit_class(){
             }}];
         }
 
-        var fid = field+resp.id;
+        if(this.status_menu_edit){
+            message.create()
+            message.addTree(element.create('label', {'for': field + resp.id,
+                            innerText: capitalise(field) + ':'}));
+            message.addTree(forms.getField(field, resp.id));
+            message.show();
+            this.status_menu_edit = false;
+        }
 
-        if(resp.status){
-            if(!resp.form)
-                throw new Error('Server did not return form.')
+        resp.form.push.apply(resp.form, this.addField(field));
 
-            if(this.status_menu_edit){
-                message.create()
-                message.addTree(element.create('label', {'for': field + resp.id,
-                                innerText: capitalise(field) + ':'}));
-                message.addTree(forms.getField(field, resp.id));
-                message.show();
-            }
+        var spans = getElementsByClassName(fid, null);
+        restorable_elems[fid] = filter(function(sp){
+            return sp.parentNode != message.getMenu(); }, spans);
+        var restorable_flds = map(function(el){
+            return el.parentNode; }, restorable_elems[fid]);
 
-            resp.form.push.apply(resp.form, this.addField(field));
+        resp.form.push({'input': {type: 'hidden', name: 'id', value: resp.id}});
+        resp.form.push({'input': {type: 'hidden', name: 'model', value: resp.model}});
 
-            var spans = getElementsByClassName(fid, null);
-            restorable_elems[fid] = spans;
-
-            resp.form.push({'input': {type: 'hidden', name: 'id', value: resp.id}});
-            resp.form.push({'input': {type: 'hidden', name: 'model', value: resp.model}});
-
-            if(resp.field)
-                resp.form.push({'input': {type: 'hidden', name: 'field', value: resp.field}});
-            for(var i = 0; i < spans.length; i++){
-                var s = element.create('div', {className: 'editDiv edit_' + fid}, resp.form);
-                if(!this.status_menu_edit){
-                    var pnfc = spans[i].parentNode.firstChild;
-                    s.style.width = (field != 'links') ? '190px' : '300px';
-                    element.insert(pnfc, {'a': {'className': 'right', 'innerText': 'Cancel',
-                        'onclick': function(e){ edit.restore(this.parentNode, e); }}});
-                    element.insert(pnfc, {'span': {'className': 'right', 'innerText': '|'}});
-                    element.insert(pnfc, {'a': {'className': 'right', 'innerText': 'Save',
-                            'onclick': function(e){ edit.send(this.parentNode, e); }}});
-                    removeEvent(pnfc.parentNode, 'mouseover', this.showChild);
-                    removeEvent(pnfc.parentNode, 'mouseout', this.hideChild);
-                    element.remove(pnfc);
-                }
-                element.insert(spans[i], s);
-                element.remove(spans[i], true);
-            }
-            if(this.status_menu_edit)
-                this.status_menu_edit = false;
-        }else{
-            if(isHash(resp.text)){
-                for(var target in resp.text){
-                    var obj;
-                    if(target == '__all__'){
-                        obj = document.getElementsByClassName('edit_' + fid);
-                        if(obj) obj = obj[0].previousSibling;
-                    }else{
-                        obj = document.getElementById('id_'+target);
-                    }
-                    if(!obj) continue;
-                    for(var e in resp.text[target]){
-                        element.insert(obj.nextSibling, {'span': {
-                            className: 'error', innerText: resp.text[target][e]}});
-                    }
-                }
+        if(resp.field)
+            resp.form.push({'input': {type: 'hidden', name: 'field', value: resp.field}});
+        for(var i = 0; i < spans.length; i++){
+            var spani = spans[i];
+            var s = element.create('div', {className: 'editDiv edit_' + fid}, resp.form);
+            if(spani.parentNode != message.getMenu()){
+                var pnfc = spani.parentNode.firstChild;
+                s.style.width = (field != 'links') ? '190px' : '300px';
+                element.insert(pnfc, {'a': {'className': 'right', 'innerText': 'Cancel',
+                    'onclick': function(e){ edit.restore(this.parentNode, e); }}});
+                element.insert(pnfc, {'span': {'className': 'right', 'innerText': '|'}});
+                element.insert(pnfc, {'a': {'className': 'right', 'innerText': 'Save',
+                        'onclick': function(e){ edit.send(this.parentNode, e); }}});
+                removeEvent(pnfc.parentNode, 'mouseover', this.showChild);
+                removeEvent(pnfc.parentNode, 'mouseout', this.hideChild);
+                element.remove(pnfc);
             }else{
-                throw new Error(resp.text);
+                message.onclose = function(e){
+                    for(var i = 0; i < restorable_flds.length; i++)
+                        edit.restore(restorable_flds[i]);
+                }
             }
+            element.insert(spani, s);
+            element.remove(spani, true);
         }
     }
+
 
     this.processResponse = function(resp){
 
@@ -357,6 +350,29 @@ var edit = new (function edit_class(){
         }
     }
 
+
+    this.processError = function(text, fid){
+        if(isHash(text)){
+            for(var target in text){
+                var obj;
+                if(target == '__all__'){
+                    obj = document.getElementsByClassName('edit_' + fid);
+                    if(obj) obj = obj[0].previousSibling;
+                }else{
+                    obj = document.getElementById('id_'+target);
+                }
+                if(!obj) continue;
+                for(var e in text[target]){
+                    element.insert(obj.nextSibling, {'span': {
+                        className: 'error', innerText: text[target][e]}});
+                }
+            }
+        }else{
+            throw new Error(text);
+        }
+    }
+
+
     this.restore = function(elem, e){
         var data = getFormData(elem);
         var field =  this.getFieldName(data.field ? data.field : data.model);
@@ -372,6 +388,7 @@ var edit = new (function edit_class(){
         element.appendChild(elem, restorable_elems[fid]);
         delete restorable_elems[fid];
     }
+
 
     this.addField = function(field){
         if(field != 'name' && field != 'bundle' && field != 'links')

@@ -85,6 +85,7 @@ var message = new (function(){
 
     this.timeout = null;
     this.closeable = false;
+    this.onclose = null;
 
     this.getMenu = function(){
         if(!this.menu)
@@ -214,6 +215,10 @@ var message = new (function(){
         if(checkParent(target)){
             m.hide();
             clearTimeout(this.timeout);
+            if(m.onclose){
+                m.onclose();
+                m.onclose = null;
+            }
         }
     }
 
