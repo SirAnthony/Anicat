@@ -11,9 +11,9 @@
 {% endblock %}
 
 {% block main %}
-    <h2 id="listtitle">{% if link.status %}{% statusname link.status %} list{% if link.user %} for {% username link.user %}{% endif %}{% endif %}</h1>
 {% cache 0 mainTable cachestr %}
     <div id="dvid">
+        <h2 class="listtitle">{% if link.status %}{% statusname link.status %} list{% if link.user %} for {% username link.user %}{% endif %}{% endif %}</h2>
         {% if not list %}
             {% if cachestr %}
         <p>Nothing to display.</p>

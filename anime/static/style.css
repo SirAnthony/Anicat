@@ -140,7 +140,7 @@ a:hover{
     margin-bottom: 9px;
 }
 
-#listtitle {
+.listtitle {
     margin-bottom: 9px;
 }
 
@@ -774,6 +774,9 @@ div#id_filter_genre_container {
     z-index: 2;
 }
 
+#statistic + #dvid {
+    margin-top: 30px;
+}
 
 #requests, .column {
     line-height: 1.2em;

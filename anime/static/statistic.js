@@ -108,7 +108,8 @@ var statistics = new ( function(){
             items[6]++;
         }
         var counter = -1;
-        var statuses = ["none", "want", "now", "done", "dropped", "partially watched", "total"];
+        var statuses = STATUSES;
+        statuses.push("total");
         element.appendChild(this.stat, [
             'table', ['thead', ['th', {'th': {'innerText': 'Items'}}],
                 'tbody', map(function(el){

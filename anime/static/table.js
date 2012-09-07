@@ -171,6 +171,9 @@ var table = new ( function(){
         calls = extend({'head': {}, 'pages': {}}, calls);
         element.removeAllChilds(obj);
         if(isArray(data.list) && data.list.length){
+            if(isHash(data.link) && data.link.status)
+                element.appendChild(obj, {'h2': {'className': 'listtitle',
+                    'innerText': capitalise(STATUSES[data.link.status]) + ' list'}});
             element.appendChild(obj, [{'table':
                 extend({className: 'tbl', cellSpacing: 0}, attrs.table)},[
                     {'thead': extend({className: 'thdtbl'}, attrs.head)},
