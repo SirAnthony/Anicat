@@ -66,6 +66,7 @@ var statistics = new ( function(){
         if(!this.stat)
             return;
         var counter = 0;
+        element.removeAllChilds(this.stat);
         element.appendChild(this.stat, [
             'table', ['thead', ['th', {'th': {'innerText': 'Items'}},
                 {'th': {'innerText': 'Full duration', 'colSpan': '2'}},
@@ -93,8 +94,48 @@ var statistics = new ( function(){
         this.hrsSetup();
     }
 
+
+    this.loadStorage = function(){
+        if(!this.stat)
+            return;
+        element.removeAllChilds(this.stat);
+        var storage = user_storage.items('list');
+        var items = new Array(0,0,0,0,0,0,0);
+        for(var i in storage){
+            var n = parseInt(storage[i]);
+            if(n < 1 || n > 6) continue;
+            items[n]++;
+            items[6]++;
+        }
+        var counter = -1;
+        var statuses = ["none", "want", "now", "done", "dropped", "partially watched", "total"];
+        element.appendChild(this.stat, [
+            'table', ['thead', ['th', {'th': {'innerText': 'Items'}}],
+                'tbody', map(function(el){
+                    counter++;
+                    if(!counter)
+                        return null;
+                    return element.create('tr', {'className': 'stat'}, [
+                        {'td': {'className': 'textleft stat' + statuses[counter],
+                            'innerText': capitalise(statuses[counter]) + ':'}},
+                        {'td': {'innerText': el || 0 }},
+                    ]);
+                }, items)
+            ]
+        ]);
+    }
+
+
     this.getStat = function(){
-        ajax.loadXMLDoc('stat', {}, this.processor);
+        if(user.logined){
+            ajax.loadXMLDoc('stat', {}, this.processor);
+        }else if(catalog_storage.enabled){
+            this.loadStorage();
+        }else{
+            element.removeAllChilds(this.stat);
+            element.appendChild(this.stat, {'p': {'innerText':
+                'Enable local storage to use catalog anonymously.'}});
+        }
     }
 
     this.toggle = function(){

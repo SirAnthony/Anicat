@@ -14,9 +14,16 @@ var user_storage = new (function(){
     this.loaded = false;
 
     this.init = function(){
-        user_storage.loaded = !isUndef(localStorage);
-        updateListFromStorage();
-        this.enabled = user_storage.getItem('enabled') ? true : false;
+        if(this.loaded)
+            return true;
+        this.loaded = !isUndef(localStorage);
+        if(this.loaded){
+            updateListFromStorage();
+            this.enabled = user_storage.getItem('enabled') ? true : false;
+        }else{
+            this.enabled = false;
+        }
+        return this.loaded;
     }
 
     this.enable = function(){
@@ -30,7 +37,7 @@ var user_storage = new (function(){
         this.removeItem('enabled');
     }
 
-    this.getKeys = function(subkey){
+    this.keys = function(subkey){
         if(!this.loaded) return;
         var keys = new Array();
         if(subkey)
@@ -47,6 +54,25 @@ var user_storage = new (function(){
             }
         }
         return keys;
+    }
+
+    this.items = function(subkey){
+        if(!this.loaded) return;
+        var items = {};
+        if(subkey)
+            var re = new RegExp('^'+subkey+'\\.');
+        for(var i=0; i<localStorage.length; i++){
+            var keyname = localStorage.key(i);
+            if(/^anicat\./.test(keyname)){
+                var key = keyname.replace(/^anicat\./, '');
+                if(!subkey || (re && re.test(key))){
+                    if(re)
+                        key = key.replace(re, '')
+                    items[key] = localStorage[keyname];
+                }
+            }
+        }
+        return items;
     }
 
     this.addItem = function(key, value){
@@ -73,7 +99,7 @@ var user_storage = new (function(){
 
 function updateListFromStorage(){
     if(!user_storage.loaded) return;
-    var keys = user_storage.getKeys('list');
+    var keys = user_storage.keys('list');
     var colors = {};
     var rules = new Array();
     for(var i in keys){

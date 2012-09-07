@@ -134,8 +134,6 @@ var user = new( function(){
         element.insert(loginform, {'div': {'id': 'statistic', 'className': 'right'}});
         element.remove(loginform);
         element.removeAllChilds(form);
-        loadModule('ae');
-        loadModule('statistic');
         element.appendChild(form, [
             {'span': {className: 'delimiter', innerText: '|'}}, {'span': {}}, [
                 {'a': {'href': '/settings/', title: 'User settings', innerText: nick}}],
@@ -157,6 +155,7 @@ var user = new( function(){
             ]
         ]);
         this.logined = true;
+        statistics.getStat();
         catalog_storage.disable();
     }
 
@@ -229,7 +228,7 @@ var catalog_storage = new (function(){
     }
 
     this.enable = function(){
-        if(typeof user_storage != "undefined" && user_storage.loaded){
+        if(typeof user_storage != "undefined" && user_storage.init()){
             if(!user_storage.enabled) user_storage.enable();
             this.enabled = true;
             return true;
@@ -238,7 +237,7 @@ var catalog_storage = new (function(){
 
     this.disable = function(){
         this.enabled = false;
-        if(typeof user_storage != "undefined" && user_storage.loaded){
+        if(typeof user_storage != "undefined" && user_storage.init()){
             if(user_storage.enabled) user_storage.disable();
             return true;
         }
@@ -247,4 +246,4 @@ var catalog_storage = new (function(){
 
 })();
 
-addEvent(window, 'load', function(){ user.init.call(user); });
+addEvent(window, 'load', function(){ user.init(); });

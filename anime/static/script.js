@@ -564,13 +564,6 @@ function removeEvent(obj, evType, fn) {
     }
 }
 
-function loadModule(name){
-    element.appendChild(document.head, [{'script':
-        {'type': 'text/javascript', 'src': '/static/' + name + '.js',
-        'onload': function () {
-            if (this.readyState == 'complete') init();
-        }}}]);
-}
 
 function updateStylesheets(name, link){
     var a = document.getElementsByTagName('link');

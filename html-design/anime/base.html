@@ -27,13 +27,12 @@
     <script type="text/javascript" src="/static/ae.js"></script>
     <script type="text/javascript" src="/static/card.js"></script>
     <script type="text/javascript" src="/static/app.js"></script>
+    <script type="text/javascript" src="/static/statistic.js"></script>
     <script type="text/javascript" src="/static/calendar.js"></script>
     <script type="text/javascript" src="/static/DateTimeShortcuts.js"></script>
 {% endcompress %}
     {% if not user.is_authenticated %}
         <script type="text/javascript" src="/static/userstorage.js"></script>
-    {% else %}
-        <script type="text/javascript" src="/static/statistic.js"></script>
     {% endif %}
     {% block customScripts %}{% endblock %}
 </head>
@@ -83,10 +82,11 @@
             {% endblock %}
         </div>
     </div>
-    {% block statdiv %}<div id="statistic" class="right"></div>{% endblock %}
     {% else %}
         </div>
         <div id="usermenu" class="rightmenu">
+            <a href="#" onclick="statistics.toggle(); return false;">Statistics⇣</a>
+            <span class="delimiter">|</span>
             <a href="{% url login %}" onclick="return user.toggle();">Account</a>
         </div>
     </div>
@@ -143,6 +143,7 @@
         </dl>
     </div>
     {% endif %}
+    {% block statdiv %}<div id="statistic" class="right"></div>{% endblock %}
     {% block search %}
     <div id="srch" class="hidden">
         <form method="POST" action="{% url search %}" id="srchp" onsubmit="searcher.send(1, event); return false;">

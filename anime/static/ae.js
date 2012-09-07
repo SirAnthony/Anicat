@@ -264,7 +264,10 @@ var edit = new (function edit_class(){
 
         if(!user.logined && resp.model == 'state'){
             var s = catalog_storage.getStatus(resp.id, (resp.text ? resp.text.select : null));
-            resp.form = [{"select": {"name": "state", "required": true, "value": s.state, "label": "State", "choices": [["0", "None"], ["1", "Want"], ["2", "Now"], ["3", "Done"], ["4", "Dropped"], ["5", "Partially watched"]], "id": "id_state"}}];
+            resp.form = [{'select': {'name': 'state', 'required': true, 'value': s.state, 'id': 'id_state',
+                'label': 'State', 'onchange': function(){ return edit.send(this.parentNode.parentNode); },
+                'choices': [['0', 'None'], ['1', 'Want'], ['2', 'Now'], ['3', 'Done'], ['4', 'Dropped'], ['5', 'Partially watched']],
+            }}];
         }
 
         var fid = field+resp.id;
