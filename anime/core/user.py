@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.models import User
-from django.core.cache import cache
 from django.db.models import Q
 from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
@@ -11,7 +10,9 @@ from anime.forms.Error import UploadMalListForm
 from anime.forms.User import ( UserNamesForm, UserEmailForm,
         UserCreationFormMail, NotActiveAuthenticationForm, )
 from anime.malconvert import passFile
-from anime.models import AnimeRequest, UserStatusBundle, USER_STATUS
+from anime.models import AnimeItem, AnimeRequest, UserStatusBundle, USER_STATUS
+from anime.utils import cache
+from anime.utils.catalog import latest_status
 
 
 ERROR_MESSAGES = {
@@ -165,8 +166,37 @@ def get_statistics(request, user_id = 0):
             total['custom'] += arr['custom'] or 0
             tuser.append(arr)
         tuser.append(total)
-        cache.set('Stat:%s' % uid, tuser)
+        cache.cset('Stat:%s' % uid, tuser)
     return {'userid': uid, 'stat': tuser}
+
+
+def export_statistic(request):
+    if not request.user.is_authenticated():
+        raise Http404(ERROR_MESSAGES['user']['bad'])
+    pk = latest_status(request.user)
+    cachestr = 'statusexport:{0}'.format(request.user.id)
+    cachename = 'statusexportdata:{0}'.format(request.user.id)
+    data = cache.get(cachename)
+    if not data or not cache.latest('StatisticExport',
+                    cachestr, {'UserStatusBundle': pk}):
+        data = AnimeItem.objects.filter(statusbundles__user=request.user,
+                                        statusbundles__state__gt=0).\
+                extra(select={
+                        'names': """SELECT GROUP_CONCAT(`anime_animename`.`title` SEPARATOR "||")
+                FROM `anime_animename` WHERE `anime_animename`.`anime_id` = `anime_animeitem`.`id`""",
+                        'my_state': 'anime_userstatusbundle.state',
+                        'my_count': 'anime_userstatusbundle.count',
+                        'my_rating': 'anime_userstatusbundle.rating',
+                        'my_changed': 'anime_userstatusbundle.changed',
+                }).values('id', 'releasedAt', 'episodesCount', 'endedAt',
+                'title', 'releaseType', 'air', 'duration', 'names',
+                'my_state', 'my_count', 'my_rating', 'my_changed')
+        for item in data:
+            item['names'] = item['names'].split('||')
+        cache.cset(cachename, data)
+        cache.update_named_cache(cachestr)
+    update = cache.get(cachestr)
+    return {'response': 'export', 'text': {'last_update': update, 'data': data}}
 
 
 def get_styles(user):
@@ -181,5 +211,5 @@ def get_styles(user):
             for status in statuses:
                 styles[status['state']].append(unicode(status['anime']))
             styles = [[',.r'.join(style), ',.a'.join(style), ',.s'.join(style)] for style in styles]
-        cache.set('userCss:%s' % uid, styles)
+        cache.cset('userCss:%s' % uid, styles)
     return styles

@@ -772,6 +772,7 @@ div#id_filter_genre_container {
     background-color: #FFF;
     right: 6px;
     z-index: 2;
+    display: none;
 }
 
 #statistic + #dvid {

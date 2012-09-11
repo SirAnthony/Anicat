@@ -14,7 +14,8 @@
     <div>
         <p><b>User</b>: {% ifequal user.id userid %}{% username user %}{% else %}{% username '' %}{% endifequal %}</p>
         {% ifequal user.id userid %}
-        <p><b>Statistics link</b>: <a href="http://anicat.net/stat/{{ userid }}/">anicat.net/stat/{{ userid }}/</a></p>
+        <p><b>Statistics link</b>: <a href="/stat/{{ userid }}/">/stat/{{ userid }}/</a></p>
+        <p><b>Export statistics</b>: <a href="/stat/export/" target="_blank">/stat/export/</a></p>
         {% endifequal %}
     </div>
     <div id="statistic">

@@ -268,9 +268,6 @@ var edit = new (function edit_class(){
         if(!resp.status)
             return this.processError(resp.text, fid);
 
-        if(!resp.form)
-            throw new Error('Server did not return form.')
-
 
         if(!user.logined && resp.model == 'state'){
             var s = catalog_storage.getStatus(resp.id, (resp.text ? resp.text.select : null));
@@ -279,6 +276,10 @@ var edit = new (function edit_class(){
                 'choices': [['0', 'None'], ['1', 'Want'], ['2', 'Now'], ['3', 'Done'], ['4', 'Dropped'], ['5', 'Partially watched']],
             }}];
         }
+
+
+        if(!resp.form)
+            throw new Error('Server did not return form.')
 
         if(this.status_menu_edit){
             message.create()

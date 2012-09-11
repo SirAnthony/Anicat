@@ -47,6 +47,7 @@ urlpatterns += patterns('anime.views.user',
     url(r'^register/$', 'register', name='registration'),
     url(r'^settings/$', 'settings', name='settings'),
     url(r'^stat/(?:(?P<user_id>\d+)/)?$', 'statistics', name='statistics'),
+    url(r'^stat/export/?$', 'statistics_export', name='statistics_export'),
     url(r'^css/$', 'generate_css', name='user_css'),
 )
 
@@ -126,4 +127,5 @@ if not settings.DEPLOY:
         'document_root': settings.IMAGES_ROOT}),
                                 url(r'^static/(.*)$',
         'django.views.static.serve', kwargs={
-        'document_root': settings.STATIC_ROOT}), )
+        'document_root': settings.STATIC_ROOT}),
+    )

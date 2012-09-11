@@ -91,6 +91,7 @@ MEDIA_URL = '/media/'
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = os.path.join(OUR_ROOT, 'static')
 
+
 # URL that handles the static files served from STATICFILES_ROOT.
 # Example: "http://static.lawrence.com/", "http://example.com/static/"
 STATIC_URL = '/static/'
@@ -101,8 +102,8 @@ STATIC_URL = '/static/'
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # A list of locations of additional static files
-STATICFILES_DIRS = (
- )
+STATICFILES_DIRS = ()
+
 
 # List of finder classes that know how to find static files in
 # various locations.

@@ -17,6 +17,7 @@ ITEM_TYPES = {
     'IndexListView': [AnimeItem, UserStatusBundle],
     'RequestsListView': [AnimeRequest],
     'SearchListView': [AnimeItem],
+    'StatisticExport': [AnimeItem, AnimeName, UserStatusBundle],
 }
 
 get = cache.get

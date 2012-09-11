@@ -18,7 +18,7 @@ def ajaxResponse(fn):
                 del ret[key]
         ret = prepare_data(ret)
         return HttpResponse(simplejson.dumps(ret, cls=JSONFunctionEncoder),
-                mimetype='application/javascript')
+                mimetype='application/javascript; charset=UTF-8')
     return new
 
 

@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect
 from django.views.decorators.http import condition
 from django.views.decorators.cache import cache_control
 from annoying.decorators import render_to
+from anime.views.ajax import ajaxResponse
 
 
 @render_to('anime/user/login.html')
@@ -43,6 +44,10 @@ def settings(request):
 @render_to('anime/stat.html')
 def statistics(request, user_id=0):
     return userMethods.get_statistics(request, user_id)
+
+@ajaxResponse
+def statistics_export(request):
+    return userMethods.export_statistic(request)
 
 
 @cache_control(private=True, no_cache=True)

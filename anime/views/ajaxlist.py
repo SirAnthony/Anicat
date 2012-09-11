@@ -9,6 +9,7 @@ from hashlib import sha1
 
 from anime.models import AnimeItem, UserStatusBundle, USER_STATUS
 from anime.utils import cache
+from anime.utils.catalog import latest_status
 from anime.views.classes import AnimeAjaxListView
 from anime.views.ajax import ajaxResponse
 
@@ -97,15 +98,12 @@ class IndexListView(AnimeAjaxListView):
         return qs
 
     def updated(self, cachestr):
-        pk = cache.get('lastuserbundle:{0}'.format(self.user.id))
-        if not pk and self.user.is_authenticated():
-            try:
-                pk = UserStatusBundle.objects.filter(user=self.user) \
-                    .values('pk').latest('changed').get('pk', None)
-            except:
-                pk = None
-            cache.cset('lastuserbundle:{0}'.format(self.user.id), pk)
-        return super(IndexListView, self).updated(cachestr, {'UserStatusBundle': pk})
+        if not self.user.is_authenticated():
+            pk = None
+        else:
+            pk = latest_status(self.user)
+        return super(IndexListView, self).updated(cachestr,
+                                    {'UserStatusBundle': pk})
 
     @ajaxResponse
     def ajax(self, request, *args, **kwargs):
