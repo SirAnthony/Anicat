@@ -363,10 +363,18 @@ function hideRadio(s){
 function numHash(numh){ //for hash with numeric keys only
     var e=0;
     for(var r in numh){
-        //if( /[^\d]/.test(r) )  continue;
         if( Number(r) > Number(e) ) e=r;
     }
     return e;
+}
+
+function hashCount(obj){ //for hash with numeric keys only
+    var count = 0;
+    for(var prop in obj) {
+        if(obj.hasOwnProperty(prop))
+            ++count;
+    }
+    return count;
 }
 
 function getElementsByClassName(searchClass, node, tag) {

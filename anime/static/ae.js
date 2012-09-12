@@ -31,6 +31,7 @@ var add = new (function add_class(){
             switch(this.value){
                 case "":
                     ecount.value = "";
+                    if(!edur.value) edur.value = "";
                     break;
                 case "0": // TV
                     ecount.value = 13;
@@ -94,12 +95,11 @@ var add = new (function add_class(){
     this.sendForm = function(e){
         if(!this.loaded)
             return;
-        if(!(e.clientX | e.clientY))
-            return;
+        if(!!(e.clientX | e.clientY))
+            message.toEventPosition(e);
         this.clearForm();
         var formData = getFormData(this.form);
         ajax.loadXMLDoc('add', formData, this.processor);
-        message.toEventPosition(e);
     }
 
     this.processResponse = function(resp){
@@ -501,10 +501,5 @@ var edit = new (function edit_class(){
 
 
 
-if(document.readyState === "complete"){
-    add.init();
-    edit.init();
-}else{
-    addEvent(window, 'load', function(){ add.init(); });
-    addEvent(window, 'load', function(){ edit.init(); });
-}
+addEvent(window, 'load', function(){ add.init(); });
+addEvent(window, 'load', function(){ edit.init(); });

@@ -150,9 +150,4 @@ var statistics = new ( function(){
 })();
 
 
-
-if(document.readyState === "complete"){
-    statistics.init();
-}else{
-    addEvent(window, 'load', function(){ statistics.init(); });
-}
+addEvent(window, 'load', function(){ statistics.init(); });

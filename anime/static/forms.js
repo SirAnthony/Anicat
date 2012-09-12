@@ -35,7 +35,6 @@ var forms = new (function forms_class(){
             case 'episodesCount': title = 'episodes:'; break;
             case 'release': title = 'released:'; break;
             case 'bundle': title = 'Bundled with:'; break;
-            case 'this': title = 'This card link:'; break;
             default: title = fieldname + ':'; break;
         }
         var childs = new Array();
