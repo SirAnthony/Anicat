@@ -426,6 +426,7 @@ a.blacklink:hover {
     min-width: 190px;
     margin-bottom: 3px;
 }
+
 .cardcol div div {
     margin-bottom: 0px;
 }
@@ -433,6 +434,7 @@ a.blacklink:hover {
 .cardcol input, .cardcol select {
     width: 190px;
     margin-bottom: 0px;
+    max-width: 190px;
 }
 
 .cardcol span {

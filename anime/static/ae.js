@@ -25,28 +25,30 @@ var add = new (function add_class(){
         this.loaded = true;
         this.processor = new RequestProcessor({'add': this.processResponse}, this);
 
-        addEvent(document.getElementById('id_releaseType'), 'change', function(){
-            var ecount = document.getElementById('id_episodesCount');
-            var edur = document.getElementById('id_duration');
-            switch(this.value){
-                case "":
-                    ecount.value = "";
-                    if(!edur.value) edur.value = "";
-                    break;
-                case "0": // TV
-                    ecount.value = 13;
-                    if(!edur.value) edur.value = 25;
-                    break;
-                case "2": // OAV
-                    ecount.value = 2;
-                    if(!edur.value) edur.value = 30;
-                    break;
-                default:
-                    ecount.value = 1;
-                    break;
-            }
-        });
+        addEvent(document.getElementById('id_releaseType'), 'change', this.typeChange);
         this.genreHelperInit();
+    }
+
+    this.typeChange = function(){
+        var ecount = document.getElementById('id_episodesCount');
+        var edur = document.getElementById('id_duration');
+        switch(this.value){
+            case "":
+                ecount.value = "";
+                if(!edur.value) edur.value = "";
+                break;
+            case "0": // TV
+                ecount.value = 13;
+                if(!edur.value) edur.value = 25;
+                break;
+            case "2": // OAV
+                ecount.value = 2;
+                if(!edur.value) edur.value = 30;
+                break;
+            default:
+                ecount.value = 1;
+                break;
+        }
     }
 
     this.genreHelperInit = function(){

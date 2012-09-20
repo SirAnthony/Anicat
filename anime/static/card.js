@@ -90,7 +90,7 @@ var Card = new (function(){
             ]
 
         ]);
-        this.place();
+        this.place(true);
         this.load();
     }
 
@@ -116,10 +116,10 @@ var Card = new (function(){
         return true;
     }
 
-    this.place = function(){
+    this.place = function(show){
         var card = document.getElementById("card");
         if(!card) return;
-        toggle(card, true);
+        if(show) toggle(card, true);
         var soffsety = (document.documentElement.scrollTop || document.body.scrollTop) - document.documentElement.clientTop;
         var scry = 0;
         if(isNumber(window.pageYOffset))

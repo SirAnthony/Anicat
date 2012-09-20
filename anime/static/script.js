@@ -513,6 +513,8 @@ function map(callback, array, environ){
 }
 
 function filter(callback, array, environ){
+    if(!array)
+        return [];
     if(!isFunction(callback))
         throw new TypeError(callback + " is not a function");
     var ret;
