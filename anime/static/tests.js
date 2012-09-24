@@ -259,7 +259,7 @@ var Tests = new (function(){
             toggle(lf, 1);
             toggle(document.getElementById('logdvmore'), 1);
             var re = document.getElementById('id_register-email');
-            re.value = Date().replace(/\D/gi, '') + '@anicat.net';
+            re.value = Date().replace(/[\D-]/gi, '') + '@anicat.net';
             re.nextSibling.click();
         },
         'loggedform': function(){
@@ -312,6 +312,34 @@ var Tests = new (function(){
             type.options[3].selected = true;
             add.typeChange.call(type);
         },
+        'fill_genre': function(){
+            var form = document.getElementById('addform');
+            if(!form)
+                return;
+            toggle(form, 1);
+            var link = document.getElementById('ImportAddLink');
+            link.click();
+            link.click();
+            var genre = document.getElementById('id_genre');
+            genre.options[2].selected = true;
+            genre.options[5].selected = true;
+        },
+        'fill_date': function(){
+            var form = document.getElementById('addform');
+            if(!form)
+                return;
+            toggle(form, 1);
+            var date = document.getElementById('id_releasedAt');
+            date.value = '25.09.2012';
+        },
+        'fill_title': function(){
+            var form = document.getElementById('addform');
+            if(!form)
+                return;
+            toggle(form, 1);
+            var title = document.getElementById('id_title');
+            title.value = Date().replace(/[\D-]/gi, '');
+        },
         'send_blank': function(){
             var form = document.getElementById('addform');
             if(!form)
@@ -332,9 +360,11 @@ var Tests = new (function(){
             var box = getElementsByClassName('calendarbox').pop();
             map(function(el){  el.click(); }, box.getElementsByTagName('a'));
         },
-        ''
-
-    }, {'all': ['show', 'send_blank', 'fill_type', 'calendar']});
+        'submit': function(){
+            document.getElementById('addform').lastChild.click();
+        }
+    }, {'all': ['show', 'send_blank', 'fill_type', 'calendar', 'submit'],
+    'submit': ['fill_type', 'calendar', 'fill_genre', 'fill_date', 'fill_title']});
 
     this.test_filter = new TestRunner({
         'show': function(){

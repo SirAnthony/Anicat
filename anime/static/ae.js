@@ -54,7 +54,7 @@ var add = new (function add_class(){
     this.genreHelperInit = function(){
         var genre = document.getElementById('id_genre');
         element.insert(genre, [{'span': {className: 'datetimeshortcuts'}},
-            [{'a': {innerText: 'Import', onclick: function(){
+            [{'a': {innerText: 'Import', 'id': 'ImportAddLink', onclick: function(){
                 var form = document.getElementById('TitleHelperForm')
                 if(toggle(form)) form.firstChild.focus(); }
             }}]]);

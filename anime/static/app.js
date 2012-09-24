@@ -92,7 +92,7 @@ function Autocomplete(object, objectattrs, types, retval){
                     this.opts.delay);
             break;
         }
-        return prevent(event);;
+        return prevent(event);
     }
 
     this.show = function(){
