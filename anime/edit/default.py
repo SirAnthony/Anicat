@@ -67,12 +67,13 @@ class EditableDefault(object):
             raise EditError(self.error_messages['not_loggined'])
         elif modelname not in EDIT_MODELS:
             raise EditError(self.error_messages['bad_model'])
-        elif not request.user.is_active and modelname not in EDITABLE_LIST:
-            raise EditError(self.error_messages['forbidden'])
-        elif (datetime.now() - request.user.date_joined).days < 15:
-            raise EditError(self.error_messages['wait'].format(
-                settings.DAYS_BEFORE_EDIT - (
-                    datetime.now() - request.user.date_joined).days))
+        elif modelname not in EDITABLE_LIST:
+            if not request.user.is_active:
+                raise EditError(self.error_messages['forbidden'])
+            elif (datetime.now() - request.user.date_joined).days < 15:
+                raise EditError(self.error_messages['wait'].format(
+                    settings.DAYS_BEFORE_EDIT - (
+                        datetime.now() - request.user.date_joined).days))
 
         try:
             self.item_id = int(item_id)
