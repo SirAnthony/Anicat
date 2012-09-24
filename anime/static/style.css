@@ -438,7 +438,9 @@ a.blacklink:hover {
 }
 
 .cardcol span {
+    display: inline-block;
     margin-left: 2px;
+    max-width: 300px;
 }
 
 .cardcol a.right {
