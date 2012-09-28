@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.conf.urls.defaults import patterns, url
 
-from django.views.generic.simple import direct_to_template
+from django.views.generic.base import TemplateView
 
 from anime.forms.User import NotActivePasswordResetForm
 from anime.views.list import RequestsListView
@@ -28,9 +28,9 @@ urlpatterns += patterns('',
 
 # Direct
 urlpatterns += patterns('',
-    (r'^changes/$', direct_to_template, {'template': 'anime/changes.html'}, 'changes'),
-    (r'^faq/$', direct_to_template, {'template': 'anime/faq.html'}, 'faq'),
-    (r'^blank/$', direct_to_template, {'template': 'anime/blank.html'}, 'blank'),
+    url(r'^changes/$', TemplateView.as_view(template_name='anime/changes.html'), name='changes'),
+    url(r'^faq/$', TemplateView.as_view(template_name='anime/faq.html'), name='faq'),
+    url(r'^blank/$', TemplateView.as_view(template_name='anime/blank.html'), name='blank'),
 )
 
 # History
@@ -42,7 +42,7 @@ urlpatterns += patterns('anime.views.history',
 urlpatterns += patterns('anime.views.user',
     url(r'^login/$', 'login', name='login'),
     url(r'^login/error/$', 'social_error', name='social_error'),
-    (r'^login/done/$', direct_to_template, {'template': 'anime/user/social-done.html'}),
+    (r'^login/done/$', TemplateView.as_view(template_name='anime/user/social-done.html')),
     url(r'^logout/$', 'logout', name='logout'),
     url(r'^register/$', 'register', name='registration'),
     url(r'^settings/$', 'settings', name='settings'),
@@ -53,25 +53,26 @@ urlpatterns += patterns('anime.views.user',
 
 # Password functions
 urlpatterns += patterns('django.contrib.auth.views',
-    (r'^password/reset/$', 'password_reset', {
+    url(r'^password/reset/$', 'password_reset', {
         'post_reset_redirect': '/password/reset/sent/',
         'subject_template_name': 'anime/user/password_reset_subject.txt',
         'email_template_name': 'anime/user/password_reset_email.html',
         'template_name': 'anime/user/password.html',
         'password_reset_form': NotActivePasswordResetForm,},
-        'password_reset'),
-    (r'^password/reset/sent/$', direct_to_template, {
-        'template': 'anime/user/password_reset_sent.html'}),
-    (r'^password/reset/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$',
+        name='password_reset'),
+    (r'^password/reset/sent/$', TemplateView.as_view(
+        template_name='anime/user/password_reset_sent.html')),
+    url(r'^password/reset/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$',
         'password_reset_confirm', {
         'template_name': 'anime/user/password_reset_confirm.html',
         'post_reset_redirect': '/password/reset/done/'},
-        'password_reset_confirm'),
+        name='password_reset_confirm'),
     (r'^password/reset/done/$', 'password_reset_complete',
         {'template_name': 'anime/user/password_reset_complete.html'}),
-    (r'^password/change/$', 'password_change', {
+    url(r'^password/change/$', 'password_change', {
         'post_change_redirect': '/settings/',
-        'template_name': 'anime/user/password.html'}, 'password_change'),
+        'template_name': 'anime/user/password.html'},
+        name='password_change'),
 )
 
 # Edit

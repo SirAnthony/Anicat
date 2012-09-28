@@ -30,16 +30,18 @@ class FormSerializer(object):
 
         if isinstance(widget, forms.SelectMultiple):
             return 'selectmultiple'
-        if isinstance(widget, forms.RadioSelect):
-            return 'radio'
-        if isinstance(widget, forms.Select):
+        elif isinstance(widget, forms.Select):
             return 'select'
+        elif isinstance(widget, forms.HiddenInput):
+            return 'hidden'
+        elif isinstance(widget, forms.FileInput):
+            return 'file'
+        elif isinstance(widget, forms.RadioSelect):
+            return 'radio'
         elif isinstance(widget, forms.CheckboxInput):
             return 'checkbox'
         elif isinstance(widget, forms.Textarea):
             return 'textarea'
-        elif isinstance(widget, forms.HiddenInput):
-            return 'hidden'
         return 'text'
 
     def compact_choices(self, choices):

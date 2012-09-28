@@ -16,7 +16,7 @@
         <div id="imagebun" class="cardcol">
             <div id="cimg">
                 <img src="http://anicat.net/images/{{ anime.id }}/" />
-                {% if user.is_authenticated %}<a href="/edit/image/{{ anime.id }}/" class="right">Submit new</a>{%endif%}
+                {% if user.is_authenticated %}<a href="/edit/image/{{ anime.id }}/" onclick="return edit.rf({{ anime.id }}, 'image', event);" class="right">Submit new</a>{%endif%}
             </div>
             <div>
             {% if user.is_authenticated %}
@@ -33,7 +33,7 @@
                         <td>{% ifequal item.id anime.id %}►{% endifequal %}</td>
                         <td align="right">{{ forloop.counter }}</td>
                         <td>
-                            <a href="{% url card item.id %}" class="s s{{ item.id }}" >{{ item.title }}</a>
+                            <a href="{% url 'card' item.id %}" class="s s{{ item.id }}" >{{ item.title }}</a>
                         </td>
                     </tr>
                 {% endfor %}

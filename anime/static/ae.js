@@ -162,8 +162,10 @@ var edit = new (function edit_class(){
 
     var restorable_elems = {};
 
-    this.hideChild = function(){ toggle(this.firstChild, -1); }
-    this.showChild = function(){ toggle(this.firstChild, 1); }
+    this.hideEdit = function(){ map(function(el){ toggle(el, -1) },
+                        getElementsByClassName('right', this)); }
+    this.showEdit = function(){ map(function(el){ toggle(el, 1) },
+                        getElementsByClassName('right', this)); }
 
 
     this.getFieldName = function(n){
@@ -309,16 +311,16 @@ var edit = new (function edit_class(){
             var spani = spans[i];
             var s = element.create('div', {className: 'editDiv edit_' + fid}, resp.form);
             if(spani.parentNode != message.getMenu()){
-                var pnfc = spani.parentNode.firstChild;
+                var editlink = getElementsByClassName('right', spani.parentNode, 'a')[0];
                 s.style.width = (field != 'links') ? '190px' : '300px';
-                element.insert(pnfc, {'a': {'className': 'right', 'innerText': 'Cancel',
+                element.insert(editlink, {'a': {'className': 'right', 'innerText': 'Cancel',
                     'onclick': function(e){ edit.restore(this.parentNode, e); }}});
-                element.insert(pnfc, {'span': {'className': 'right', 'innerText': '|'}});
-                element.insert(pnfc, {'a': {'className': 'right', 'innerText': 'Save',
+                element.insert(editlink, {'span': {'className': 'right', 'innerText': '|'}});
+                element.insert(editlink, {'a': {'className': 'right', 'innerText': 'Save',
                         'onclick': function(e){ edit.send(this.parentNode, e); }}});
-                removeEvent(pnfc.parentNode, 'mouseover', this.showChild);
-                removeEvent(pnfc.parentNode, 'mouseout', this.hideChild);
-                element.remove(pnfc);
+                removeEvent(spani.parentNode, 'mouseover', this.showEdit);
+                removeEvent(spani.parentNode, 'mouseout', this.hideEdit);
+                element.remove(editlink);
             }else{
                 message.onclose = function(e){
                     for(var i = 0; i < restorable_flds.length; i++)
@@ -380,14 +382,8 @@ var edit = new (function edit_class(){
         var data = getFormData(elem);
         var field =  this.getFieldName(data.field ? data.field : data.model);
         var fid = field + data.id;
-        element.remove(getElementsByClassName('right', elem));
+        this.putEdit(elem, field, data.id);
         element.remove(getElementsByClassName('editDiv', elem));
-        element.insert(elem.firstChild, {'a': {
-                className: 'right', 'href': this.getFieldLink(data.id, field),
-                innerText: 'Edit', style: {display: "none"}, target: '_blank',
-                onclick: function(e){ return edit.rf(data.id, field, e); }}});
-        addEvent(elem, 'mouseover', this.showChild);
-        addEvent(elem, 'mouseout', this.hideChild);
         element.appendChild(elem, restorable_elems[fid]);
         delete restorable_elems[fid];
     }
@@ -486,17 +482,19 @@ var edit = new (function edit_class(){
         var text = (resp.text[resp.field] ? resp.text[resp.field] : resp.text);
         for(var i = 0; i < divs.length; i++){
             var s = forms.getField(field, id, text);
-            element.remove(getElementsByClassName('right', divs[i].parentNode));
-            element.insert(divs[i].parentNode.firstChild, {'a': {
-                className: 'right', 'href': this.getFieldLink(resp.id, field),
-                innerText: 'Edit', style: {display: "none"}, target: '_blank',
-                onclick: function(e){ return edit.rf(resp.id, field, e); }}});
-            addEvent(divs[i].parentNode, 'mouseover', this.showChild);
-            addEvent(divs[i].parentNode, 'mouseout', this.hideChild);
-
+            this.putEdit(divs[i].parentNode, field, id);
             element.insert(divs[i], s);
             element.remove(divs[i]);
         }
+    }
+
+    this.putEdit = function(elem, field, id){
+        var links = getElementsByClassName('right', elem);
+        element.insert(links[0] || elem.firstChild,
+                                forms.getEditLink(field, id));
+        element.remove(links);
+        addEvent(elem, 'mouseover', this.showEdit);
+        addEvent(elem, 'mouseout', this.hideEdit);
     }
 
 })();

@@ -67,8 +67,19 @@ var ajax = new (function(){
         var makePostData = function(name, value){
             var crlf = '\r\n'
             var s = '--' + boundary + crlf;
-            s += 'Content-Disposition: form-data; name="' + name + '"' + crlf;
-            s += crlf + (!isString(value) ? jsonToString(value) : value) + crlf;
+            s += 'Content-Disposition: form-data; name="' + name + '"';
+            // isFile
+            if(value != null && typeof value == "object" &&
+                    'lastModifiedDate' in value && 'name' in value){
+                throw Error('This is not supported yet. Use static uploading.');
+                //~ s += '; filename="' + value.name + '"' + crlf;
+                //~ s += 'Content-Type: application/octet-stream' + crlf;
+                //~ var reader = new FileReader();
+                //~ reader.readAsBinaryString(value);
+                //~ s += crlf + reader.result + crlf;
+            }else{
+                s += crlf + crlf + (!isString(value) ? jsonToString(value) : value) + crlf;
+            }
             return s;
         }
 

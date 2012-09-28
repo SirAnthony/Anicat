@@ -2,7 +2,7 @@
 {% block main %}
 {% if not user.is_authenticated %}
     <form method="POST" action="/register/" id="register" class="register left">
-        {% csrf_token %}
+        <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
         <p class="mainerror">
             {{ RegisterForm.non_field_errors }}
         </p>

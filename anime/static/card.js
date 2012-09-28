@@ -49,13 +49,8 @@ var Card = new (function(){
         for(var element=0; element<h.length; element++){
             var c = h[element];
             toggle(c, -1);
-            if(c.previousSibling){
-                addEvent(c.parentNode, 'mouseover', function(){ toggle(this.lastChild, 1); });
-                addEvent(c.parentNode, 'mouseout', function(){ toggle(this.lastChild, -1); });
-            }else{
-                addEvent(c.parentNode, 'mouseover', edit.showChild);
-                addEvent(c.parentNode, 'mouseout', edit.hideChild);
-            }
+            addEvent(c.parentNode, 'mouseover', edit.showEdit);
+            addEvent(c.parentNode, 'mouseout', edit.hideEdit);
         }
     }
 
@@ -79,8 +74,8 @@ var Card = new (function(){
             {'div': {'id': 'imagebun', 'className': 'cardcol'}}, [
                 {'div': {'id': 'cimg'}}, [
                     {'img': {'src': 'http://anicat.net/images/' + res.id + '/'}},
-                    {'a': {href: edit.getFieldLink(id, 'image'), className: 'right',
-                    innerText: 'Submit new', style: {display: "none"}, target: '_blank'}}],
+                    forms.getEditLink('image', id, 'Submit new'),
+                    forms.getField('image', res.id)],
                 link, bundle
             ],
             {'div': {'id': 'main', 'className': 'cardcol'}}, data,

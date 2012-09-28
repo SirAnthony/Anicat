@@ -59,7 +59,7 @@ def form(request):
 
 def process_edit_response(response):
     if 'form' in response:
-        if 'status' in response and not response['status']:
+        if not response.get('status', False):
             del response['form']
         else:
             try:

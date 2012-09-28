@@ -11,7 +11,7 @@
         {% if model != 'anime' or  id and id != '0' %}
         {% if user.is_authenticated %}
         <form id="addform" class="addform cont_men" action="/add/" method="post" enctype="multipart/form-data" onsubmit="return false;">
-        {% csrf_token %}
+            <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
             <div class="mainerror">{{ AddForm.non_field_errors }}</div>
             {% for field in AddForm %}
             <div {% if forloop.counter0|divisibleby:2 %}class="clear"{% endif %}>
@@ -36,7 +36,7 @@
     {% else %}
     {# Костыли, костыли everywhere #}
     <form class="addform{% if form.fields|length < 2 %} addfrmoc{% endif %}" action="" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+        <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
         <div class="mainerror">
             {{ form.non_field_errors }}
         </div>

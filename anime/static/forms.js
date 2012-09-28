@@ -39,15 +39,10 @@ var forms = new (function forms_class(){
         }
         var childs = new Array();
         if(edit && fieldname != 'this')
-            childs.push({'a': {className: 'right',
-                'href': edit.getFieldLink(id, fieldname),
-                innerText: 'Edit', target: '_blank',
-                onclick: (function(i, f){ return function(e){
-                    return edit.rf(i, f, e); }})(id, fieldname) }});
-        childs.push({'h4': {innerText: capitalise(title),
-            style: (fieldname == 'this' ? {display: 'inline', marginRight: '7px'} : null)}});
+            childs.push(this.getEditLink(fieldname, id));
+        childs.push({'h4': {innerText: capitalise(title)}});
         if(isArray(fields))
-            childs.push.apply(childs, fields); //lolo
+            childs.push.apply(childs, fields);
         else
             childs.push(fields);
         return element.create('div', null, childs);
@@ -61,6 +56,29 @@ var forms = new (function forms_class(){
         if(!el.className)
             el.className = fieldname + id;
         return el;
+    }
+
+    this.getEditLink = function(fieldname, id){
+        var func = this['editlink_'+fieldname];
+        if(!func)
+            func = this.editlink_default;
+        return func.call(this, fieldname, id);
+    }
+
+    this.editlink_default = function(fieldname, id, text){
+        if(!text) text = 'Edit';
+        return {'a': {'className': 'right', 'style': {'display': 'none'},
+                'href': edit.getFieldLink(id, fieldname),
+                'innerText': text, 'target': '_blank',
+                onclick: function(e){ return edit.rf(id, fieldname, e); }
+        }}
+    }
+
+    this.editlink_image = function(fieldname, id){
+        return {'a': {'className': 'right', 'style': {'display': 'none'},
+                'href': edit.getFieldLink(id, fieldname),
+                'innerText': 'Submit new', 'target': '_blank'}}
+        //~ return this.editlink_default(fieldname, id, 'Submit new');
     }
 
     this.field_state = function(data, id){
@@ -142,6 +160,10 @@ var forms = new (function forms_class(){
 
     this.field_duration = function(data){
         return element.create('p', {innerText: data + ' min.'});
+    }
+
+    this.field_image = function(data){
+        return element.create('p', {'style': {'display': 'none'}});
     }
 
     this.field_default = function(data){

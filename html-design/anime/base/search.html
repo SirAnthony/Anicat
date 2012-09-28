@@ -2,7 +2,6 @@
 
 {% load cache %}
 
-{% load url from future %}
 
 {% block searchlink %}
 {% endblock %}
@@ -11,20 +10,7 @@
 {% block search %}
     <div id="srch">
         <form method="POST" action="/search/" id="srchp">
-            {% csrf_token %}
-            {% comment %}
-            <!--<p id="chtext"><input type="checkbox" id="chsrch" onClick="searcher.showAdvance();" />Advanced Search</p>-->
-            <!--<select id="advsrch" class="advsrch">
-                <option value="null" selected="selected">Find by:</option>
-                <option value="genre">Genre</option>
-            </select>
-            <select id="sortsrch" class="advsrch">
-                <option value="null" selected="selected">Sort by:</option>
-                <option value="genre">Genre</option>
-            </select>
-            -->
-            <!--<input type="text" onkeyup="app.acomp(this, 'catalog', event);" /><br/>-->
-            {% endcomment %}
+            <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
             <input id="sin" name="string" type="text" value="{{ link.string }}"/>
             <input type="submit" value="Search" />
         </form>

@@ -2,7 +2,7 @@
 {% block main %}
 {% if not user.is_authenticated %}
     <form action="/login/" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+        <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
         <table>
         <tr class="mainerror">
             <td colspan="2">{{ form.non_field_errors }}</td>
@@ -27,12 +27,13 @@
         {% for name in social_auth.backends.openid %}
             {% if  name != "openid" %}
             <li>
-                <a rel="nofollow" href="{% url socialauth_begin name %}">{{ name|title }}</a>
+                <a rel="nofollow" href="{% url 'socialauth_begin' name %}">{{ name|title }}</a>
             </li>
             {% endif %}
         {% endfor %}
             <li>
-                <form action="{% url socialauth_begin "openid" %}" method="post">{% csrf_token %}
+                <form action="{% url 'socialauth_begin' "openid" %}" method="post">
+                    <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
                     <div>
                         <label for="openid_identifier">Other provider</label><br/>
                         <input id="openid_identifier" type="text" value="" name="openid_identifier" />

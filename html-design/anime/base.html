@@ -13,7 +13,7 @@
     <link rel="search" type="application/opensearchdescription+xml" title="Anime catalog" href="/static/srch.xml" />
     <link href="/static/style.css" type="text/css" rel="stylesheet" />
     <link href="/static/nanoscroller.css" type="text/css" rel="stylesheet" />
-    <link href="{% url user_css %}" type="text/css" rel="stylesheet" />
+    <link href="{% url 'user_css' %}" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="/jsi18n/"></script>
 {% compress js %}
     <script type="text/javascript" src="{{ STATIC_URL }}js/element.js"></script>
@@ -45,26 +45,26 @@
             <span class="delimiter">|</span>
             {% endblock %}
             {% block searchlink %}
-            <a href="{% url search %}" rel="nofollow" onclick="searcher.toggle(); return false;" accesskey="s">Search</a>
+            <a href="{% url 'search' %}" rel="nofollow" onclick="searcher.toggle(); return false;" accesskey="s">Search</a>
             <span class="delimiter">|</span>
             {% endblock %}
-            <a href="{% url faq %}">FAQ</a><span class="delimiter">|</span>
-            <a href="{% url card %}" rel="nofollow">Random</a><span class="delimiter">|</span>
+            <a href="{% url 'faq' %}">FAQ</a><span class="delimiter">|</span>
+            <a href="{% url 'card' %}" rel="nofollow">Random</a><span class="delimiter">|</span>
             <a onclick="Filter.toggle(); return false;">Filter⇣</a>
     {% if user.is_authenticated %}
             {% block addLink %}
             <span class="delimiter">|</span>
-            <a href="{% url edit_add %}" rel="nofollow" onclick="add.toggle(); return false;">Add⇣</a>
+            <a href="{% url 'edit_add' %}" rel="nofollow" onclick="add.toggle(); return false;">Add⇣</a>
             {% endblock %}
         </div>
         <div id="usermenu" class="rightmenu">
             <span class="delimiter">|</span>
-            <span><a href="{% url settings %}" title="User settings">{% username user %}</a></span>
+            <span><a href="{% url 'settings' %}" title="User settings">{% username user %}</a></span>
             <span class="delimiter">|</span>
-            <a href="{% url logout %}" onclick="user.logout(); return false;">Logout</a>
+            <a href="{% url 'logout' %}" onclick="user.logout(); return false;">Logout</a>
         </div>
         <div class="rightmenu">
-            <a href="{% url statistics %}" onclick="statistics.toggle(); return false;">Statistics⇣</a>
+            <a href="{% url 'statistics' %}" onclick="statistics.toggle(); return false;">Statistics⇣</a>
             {% block selectView %}
             <span class="delimiter">|</span>
             <div class="select">
@@ -88,15 +88,15 @@
         <div id="usermenu" class="rightmenu">
             <a href="#" onclick="statistics.toggle(); return false;">Statistics⇣</a>
             <span class="delimiter">|</span>
-            <a href="{% url login %}" onclick="return user.toggle();">Account</a>
+            <a href="{% url 'login' %}" onclick="return user.toggle();">Account</a>
         </div>
     </div>
     <div id="loginform" class="right">
         {% loginForm %}
         <dl>
             <dd>
-                <form method="POST" action="{% url login %}" id="login" onsubmit="return user.login(event);">
-                    {% csrf_token %}
+                <form method="POST" action="{% url 'login' %}" id="login" onsubmit="return user.login(event);">
+                    <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
                     {{ LoginForm.username }}
                     {{ LoginForm.password }}
                     <input type="submit" value="Login" />
@@ -108,11 +108,11 @@
         </dl>
         <dl id="logdvmore" class="right hidden">
             <dd>
-                <a rel="nofollow" href="{% url password_reset %}" class="inurl right">Restore password</a>
+                <a rel="nofollow" href="{% url 'password_reset' %}" class="inurl right">Restore password</a>
                 <p>
                 {% for name in social_auth.backends.openid %}
                     {% if  name != "openid" %}
-                    <a rel="nofollow" target="_blank" onclick="return user.alterlogin('{% url socialauth_begin name %}');" class="inurl" href="{% url socialauth_begin name %}">{{ name|title }}</a>
+                    <a rel="nofollow" target="_blank" onclick="return user.alterlogin('{% url 'socialauth_begin' name %}');" class="inurl" href="{% url 'socialauth_begin' name %}">{{ name|title }}</a>
                     {% endif %}
                 {% endfor %}
                     <a rel="nofollow" onclick="return user.alterlogin('openid');" class="inurl">OpenID</a>
@@ -120,16 +120,16 @@
             </dd>
             <dt class="inurl">Login with</dt>
             <dd class="hidden">
-                <form id="login_openid" action="{% url socialauth_begin 'openid' %}" target="Login" method="post" onsubmit="return user.alterlogin('{% url socialauth_begin 'openid' %}');">
-                    {% csrf_token %}
+                <form id="login_openid" action="{% url 'socialauth_begin' 'openid' %}" target="Login" method="post" onsubmit="return user.alterlogin('{% url 'socialauth_begin' 'openid' %}');">
+                    <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
                     <input id="openid_identifier" type="text" value="" name="openid_identifier" />
                     <input type="submit" value="Login" />
                 </form>
             </dd>
             <dd class="hidden"><p id="socialinfo" class="error"></p></dd>
             <dd>
-                <form method="POST" action="{% url registration %}" id="register" class="register"  onsubmit="return user.register(event);">
-                    {% csrf_token %}
+                <form method="POST" action="{% url 'registration' %}" id="register" class="register"  onsubmit="return user.register(event);">
+                    <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
                     {% for field in RegisterForm %}
                         {{ field }}
                     {% endfor %}
@@ -147,8 +147,8 @@
     {% block statdiv %}<div id="statistic" class="right"></div>{% endblock %}
     {% block search %}
     <div id="srch" class="hidden">
-        <form method="POST" action="{% url search %}" id="srchp" onsubmit="searcher.send(1, event); return false;">
-        {% csrf_token %}
+        <form method="POST" action="{% url 'search' %}" id="srchp" onsubmit="searcher.send(1, event); return false;">
+            <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
             <input id="sin" name="string" type="text"/>
             <input type="submit" value="Search" />
         </form>
@@ -168,13 +168,13 @@
     <div class="cont_men" id="popup">
         <span id="popups"></span>
     </div>
-    <div class="footer">v. <a href="{% url changes %}" style="font-size: 10pt;">3.2.2</a>.</div>
+    <div class="footer">v. <a href="{% url 'changes' %}" style="font-size: 10pt;">3.2.2</a>.</div>
     {% addForm %}
     {% block addForm %}
     {% if user.is_authenticated %}
-    <form id="addform" class="addform cont_men" action="{% url edit_add %}" method="post" enctype="multipart/form-data"
+    <form id="addform" class="addform cont_men" action="{% url 'edit_add' %}" method="post" enctype="multipart/form-data"
         onsubmit="return false;">
-        {% csrf_token %}
+        <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
         <div class="mainerror">{{ AddForm.non_field_errors }}</div>
         {% for field in AddForm %}
         <div {% if forloop.counter0|divisibleby:2 %}class="clear"{% endif %}>

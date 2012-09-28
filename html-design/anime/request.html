@@ -12,7 +12,7 @@
             {% endif %}
         {# Костыли, костыли everywhere #}
         {% else %}
-    <div style="margin-bottom: 5px;"><a href="{% url requests %}">All requests</a></div>
+    <div style="margin-bottom: 5px;"><a href="{% url 'requests' %}">All requests</a></div>
     <div class="request">
         <div class="title">
             <p>
@@ -24,7 +24,7 @@
             <p>
                 <span>
                     <b>Related to:</b>
-                    <a href="{% url card form.instance.anime.id %}">{{ form.instance.anime }}</a>
+                    <a href="{% url 'card' form.instance.anime.id %}">{{ form.instance.anime }}</a>
                 </span>
             </p>
             {% endif %}
@@ -38,7 +38,7 @@
         </div>
             {% if user.is_staff %}
         <form class="addform" action="" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
+            <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
             <div class="mainerror">
                 {{ form.non_field_errors }}
             </div>

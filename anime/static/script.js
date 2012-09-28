@@ -308,6 +308,9 @@ function getFormData(form){
                     formData[elm.name] = map(function(opt){return opt.value},
                         filter(function(opt){ return opt.selected; }, elm.childNodes));
                     break;
+                case "file":
+                    formData[elm.name] = elm.files[0];
+                    break;
                 default:
                     formData[elm.name] = elm.value;
                     break;
