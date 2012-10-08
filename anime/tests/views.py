@@ -120,7 +120,10 @@ class AjaxTest(TestCase):
              'response': 'error'})
 
     def test_filter(self):
-
+        a = api.Filter()
+        link = a.get_link()
+        self.send_request(link, {}, a.get_returns())
+        self.send_request(link, {}, a.get_returns())
 
 
 class UserViewsTest(TestCase):

@@ -114,11 +114,11 @@ Filter:
     Apply filter to site output.
     Request target: /ajax/filter/
     Request params:
-        releasedAt: unicode,
-        duration: unicode,
-        episodesCount: unicode,
-        endedAt: unicode,
-        genre: unicode,
+        releasedAt: datetime or unicode,
+        duration: int,
+        episodesCount: int,
+        endedAt: datetime or unicode,
+        genre: list,
         releaseType: list,
         state: list
     Response object:
@@ -195,10 +195,10 @@ Add:
     This is a `form` field. It returns form if requested without parameters.
     Request target: /ajax/add/
     Request params:
-        releasedAt: unicode,
-        genre: unicode,
+        releasedAt: datetime or unicode,
+        genre: list,
         episodesCount: int,
-        endedAt: unicode,
+        endedAt: datetime or unicode,
         title: unicode,
         duration: int,
         releaseType: list

@@ -2,8 +2,8 @@
 from django.forms import Form, BooleanField, FileField, \
                          MultipleChoiceField, ModelMultipleChoiceField
 from django.forms.widgets import SelectMultiple
-from anime.forms.fields import UnknownDateField, FilterWidget, \
-                               FilterIntegerField, FilterUnknownDateField
+from anime.forms.fields import FilterWidget, FilterIntegerField, \
+                               FilterUnknownDateField
 from anime.models import Genre, ANIME_TYPES, USER_STATUS
 
 

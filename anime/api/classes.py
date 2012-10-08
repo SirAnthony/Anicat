@@ -70,6 +70,9 @@ class Base(object):
     def get_returns(self):
         return self.returns.copy()
 
+    def get_returns_noarg(self):
+        return self.returns_noarg.copy()
+
 
 class Filter(Base):
     """Apply filter to site output."""

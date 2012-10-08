@@ -1,7 +1,9 @@
 
 import datetime
 from decimal import Decimal
-from django.forms import fields
+from django.forms import fields, ModelMultipleChoiceField
+from anime.forms import fields as afields
+
 
 class MultiType(object):
     def __init__(self, *args):
@@ -37,6 +39,10 @@ fieldTypes = {
     fields.TypedChoiceField: list,
     fields.MultipleChoiceField: list,
     fields.MultiValueField: unicode,
+    ModelMultipleChoiceField: list,
+    afields.UnknownDateField: MultiType(datetime.datetime, unicode),
+    afields.FilterIntegerField: int,
+    afields.FilterUnknownDateField: MultiType(datetime.datetime, unicode),
 }
 
 
