@@ -1,9 +1,12 @@
 import datetime
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
+from django.test.client import RequestFactory
 
 from anime.utils.misc import is_iterator
 from anime import api
+
+request_factory = RequestFactory()
 
 user = 'nobody'
 email = 'nobody@example.com'
@@ -29,6 +32,14 @@ def create_user(u=None, e=None, p=None, lng=False):
             f(self, *args, **kwargs)
         return d_create
     return wrap
+
+
+def fake_request(*args, **kwargs):
+    user = kwargs.pop('_user', AnonymousUser())
+    request = request_factory.post(*args, **kwargs)
+    request.user = user
+    request.session = {}
+    return request
 
 
 def check_response(response, origin, *args, **kwargs):

@@ -184,7 +184,6 @@ class SearchListView(AnimeAjaxListView):
                     self.model._meta.get_field(f)
             fields.sort()
         except (FieldDoesNotExist, TypeError, AttributeError):
-            raise Exception
             raise Http404(self.error_messages['bad_fields'])
 
         try:

@@ -10,9 +10,12 @@ from anime import api
 from anime.utils.cache import invalidate_key
 from anime.models import AnimeItem, AnimeBundle, AnimeRequest, EDIT_MODELS
 from anime.tests._classes import CleanTestCase as TestCase
-from anime.tests._functions import create_user, login, check_response, fill_params
+from anime.tests._functions import (fake_request, create_user, login,
+                                    check_response, fill_params)
 from anime.utils.catalog import last_record_pk
 
+
+BLANK_CACHESTR = 'bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f'
 
 
 class AjaxTest(TestCase):
@@ -72,8 +75,8 @@ class AjaxTest(TestCase):
         self.send_request(link, {'string': 'b', 'order': 'releasedAt', 'limit': 40, 'page': 1}, a.returns)
         self.send_request(link, {'string': 'b', 'order': 'releasedAt', 'limit': 40, 'page': 1}, a.returns)
         self.send_request(link, {'string': 'b', 'limit': 'd', 'page': 'f'}, a.error)
-        self.send_request(link, {'string': 'b', 'field': 'd'}, a.error)
-        self.send_request(link, {'string': 'b', 'sort': 'd'}, a.error)
+        self.send_request(link, {'string': 'b', 'fields': 'd,f'}, a.error)
+        self.send_request(link, {'string': 'b', 'order': 'd'}, a.error)
         self.send_request(link, {}, a.error)
 
     def test_get(self):
@@ -112,9 +115,12 @@ class AjaxTest(TestCase):
 
     def test_process_edit_response(self):
         from anime.views.ajax import process_edit_response
-        self.assertEquals(process_edit_response({'form': None}),
+        self.assertEquals(process_edit_response({'form': None, 'status': True}),
             {'status': False, 'text': u'Form instance has bad type.',
              'response': 'error'})
+
+    def test_filter(self):
+
 
 
 class UserViewsTest(TestCase):
@@ -278,18 +284,19 @@ class ClassesViewsTest(TestCase):
     def test_AnimeListView(self):
         from anime.views.classes import AnimeListView
         v = AnimeListView()
-
+        v.request = fake_request('')
         self.assertRaises(NotImplementedError, v.get_link)
         self.assertRaises(NotImplementedError, v.check_parameters, None)
         v.get_link = self.blank
         v.check_parameters = self.blank
         v.cache_name = ''
         self.assertEquals(v.get_context_data(object_list=None),
-                {'list': None, 'link': '', 'pages': {}, 'cachestr': ''})
+                {'list': None, 'link': '', 'pages': {}, 'cachestr': BLANK_CACHESTR})
 
     def test_AnimeAjaxListView(self):
         from anime.views.classes import AnimeAjaxListView
         v = AnimeAjaxListView()
+        v.request = fake_request('')
         v.ajax_call = True
         self.assertRaises(NotImplementedError, v.post, None)
         v.cache_name = ''
@@ -300,7 +307,10 @@ class ClassesViewsTest(TestCase):
         v.get_link = self.blank
         v.check_parameters = self.blank
         self.assertEquals(v.get_context_data(object_list=None),
-                {'list': None, 'link': '', 'pages': {}, 'cachestr': ''})
+                {'list': None, 'link': '', 'pages': {}, 'cachestr': BLANK_CACHESTR})
+
+    def test_filter(self):
+        pass
 
 
 class ListViewsTest(TestCase):
@@ -352,13 +362,13 @@ class AjaxListViewsTest(TestCase):
     def test_SearchListView(self):
         from anime.views.ajaxlist import SearchListView
         s = SearchListView()
-        s.string = ''
-        s.page = 1
-        s.field = s.order = 'a'
-        self.assertEquals(s.get_link(), ({'field': 'a',  'order': 'a',
-            'link': '/search/da39a3ee5e6b4b0d3255bfef95601890afd80709/field/a/sort/a/',
-            'string': 'da39a3ee5e6b4b0d3255bfef95601890afd80709'},
-            '/search/da39a3ee5e6b4b0d3255bfef95601890afd80709/field/a/sort/a/1'))
+        s.kwargs = {}
+        request = fake_request('search', {'string': 'a',
+                'page': 1, 'fields': ['title'], 'order': 'title'})
+        s.check_parameters(request)
+        s.request = request
+        self.assertEquals(s.get_link(), ({'link': '/search/a/',
+            'string': u'a'}, 'ef0b30c1969b1cfcaba4b1159e5f91d800b210cf'))
         self.assertEquals(unicode(s.get_queryset()), unicode(AnimeItem.objects.none()))
         self.assertEquals(self.client.get(reverse('search')).status_code, 200)
         invalidate_key('search', '/search/4a0a19218e082a343a1b17e5333409af9d98f0f5/sort/releasedAt/1')

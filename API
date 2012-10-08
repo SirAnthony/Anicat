@@ -7,12 +7,13 @@ Notes:
         text - different, body of response.
 
 Search:
-    No description.
+    Search in database.
+    Optional `fields` argument can be passed to retrive only certain fields in response.
     Request target: /ajax/search/
     Request params:
-        field: unicode or nothing,
-        order: unicode or nothing,
-        limit: int or nothing,
+        fields: list or nothing. Default: All item fields,
+        order: unicode or nothing. Default: title,
+        limit: int or nothing. Default: 20,
         page: int or nothing,
         string: unicode
     Response object:
@@ -21,7 +22,8 @@ Search:
             count: int,
             list: [
                 This list may have variable items count. All items have the same structure
-                    name: unicode,
+                The fields is differs depends on `fields` parameter. Default:
+                    title: unicode,
                     air: bool,
                     episodes: int,
                     release: unicode,
@@ -39,7 +41,7 @@ Search:
         response: "search"
 
 Get:
-    No description.
+    Get certain field for record.
     Request target: /ajax/get/
     Request params:
         field: tuple,
@@ -106,10 +108,29 @@ Get:
         id: int
     Error object:
         No global errors for the get rerquest.
-        All fields errors in response text
+        All fields errors in response `text` parameter.
+
+Filter:
+    Apply filter to site output.
+    Request target: /ajax/filter/
+    Request params:
+        releasedAt: unicode,
+        duration: unicode,
+        episodesCount: unicode,
+        endedAt: unicode,
+        genre: unicode,
+        releaseType: list,
+        state: list
+    Response object:
+        status: True,
+        response: "filter"
+    Error object:
+        status: False,
+        text: dict,
+        response: "filter"
 
 Login:
-    No description.
+    Login to site.
     Request target: /ajax/login/
     Request params:
         username: unicode,
@@ -125,7 +146,7 @@ Login:
         response: "login"
 
 Forms:
-    No description.
+    This API call returns JSON-serialized form for field.
     Request target: /ajax/form/
     Request params:
         field: unicode or nothing,
@@ -170,20 +191,29 @@ Forms:
         response: "form"
 
 Add:
-    No description.
+    Add new record.
+    This is a `form` field. It returns form if requested without parameters.
     Request target: /ajax/add/
     Request params:
+        releasedAt: unicode,
+        genre: unicode,
+        episodesCount: int,
+        endedAt: unicode,
+        title: unicode,
+        duration: int,
+        releaseType: list
+    Response without arguments:
         releasedAt: {'input': {'id': 'id_releasedAt', 'name': 'releasedAt', 'value': date or nothing, 'label': ReleasedAt}},
+        genre: [
+            {'input': {'id': 'id_genre', 'name': 'genre', 'value': int or nothing, 'label': Genre}}
+            {'input': {'id': 'id_genre', 'name': 'genre', 'value': int or nothing, 'label': Genre}}
+            ],
         episodesCount: {'input': {'id': 'id_episodesCount', 'name': 'episodesCount', 'value': int or nothing, 'label': EpisodesCount}},
         endedAt: {'input': {'id': 'id_endedAt', 'name': 'endedAt', 'value': date or nothing, 'label': EndedAt}},
         title: {'input': {'id': 'id_title', 'name': 'title', 'value': unicode or nothing, 'label': Title}},
-        releaseType: {'select': {'name': 'releaseType', 'choices': [(0, u'TV'), (1, u'Movie'), (2, u'OAV'), (3, u'TV-Sp'), (4, u'SMovie'), (5, u'ONA'), (6, u'AMV'), (7, u'Other')], 'id': 'id_releaseType', 'value': int or nothing, 'label': ReleaseType}},
-        air: {'input': {'id': 'id_air', 'name': 'air', 'value': bool or nothing, 'label': Air}},
         duration: {'input': {'id': 'id_duration', 'name': 'duration', 'value': int or nothing, 'label': Duration}},
-        genre: [
-            {'input': {'id': 'id_genre', 'name': 'genre', 'value': 1, 'label': Genre}}
-            {'input': {'id': 'id_genre', 'name': 'genre', 'value': 2, 'label': Genre}}
-            ]
+        releaseType: {'select': {'name': 'releaseType', 'choices': [(0, u'TV'), (1, u'Movie'), (2, u'OAV'), (3, u'TV-Sp'), (4, u'SMovie'), (5, u'ONA'), (6, u'AMV'), (7, u'Other')], 'id': 'id_releaseType', 'value': int or nothing, 'label': ReleaseType}},
+        air: {'input': {'id': 'id_air', 'name': 'air', 'value': bool or nothing, 'label': Air}}
     Response object:
         status: True,
         response: "add",
@@ -194,7 +224,7 @@ Add:
         response: "add"
 
 Set:
-    No description.
+    Change field.
     Request target: /ajax/set/
     Request params:
         field: unicode or nothing,
