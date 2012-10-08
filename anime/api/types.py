@@ -102,6 +102,26 @@ class FuzzyList(list):
         return s
 
 
+class MultiType(object):
+    def __init__(self, *args):
+        self.types = args
+
+    def __unicode__(self):
+        return u' or '.join([arg.__name__ for arg in self.types])
+    __name__ = property(__unicode__)
+
+
+class FileType(object):
+
+    def __unicode__(self):
+        return u'file'
+    __name__ = property(__unicode__)
+
+
+class WidgetFieldType(type):
+    pass
+
+
 class Field(object):
 
     def __init__(self, t, name, label=None, fid=None, **kwargs):
@@ -112,13 +132,14 @@ class Field(object):
         self.label = label if label else name[0].capitalize() + name[1:]
         self.id = fid if fid else 'id_{0}'.format(name)
         self.default = kwargs.pop('default', None)
+        self.default_obj = kwargs.pop('default_obj', None)
         self.attrs = kwargs
 
     def __unicode__(self):
         return smart_unicode(self.field())
 
     #TODO: make something with name
-    def props(self):
+    def props(self, text=True):
         func = getattr(self, self.type, None)
         attr = {
             "name": self.name,
@@ -131,6 +152,8 @@ class Field(object):
         }
         if callable(func):
             attr.update(func())
+        if self.default_obj is not None and not text:
+            attr['value'] = self.default_obj
         return attr
 
     def value(self):

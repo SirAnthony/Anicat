@@ -4,7 +4,8 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.test.client import RequestFactory
 
 from anime.utils.misc import is_iterator
-from anime import api
+from anime.api import types as apiTypes
+from anime.api import classes as apiClasses
 
 request_factory = RequestFactory()
 
@@ -50,7 +51,7 @@ def check_response(response, origin, *args, **kwargs):
     if isinstance(origin, dict):
         if not isinstance(response, dict):
             raise AssertionError('%s not match original type: %s' % (response, origin))
-        #elif not isinstance(origin, api.NoneableDict) and \
+        #elif not isinstance(origin, apiTypes.NoneableDict) and \
         #        len(origin.keys()) != len(response.keys()):
         #    raise AssertionError('%s fields count differs from %s' % (response, origin))
         else:
@@ -59,8 +60,8 @@ def check_response(response, origin, *args, **kwargs):
                     check_response(response[key], item, *args, **kwargs)
                 except KeyError:
                     # Field may be absent if value is None
-                    if item is not None and not isinstance(origin, api.NoneableDict) and \
-                       not isinstance(item, api.Noneable):
+                    if item is not None and not isinstance(origin, apiTypes.NoneableDict) and \
+                       not isinstance(item, apiTypes.Noneable):
                         raise AssertionError('%s not match original: %s;\nKey: %s, item: %s' % (response, origin, key, item))
             return
 
@@ -74,7 +75,7 @@ def check_response(response, origin, *args, **kwargs):
     if is_iterator(origin):
         if not is_iterator(response):
             raise AssertionError('%s not match original type: %s' % (response, origin))
-        if isinstance(origin, api.FuzzyList):
+        if isinstance(origin, apiTypes.FuzzyList):
             origin.set_count(len(response))
         for i in range(0, len(origin)):
             try:
@@ -93,7 +94,7 @@ def check_response(response, origin, *args, **kwargs):
                 raise AssertionError('%s not match original: %s' % (response, origin))
         return
 
-    if isinstance(origin, api.Noneable):
+    if isinstance(origin, apiTypes.Noneable):
         if response is not None:
            check_response(response, origin.type)
         return
@@ -112,17 +113,20 @@ def check_response(response, origin, *args, **kwargs):
 
 def fill_params(sample, data={}):
 
-    if isinstance(sample, api.Base):
+    if isinstance(sample, apiClasses.Base):
         return fill_params(sample.get_params(), data)
 
-    if isinstance(sample, api.Field):
+    if isinstance(sample, apiTypes.Field):
         return fill_params(sample.value())
+
+    if isinstance(sample, apiTypes.MultiType):
+        return fill_params(sample.types[0], data)
 
     for t in (basestring, str, bool, int, float, long, complex, type(None)):
         if isinstance(sample, t):
             return sample
 
-    if isinstance(sample, api.Noneable):
+    if isinstance(sample, apiTypes.Noneable):
         t = sample.default if sample.default is not None else sample.type
         return fill_params(t)
 
@@ -134,6 +138,18 @@ def fill_params(sample, data={}):
                 params[key] = param
         return params
 
+    #~ if isinstance(sample, list):
+        #~ params = []
+        #~ for value in sample[:]:
+            #~ try:
+                #~ default = data.pop()
+            #~ except IndexError:
+                #~ default = None
+            #~ param = fill_params(default if default else value)
+            #~ if param is not None:
+                #~ params.append(param)
+        #~ return params
+
     if is_iterator(sample):
         return [fill_params(s) for s in sample]
 
@@ -144,7 +160,9 @@ def fill_params(sample, data={}):
             return 1
         elif sample is bool:
             return False
-        elif sample is datetime.date:
+        elif sample is list:
+            return [1,2]
+        elif sample in (datetime.date, datetime.datetime):
             return datetime.date.today()
         else:
             raise TypeError('Not supported type: {0}'.format(sample))

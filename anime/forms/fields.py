@@ -328,7 +328,10 @@ def create_filter_widget(widget):
         def value_from_datadict(self, data, files, name):
             value = [None, None, None]
             for d in filter(lambda x: x.startswith(name), data):
-                index = int(d[len(name)+1:])
+                try:
+                    index = int(d[len(name)+1:])
+                except:
+                    continue
                 value[index] = data[d]
             return value
 

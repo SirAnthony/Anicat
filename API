@@ -115,12 +115,16 @@ Filter:
     Request target: /ajax/filter/
     Request params:
         releasedAt: datetime or unicode,
-        duration: int,
-        episodesCount: int,
         endedAt: datetime or unicode,
-        genre: list,
+        episodesCount_1: int or nothing,
+        episodesCount_0: int,
+        episodesCount_2: bool or nothing,
         releaseType: list,
-        state: list
+        state: list,
+        duration_2: bool or nothing,
+        duration_1: int or nothing,
+        duration_0: int,
+        genre: list
     Response object:
         status: True,
         response: "filter"

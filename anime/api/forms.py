@@ -1,5 +1,6 @@
 
-from anime.api.fields import guess_type
+from anime.api.fields import guess_type, guess_by_widget
+from anime.api.types import WidgetFieldType
 
 
 def from_form(form):
@@ -9,5 +10,9 @@ def from_form(form):
     form = form()
     fields = {}
     for name, value in form.fields.items():
-        fields[name] = guess_type(value)
+        val = guess_type(value)
+        if val == WidgetFieldType:
+            fields.update(guess_by_widget(name, value))
+        else:
+            fields[name] = val
     return fields

@@ -30,6 +30,7 @@ class AjaxTest(TestCase):
         except AssertionError, e:
             raise AssertionError('Error in response check. Data: %s, %s\nOriginal message: %s' % (
                     ret, returns, e.message))
+        return ret
 
     @create_user()
     def setUp(self):
@@ -123,7 +124,8 @@ class AjaxTest(TestCase):
         a = api.Filter()
         link = a.get_link()
         self.send_request(link, {}, a.get_returns())
-        self.send_request(link, {}, a.get_returns())
+        self.send_request(link, {'episodesCount_0': 25}, a.get_returns())
+        self.send_request(link, {'episodesCount_0': 'u'}, a.error)
 
 
 class UserViewsTest(TestCase):

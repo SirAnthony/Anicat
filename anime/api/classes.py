@@ -257,12 +257,12 @@ class Forms(Base):
             'endedAt': Field('input', 'endedAt', 'Ended', value=datetime.date),
             'air': Field('input', 'air'),
         },
-        'links': [Field('input', 'Link 0'), Field('select', 'Link type 0', choices=LINKS_TYPES)],
+        'links': [Field('input', 'Link 0', default_obj='http://example.com'), Field('select', 'Link type 0', choices=LINKS_TYPES, default_obj=0)],
         'animerequest': Field('textarea', 'text', 'Request anime'),
         'image': Field('input', 'text', 'File'),
         'request': Field('textarea', 'text'),
         'feedback': Field('textarea', 'text', 'Please tell about your suffering'),
-        'bundle': [Field('input', 'Bundle 0'), Field('input', 'Bundle 1')],
+        'bundle': [Field('input', 'Bundle 0', default_obj=1), Field('input', 'Bundle 1', default_obj=2)],
         'name': [Field('input', 'Name 0'), Field('input', 'Name 1')],
     }
 
@@ -351,7 +351,7 @@ class Set(Get):
         form = self.forms.get_fields(t, f)
         ret = self.params.copy()
         for item in form:
-            attr = item.props()
+            attr = item.props(False)
             ret[attr['name']] = attr['value']
         return ret
 
