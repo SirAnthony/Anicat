@@ -12,7 +12,7 @@ from anime.forms.User import ( UserNamesForm, UserEmailForm,
 from anime.malconvert import passFile
 from anime.models import AnimeItem, AnimeRequest, UserStatusBundle, USER_STATUS
 from anime.utils import cache
-from anime.utils.catalog import latest_status
+from anime.utils.catalog import latest_status, sql_concat
 
 
 ERROR_MESSAGES = {
@@ -154,9 +154,10 @@ def get_statistics(request, user_id = 0):
                 select = {'full': 'SUM(anime_animeitem.episodesCount*anime_animeitem.duration)',
                           'custom': 'SUM(anime_animeitem.duration*anime_userstatusbundle.count)',
                           'count': 'COUNT(*)'}
+                ).select_related('anime__episodesCount', 'anime__duration'
                 #TODO: we need only one anime__X value for django orm works
-                ).values('anime__episodesCount', 'anime__duration', 'full', 'custom',
-                'count').select_related('anime__episodesCount', 'anime__duration').get()
+                ).values('anime__episodesCount', 'anime__duration',
+                'full', 'custom', 'count').get()
             arr['name'] = status[1]
             if status[0] == 3:
                 arr['custom'] = arr['full']
@@ -182,8 +183,9 @@ def export_statistic(request):
         data = AnimeItem.objects.filter(statusbundles__user=request.user,
                                         statusbundles__state__gt=0).\
                 extra(select={
-                        'names': """SELECT GROUP_CONCAT(`anime_animename`.`title` SEPARATOR "||")
-                FROM `anime_animename` WHERE `anime_animename`.`anime_id` = `anime_animeitem`.`id`""",
+                        'names': """SELECT {0} FROM `anime_animename` WHERE
+                    `anime_animename`.`anime_id` = `anime_animeitem`.`id`""".format(
+                    sql_concat('`anime_animename`.`title`', '||')),
                         'my_state': 'anime_userstatusbundle.state',
                         'my_count': 'anime_userstatusbundle.count',
                         'my_rating': 'anime_userstatusbundle.rating',

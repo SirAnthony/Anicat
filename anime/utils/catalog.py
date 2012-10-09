@@ -1,6 +1,8 @@
 #Some helpful functions
 from anime.models import UserStatusBundle
 from anime.utils import cache
+from django.conf import settings
+from django.db import DatabaseError
 
 
 def last_record_pk(model):
@@ -20,3 +22,13 @@ def latest_status(user):
             pk = None
         cache.cset('lastuserbundle:{0}'.format(user.id), pk)
     return pk
+
+def sql_concat(field, separator):
+    eng = settings.DATABASES['default']['ENGINE']
+    if eng == 'django.db.backends.mysql':
+        ret = 'GROUP_CONCAT({0} SEPARATOR "{1}")'
+    elif eng == 'django.db.backends.sqlite3':
+        ret = 'GROUP_CONCAT({0}, "{1}")'
+    else:
+        raise DatabaseError('Bad engine.')
+    return ret.format(field, separator)

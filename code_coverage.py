@@ -8,7 +8,7 @@ import os
 from django.test.simple import DjangoTestSuiteRunner
 from django.conf import settings
 
-SKIP_DIRS = ['migrations', 'tests']
+SKIP_DIRS = ['migrations', 'tests', 'api']
 
 class CoveragedRunner(DjangoTestSuiteRunner):
 

@@ -26,6 +26,7 @@ class IndexListView(AnimeAjaxListView):
     cache_name = 'mainTable'
     ajax_cache_name = 'ajaxlist'
     ADDITIONAL_FIELDS = ['rating', '-rating', 'changed', '-changed']
+    fields = ['air', 'id', 'title', 'episodes', 'release', 'type']
 
     def get_link(self):
         userid = self.kwargs.get('user_id')
@@ -109,15 +110,9 @@ class IndexListView(AnimeAjaxListView):
     def ajax(self, request, *args, **kwargs):
         response = {'response': 'list', 'status': False}
         try:
-            self.check_parameters(request, *args, **kwargs)
-            self.object_list = self.get_queryset()
-            ret = self.get_context_data(object_list=self.object_list)
-            fields = ['air', 'id', 'title', 'episodes', 'release', 'type']
-            ret['list'] = [
-                    dict([(name, getattr(x, name)) for name in fields]) \
-                    for x in ret['list'] ]
+            ret = self.ajax_process(request, *args, **kwargs)
             paginator = ret['pages']['items']
-            ret['head'] = fields
+            ret['head'] = self.fields
             ret['count'] = paginator.count
             ret['pages']['items'] = paginator.get_names()
             response.update({'status': True, 'text': ret})
@@ -143,6 +138,7 @@ class SearchListView(AnimeAjaxListView):
 
 
     def get_link(self):
+        # FIXME: rewrite this
         link = {}
         string = None
         if self.string is not None:
@@ -226,15 +222,7 @@ class SearchListView(AnimeAjaxListView):
     def ajax(self, request, *args, **kwargs):
         response = {'response': 'search', 'status': False}
         try:
-            self.check_parameters(request, *args, **kwargs)
-            self.object_list = self.get_queryset()
-            ret = self.get_context_data(object_list=self.object_list)
-            fields = self.fields
-            if not fields:
-                fields = ['title', 'type', 'episodes', 'id', 'release', 'air']
-            ret['list'] = [
-                    dict([(name, getattr(x, name)) for name in fields]) \
-                    for x in ret['list'] ]
+            ret = self.ajax_process(request, *args, **kwargs)
             paginator = ret['pages']['items']
             ret['count'] = paginator.count
             ret['pages']['items'] = paginator.page_range

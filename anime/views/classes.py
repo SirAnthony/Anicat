@@ -155,3 +155,14 @@ class AnimeAjaxListView(AnimeListView):
         "Implementation in subclasses"
         raise NotImplementedError
 
+    def ajax_process(self, request, *args, **kwargs):
+        self.check_parameters(request, *args, **kwargs)
+        self.object_list = self.get_queryset()
+        ret = self.get_context_data(object_list=self.object_list)
+        fields = getattr(self, 'fields', None) or \
+            ['air', 'id', 'title', 'episodes', 'release', 'type']
+        ret['list'] = [
+                dict([(name, getattr(x, name)) for name in fields]) \
+                for x in ret['list'] ]
+        return ret
+

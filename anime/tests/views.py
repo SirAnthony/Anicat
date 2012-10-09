@@ -80,6 +80,12 @@ class AjaxTest(TestCase):
         self.send_request(link, {'string': 'b', 'order': 'd'}, a.error)
         self.send_request(link, {}, a.error)
 
+    def test_index(self):
+        a = api.List()
+        link = a.get_link()
+        self.send_request(link, {}, a.returns)
+        self.send_request(link, {'order': 'd'}, a.error)
+
     def test_get(self):
         a = api.Get()
         link = a.get_link()
@@ -123,9 +129,22 @@ class AjaxTest(TestCase):
     def test_filter(self):
         a = api.Filter()
         link = a.get_link()
-        self.send_request(link, {}, a.get_returns())
         self.send_request(link, {'episodesCount_0': 25}, a.get_returns())
         self.send_request(link, {'episodesCount_0': 'u'}, a.error)
+        self.send_request(link, {'releaseType': 1, 'genre': [2, 3],
+        'state': 1, 'episodesCount_0': 25, 'episodesCount_2': True,
+        'duration_0': 25, 'duration_1': '__gt', 'releasedAt_0': '2.02.2010'}, a.get_returns())
+        self.client.get(reverse('index'))
+        self.send_request(link, {}, a.get_returns())
+
+    @login()
+    def test_statistics(self):
+        a = api.Statistics()
+        link = a.get_link()
+        self.send_request(link, {}, a.get_returns())
+        self.client.logout()
+        self.send_request(link, {'user_id': 1}, a.get_returns())
+        self.send_request(link, {}, a.error)
 
 
 class UserViewsTest(TestCase):
@@ -176,6 +195,12 @@ class UserViewsTest(TestCase):
     @login()
     def test_css(self):
         self.assertEquals(self.client.get(reverse('user_css')).status_code, 200)
+
+    @login()
+    def test_statistics_export(self):
+        self.assertEquals(self.client.get(reverse('statistics_export')).status_code, 200)
+        self.client.logout()
+        self.assertEquals(self.client.get(reverse('statistics_export')).status_code, 404)
 
 
 class EditViewsTest(TestCase):
@@ -359,6 +384,10 @@ class ListViewsTest(TestCase):
 
 class AjaxListViewsTest(TestCase):
 
+    fixtures = ['2trash.json']
+
+    #TODO: caches
+
     def tearDown(self):
         invalidate_key('search', '/search/4a0a19218e082a343a1b17e5333409af9d98f0f5/sort/releasedAt/1')
         cache.delete('ajaxsearch:/search/4a0a19218e082a343a1b17e5333409af9d98f0f5/sort/releasedAt/1')
@@ -368,12 +397,19 @@ class AjaxListViewsTest(TestCase):
         from anime.views.ajaxlist import SearchListView
         s = SearchListView()
         s.kwargs = {}
-        request = fake_request('search', {'string': 'a',
-                'page': 1, 'fields': ['title'], 'order': 'title'})
+        s.string = None
+        s.order = u'title'
+        s.page = 0
+        s.fields = []
+        self.assertEquals(unicode(s.get_queryset()), unicode(AnimeItem.objects.none()))
+        self.assertEquals(s.get_link(), ({'link': '/search/'}, '/search/0'))
+
+        request = fake_request('search', {'string': 'abcdef',
+                'page': 1, 'fields': ['title'], 'limit': 10, 'order': 'title'})
         s.check_parameters(request)
         s.request = request
-        self.assertEquals(s.get_link(), ({'link': '/search/a/',
-            'string': u'a'}, 'ef0b30c1969b1cfcaba4b1159e5f91d800b210cf'))
+        self.assertEquals(s.get_link(), ({'link': '/search/abcdef/limit/10/',
+            'limit': 10, 'string': u'abcdef'}, '0114b1cfd6126e175fcce2b13be769f0ca55a231'))
         self.assertEquals(unicode(s.get_queryset()), unicode(AnimeItem.objects.none()))
         self.assertEquals(self.client.get(reverse('search')).status_code, 200)
         invalidate_key('search', '/search/4a0a19218e082a343a1b17e5333409af9d98f0f5/sort/releasedAt/1')
@@ -386,6 +422,10 @@ class AjaxListViewsTest(TestCase):
                 'string': 'f', 'order': 'releasedAt'})).status_code, 200)
         self.assertEquals(self.client.post(reverse('search', kwargs={
                 'string': ' '})).status_code, 404)
+
+    #~ def test_IndexListView(self):
+        #~ pass
+
 
 
 

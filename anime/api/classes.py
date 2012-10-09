@@ -8,7 +8,7 @@ from anime.api.forms import from_form
 from django.conf import settings
 
 __all__ = ['Filter', 'Register', 'Login', 'Add', 'Get', 'Search',
-           'Forms', 'Set', 'out', 'to_file']
+           'List', 'Forms', 'Statistics', 'Set', 'out', 'to_file']
 
 
 class Base(object):
@@ -89,6 +89,62 @@ class Filter(Base):
         'response': 'filter',
         'text': dict
     }
+
+
+class List(Base):
+    """Get main list as JSON-object."""
+
+    link = 'list/'
+
+    params = {
+        'user': Noneable(int, 'Current user'),
+        'status': Noneable(int, 'All statuses'),
+        'order': Noneable(unicode, 'title'),
+        'page': Noneable(int, 1)
+    }
+
+    returns = {
+        'response': 'list',
+        'text': dict,
+    }
+
+    error = {
+        'response': 'list',
+        'text': list
+    }
+
+
+
+class Statistics(Base):
+    """User statisics.
+    Returns statistics for curren user if `user_id` is not set."""
+
+    link = 'stat/'
+
+    params = {
+        'user_id': Noneable(int)
+    }
+
+    returns = {
+        'response': 'stat',
+        'text': {
+            'stat': [{
+                'count': int,
+                'anime__duration': Noneable(int),
+                'full': Noneable(int),
+                'name': unicode,
+                'anime__episodesCount': Noneable(int),
+                'custom': Noneable(int)
+            }] * len(USER_STATUS),
+            'userid': int
+        }
+    }
+
+    error = {
+        'response': 'stat',
+        'text': list
+    }
+
 
 
 class Register(Base):
@@ -359,7 +415,7 @@ class Set(Get):
         return self.params.copy()
 
 
-OUTPUT = [Search, Get, Filter, Login, Forms, Add, Set]
+OUTPUT = [Search, List, Get, Statistics, Filter, Login, Forms, Add, Set]
 
 def out():
     for item in OUTPUT:
