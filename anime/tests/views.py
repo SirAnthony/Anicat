@@ -11,7 +11,7 @@ from anime.utils.cache import invalidate_key
 from anime.models import AnimeItem, AnimeBundle, AnimeRequest, EDIT_MODELS
 from anime.tests._classes import CleanTestCase as TestCase
 from anime.tests._functions import (fake_request, create_user, login,
-                                    check_response, fill_params)
+                                    fill_params)
 from anime.utils.catalog import last_record_pk
 
 
@@ -25,11 +25,7 @@ class AjaxTest(TestCase):
     def send_request(self, link, params, returns):
         response = self.client.post(link, params)
         ret = json.loads(response._container[0])
-        try:
-            check_response(ret, returns)
-        except AssertionError, e:
-            raise AssertionError('Error in response check. Data: %s, %s\nOriginal message: %s' % (
-                    ret, returns, e.message))
+        self.check_response(ret, returns)
         return ret
 
     @create_user()
@@ -314,7 +310,7 @@ class ClassesViewsTest(TestCase):
     def test_AnimeListView(self):
         from anime.views.classes import AnimeListView
         v = AnimeListView()
-        v.request = fake_request('')
+        v.request = fake_request()
         self.assertRaises(NotImplementedError, v.get_link)
         self.assertRaises(NotImplementedError, v.check_parameters, None)
         v.get_link = self.blank

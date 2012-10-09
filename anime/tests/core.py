@@ -2,16 +2,17 @@
 import anime.core.user as userMethods
 import anime.core.base as coreMethods
 from django.conf import settings
-from django.core.cache import cache
 from django.contrib.auth.models import User, AnonymousUser
 from django.http import HttpRequest
 
-from anime import api
+from anime.api import types as apiTypes
 from anime.core import explorer
 from anime.forms.json import FormSerializer as FS
 from anime.models import AnimeItem
 from anime.tests._classes import CleanTestCase as TestCase
-from anime.tests._functions import create_user, login, check_response
+from anime.tests._functions import (fake_request, create_user, login,
+                                    check_response)
+from anime.utils import cache
 
 
 class UserTest(TestCase):
@@ -21,7 +22,7 @@ class UserTest(TestCase):
         pass
 
     def tearDown(self):
-        cache.delete('MalList:1')
+        cache.invalidate_key('MalList:1')
         super(TestCase, self).tearDown()
 
     def test_get_username(self):
@@ -79,6 +80,7 @@ class UserTest(TestCase):
             if name == 'mallist':
                 continue
             result[name] = FS(result[name])
+        cache.invalidate_key('MalList:%s' % u.id)
         self.assertEquals(result, {
                     'emailform': FS(UserEmailForm(instance=u)),
                     'usernames': FS(UserNamesForm(instance=u)),
@@ -104,7 +106,7 @@ class UserTest(TestCase):
         filename = os_join(settings.MEDIA_ROOT, 'test', '1px.png')
         with open(filename, 'r') as fl:
             r.FILES={'file': SimpleUploadedFile(filename, fl.read())}
-            cache.delete('MalList:1')
+            cache.invalidate_key('MalList:1')
             r.POST.update({'mallist': True})
             res = userMethods.load_MalList(r)
             self.assertEquals(res, {
@@ -114,7 +116,7 @@ class UserTest(TestCase):
             self.assertEquals(res['mallistform'].errors, {'__all__': [
                 userMethods.ERROR_MESSAGES['mallist']['fast'].format(30)]
             })
-            cache.delete('MalList:1')
+            cache.invalidate_key('MalList:1')
             mode = (stat(settings.MEDIA_ROOT).st_mode & 0777)
             try:
                 chmod(settings.MEDIA_ROOT, 444)
@@ -155,17 +157,20 @@ class UserDBTest(TestCase):
         self.assertEquals(userMethods.latest_status(r, user_id=2), None)
 
     def test_get_statistics(self):
+        from django.http import Http404
         u = User.objects.get(id=1)
         cache.delete('Stat:1')
-        self.assertEquals(userMethods.get_statistics(None), None)
-        self.assertEquals(userMethods.get_statistics(u), [
+        request = fake_request()
+        self.assertRaises(Http404, userMethods.get_statistics, request)
+        request.user = u
+        self.assertEquals(userMethods.get_statistics(request), {'stat': [
             {'count': 1, 'anime__duration': 211, 'full': 24054, 'name': u'Want', 'anime__episodesCount': 114, 'custom': 211},
             {'count': 0, 'anime__duration': None, 'full': None, 'name': u'Now', 'anime__episodesCount': None, 'custom': None},
             {'count': 0, 'anime__duration': None, 'full': None, 'name': u'Done', 'anime__episodesCount': None, 'custom': None},
             {'count': 0, 'anime__duration': None, 'full': None, 'name': u'Dropped', 'anime__episodesCount': None, 'custom': None},
             {'count': 0, 'anime__duration': None, 'full': None, 'name': u'Partially watched', 'anime__episodesCount': None, 'custom': None},
-            {'count': 1, 'full': 24054, 'name': 'Total', 'custom': 211}
-        ])
+            {'count': 1, 'full': 24054, 'name': 'Total', 'custom': 211}], 'userid': u.id
+        })
 
     def test_get_styles(self):
         from anime.models import USER_STATUS
@@ -208,7 +213,7 @@ class ExplorerTest(TestCase):
 
     def test_FieldExplorer_fields(self):
         from anime.models import AnimeName
-        fields = api.CatalogGetTypes()
+        fields = apiTypes.CatalogGetTypes()
         ex = explorer.FieldExplorer('anime')
         anime = AnimeItem.objects.get(id=1)
         self.assertEquals(ex.get_value(anime, None), None)
@@ -219,6 +224,8 @@ class ExplorerTest(TestCase):
         self.assertEquals(ex.get_value(anime, None), anime.release)
         ex.set_field('genre')
         self.assertEquals(len(ex.get_value(anime, None).split(', ')), anime.genre.count())
+        ex.set_field('genre_list')
+        self.assertEquals(len(ex.get_value(anime, None)), anime.genre.count())
         for item in ['title', 'name', 'links', 'bundle']:
             ex.set_field(item)
             check_response(ex.get_value(anime, None), fields.funcs[item])
@@ -281,7 +288,7 @@ class BaseTest(TestCase):
     def test_card(self):
         user = User.objects.get(id=1)
         anime = AnimeItem.objects.get(id=1)
-        fields = api.CatalogGetTypes()
+        fields = apiTypes.CatalogGetTypes()
         cache.delete('card:1')
         self.assertRaises(AnimeItem.DoesNotExist, coreMethods.card, None, user)
         self.assertEquals(coreMethods.card('none', AnonymousUser()), {})

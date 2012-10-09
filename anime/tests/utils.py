@@ -21,8 +21,9 @@ class CacheTest(TestCase):
         super(TestCase, self).tearDown()
 
     def test_latest(self):
+        cache.invalidate_key('1')
         self.assertEquals(cache.latest('IndexListView', '1'), False)
-        self.assertEquals(cache.latest('IndexListView', '1'), False)
+        self.assertEquals(cache.latest('IndexListView', '1'), True)
 
     def test_get_latest(self):
         self.assertRaisesMessage(ValueError,
@@ -91,6 +92,19 @@ class CatalogTest(TestCase):
         self.assertEquals(catalog.last_record_pk(AnimeItem),
                 AnimeItem.objects.order_by('-pk')[0].pk)
         self.assertEquals(catalog.last_record_pk(AnimeRequest), 0)
+
+    def test_sql_concat(self):
+        from anime.utils.catalog import sql_concat
+        from django.conf import settings
+        from django.db import DatabaseError
+        olddb = settings.DATABASES['default']['ENGINE']
+        settings.DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
+        self.assertEquals(sql_concat(1, ','), 'GROUP_CONCAT(1 SEPARATOR ",")')
+        settings.DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
+        self.assertEquals(sql_concat(1, ','), 'GROUP_CONCAT(1, ",")')
+        settings.DATABASES['default']['ENGINE'] = None
+        self.assertRaises(DatabaseError, sql_concat, 1, ',')
+        settings.DATABASES['default']['ENGINE'] = olddb
 
 
 class ConfitTest(TestCase):

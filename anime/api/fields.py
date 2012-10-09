@@ -21,7 +21,7 @@ fieldTypes = {
     fields.URLField: unicode,
     fields.BooleanField: bool,
     fields.ChoiceField: int,
-    fields.TypedChoiceField: list,
+    fields.TypedChoiceField: int,
     fields.MultipleChoiceField: list,
     fields.MultiValueField: unicode,
     ModelMultipleChoiceField: list,

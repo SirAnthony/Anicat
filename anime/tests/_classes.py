@@ -1,6 +1,7 @@
 
 from django.test import TestCase
 from django.core.cache import cache
+from anime.tests._functions import check_response
 
 
 FIXTURES_MAP = {
@@ -21,3 +22,10 @@ class CleanTestCase(TestCase):
                 for i in range(1, v+1):
                     cache.delete('{0}:{1}'.format(k, v))
                 cache.delete(k)
+
+    def check_response(self, ret, returns):
+        try:
+            check_response(ret, returns)
+        except AssertionError, e:
+            raise AssertionError('Error in response check. Data: %s, %s\nOriginal message: %s' % (
+                    ret, returns, e.message))

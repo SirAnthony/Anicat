@@ -84,7 +84,7 @@ class EditDefaultTests(TestCase):
         result = f.process('form')
         result['form'] = json.FormSerializer(result['form'])
         check_response(result, {'form': a.get_fields('bundle'),
-            'status': True, 'id': 0, 'text': api.Noneable(None)}) #lol
+            'status': True, 'id': 0, 'text': api.types.Noneable(None)}) #lol
         f = EditableDefault(r, 1, 'anime', 'title')
         result = f.process('post')
         result['form'] = json.FormSerializer(result['form'])

@@ -137,10 +137,7 @@ def get_requests(user, *keys):
 def get_statistics(request, user_id = 0):
     user = user_id or request.POST.get('user_id', 0) or request.user
     try:
-        if isinstance(user, User):
-            if not user.is_authenticated():
-                raise User.DoesNotExist
-        else:
+        if not isinstance(user, User):
             user = User.objects.get(id=user)
     except (User.DoesNotExist, ValueError, TypeError):
         raise Http404(ERROR_MESSAGES['user']['bad'])

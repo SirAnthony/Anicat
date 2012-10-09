@@ -37,6 +37,8 @@ def create_user(u=None, e=None, p=None, lng=False):
 
 def fake_request(*args, **kwargs):
     user = kwargs.pop('_user', AnonymousUser())
+    if not args:
+        args = ['']
     request = request_factory.post(*args, **kwargs)
     request.user = user
     request.session = {}
