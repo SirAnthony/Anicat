@@ -135,7 +135,7 @@ class Statistics(Base):
                 'name': unicode,
                 'anime__episodesCount': Noneable(int),
                 'custom': Noneable(int)
-            }] * len(USER_STATUS),
+            }],
             'userid': int
         }
     }

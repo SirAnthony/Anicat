@@ -40,6 +40,23 @@ Search:
         text: list,
         response: "search"
 
+List:
+    Get main list as JSON-object.
+    Request target: /ajax/list/
+    Request params:
+        status: int or nothing. Default: All statuses,
+        order: unicode or nothing. Default: title,
+        page: int or nothing. Default: 1,
+        user: int or nothing. Default: Current user
+    Response object:
+        status: True,
+        text: dict,
+        response: "list"
+    Error object:
+        status: False,
+        text: list,
+        response: "list"
+
 Get:
     Get certain field for record.
     Request target: /ajax/get/
@@ -109,6 +126,30 @@ Get:
     Error object:
         No global errors for the get rerquest.
         All fields errors in response `text` parameter.
+
+Statistics:
+    User statisics.
+    Returns statistics for curren user if `user_id` is not set.
+    Request target: /ajax/stat/
+    Request params:
+        user_id: int or nothing
+    Response object:
+        status: True,
+        text: 
+            stat: [
+                    count: int,
+                    anime__duration: int or nothing,
+                    full: int or nothing,
+                    name: unicode,
+                    anime__episodesCount: int or nothing,
+                    custom: int or nothing
+                ],
+            userid: int,
+        response: "stat"
+    Error object:
+        status: False,
+        text: list,
+        response: "stat"
 
 Filter:
     Apply filter to site output.
@@ -205,7 +246,7 @@ Add:
         endedAt: datetime or unicode,
         title: unicode,
         duration: int,
-        releaseType: list
+        releaseType: int
     Response without arguments:
         releasedAt: {'input': {'id': 'id_releasedAt', 'name': 'releasedAt', 'value': date or nothing, 'label': ReleasedAt}},
         genre: [
