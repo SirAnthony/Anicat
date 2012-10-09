@@ -3,6 +3,7 @@
 {% load cache %}
 
 {% load animetemplates %}
+{% load url from future %}
 
 {% block title %}{% if link.status %} - {% statusname link.status %} list{% endif %}{% endblock %}
 
