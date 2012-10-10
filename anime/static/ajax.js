@@ -165,6 +165,7 @@ function RequestProcessor(parsers, caller){
                 parser.call(caller, resp);
             }
         }catch(e){
+            this._catch(e)
             message.create(e);
             if(resp.text){
                 message.add('Server response:');
@@ -172,6 +173,10 @@ function RequestProcessor(parsers, caller){
             }
             message.show();
         }
+        this._parsed();
     }
 
 };
+
+RequestProcessor.prototype._сatch = function(){}
+RequestProcessor.prototype._parsed = function(){}

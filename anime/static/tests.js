@@ -8,6 +8,14 @@ function TestRunner(tests, prepare){
     this.prepare = {};
     this.results = [];
 
+    this.ajax_call = function(){
+        var _runner = this;
+        return function(e){
+            _runner.results.push(['Ajax', false, e.toString()]);
+            RequestProcessor.prototype._catch = Tests.ajax_proto;
+        }
+    }
+
     for(var t in prepare){
         if(!isArray(prepare[t]))
             continue;
@@ -36,48 +44,69 @@ function TestRunner(tests, prepare){
         if(isFunction(test) || isNumber(test))
             this.stack.push([name, test]);
         if(!this.timer)
-            this.timer = setTimeout((function(t){
-                return function(){ t.process.call(t); }
-        })(this), this.timeout);
+            this.nextTimer();
+    }
+
+    this.nextTimer = function(timeout){
+        var _this = this;
+        this.timer = setTimeout(function(){ _this.process.call(_this); },
+            (isNumber(timeout) ? timeout : this.timeout));
     }
 
     this.process = function(){
         clearTimeout(this.timer);
         this.timer = null;
+        var status = document.getElementById('test_status');
+        if(status.value == Tests.statuses.running)
+            return this.nextTimer(func);
         var func = this.stack.shift();
+        if(!func)
+            return;
         if(isArray(func) && isFunction(func[1]))
+            status.value = Tests.statuses.ready;
             try{
+                RequestProcessor.prototype._catch = this.ajax_call();
                 func[1].call(this);
+                if(Tests.ajax_calls == 0) // Return old prototype if not needed;
+                    RequestProcessor.prototype._process = Tests.ajax_proto;
                 this.results.push([func[0], true]);
             }catch(e){
                 this.results.push([func[0], false, e.toString()]);
             }
         if(this.stack.length){
-            this.timer = setTimeout((function(t){
-                return function(){ t.process.call(t); }
-            })(this), (isNumber(func) ? func : this.timeout));
+            if(Tests.break_after && Tests.continue_bt)
+                Tests.continue_bt.onclick = (function(_this){
+                    return function(){ _this.process.call(_this); }})(this);
+            else
+                this.nextTimer(func);
         }else{
-            var resdiv = document.getElementById('TestResults');
-            if(!resdiv){
-                resdiv = element.create('div', {'id': 'TestResults',
-                    'style': {'position': 'absolute', 'bottom': 0,
-                    'right': 0, 'width': '400px', 'background': '#FFF',
-                    'border': '2px solid #b0b0b0', 'borderRadius': '3px',
-                    'padding': '2px 5px'}});
-                element.appendChild(document.body, resdiv);
-            }
-            for(var i = 0; i < this.results.length; i++){
-                var result = this.results[i];
-                var resp = element.create('p', {'style': {'borderRadius': '5px',
-                    'background': (result[1] ? '#CCFFCC' : '#FF0000'),
-                    'padding': '0px 10px', 'margin': '2px 0px'}},
-                    [{'span': {'innerText': result[0] + ':', 'style': {'marginRight': '10px'}}},
-                     {'span': {'innerText': (result[1] ? 'Done' : 'Failed')}}]);
-                if(!result[1])
-                    element.appendChild(resp, {'span': {'innerText': result[2],
-                    'style': {'display': 'block'}}});
-                element.appendChild(resdiv, resp);
-            }
+            this.printResults();
+            status.value = Tests.statuses.done;
+        }
+
+    }
+
+    this.printResults = function(){
+        var resdiv = document.getElementById('TestResults');
+        if(!resdiv){
+            resdiv = element.create('div', {'id': 'TestResults',
+                'style': {'position': 'absolute', 'bottom': 0,
+                'right': 0, 'width': '400px', 'background': '#FFF',
+                'border': '2px solid #b0b0b0', 'borderRadius': '3px',
+                'padding': '2px 5px'}});
+            element.appendChild(document.body, resdiv);
+        }
+        for(var i = 0; i < this.results.length; i++){
+            var result = this.results[i];
+            var resp = element.create('p', {'style': {'borderRadius': '5px',
+                'background': (result[1] ? '#CCFFCC' : '#FF0000'),
+                'padding': '0px 10px', 'margin': '2px 0px'}},
+                [{'span': {'innerText': result[0] + ':', 'style': {'marginRight': '10px'}}},
+                 {'span': {'innerText': (result[1] ? 'Done' : 'Failed')}}]);
+            if(!result[1])
+                element.appendChild(resp, {'span': {'innerText': result[2],
+                'style': {'display': 'block'}}});
+            element.appendChild(resdiv, resp);
         }
     }
 
@@ -85,6 +114,11 @@ function TestRunner(tests, prepare){
 
 
 var Tests = new (function(){
+
+    this.statuses = {'none': 0, 'ready': 1, 'running': 2, 'done': 3}
+    this.ajax_proto = RequestProcessor.prototype._catch;
+    this.ajax_calls = 0;
+    this.break_after = true;
 
     this.test_main = new TestRunner({
         'page': function(){
@@ -400,7 +434,7 @@ var Tests = new (function(){
             document.getElementById('id_releasedAt_0').value = "a"
             fl.lastChild.previousSibling.click();
         },
-    }, {'all': ['show', 'apply', 3000, 'clear', 3000, 'clear_select',
+    }, {'all': ['show', 'apply', 'clear', 'clear_select',
                 'error']});
 
     this.test_search = new TestRunner({
@@ -438,6 +472,40 @@ var Tests = new (function(){
         var subtest = testre[3];
         if(!testname)
             return;
+
+        var status = document.getElementById('test_status');
+        if(!status){
+            status = element.create('input', {'id': 'test_status', 'type': 'input'});
+            element.appendChild(document.body, status);
+        }
+        if(status.value == this.statuses.running)
+            return;
+        status.value = this.statuses.ready;
+
+        if(this.break_after){
+            this.continue_bt = document.getElementById('test_c_bt');
+            if(!this.continue_bt){
+                this.continue_bt = element.create('input', {'value': 'next',
+                                        'id': 'test_c_bt', 'type': 'button'})
+                element.appendChild(document.body, this.continue_bt);
+            }
+        }
+
+        // Redefine ajax.loadXMLDoc to setup status to running when called
+        ajax.loadXMLDoc = (function(){
+            var olddoc = ajax.loadXMLDoc;
+            return function(url, qry, processor){
+                Tests.ajax_calls++;
+                status.value = Tests.statuses.running;
+                olddoc.call(ajax, url, qry, processor);
+            }
+        })();
+
+        RequestProcessor.prototype._parsed = function(){
+            var status = document.getElementById('test_status');
+            status.value = Tests.statuses.ready;
+            Tests.ajax_calls--;
+        }
 
         var test = this['test_'+testname];
         if(!test || !test.run)
