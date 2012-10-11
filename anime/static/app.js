@@ -140,7 +140,7 @@ function Autocomplete(object, objectattrs, types, retval){
         if(this.object.value.length < 2 || this.text == this.object.value)
             return;
         this.text = this.object.value;
-        ajax.loadXMLDoc('search', {'fields': this.types,
+        ajax.load('search', {'fields': this.types,
                         'limit': this.opts.limit, 'string': this.text},
             this.processor);
     }
@@ -184,7 +184,7 @@ function Autocomplete(object, objectattrs, types, retval){
                     id = el.value;
             }, elem);
             if(!id) return;
-            ajax.loadXMLDoc('get', {'id': id, 'field': this.retfield},
+            ajax.load('get', {'id': id, 'field': this.retfield},
                 new RequestProcessor({'get': this.ajaxProcessor}, this));
         }
         this.removeSelection();

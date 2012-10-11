@@ -10,7 +10,7 @@
 
 //################# Ajax worker
 
-var ajax = new (function(){
+function AjaxClass(){
 
     var cookie = cookies;
 
@@ -97,7 +97,12 @@ var ajax = new (function(){
         return {'request': request, 'boundary': boundary};
     }
 
-})();
+
+};
+
+var ajax = new AjaxClass();
+
+AjaxClass.prototype.load = ajax.loadXMLDoc
 
 
 //################# Request processor

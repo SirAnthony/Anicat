@@ -227,7 +227,7 @@ addEvent(window, 'load', function() {
 
         NanoScroll.prototype.restore = function() {
             this.stopped = false;
-            toggle(this.pane, true);
+            toggle(this.pane, 1);
             return this.addEvents();
         };
 
@@ -237,6 +237,8 @@ addEvent(window, 'load', function() {
                 this.generate().stop();
             if (this.stopped)
                 this.restore();
+            toggle(this.pane, 1);
+            toggle(this.slider, 1);
             content = this.content;
             contentStyle = content.style;
             contentStyleOverflowY = contentStyle.overflowY;
@@ -261,15 +263,15 @@ addEvent(window, 'load', function() {
             this.sliderHeight = sliderHeight;
             this.slider.style.height = sliderHeight + 'px';
             this.events.scroll();
-            toggle(this.pane, true);
+            toggle(this.pane, 1);
             this.isActive = true;
             if (this.pane.offsetHeight >= content.scrollHeight && contentStyleOverflowY !== SCROLL) {
-                toggle(this.pane, false);
+                toggle(this.pane, -1);
                 this.isActive = false;
             } else if (this.el.clientHeight === content.scrollHeight && contentStyleOverflowY === SCROLL) {
-                toggle(this.slider, false)
+                toggle(this.slider, -1);
             } else {
-                toggle(this.slider, true);
+                toggle(this.slider, 1);
             }
             if (this.options.alwaysVisible) {
                 this.pane.style.opacity = 1;
@@ -319,7 +321,7 @@ addEvent(window, 'load', function() {
         NanoScroll.prototype.stop = function() {
             this.stopped = true;
             this.removeEvents();
-            toggle(this.pane, false);
+            toggle(this.pane, -1);
             return this;
         };
 
@@ -366,9 +368,9 @@ addEvent(window, 'load', function() {
             return scrollbar.reset();
         }
         if(isElement(obj))
-            _f(obj);
+            return _f(obj);
         else if(isString(obj))
-            map(_f, getElementsByClassName(obj));
+            return map(_f, getElementsByClassName(obj));
     }
 
 });

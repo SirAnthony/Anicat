@@ -129,7 +129,7 @@ var statistics = new ( function(){
 
     this.getStat = function(){
         if(user.logined){
-            ajax.loadXMLDoc('stat', {}, this.processor);
+            ajax.load('stat', {}, this.processor);
         }else if(catalog_storage.enabled){
             this.loadStorage();
         }else{

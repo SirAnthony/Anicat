@@ -102,7 +102,7 @@ var Card = new (function(){
             card.style.width = w + 'px';
             if(w >= 500){
                 if(e) message.toEventPosition(e);
-                ajax.loadXMLDoc('get', {'id': id, 'card': true, 'field': [
+                ajax.load('get', {'id': id, 'card': true, 'field': [
                     'id', 'bundle', 'name', 'type', 'genre', 'episodesCount',
                     'duration', 'release', 'links', 'state']}, processor);
                 return false;

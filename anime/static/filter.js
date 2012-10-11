@@ -14,7 +14,7 @@ var Filter = new (function(){
     this.processor = null;
 
     this.init = function(){
-        createScroll(document.getElementById('id_filter_genre_container'));
+        this.scroller = createScroll(document.getElementById('id_filter_genre_container'));
         map(function(el){
             element.insert(el.firstChild, {'a':
                 {'innerText': 'Clear', 'className': 'right',
@@ -31,7 +31,7 @@ var Filter = new (function(){
                 if(!resp.status)
                     this.processError(resp.text);
                 else
-                    ajax.loadXMLDoc('list', {}, this.processor);
+                    ajax.load('list', {}, this.processor);
             },
             'list': function(resp){
                 message.hide();
@@ -44,6 +44,7 @@ var Filter = new (function(){
 
     this.toggle = function(){
         toggle(document.getElementById('id_filter_container'));
+        this.scroller.reset();
     }
 
     this.clear = function(){
@@ -70,7 +71,7 @@ var Filter = new (function(){
                     processed[i] = data[i];
             }
         }, getElementsByClassName('filter', document));
-        ajax.loadXMLDoc('filter', processed, this.processor);
+        ajax.load('filter', processed, this.processor);
     }
 
     this.processError = function(error){

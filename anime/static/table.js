@@ -37,7 +37,7 @@ function loadURIHash(string){
         string = string.replace(/http:\/\/[^\/]+/g,'');
     var link = parseHash(string ? string : document.location.hash);
     if(!link || !link[0]) return;
-    ajax.loadXMLDoc.apply(ajax, link);
+    ajax.load.apply(ajax, link);
     return false;
 }
 
@@ -85,7 +85,7 @@ var searcher = new ( function(){
     }
 
     this.loadCall = function(link, number, event){
-        ajax.loadXMLDoc('search', extend(link, {'page': number,
+        ajax.load('search', extend(link, {'page': number,
                 'link': undefined}), this.processor);
         return false;
     }
@@ -134,13 +134,13 @@ var list = new ( function(){
     }
 
     this.sortCall = function(link, order, event){
-        ajax.loadXMLDoc('list', extend(link, {'order': order,
+        ajax.load('list', extend(link, {'order': order,
                 'link': undefined, 'page': undefined}), this.processor);
         return false;
     }
 
     this.pageCall = function(link, number, event){
-        ajax.loadXMLDoc('list', extend(link, {'page': number,
+        ajax.load('list', extend(link, {'page': number,
                 'link': undefined}), this.processor);
         return false;
     }

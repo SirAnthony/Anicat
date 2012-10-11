@@ -101,7 +101,7 @@ var add = new (function add_class(){
             message.toEventPosition(e);
         this.clearForm();
         var formData = getFormData(this.form);
-        ajax.loadXMLDoc('add', formData, this.processor);
+        ajax.load('add', formData, this.processor);
     }
 
     this.processResponse = function(resp){
@@ -201,7 +201,7 @@ var edit = new (function edit_class(){
                 q['field'] = this.edits[field];
             }
         }
-        ajax.loadXMLDoc('form', q, processor);
+        ajax.load('form', q, processor);
     }
 
     this.getFieldLink = function(id, name){
@@ -234,7 +234,7 @@ var edit = new (function edit_class(){
             processor.parse(formData);
             message.unlock()
         }else{
-            ajax.loadXMLDoc('set', formData, processor);
+            ajax.load('set', formData, processor);
         }
         var errors = getElementsByClassName('error', form);
         element.remove(errors);

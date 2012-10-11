@@ -480,7 +480,7 @@ function cnt(tag, num, e){
         default:
             qw['field'] = tag;
     }
-    ajax.loadXMLDoc('get', qw, new RequestProcessor({
+    ajax.load('get', qw, new RequestProcessor({
         'get': function(resp){
         message.create();
         for(var i in resp.text.order){

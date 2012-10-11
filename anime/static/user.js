@@ -76,7 +76,7 @@ var user = new( function(){
         toggle(document.getElementById('logininfo').parentNode, -1);
         var rform = document.getElementById('login');
         var formData = getFormData(rform);
-        ajax.loadXMLDoc('login', formData, processor);
+        ajax.load('login', formData, processor);
         message.toEventPosition(e);
         return false;
     }
@@ -178,7 +178,7 @@ var user = new( function(){
         var errors = getElementsByClassName('error', obj);
         element.remove(errors);
         toggle(obj.parentNode, -1);
-        ajax.loadXMLDoc('register', formData, processor);
+        ajax.load('register', formData, processor);
         message.toEventPosition(e);
         return false;
     }

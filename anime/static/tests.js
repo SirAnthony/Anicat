@@ -1,3 +1,13 @@
+/*
+ * This file is part of Anicat.
+ *
+ * Anicat is distributed under the terms of Anicat License.
+ * See <http://www.anicat.net/LICENSE/> for feature details.
+ *
+ * Javascript tests
+ *
+ */
+
 
 function TestRunner(tests, prepare){
 
@@ -67,18 +77,23 @@ function TestRunner(tests, prepare){
             try{
                 RequestProcessor.prototype._catch = this.ajax_call();
                 func[1].call(this);
-                if(Tests.ajax_calls == 0) // Return old prototype if not needed;
+                if(Tests.ajax_calls <= 0) // Return old prototype if not needed;
                     RequestProcessor.prototype._process = Tests.ajax_proto;
                 this.results.push([func[0], true]);
             }catch(e){
                 this.results.push([func[0], false, e.toString()]);
             }
         if(this.stack.length){
-            if(Tests.break_after && Tests.continue_bt)
+            if(Tests.break_after && Tests.continue_bt){
                 Tests.continue_bt.onclick = (function(_this){
-                    return function(){ _this.process.call(_this); }})(this);
-            else
+                    return function(e){
+                        e.stopPropagation && e.stopPropagation();
+                        e.cancelBubble = true;
+                        _this.process.call(_this);
+                    }})(this);
+            }else{
                 this.nextTimer(func);
+            }
         }else{
             this.printResults();
             status.value = Tests.statuses.done;
@@ -486,25 +501,25 @@ var Tests = new (function(){
             this.continue_bt = document.getElementById('test_c_bt');
             if(!this.continue_bt){
                 this.continue_bt = element.create('input', {'value': 'next',
-                                        'id': 'test_c_bt', 'type': 'button'})
+                    'id': 'test_c_bt', 'style': {'position': 'fixed',
+                    'right': '0px', 'bottom': '0px'},  'type': 'button'})
                 element.appendChild(document.body, this.continue_bt);
             }
         }
 
-        // Redefine ajax.loadXMLDoc to setup status to running when called
-        ajax.loadXMLDoc = (function(){
-            var olddoc = ajax.loadXMLDoc;
-            return function(url, qry, processor){
-                Tests.ajax_calls++;
-                status.value = Tests.statuses.running;
-                olddoc.call(ajax, url, qry, processor);
-            }
-        })();
+        // Redefine ajax.load to setup status to running when called
+        AjaxClass.prototype.load = function(url, qry, processor){
+            Tests.ajax_calls++;
+            status.value = Tests.statuses.running;
+            ajax.loadXMLDoc.call(ajax, url, qry, processor);
+        }
 
+        // Define postprocessor for requests
         RequestProcessor.prototype._parsed = function(){
             var status = document.getElementById('test_status');
             status.value = Tests.statuses.ready;
-            Tests.ajax_calls--;
+            if(Tests.ajax_calls)
+                Tests.ajax_calls--;
         }
 
         var test = this['test_'+testname];
