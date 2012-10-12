@@ -306,7 +306,7 @@ function getFormData(form){
                     break;
                 case "select-multiple":
                     formData[elm.name] = map(function(opt){return opt.value},
-                        filter(function(opt){ return opt.selected; }, elm.childNodes));
+                        filter(function(opt){ return opt.selected; }, elm.childNodes, null, true));
                     break;
                 case "file":
                     formData[elm.name] = elm.files[0];
@@ -499,12 +499,12 @@ function cnt(tag, num, e){
 
 // Additional functions
 
-function map(callback, array, environ){
+function map(callback, array, environ, forcearray){
     if(!isFunction(callback))
         throw new TypeError(callback + " is not a function");
     var ret;
-    if(isHash(array) && !isNodeList(array)){
-        ret = {}
+    if(!forcearray && isHash(array) && !isNodeList(array)){
+        ret = new Object();
         for(var i in array)
             ret[i] = callback.call(environ, array[i]);
     }else{
@@ -515,13 +515,13 @@ function map(callback, array, environ){
     return ret;
 }
 
-function filter(callback, array, environ){
+function filter(callback, array, environ, forcearray){
     if(!array)
         return [];
     if(!isFunction(callback))
         throw new TypeError(callback + " is not a function");
     var ret;
-    if(isArray(array) || isNodeList(array)){
+    if(isArray(array) || isNodeList(array) || forcearray){
         ret = new Array();
         for(var i = 0; i < array.length; i++)
             if(callback.call(environ, array[i])) ret.push(array[i]);

@@ -24,7 +24,7 @@ var Card = new (function(){
         var card = document.getElementById('card') || document.getElementById('pagecard');
         if(!isOldIE)
             this.hideEdits(card);
-        if(!card || !card.clientWidth) return;
+        if(!card || !card.clientWidth || !card.childNode) return;
         var imgbun;
         if(card.clientWidth < 750){
             imgbun = (card.clientWidth < 600) ? 200 : 300;

@@ -9,7 +9,7 @@
  */
 
 
-function TestRunner(tests, prepare){
+function TestRunner(tests, prepare, wait){
 
     this.timer = null;
     this.timeout = 1000;
@@ -17,12 +17,13 @@ function TestRunner(tests, prepare){
     this.tests = tests;
     this.prepare = {};
     this.results = [];
+    this.waitBefore = wait
 
     this.ajax_call = function(){
         var _runner = this;
         return function(e){
             _runner.results.push(['Ajax', false, e.toString()]);
-            RequestProcessor.prototype._catch = Tests.ajax_proto;
+            RequestProcessor.prototype._catch = function(){ };
         }
     }
 
@@ -53,8 +54,16 @@ function TestRunner(tests, prepare){
         }
         if(isFunction(test) || isNumber(test))
             this.stack.push([name, test]);
-        if(!this.timer)
+        if(this.waitBefore && Tests.break_after && Tests.continue_bt){
+            Tests.continue_bt.onclick = (function(_this){
+                return function(e){
+                    e.stopPropagation && e.stopPropagation();
+                    e.cancelBubble = true;
+                    _this.process.call(_this);
+            }})(this);
+        }else{
             this.nextTimer();
+        }
     }
 
     this.nextTimer = function(timeout){
@@ -66,23 +75,27 @@ function TestRunner(tests, prepare){
     this.process = function(){
         clearTimeout(this.timer);
         this.timer = null;
-        var status = document.getElementById('test_status');
-        if(status.value == Tests.statuses.running)
+        if(StatusManager.status > 0)
             return this.nextTimer(func);
+        if(StatusManager.status < 0)
+            return;
         var func = this.stack.shift();
         if(!func)
             return;
         if(isArray(func) && isFunction(func[1]))
-            status.value = Tests.statuses.ready;
+            StatusManager.take();
             try{
                 RequestProcessor.prototype._catch = this.ajax_call();
                 func[1].call(this);
-                if(Tests.ajax_calls <= 0) // Return old prototype if not needed;
-                    RequestProcessor.prototype._process = Tests.ajax_proto;
+                if(!Tests.ajax_calls.length){
+                    // Return old prototype if not needed;
+                    RequestProcessor.prototype._catch = function(){};
+                }
                 this.results.push([func[0], true]);
             }catch(e){
                 this.results.push([func[0], false, e.toString()]);
             }
+            StatusManager.put();
         if(this.stack.length){
             if(Tests.break_after && Tests.continue_bt){
                 Tests.continue_bt.onclick = (function(_this){
@@ -96,9 +109,8 @@ function TestRunner(tests, prepare){
             }
         }else{
             this.printResults();
-            status.value = Tests.statuses.done;
+            StatusManager.put();
         }
-
     }
 
     this.printResults = function(){
@@ -130,10 +142,8 @@ function TestRunner(tests, prepare){
 
 var Tests = new (function(){
 
-    this.statuses = {'none': 0, 'ready': 1, 'running': 2, 'done': 3}
-    this.ajax_proto = RequestProcessor.prototype._catch;
-    this.ajax_calls = 0;
-    this.break_after = true;
+    this.ajax_calls = new Array();
+    this.break_after = false; // true;
 
     this.test_main = new TestRunner({
         'page': function(){
@@ -148,7 +158,7 @@ var Tests = new (function(){
             var th = getElementsByClassName('episodes', document, 'th')[0];
             th.firstChild.click();
         }
-    }, {'rsort': ['sort'], 'all': ['sort', 'rsort', 'page']});
+    }, {'rsort': ['sort'], 'all': ['rsort', 'page', 'sort']}, true);
 
     this.test_cnt = new TestRunner({
         'link': function(){
@@ -176,7 +186,7 @@ var Tests = new (function(){
             state.onchange();
         },
     }, {'id_send': ['id'],
-        'all': ['type', 'release', 'episodes', 'title', 'id', 'link', 'id_send']});
+        'all': ['type', 'release', 3000, 'episodes', 'title', 'id', 'link', 'id_send']});
 
     this.test_card = new TestRunner({
         'open': function(){
@@ -186,8 +196,10 @@ var Tests = new (function(){
         'edit': function(){
             var card = document.getElementById('card');
             var elements = getElementsByClassName('right', card, 'a');
-            for(var e = 0; e < elements.length; e++)
-                elements[e].click();
+            for(var e = 0; e < elements.length; e++){
+                if(elements[e].innerText != 'Submit new')
+                    elements[e].click();
+            }
         },
         'send': function(){
             var card = document.getElementById('card');
@@ -334,7 +346,7 @@ var Tests = new (function(){
             menu[0].click();
         }
     }, {'all': ['show', 'void_login', 'bad_login', 'show_more',
-        'register_fail', 'register_success', 'loggedform', 'logout']});
+        'register_fail', 'register_success', 'loggedform']});
 
     this.test_add = new TestRunner({
         'show': function(){
@@ -371,7 +383,7 @@ var Tests = new (function(){
             link.click();
             var genre = document.getElementById('id_genre');
             genre.options[2].selected = true;
-            genre.options[5].selected = true;
+            genre.options[3].selected = true;
         },
         'fill_date': function(){
             var form = document.getElementById('addform');
@@ -407,18 +419,23 @@ var Tests = new (function(){
             cal.firstChild.click();
             cal.firstChild.click();
             var box = getElementsByClassName('calendarbox').pop();
-            map(function(el){  el.click(); }, box.getElementsByTagName('a'));
+            map(function(el){ el.click && el.click(); }, box.getElementsByTagName('a'));
         },
         'submit': function(){
-            document.getElementById('addform').lastChild.click();
+            var form = document.getElementById('addform');
+            if(!form)
+                return;
+            toggle(form, 1);
+            form.lastChild.click();
         }
-    }, {'all': ['show', 'send_blank', 'fill_type', 'calendar', 'submit'],
+    }, {'all': ['show', 'send_blank', 'fill_type', 'calendar', 'submit', 5000, 'show'],
     'submit': ['fill_type', 'calendar', 'fill_genre', 'fill_date', 'fill_title']});
 
     this.test_filter = new TestRunner({
         'show': function(){
-            var h = getElementsByClassName('leftmenu');
-            h = filter(function(el){ if(!el.href) return true; }, h)[0]
+            var h = document.getElementsByTagName('a');
+            h = filter(function(el){
+                return /^filter/gi.test(el.innerText); }, h, null, true)[0];
             h.click();
         },
         'apply': function(){
@@ -470,14 +487,14 @@ var Tests = new (function(){
         'submit': function(){
             toggle(document.getElementById('srch'), 1);
             var input = document.getElementById('sin');
-            input.value = 'nar';
+            input.value = 'zaa';
             input.nextSibling.click();
         },
         'pages': function(){
             var pg = document.getElementById('srchpg');
             pg.lastChild.click();
         }
-    }, {'pages': ['submit'], 'all': ['show', 'submit_blank', 'submit', 'pages']});
+    }, {'pages': ['submit'], 'all': ['show', 'submit_blank', 'submit', 'pages']}, true);
 
     this.start = function(){
         var testre = document.location.hash.match(/^#test\/(\w+)(\/(\w+))?/);
@@ -488,38 +505,18 @@ var Tests = new (function(){
         if(!testname)
             return;
 
-        var status = document.getElementById('test_status');
-        if(!status){
-            status = element.create('input', {'id': 'test_status', 'type': 'input'});
-            element.appendChild(document.body, status);
-        }
-        if(status.value == this.statuses.running)
-            return;
-        status.value = this.statuses.ready;
-
-        if(this.break_after){
-            this.continue_bt = document.getElementById('test_c_bt');
-            if(!this.continue_bt){
-                this.continue_bt = element.create('input', {'value': 'next',
-                    'id': 'test_c_bt', 'style': {'position': 'fixed',
-                    'right': '0px', 'bottom': '0px'},  'type': 'button'})
-                element.appendChild(document.body, this.continue_bt);
-            }
-        }
-
         // Redefine ajax.load to setup status to running when called
         AjaxClass.prototype.load = function(url, qry, processor){
-            Tests.ajax_calls++;
-            status.value = Tests.statuses.running;
+            Tests.ajax_calls.push([this, url, qry, processor]);
+            StatusManager.take();
             ajax.loadXMLDoc.call(ajax, url, qry, processor);
         }
 
         // Define postprocessor for requests
         RequestProcessor.prototype._parsed = function(){
-            var status = document.getElementById('test_status');
-            status.value = Tests.statuses.ready;
-            if(Tests.ajax_calls)
-                Tests.ajax_calls--;
+            StatusManager.put();
+            if(!Tests.ajax_calls.pop())
+                StatusManager.take(); // Parser was called without server call
         }
 
         var test = this['test_'+testname];
@@ -531,6 +528,55 @@ var Tests = new (function(){
     }
 
 })();
+
+if(Tests.break_after){
+    addEvent(window, 'load', (function(_this){
+        return function(){
+            _this.continue_bt = document.getElementById('test_c_bt');
+            if(!_this.continue_bt){
+                _this.continue_bt = element.create('input', {'value': 'next',
+                    'id': 'test_c_bt', 'style': {'position': 'fixed',
+                    'right': '500px', 'bottom': '0px'},  'type': 'button'})
+                element.appendChild(document.body, _this.continue_bt);
+            }
+        }
+    })(Tests));
+}
+
+
+
+var StatusManager = new (function(){
+    this.statuses = {'done': -1, 'ready': 0, 'running': 1}
+    this.status = this.statuses.ready;
+    this.sinput = null;
+
+    this.take = function(){
+        this.status++;
+        this.display();
+    }
+
+    this.put = function(){
+        this.status--;
+        this.display();
+    }
+
+    this.display = function(){
+        this.sinput.value = this.status;
+    }
+
+})();
+
+addEvent(window, 'load', (function(_this){
+
+    return function(){
+        _this.sinput = document.getElementById('test_status');
+        if(!_this.sinput){
+            _this.sinput = element.create('input', {'id': 'test_status', 'type': 'input'});
+            element.appendChild(document.body, _this.sinput);
+        }
+        _this.display();
+    }
+})(StatusManager));
 
 
 addEvent(window, 'load', function(){ Tests.start(); });

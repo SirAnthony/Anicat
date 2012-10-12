@@ -11,7 +11,6 @@ from anime.tests._functions import create_user
 
 class ModelsTest(TestCase):
 
-
     def test_Genre(self):
         g = models.Genre(name='a')
         self.assertEquals(unicode(g), u'a')

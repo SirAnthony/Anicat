@@ -136,7 +136,7 @@ function RequestProcessor(parsers, caller){
                     resp = resp.replace(/"\$(.+?)\$"/gi,'$1');
                     if( /^\{.*\}$/.test(resp)){
                         resp = eval("("+resp+")");
-                        processor.parse(resp);
+                        processor.parse.call(processor, resp);
                     }else if(this.responseXML){ //Опера не отличает жсон от xml. лол.
                         //ajxedt(this.responseXML.documentElement);
                     }
@@ -170,7 +170,7 @@ function RequestProcessor(parsers, caller){
                 parser.call(caller, resp);
             }
         }catch(e){
-            this._catch(e)
+            this._сatch(e)
             message.create(e);
             if(resp.text){
                 message.add('Server response:');

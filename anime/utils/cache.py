@@ -80,7 +80,7 @@ def update_named_cache(name):
     if type(name) in (list, tuple):
         c = cache.set_many(dict([(x, date) for x in name]), 0)
     else:
-        cache.set(name, date, 0)
+        cset(name, date, 0)
     return date
 
 

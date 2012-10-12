@@ -10,13 +10,13 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <meta name="description" content="{% block description %}{% endblock %} Simple anime catalog. An easy way to create and manage your anime lists. No registration required.">
     <meta name="Keywords" content="anime, anime catalog,  anicat, {% block keywords %}animelist, anime list{% endblock %}">
-    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
-    <link rel="search" type="application/opensearchdescription+xml" title="Anime catalog" href="/static/srch.xml" />
-    <link href="/static/style.css" type="text/css" rel="stylesheet" />
-    <link href="/static/nanoscroller.css" type="text/css" rel="stylesheet" />
+    <link rel="icon" href="{{ STATIC_URL }}favicon.ico" type="image/x-icon" />
+    <link rel="search" type="application/opensearchdescription+xml" title="Anime catalog" href="{{ STATIC_URL }}srch.xml" />
+    <link href="{{ STATIC_URL }}style.css" type="text/css" rel="stylesheet" />
+    <link href="{{ STATIC_URL }}nanoscroller.css" type="text/css" rel="stylesheet" />
     <link href="{% url 'user_css' %}" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="/jsi18n/"></script>
-{% compress js %}
+{# chrome cannot into it % compress js % #}
     <script type="text/javascript" src="{{ STATIC_URL }}js/element.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}script.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}ajax.js"></script>
@@ -31,7 +31,7 @@
     <script type="text/javascript" src="{{ STATIC_URL }}statistic.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}calendar.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}DateTimeShortcuts.js"></script>
-{% endcompress %}
+{# % endcompress % #}
     <script type="text/javascript" src="{{ STATIC_URL }}tests.js"></script>
     {% if not user.is_authenticated %}
         <script type="text/javascript" src="{{ STATIC_URL }}userstorage.js"></script>
@@ -169,7 +169,7 @@
     <div class="cont_men" id="popup">
         <span id="popups"></span>
     </div>
-    <div class="footer">v. <a href="{% url 'changes' %}" style="font-size: 10pt;">3.2.2</a>.</div>
+    <div class="footer">v. <a href="{% url 'changes' %}" style="font-size: 10pt;">3.3.0</a>.</div>
     {% addForm %}
     {% block addForm %}
     {% if user.is_authenticated %}

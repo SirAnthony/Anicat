@@ -23,7 +23,7 @@ class UserTest(TestCase):
 
     def tearDown(self):
         cache.invalidate_key('MalList:1')
-        super(TestCase, self).tearDown()
+        super(UserTest, self).tearDown()
 
     def test_get_username(self):
         u = User.objects.get(id=1)
@@ -143,7 +143,7 @@ class UserDBTest(TestCase):
     def tearDown(self):
         cache.delete('Stat:1')
         cache.delete('userCss:1')
-        super(TestCase, self).tearDown()
+        super(UserDBTest, self).tearDown()
 
     def test_latest_status(self):
         from anime.models import UserStatusBundle

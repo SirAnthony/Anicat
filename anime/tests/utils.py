@@ -18,7 +18,7 @@ class CacheTest(TestCase):
         cache.delete('b')
         cache.delete('Genre')
         cache.delete('Genre:1')
-        super(TestCase, self).tearDown()
+        super(CacheTest, self).tearDown()
 
     def test_latest(self):
         cache.invalidate_key('1')
@@ -155,7 +155,7 @@ class PaginatorTest(TestCase):
 
     def tearDown(self):
         cache.delete('Pages:c')
-        super(TestCase, self).tearDown()
+        super(PaginatorTest, self).tearDown()
 
     def test_name_length(self):
         self.assertEquals(self.pg.name_length, 4)

@@ -205,7 +205,7 @@ a:hover{
 
 tr.stat {
     text-align: right;
-    border-spacing: 3;
+    border-spacing: 3px;
     line-height: 1.2em;
 }
 

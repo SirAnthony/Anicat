@@ -3,10 +3,10 @@ import json
 import os
 
 from django.conf import settings
-from django.core.cache import cache
 from django.core.urlresolvers import reverse
 
 from anime import api
+from anime.utils import cache
 from anime.utils.cache import invalidate_key
 from anime.models import AnimeItem, AnimeBundle, AnimeRequest, EDIT_MODELS
 from anime.tests._classes import CleanTestCase as TestCase
@@ -33,10 +33,19 @@ class AjaxTest(TestCase):
         pass
 
     def tearDown(self):
-        cache.delete('ajaxsearch:/search/e9d71f5ee7c92d6dc9e92ffdad17b8bd49418f98/1')
-        invalidate_key('search', '/search/e9d71f5ee7c92d6dc9e92ffdad17b8bd49418f98/1')
-        invalidate_key('mainTable', u'/1')
-        super(TestCase, self).tearDown()
+        searchkey = '38e442f57cd588f5e52f1484b1bc67c480df31ae'
+        cache.delete('ajaxsearch:%s' % searchkey)
+        invalidate_key('search', searchkey)
+        for key in ['47585a4c37e8f7c9845f97099debf576fe46fb92',
+                    '66811e1a68035d2514733b54be7e9fc7e98d5a2e',
+                    '4c2730ba7c3198ec39fadb22988623e2be0dd908',
+                    '8ccbb6ff42daa120dd76e2beec460b282d8ed746']:
+            invalidate_key('mainTable', key)
+            cache.delete('ajaxlist:%s' % key)
+            invalidate_key('search', key)
+            cache.delete('ajaxsearch:%s' % key)
+        cache.delete('Stat:1')
+        super(AjaxTest, self).tearDown()
 
     def test_registration(self):
         a = api.Register()
@@ -153,9 +162,13 @@ class UserViewsTest(TestCase):
 
     def tearDown(self):
         cache.delete('Stat:1')
+        cache.delete('lastuserbundle:2')
+        cache.delete('statusexportdata:1')
         cache.delete('userCss:1')
-        invalidate_key('mainTable', u'/1')
-        super(TestCase, self).tearDown()
+        key = '66811e1a68035d2514733b54be7e9fc7e98d5a2e',
+        invalidate_key('mainTable', key)
+        cache.delete('ajaxlist:%s' % key)
+        super(UserViewsTest, self).tearDown()
 
     @login()
     def test_login_logout(self):
@@ -207,6 +220,9 @@ class EditViewsTest(TestCase):
     def setUp(self):
         pass
 
+    def tearDown(self):
+        super(EditViewsTest, self).tearDown(self.fixtures + ['requests.json'])
+
     @login()
     def test_add(self):
         a = api.Add()
@@ -248,9 +264,13 @@ class EditViewsRequestsTest(TestCase):
         pass
 
     def tearDown(self):
-        invalidate_key('requests', '/requests/1')
-        invalidate_key('requests', u'/requests/status/1/type/1/1')
-        super(TestCase, self).tearDown()
+        # FIXME: This string obtained by watching of cache calls.
+        # TODO: Reverse this and make it dinamic
+        for cname in ['e5cfc2c10ac18b2f0befdbb54f0e23247fdc333e',
+                      'dfc48f25b896dd05ae8caed9f05280464100f0e3']:
+            invalidate_key('requests', cname)
+            cache.delete(cname)
+        super(EditViewsRequestsTest, self).tearDown()
 
     @login()
     def test_requests_page(self):
@@ -284,7 +304,7 @@ class BaseViewsTest(TestCase):
     def tearDown(self):
         cache.delete('card:1')
         cache.delete('card:2')
-        super(TestCase, self).tearDown()
+        super(BaseViewsTest, self).tearDown()
 
     def test_card(self):
         self.assertEquals(self.client.get(reverse('card'), follow=True).status_code, 200)
@@ -295,8 +315,9 @@ class BaseViewsTest(TestCase):
 class BaseViewsNoFixturesTest(TestCase):
 
     def tearDown(self):
+        #FIXME: what card?
         cache.delete('card:')
-        super(TestCase, self).tearDown()
+        super(BaseViewsNoFixturesTest, self).tearDown()
 
     def test_card(self):
         self.assertEquals(self.client.get(reverse('card'), follow=True).status_code, 200)
@@ -304,12 +325,19 @@ class BaseViewsNoFixturesTest(TestCase):
 
 class ClassesViewsTest(TestCase):
 
+    def tearDown(self):
+        cache.delete(BLANK_CACHESTR)
+        cache.delete('listtest:%s' % BLANK_CACHESTR)
+        cache.delete('ajaxtest:%s' % BLANK_CACHESTR)
+        super(ClassesViewsTest, self).tearDown(['2trash.json'])
+
     def blank(*args, **kwargs):
         return '', ''
 
     def test_AnimeListView(self):
         from anime.views.classes import AnimeListView
         v = AnimeListView()
+        v.cache_name = 'listtest'
         v.request = fake_request()
         self.assertRaises(NotImplementedError, v.get_link)
         self.assertRaises(NotImplementedError, v.check_parameters, None)
@@ -322,6 +350,7 @@ class ClassesViewsTest(TestCase):
     def test_AnimeAjaxListView(self):
         from anime.views.classes import AnimeAjaxListView
         v = AnimeAjaxListView()
+        v.ajax_cache_name = 'ajaxtest'
         v.request = fake_request('')
         v.ajax_call = True
         self.assertRaises(NotImplementedError, v.post, None)
@@ -335,8 +364,8 @@ class ClassesViewsTest(TestCase):
         self.assertEquals(v.get_context_data(object_list=None),
                 {'list': None, 'link': '', 'pages': {}, 'cachestr': BLANK_CACHESTR})
 
-    def test_filter(self):
-        pass
+    #~ def test_filter(self):
+        #~ pass
 
 
 class ListViewsTest(TestCase):
@@ -344,13 +373,15 @@ class ListViewsTest(TestCase):
     fixtures = ['2trash.json']
 
     def tearDown(self):
-        invalidate_key('mainTable', u'1:/show/0/sort/releasedAt/1')
-        invalidate_key('mainTable', u'2:/user/2/show/1/1')
-        invalidate_key('mainTable', u'1:/user/1/show/0/1')
-        invalidate_key('mainTable', u'/1')
-        cache.delete('userstatus:1:0')
-        cache.delete('userstatus:2:1')
-        super(TestCase, self).tearDown()
+        for cname in ['66811e1a68035d2514733b54be7e9fc7e98d5a2e',
+                      '78a6a1ecae85ccea08dc9390082d2f570f743c9f',
+                      '517cd1330ed1f76505e1f948bcb86557e4e9d451',
+                      '8c78f52585d20cfc2eaca1329c371e8ea5782a3e']:
+            invalidate_key('mainTable', cname)
+            cache.delete('ajaxlist:%s' % cname)
+        cache.delete('lastuserbundle:1')
+        cache.delete('lastuserbundle:2')
+        super(ListViewsTest, self).tearDown()
 
     @create_user()
     @create_user('2')
@@ -382,12 +413,12 @@ class AjaxListViewsTest(TestCase):
 
     fixtures = ['2trash.json']
 
-    #TODO: caches
-
     def tearDown(self):
-        invalidate_key('search', '/search/4a0a19218e082a343a1b17e5333409af9d98f0f5/sort/releasedAt/1')
-        cache.delete('ajaxsearch:/search/4a0a19218e082a343a1b17e5333409af9d98f0f5/sort/releasedAt/1')
-        super(TestCase, self).tearDown()
+        # FIXME: key
+        key = 'bf490f96cf04c4f95def45f7a693495665306345'
+        invalidate_key('search', key)
+        cache.delete('ajaxsearch:%s' % key)
+        super(AjaxListViewsTest, self).tearDown()
 
     def test_SearchListView(self):
         from anime.views.ajaxlist import SearchListView

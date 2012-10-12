@@ -12,7 +12,7 @@ OUR_ROOT = os.path.realpath(os.path.dirname(__file__))
 
 PROJECT_ROOT = OUR_ROOT
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 DEPLOY = False
 
@@ -220,8 +220,21 @@ USER_PAGE_REQUEST_COUNT = 20
 DAYS_BEFORE_EDIT = 15
 if 'test' in sys.argv:
     INDEX_PAGE_LIMIT = 40
-    REQUESTS_PAGE_LIMIT = 20
+    REQUESTS_PAGE_LIMIT = 15
+    SEARCH_PAGE_LIMIT = 7
     USER_PAGE_REQUEST_COUNT = 4
+
+    # Selenium
+    SELENIUM_LOCAL = False
+    SELENIUM_SERVER_PATH = ''
+    SELENIUM_DRIVER = 'Chrome'
+    SELENIUM_CAPABILITY = {'javascriptEnabled': True,
+                           'takesScreenshot': True,
+                           'browserName': 'firefox'}
+    SELENIUM_LOCAL_CAPABILITY = {'chrome.binary': '/usr/bin/chromium'}
+    SELENIUM_HOST = '192.168.1.2'
+    SELENIUM_PORT = 4444
+    SELENIUM_CHROME_DRIVER = os.environ["CHROME_DRIVER"]
 
 try:
     from settings_auth import *

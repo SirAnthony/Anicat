@@ -177,7 +177,7 @@ var edit = new (function edit_class(){
     this.rf = function(id, field, e){
         if(!user.logined && field == 'state'){
             processor.setRequest()
-            processor.parse({'response': 'form', 'status': true,
+            processor.parse.call(processor, {'response': 'form', 'status': true,
                                     'id': id, 'model': field});
             message.unlock()
         }else
@@ -231,7 +231,7 @@ var edit = new (function edit_class(){
             processor.setRequest();
             formData['set'] = true;
             formData['response'] = 'edit';
-            processor.parse(formData);
+            processor.parse.call(processor, formData);
             message.unlock()
         }else{
             ajax.load('set', formData, processor);
