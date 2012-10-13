@@ -1,4 +1,3 @@
-
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -173,7 +172,7 @@ class SearchListView(AnimeAjaxListView):
         except AttributeError:
             raise Http404(self.error_messages['empty'])
 
-        fields = request.POST.getlist('fields', None) or []
+        fields = request.POST.getlist('fields') or []
         try:
             for f in fields:
                 if f not in ['genre_name', 'type', 'release']:
