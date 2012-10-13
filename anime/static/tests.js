@@ -143,7 +143,7 @@ function TestRunner(tests, prepare, wait){
 var Tests = new (function(){
 
     this.ajax_calls = new Array();
-    this.break_after = false; // true;
+    this.break_after = true; // false;
 
     this.test_main = new TestRunner({
         'page': function(){
@@ -571,7 +571,7 @@ addEvent(window, 'load', (function(_this){
     return function(){
         _this.sinput = document.getElementById('test_status');
         if(!_this.sinput){
-            _this.sinput = element.create('input', {'id': 'test_status', 'type': 'input'});
+            _this.sinput = element.create('input', {'id': 'test_status', 'type': 'text'});
             element.appendChild(document.body, _this.sinput);
         }
         _this.display();

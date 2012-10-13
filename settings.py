@@ -96,11 +96,6 @@ STATIC_ROOT = os.path.join(OUR_ROOT, 'static')
 # Example: "http://static.lawrence.com/", "http://example.com/static/"
 STATIC_URL = '/static/'
 
-# URL prefix for admin media -- CSS, JavaScript and images.
-# Make sure to use a trailing slash.
-# Examples: "http://foo.com/static/admin/", "/static/admin/".
-ADMIN_MEDIA_PREFIX = '/static/admin/'
-
 # A list of locations of additional static files
 STATICFILES_DIRS = ()
 
@@ -111,7 +106,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
-    'compressor.finders.CompressorFinder',
+#    'compressor.finders.CompressorFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -153,11 +148,12 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'social_auth',
-    'compressor',
+    #'compressor',
     'anime',
     'south',
     'debug_toolbar',
     'django_extensions',
+
 )
 
 #~ COMPRESS_ENABLED = True
@@ -227,14 +223,14 @@ if 'test' in sys.argv:
     # Selenium
     SELENIUM_LOCAL = False
     SELENIUM_SERVER_PATH = ''
-    SELENIUM_DRIVER = 'Chrome'
+    SELENIUM_DRIVER = 'Remote'
     SELENIUM_CAPABILITY = {'javascriptEnabled': True,
                            'takesScreenshot': True,
-                           'browserName': 'firefox'}
-    SELENIUM_LOCAL_CAPABILITY = {'chrome.binary': '/usr/bin/chromium'}
-    SELENIUM_HOST = '192.168.1.2'
+                           'browserName': 'internet explorer'}
+    SELENIUM_HOST = '192.168.1.6'
     SELENIUM_PORT = 4444
-    SELENIUM_CHROME_DRIVER = os.environ["CHROME_DRIVER"]
+    if hasattr(os.environ, "CHROME_DRIVER"):
+        SELENIUM_CHROME_DRIVER = os.environ["CHROME_DRIVER"]
 
 try:
     from settings_auth import *

@@ -18,8 +18,8 @@ from anime.tests.orphans import UploadTest
 from anime.tests.javascript import JSLightTests, JSHardTests
 #import * - bad
 
-from anime import api
-api.to_file('API')
+#from anime import api
+#api.to_file('API')
 
 __test__= {
     'forms': forms,

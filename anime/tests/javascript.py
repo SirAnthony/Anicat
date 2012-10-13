@@ -49,14 +49,14 @@ class JSTests(LiveServerTestCase):
         driver = getattr(webdriver, settings.SELENIUM_DRIVER, None)
         assert driver, "settings.SELENIUM_DRIVER: dirver not found"
         if driver is webdriver.Remote:
-            if isinstance(settings.SELENIUM_REMOTE_CAPABILITY, dict):
+            if isinstance(settings.SELENIUM_CAPABILITY, dict):
                 capability = settings.SELENIUM_CAPABILITY
             else:
                 capability = getattr(webdriver.DesiredCapabilities, settings.SELENIUM_CAPABILITY, None)
                 assert capability, 'settings.SELENIUM_CAPABILITY: capability does not exist'
             cls.driver = driver('http://%s:%d/wd/hub' % (settings.SELENIUM_HOST, settings.SELENIUM_PORT), capability)
         else:
-            cls.driver = driver(settings.SELENIUM_CHROME_DRIVER) #settings.SELENIUM_LOCAL_CAPABILITY
+            cls.driver = driver(settings.SELENIUM_CHROME_DRIVER)
         super(JSTests, cls).setUpClass()
 
     @classmethod

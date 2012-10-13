@@ -1,3 +1,4 @@
+Django>=1.4.1
 coverage
 annoying
 debug-toolbar
