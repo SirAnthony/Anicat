@@ -1,7 +1,7 @@
 Quickstart
 ==========
 
-Ensure that you have django 1.4b1 installed.
+Ensure that you have django 1.4 installed.
 
 1. Clone repository and go to it's folder.
 2. chmod +x manage.py
