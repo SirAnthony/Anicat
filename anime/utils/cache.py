@@ -1,7 +1,7 @@
 
+import hashlib
 from datetime import datetime
 from django.core.cache import cache
-from django.utils.hashcompat import md5_constructor
 from django.utils.http import urlquote
 from anime.models import ( AnimeBundle, AnimeItem, AnimeName,
                             UserStatusBundle, AnimeRequest)
@@ -98,12 +98,12 @@ def clean_cache(name, cachestr):
 
 
 def key_valid(fragment_name, *variables):
-    args = md5_constructor(u':'.join([urlquote(var) for var in variables]))
+    args = hashlib.md5(u':'.join([urlquote(var) for var in variables]))
     cache_key = 'template.cache.%s.%s' % (fragment_name, args.hexdigest())
     return cache.has_key(cache_key)
 
 
 def invalidate_key(fragment_name, *variables):
-    args = md5_constructor(u':'.join([urlquote(var) for var in variables]))
+    args = hashlib.md5(u':'.join([urlquote(var) for var in variables]))
     cache_key = 'template.cache.%s.%s' % (fragment_name, args.hexdigest())
     cache.delete(cache_key)

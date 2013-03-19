@@ -1,11 +1,18 @@
+
 from django.conf import settings
-from django.conf.urls.defaults import patterns, url
+
+try:
+    from django.conf.urls import patterns, url, include
+except ImportError:
+    # for Django version less then 1.4
+    from django.conf.urls.defaults import patterns, url, include
 
 from django.views.generic.base import TemplateView
 
 from anime.forms.User import NotActivePasswordResetForm
 from anime.views.list import RequestsListView
 from anime.views.ajaxlist import IndexListView, SearchListView
+
 
 # General
 urlpatterns = patterns(
@@ -103,16 +110,18 @@ urlpatterns += patterns('',
     url(r'^ajax/search/$', SearchListView.as_view(ajax_call=True), name='ajax_search'),
 )
 
-urlpatterns += patterns('social_auth.views',
-    url(r'^login/(?P<backend>[^/]+)/$', 'auth', name='socialauth_begin'),
-    url(r'^complete/(?P<backend>[^/]+)/$', 'complete', name='socialauth_complete'),
-    url(r'^associate/(?P<backend>[^/]+)/$', 'associate', name='socialauth_associate_begin'),
-    url(r'^associate/complete/(?P<backend>[^/]+)/$', 'associate_complete',
-        name='socialauth_associate_complete'),
-    url(r'^disconnect/(?P<backend>[^/]+)/$', 'disconnect', name='socialauth_disconnect'),
-    url(r'^disconnect/(?P<backend>[^/]+)/(?P<association_id>[^/]+)/$', 'disconnect',
-        name='socialauth_disconnect_individual'),
+urlpatterns += patterns('', #'social_auth.views',
+    #~ url(r'^login/(?P<backend>[^/]+)/$', 'auth', name='socialauth_begin'),
+    #~ url(r'^complete/(?P<backend>[^/]+)/$', 'complete', name='socialauth_complete'),
+    #~ url(r'^associate/(?P<backend>[^/]+)/$', 'associate', name='socialauth_associate_begin'),
+    #~ url(r'^associate/complete/(?P<backend>[^/]+)/$', 'associate_complete',
+        #~ name='socialauth_associate_complete'),
+    #~ url(r'^disconnect/(?P<backend>[^/]+)/$', 'disconnect', name='socialauth_disconnect'),
+    #~ url(r'^disconnect/(?P<backend>[^/]+)/(?P<association_id>[^/]+)/$', 'disconnect',
+        #~ name='socialauth_disconnect_individual'),
+    url(r'', include('social_auth.urls')),
 )
+
 
 urlpatterns += patterns('',
     (r'^jsi18n/(?P<packages>\S+?)?/?$',

@@ -11,11 +11,12 @@ from anime.utils.cache import invalidate_key
 from anime.models import AnimeItem, AnimeBundle, AnimeRequest, EDIT_MODELS
 from anime.tests._classes import CleanTestCase as TestCase
 from anime.tests._functions import (fake_request, create_user, login,
-                                    fill_params)
+                            fill_params, create_cachestr, hexdigest)
 from anime.utils.catalog import last_record_pk
 
 
-BLANK_CACHESTR = 'bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f'
+BLANK_CACHESTR = create_cachestr()
+#'bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f'
 
 
 class AjaxTest(TestCase):
@@ -430,13 +431,15 @@ class AjaxListViewsTest(TestCase):
         s.fields = []
         self.assertEquals(unicode(s.get_queryset()), unicode(AnimeItem.objects.none()))
         self.assertEquals(s.get_link(), ({'link': '/search/'}, '/search/0'))
-
         request = fake_request('search', {'string': 'abcdef',
-                'page': 1, 'fields': ['title'], 'limit': 10, 'order': 'title'})
+                'page': 1, 'fields': ['title'], 'limit': 5, 'order': 'title'})
         s.check_parameters(request)
         s.request = request
-        self.assertEquals(s.get_link(), ({'link': '/search/abcdef/limit/10/',
-            'limit': 10, 'string': u'abcdef'}, '0114b1cfd6126e175fcce2b13be769f0ca55a231'))
+        #import pudb; pudb.set_trace()
+        request_str = hexdigest('abcdef')
+        self.assertEquals(s.get_link(), ({'link': '/search/abcdef/limit/5/',
+            'limit': 5, 'string': u'abcdef'}, create_cachestr('search',
+            link_data = {'string': request_str, 'limit': 5}, data=[u'title',])))
         self.assertEquals(unicode(s.get_queryset()), unicode(AnimeItem.objects.none()))
         self.assertEquals(self.client.get(reverse('search')).status_code, 200)
         invalidate_key('search', '/search/4a0a19218e082a343a1b17e5333409af9d98f0f5/sort/releasedAt/1')

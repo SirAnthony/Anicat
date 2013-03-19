@@ -38,9 +38,9 @@ class IndexListView(AnimeAjaxListView):
             link['order'] = self.order
         link_name = reverse('index', kwargs=link)
         if self.status is not None:
-            cachestr = u'%s:%s%s' % (self.user.id, link_name, self.page)
+            cachestr = u'{0}:{1}{2}'.format(self.user.id, link_name, self.page)
         else:
-            cachestr = u'%s%s' % (link_name, self.page)
+            cachestr = u'{0}{1}'.format(link_name, self.page)
         link['link'] = link_name
         return link, cachestr
 

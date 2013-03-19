@@ -172,7 +172,7 @@ class EditableDefault(object):
         try:
             ret['text'] = field_expl.get_value(anime, self.request)
         except GetError, e:
-            ret['text'] = e.message
+            ret['text'] = unicode(e)
             ret['status'] = False
         return ret
 

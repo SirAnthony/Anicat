@@ -1,7 +1,10 @@
 import datetime
 
 from django.contrib.auth.models import User, AnonymousUser
+from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
+
+from hashlib import sha1
 
 from anime.utils.misc import is_iterator
 from anime.api import types as apiTypes
@@ -44,6 +47,14 @@ def fake_request(*args, **kwargs):
     request.session = {}
     return request
 
+def create_cachestr(link='', link_data={}, page=1, data={}):
+    if link:
+        link = "{0}{1}".format(reverse(link, kwargs=link_data), page)
+    string = link + str(data)
+    return sha1(string).hexdigest()
+
+def hexdigest(string):
+    return sha1(string.encode('utf-8')).hexdigest()
 
 def check_response(response, origin, *args, **kwargs):
 

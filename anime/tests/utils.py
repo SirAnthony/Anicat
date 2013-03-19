@@ -68,7 +68,7 @@ class CacheTest(TestCase):
         cache.update_cache_on_save(None, g, None)
 
     def test_key_valid_invalidate(self):
-        from django.utils.hashcompat import md5_constructor
+        from hashlib import md5 as md5_constructor
         from django.utils.http import urlquote
         fragment_name = 'a'
         variables = ['a']

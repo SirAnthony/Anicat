@@ -12,7 +12,7 @@ OUR_ROOT = os.path.realpath(os.path.dirname(__file__))
 
 PROJECT_ROOT = OUR_ROOT
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 DEPLOY = False
 
@@ -147,10 +147,10 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
+    'south',
     'social_auth',
     #'compressor',
     'anime',
-    'south',
     'debug_toolbar',
     'django_extensions',
 
@@ -186,9 +186,16 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
+            'include_html': True,
+            'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         }
     },
@@ -227,7 +234,7 @@ if 'test' in sys.argv:
     SELENIUM_CAPABILITY = {'javascriptEnabled': True,
                            'takesScreenshot': True,
                            'browserName': 'internet explorer'}
-    SELENIUM_HOST = '192.168.1.6'
+    SELENIUM_HOST = '127.0.0.1'
     SELENIUM_PORT = 4444
     if hasattr(os.environ, "CHROME_DRIVER"):
         SELENIUM_CHROME_DRIVER = os.environ["CHROME_DRIVER"]

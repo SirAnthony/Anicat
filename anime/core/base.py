@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-from django.core.cache import cache
 from django.utils.translation import ugettext_lazy as _
 from anime.core.explorer import GetError, FieldExplorer
 from anime.forms.Error import FilterForm
 from anime.models import AnimeItem, UserStatusBundle, USER_STATUS
-from anime.utils.cache import invalidate_key
+from anime.utils import cache
 
 
 ERROR_MESSAGES = {
@@ -38,7 +37,7 @@ def get_data(request):
         try:
             response[field] = field_expl.get_value(anime, request)
         except GetError, e:
-            response[field] = e.message
+            response[field] = unicode(e)
 
     r = 'card' if request.POST.get('card') else 'get'
     response = {'response': r, 'status': True, 'id': aid, 'text': response}
@@ -46,7 +45,7 @@ def get_data(request):
 
 
 def card(anime_id, user):
-    ret = cache.get('card:%s' % anime_id)
+    ret = cache.get('card:{0}'.format(anime_id))
     if not ret:
         ret = {}
         try:
@@ -56,12 +55,12 @@ def card(anime_id, user):
         except Exception:
             pass
         else:
-            ret.update({'anime': anime, 'names': anime.animenames.values()})
+            ret.update({'anime': anime, 'names': list(anime.animenames.values())})
             if anime.bundle:
-                ret['bundle'] = anime.bundle.animeitems.values('id', 'title').all().order_by('releasedAt')
+                ret['bundle'] = list(anime.bundle.animeitems.values('id', 'title').order_by('releasedAt').all())
             if anime.links:
-                ret['links'] = anime.links.order_by('linkType').all()
-            cache.set('card:%s' % anime_id, ret)
+                ret['links'] = list(anime.links.order_by('linkType').values().all())
+            cache.cset('card:{0}'.format(anime_id), ret)
     if user.is_authenticated() and 'anime' in ret:
         userstatus = None
         try:
@@ -79,6 +78,6 @@ def filter_list(request):
     if form.is_valid():
         request.session['filter'] = dict(
                     (k, v) for k, v in form.cleaned_data.items() if v)
-        invalidate_key('filter', request.session.session_key)
+        cache.invalidate_key('filter', request.session.session_key)
         return {'status': True}
     return {'form': form}

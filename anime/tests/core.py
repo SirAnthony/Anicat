@@ -292,6 +292,7 @@ class BaseTest(TestCase):
         cache.delete('card:1')
         self.assertRaises(AnimeItem.DoesNotExist, coreMethods.card, None, user)
         self.assertEquals(coreMethods.card('none', AnonymousUser()), {})
+        #import pudb; pudb.set_trace()
         result = coreMethods.card(1, user)
         for item in result.keys():
             if item == 'userstatus':
