@@ -12,6 +12,7 @@ from django.views.generic.base import TemplateView
 from anime.forms.User import NotActivePasswordResetForm
 from anime.views.list import RequestsListView
 from anime.views.ajaxlist import IndexListView, SearchListView
+from anime.views.history import HistoryListView
 
 
 # General
@@ -42,7 +43,8 @@ urlpatterns += patterns('',
 
 # History
 urlpatterns += patterns('anime.views.history',
-    (r'^history/add/?(f/(?P<field>\w+))?/?(?P<page>\d+)?/$', 'history'),
+    url(r'^history/(?:(?P<model>\w+)/)?(?:show/(?P<status>\w)/)?(?:sort/(?P<order>-?\w+)/)?(?:(?P<page>\d+)/)?$',
+    HistoryListView.as_view(), name='history'),
 )
 
 # User

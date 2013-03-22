@@ -5,7 +5,7 @@ from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.list import BaseListView
 from anime.utils import cache
 from anime.utils.paginator import Paginator
-
+from anime.views.ajax import ajaxResponse
 
 
 class AnimeListFilter(object):
@@ -79,10 +79,12 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
             context = {
                 'pages': {'current': page.number,
                     'start': page.start_index(),
-                    'items': paginator,
+                    'count': paginator.num_pages,
+                    'items': paginator.get_names(),
                 },
                 'list': queryset,
             }
+            ln = len(str(context['list']))
         else:
             context = {'pages': {}, 'list': queryset}
         context.update(kwargs)
@@ -128,7 +130,6 @@ class AnimeAjaxListView(AnimeListView):
             if not self.ajax_call:
                 cache.update_named_cache(cachestr)
             self.data = context
-            #FIXME: One useless query for caching paginator
             cache.cset('%s:%s' % (self.ajax_cache_name, cachestr), context, 0)
         elif self.data:
             context = self.data
@@ -151,9 +152,19 @@ class AnimeAjaxListView(AnimeListView):
         else:
             return self.ajax(request, *args, **kwargs)
 
+    @ajaxResponse
     def ajax(self, request, *args, **kwargs):
-        "Implementation in subclasses"
-        raise NotImplementedError
+        if not hasattr(self, 'response_name'):
+            raise NotImplementedError(_("Response name Must be defined."))
+        response = {'response': self.response_name, 'status': False}
+        try:
+            ret = self.ajax_process(request, *args, **kwargs)
+            if hasattr(self, 'fields'):
+                ret['head'] = self.fields
+            response.update({'status': True, 'text': ret})
+        except Http404, e:
+            response['text'] = e
+        return response
 
     def ajax_process(self, request, *args, **kwargs):
         self.check_parameters(request, *args, **kwargs)

@@ -1,8 +1,8 @@
 
 
-{% if pages.items.num_pages > 1 %}
+{% if pages.count > 1 %}
 <div id="pg">
-    {% for page in pages.items.get_names %}
+    {% for page in pages.items %}
         {% ifequal pages.current forloop.counter %}
             <span class="spanl">[{{ page }}]</span>
         {% else %}

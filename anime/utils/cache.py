@@ -4,7 +4,7 @@ from datetime import datetime
 from django.core.cache import cache
 from django.utils.http import urlquote
 from anime.models import ( AnimeBundle, AnimeItem, AnimeName,
-                            UserStatusBundle, AnimeRequest)
+                        UserStatusBundle, AnimeRequest, HISTORY_MODELS)
 from anime.utils.misc import is_iterator
 
 
@@ -18,6 +18,7 @@ ITEM_TYPES = {
     'RequestsListView': [AnimeRequest],
     'SearchListView': [AnimeItem],
     'StatisticExport': [AnimeItem, AnimeName, UserStatusBundle],
+    'HistoryListView': HISTORY_MODELS.values(),
 }
 
 get = cache.get

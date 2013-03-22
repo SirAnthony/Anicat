@@ -24,6 +24,7 @@ class IndexListView(AnimeAjaxListView):
     template_name = 'anime/base/list.html'
     cache_name = 'mainTable'
     ajax_cache_name = 'ajaxlist'
+    response_name = 'list'
     ADDITIONAL_FIELDS = ['rating', '-rating', 'changed', '-changed']
     fields = ['air', 'id', 'title', 'episodes', 'release', 'type']
 
@@ -105,19 +106,16 @@ class IndexListView(AnimeAjaxListView):
         return super(IndexListView, self).updated(cachestr,
                                     {'UserStatusBundle': pk})
 
-    @ajaxResponse
-    def ajax(self, request, *args, **kwargs):
-        response = {'response': 'list', 'status': False}
-        try:
-            ret = self.ajax_process(request, *args, **kwargs)
-            paginator = ret['pages']['items']
-            ret['head'] = self.fields
-            ret['count'] = paginator.count
-            ret['pages']['items'] = paginator.get_names()
-            response.update({'status': True, 'text': ret})
-        except Http404, e:
-            response['text'] = e
-        return response
+    #~ @ajaxResponse
+    #~ def ajax(self, request, *args, **kwargs):
+        #~ response = {'response': 'list', 'status': False}
+        #~ try:
+            #~ ret = self.ajax_process(request, *args, **kwargs)
+            #~ ret['head'] = self.fields
+            #~ response.update({'status': True, 'text': ret})
+        #~ except Http404, e:
+            #~ response['text'] = e
+        #~ return response
 
 
 class SearchListView(AnimeAjaxListView):
@@ -134,6 +132,7 @@ class SearchListView(AnimeAjaxListView):
     template_name = 'anime/base/search.html'
     cache_name = 'search'
     ajax_cache_name = 'ajaxsearch'
+    response_name = 'search'
 
 
     def get_link(self):
@@ -217,15 +216,12 @@ class SearchListView(AnimeAjaxListView):
         self.check_parameters(request, *args, **kwargs)
         return super(SearchListView, self).get(request, *args, **kwargs)
 
-    @ajaxResponse
-    def ajax(self, request, *args, **kwargs):
-        response = {'response': 'search', 'status': False}
-        try:
-            ret = self.ajax_process(request, *args, **kwargs)
-            paginator = ret['pages']['items']
-            ret['count'] = paginator.count
-            ret['pages']['items'] = paginator.page_range
-            response.update({'status': True, 'text': ret})
-        except Http404, e:
-            response['text'] = e
-        return response
+    #~ @ajaxResponse
+    #~ def ajax(self, request, *args, **kwargs):
+        #~ response = {'response': 'search', 'status': False}
+        #~ try:
+            #~ ret = self.ajax_process(request, *args, **kwargs)
+            #~ response.update({'status': True, 'text': ret})
+        #~ except Http404, e:
+            #~ response['text'] = e
+        #~ return response

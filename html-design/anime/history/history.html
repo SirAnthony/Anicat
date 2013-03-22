@@ -4,16 +4,14 @@
 
 {% load animetemplates %}
 
-
-{% block title %}{% if link.status %} - {% statusname link.status %} list{% endif %}{% endblock %}
+{% block title %}History{% endblock %}
 
 {% block mainlink %}
 {% endblock %}
 
 {% block main %}
-{% cache 0 mainTable cachestr %}
+{% cache 0 history cachestr %}
     <div id="dvid">
-        <h2 class="listtitle">{% if link.status %}{% statusname link.status %} list{% if link.user %} for {% username link.user %}{% endif %}{% endif %}</h2>
         {% if not list %}
             {% if cachestr %}
         <p>Nothing to display.</p>
@@ -21,8 +19,8 @@
         {% else %}
             {% url 'index' status=link.status user=link.user as link_order %}
         <table id="tbl" cellspacing="0" class="tbl">
-            {% include "anime/base/listhead.html" %}
-            {% include "anime/base/listbody.html" %}
+            {% include "anime/history/head.html" %}
+            {% include "anime/history/body.html" %}
         </table>
         {% endif %}
     </div>

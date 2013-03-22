@@ -428,6 +428,18 @@ EDIT_MODELS = {
     'feedback': AnimeFeedbackRequest,
 }
 
+HISTORY_MODELS = {
+    'anime': AnimeItem,
+    #'episode': AnimeEpisode,
+    'bundle': AnimeBundle,
+    'name': AnimeName,
+    'links': AnimeLink,
+    #'organisation': Organisation,
+    #'organisationbundle': OrganisationBundle,
+    #'people': People,
+    #'peoplebundle': PeopleBundle,
+}
+
 
 from anime.utils.cache import update_cache_on_save
 for model in ( AnimeBundle, AnimeItem, AnimeName, UserStatusBundle,

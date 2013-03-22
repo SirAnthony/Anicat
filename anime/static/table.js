@@ -94,7 +94,7 @@ var searcher = new ( function(){
         if(!this.loaded) return;
         message.hide();
         element.removeAllChilds(this.result);
-        if(!rs.count || !rs.list.length){
+        if(!rs.list.length){
            element.appendChild(this.result, [{'p': {innerText: 'Nothing found.'}}]);
         }else{
             var page = (rs.pages.current > 1) ? rs.pages.current + '/' : '';
@@ -188,7 +188,7 @@ var table = new ( function(){
     }
 
     this.buildHeader = function(data, link, callback){
-        if(!data || !isArray(data))
+        if(!isArray(data) || !data.length)
             return [];
         var th = new Array();
         map(function(name){
