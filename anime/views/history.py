@@ -6,7 +6,8 @@ from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 
-from anime.models import AnimeItem, HISTORY_MODELS
+from anime.models import (AnimeItem, HISTORY_MODELS,
+                            AUDIT_FIELDS, AUDIT_MODEL_FIELDS)
 from anime.views.classes import AnimeAjaxListView
 from anime.views.ajax import ajaxResponse
 
@@ -26,8 +27,8 @@ class HistoryListView(AnimeAjaxListView):
     cache_name = 'history'
     ajax_cache_name = 'ajaxhistory'
     ADDITIONAL_FIELDS = []
-    #fields = ['air', 'id', 'title', 'episodes', 'release', 'type']
     response_name = 'history'
+    fields = AUDIT_FIELDS
 
     def get_link(self):
         userid = self.kwargs.get('user_id')
@@ -39,7 +40,8 @@ class HistoryListView(AnimeAjaxListView):
         if self.order != 'action_date':
             link['order'] = self.order
         link_name = reverse('history', kwargs=link)
-        cachestr = u'{0}{1}'.format(link_name, self.page)
+        cachestr = u'{0}:{1}{2}'.format(self.current_user.is_staff,
+                                            link_name, self.page)
         link['link'] = link_name
         return link, cachestr
 
@@ -52,18 +54,16 @@ class HistoryListView(AnimeAjaxListView):
             raise Http404(self.error_messages['bad_model'])
         self.model = HISTORY_MODELS[model].audit_log.model
 
+        self.fields = AUDIT_FIELDS + AUDIT_MODEL_FIELDS[model] + ('locked',)
+
         status = _get('status')
         if status and status.upper() not in HISTORY_STATUSES:
             raise Http404(self.error_messages['bad_status'])
 
-        order = _get('order', 'action_date')
-        try:
-            self.model._meta.get_field(
-                    order[1:] if order.startswith('-') else order)
-        except:
-            if order not in self.ADDITIONAL_FIELDS:
-                raise Http404(self.error_messages['bad_order'])
-
+        order = _get('order', '-action_date')
+        order_field = order[1:] if order.startswith('-') else order
+        self.check_field(self.model, order_field, self.error_messages['bad_order'],
+                            lambda o: o in self.ADDITIONAL_FIELDS)
 
         self.model_name = model
         self.current_user = request.user
@@ -77,63 +77,9 @@ class HistoryListView(AnimeAjaxListView):
         state = self.status
         if state:
             qs = qs.filter(action_type=state)
-        qs = qs.order_by(self.order).values()
+        qs = qs.order_by(self.order)
+        if self.current_user.is_staff:
+            qs = qs.select_related('action_user')
+        if self.model_name != 'anime':
+            qs = qs.select_related('anime')
         return qs
-
-    #~ @ajaxResponse
-    #~ def ajax(self, request, *args, **kwargs):
-        #~ response = {'response': 'history', 'status': False}
-        #~ try:
-            #~ ret = self.ajax_process(request, *args, **kwargs)
-            #~ paginator = ret['pages']['items']
-            #~ ret['head'] = self.fields
-            #~ ret['count'] = paginator.count
-            #~ ret['pages']['items'] = paginator.get_names()
-            #~ response.update({'status': True, 'text': ret})
-        #~ except Http404, e:
-            #~ response['text'] = e
-        #~ return response
-
-
-
-@render_to('anime/history.html')
-def history(request, field=None, page=0):
-    Model = None
-    limit = 30
-    link = 'add/'
-    try:
-        page = int(page)
-    except:
-        page = 0
-    if not field:
-        Model = AnimeItem
-
-    qs = Model.audit_log.filter(action_type=u'I')
-    pages = qs.count()/limit + 1
-    res = qs[page*limit:(page+1)*limit]
-    def r(obj):
-        ret = {}
-        for fieldName in obj._meta.fields:
-            name = fieldName.name
-            ret[name] = getattr(obj, name)
-            if name in ['releasedAt', 'endedAt']:
-                if hasattr(ret[name], 'strftime'):
-                    ret[name] = ret[name].strftime("%d.%m.%Y")
-            elif name == 'action_user':
-                if request.user.is_staff:
-                    try:
-                        ret[name] = ret[name].username
-                    except AttributeError:
-                        ret[name] = '*'
-                else:
-                    ret[name] = 'Anonymous'
-            else:
-                ret[name] = getattr(obj, name)
-        return ret
-    table = map(r, res)
-    return {
-        'table': table,
-        'pages': range(1, pages+1),
-        'link': link,
-        'page': page
-    }

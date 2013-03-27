@@ -1,5 +1,12 @@
 
+{% load animefilters %}
+
 <thead class="thdtbl">
         <tr>
+            {% for header in head %}
+            <th class="{{ header }}">
+                <a rel="nofollow" href="{{ link_order|default:'/' }}sort/{% if link.order == header %}-{% endif %}{{header}}/" onclick="return loadURIHash(this.href)">{{header|header_title}}</a>
+            </th>
+            {% endfor %}
         </tr>
 </thead>

@@ -55,7 +55,7 @@ class Paginator(paginator.Paginator):
         order = self.order
         qs = self.object_list
         zero = None
-        if type(qs) is not QuerySet:
+        if not isinstance(qs, QuerySet):
             raise TypeError('iternames only works with QuerySets as item list.')
         if not self.count:
             return

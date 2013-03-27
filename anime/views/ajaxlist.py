@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db.models.fields import FieldDoesNotExist
 from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 from hashlib import sha1
@@ -25,8 +24,8 @@ class IndexListView(AnimeAjaxListView):
     cache_name = 'mainTable'
     ajax_cache_name = 'ajaxlist'
     response_name = 'list'
-    ADDITIONAL_FIELDS = ['rating', '-rating', 'changed', '-changed']
     fields = ['air', 'id', 'title', 'episodes', 'release', 'type']
+    ADDITIONAL_FIELDS = ['rating', '-rating', 'changed', '-changed']
 
     def get_link(self):
         userid = self.kwargs.get('user_id')
@@ -48,6 +47,7 @@ class IndexListView(AnimeAjaxListView):
     def check_parameters(self, request, **kwargs):
         _get = lambda val, default=None: \
                 kwargs.get(val) or request.POST.get(val) or default
+
         user = _get('user')
         if user is None or int(user) == request.user.id:
             user = request.user
@@ -66,11 +66,9 @@ class IndexListView(AnimeAjaxListView):
             status = None
 
         order = _get('order', 'title')
-        try:
-            AnimeItem._meta.get_field(order[1:] if order.startswith('-') else order)
-        except:
-            if not status or order not in self.ADDITIONAL_FIELDS:
-                raise Http404(self.error_messages['bad_order'])
+        order_field = order[1:] if order.startswith('-') else order
+        self.check_field(AnimeItem, order_field, self.error_messages['bad_order'],
+                            lambda o: status and o in self.ADDITIONAL_FIELDS)
 
         self.user = user
         self.current_user = request.user
@@ -106,17 +104,6 @@ class IndexListView(AnimeAjaxListView):
         return super(IndexListView, self).updated(cachestr,
                                     {'UserStatusBundle': pk})
 
-    #~ @ajaxResponse
-    #~ def ajax(self, request, *args, **kwargs):
-        #~ response = {'response': 'list', 'status': False}
-        #~ try:
-            #~ ret = self.ajax_process(request, *args, **kwargs)
-            #~ ret['head'] = self.fields
-            #~ response.update({'status': True, 'text': ret})
-        #~ except Http404, e:
-            #~ response['text'] = e
-        #~ return response
-
 
 class SearchListView(AnimeAjaxListView):
     error_messages = {
@@ -133,7 +120,7 @@ class SearchListView(AnimeAjaxListView):
     cache_name = 'search'
     ajax_cache_name = 'ajaxsearch'
     response_name = 'search'
-
+    fields = ['air', 'id', 'title', 'episodes', 'release', 'type']
 
     def get_link(self):
         # FIXME: rewrite this
@@ -161,6 +148,8 @@ class SearchListView(AnimeAjaxListView):
         _get = lambda val, default=None: \
             kwargs.get(val) or request.POST.get(val) or default
 
+        errors = self.error_messages
+
         try:
             string = _get('string', '')
             if request.method == 'GET':
@@ -169,29 +158,23 @@ class SearchListView(AnimeAjaxListView):
             if not string:
                 raise AttributeError
         except AttributeError:
-            raise Http404(self.error_messages['empty'])
+            raise Http404(errors['empty'])
 
-        fields = request.POST.getlist('fields') or []
-        try:
-            for f in fields:
-                if f not in ['genre_name', 'type', 'release']:
-                    self.model._meta.get_field(f)
-            fields.sort()
-        except (FieldDoesNotExist, TypeError, AttributeError):
-            raise Http404(self.error_messages['bad_fields'])
+        fields = request.POST.getlist('fields') or self.fields
+        for f in fields:
+            if f not in ['episodes', 'genre_name', 'type', 'release']:
+                self.check_field(self.model, f, errors['bad_fields'])
 
-        try:
-            order = _get('order', 'title')
-            AnimeItem._meta.get_field(order[1:] if order.startswith('-') else order)
-        except Exception:
-            raise Http404(self.error_messages['bad_order'])
+        order = _get('order', 'title')
+        order_field = order[1:] if order.startswith('-') else order
+        self.check_field(AnimeItem, order_field, errors['bad_order'])
 
         try:
             self.paginate_by = int(_get('limit', settings.SEARCH_PAGE_LIMIT))
             if not 3 < self.paginate_by < settings.SEARCH_PAGE_LIMIT:
                 self.paginate_by = settings.SEARCH_PAGE_LIMIT
         except:
-            raise Http404(self.error_messages['bad_limit'])
+            raise Http404(errors['bad_limit'])
 
         self.string = string
         self.fields = fields
@@ -215,13 +198,3 @@ class SearchListView(AnimeAjaxListView):
             return self.render_to_response({'cachestr': ''})
         self.check_parameters(request, *args, **kwargs)
         return super(SearchListView, self).get(request, *args, **kwargs)
-
-    #~ @ajaxResponse
-    #~ def ajax(self, request, *args, **kwargs):
-        #~ response = {'response': 'search', 'status': False}
-        #~ try:
-            #~ ret = self.ajax_process(request, *args, **kwargs)
-            #~ response.update({'status': True, 'text': ret})
-        #~ except Http404, e:
-            #~ response['text'] = e
-        #~ return response

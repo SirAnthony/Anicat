@@ -43,7 +43,7 @@ urlpatterns += patterns('',
 
 # History
 urlpatterns += patterns('anime.views.history',
-    url(r'^history/(?:(?P<model>\w+)/)?(?:show/(?P<status>\w)/)?(?:sort/(?P<order>-?\w+)/)?(?:(?P<page>\d+)/)?$',
+    url(r'^history/(?:(?P<model>[a-zA-Z]+)/)?(?:show/(?P<status>\w)/)?(?:sort/(?P<order>-?\w+)/)?(?:(?P<page>\d+)/)?$',
     HistoryListView.as_view(), name='history'),
 )
 

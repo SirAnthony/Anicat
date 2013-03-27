@@ -1,14 +1,23 @@
 
+{% load animefilters %}
 
 <tbody id="tbdid">
+    {{ list.head }}
     {% for row in list %}
         <tr {% if forloop.counter|divisibleby:2 %}class="rs5"{% endif %}>
-        {% for field, value in row.items %}
-            {% if not field == 'action_id' and not field == 'locked' %}
-            <td>{{ value }}</td>
-            {%endif%}
+        {% for header in head %}
+            <td>
+            {% ifequal header 'action_user' %}
+                {% if user.is_staff %}
+                    <a href="{% url 'statistics' row.action_user_id %}/">{{ row.action_user|username }}</a>
+                {% else %}
+                    *
+                {% endif %}
+            {% else %}
+                {{ row|animeitem:header }}
+            {% endifequal %}
+            </td>
         {% endfor %}
-            <td>{{ row.locked }}</td>
         </tr>
     {% endfor %}
 </tbody>

@@ -32,6 +32,12 @@ def get_username(user):
     return 'Anonymous'
 
 
+def get_username_staff(user):
+    if not user.is_staff:
+        return '*'
+    return get_username(user)
+
+
 def latest_status(request, user_id=0):
     try:
         if user_id:

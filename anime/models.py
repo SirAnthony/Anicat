@@ -55,7 +55,6 @@ REQUEST_STATUS = [
     (3, u'Done'),
 ]
 
-
 class Genre(models.Model):
     name = models.CharField(max_length=200, db_index=True, unique=True)
 
@@ -178,9 +177,10 @@ class AnimeItem(models.Model):
 
     class Meta:
         ordering = ["title"]
+        auditlog_properties = ['type', 'release', 'episodes']
 
     def __unicode__(self):
-        if self.id:
+        if self.pk:
             return '%s [%s]' % (self.title, ANIME_TYPES[self.releaseType][1])
         return ''
 
@@ -431,13 +431,20 @@ EDIT_MODELS = {
 HISTORY_MODELS = {
     'anime': AnimeItem,
     #'episode': AnimeEpisode,
-    'bundle': AnimeBundle,
     'name': AnimeName,
     'links': AnimeLink,
     #'organisation': Organisation,
     #'organisationbundle': OrganisationBundle,
     #'people': People,
     #'peoplebundle': PeopleBundle,
+}
+
+AUDIT_FIELDS = ('action_id', 'action_type', 'action_date',
+                'action_user', 'action_ip')
+AUDIT_MODEL_FIELDS = {
+    'anime': ('title', 'episodes', 'duration', 'release', 'type', 'bundle_id',),
+    'name': ('anime', 'title'),
+    'links': ('anime', 'link', 'linkType'),
 }
 
 

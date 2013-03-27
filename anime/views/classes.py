@@ -1,66 +1,28 @@
 
 import urllib
-from hashlib import sha1
+from django.db.models.fields import FieldDoesNotExist
+from django.http import Http404
 from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.list import BaseListView
 from anime.utils import cache
 from anime.utils.paginator import Paginator
 from anime.views.ajax import ajaxResponse
-
-
-class AnimeListFilter(object):
-
-    def __init__(self, data, user):
-        self.user = user
-        if type(data) == dict:
-            self.data = data
-        else:
-            self.data = {}
-
-    def get_cachestring(self, cachestr):
-        return sha1(cachestr + str(self.data)).hexdigest()
-
-    def get_queryset(self, queryset):
-        for key, value in self.data.items():
-            field = getattr(self, key, None)
-            if callable(field):
-                queryset = field(queryset, value)
-            else:
-                filtercase = key + self.get_relation(*value[1:])
-                queryset = queryset.filter(**{filtercase: value[0]})
-        return queryset
-
-    def get_relation(self, relation, equal):
-        if relation in ['__lt', '__gt']:
-            return relation + 'e' * bool(equal)
-        elif equal:
-            return '__exact'
-        return ''
-
-    def releaseType(self, queryset, value):
-        return queryset.filter(releaseType__in=value)
-
-    def genre(self, queryset, value):
-        return queryset.filter(genre__in=value)
-
-    def state(self, queryset, value):
-        return queryset.filter(statusbundles__user=self.user,
-                               statusbundles__state__in=value)
+from anime.views.filter import AnimeListFilter
 
 
 class AnimeListView(TemplateResponseMixin, BaseListView):
 
     http_method_names = ['get']
     paginator_class = Paginator
-    listfilter = None
+    filter_class = AnimeListFilter
 
     def get_queryset(self):
         queryset = super(AnimeListView, self).get_queryset()
-        return self.get_filter().get_queryset(queryset)
+        return self._filter.get_queryset(queryset)
 
     def get_context_data(self, **kwargs):
         (link, cachestr) = self.get_link()
-        cachestr = self.Filter.get_cachestring(cachestr)
+        cachestr = self._filter.get_cachestring(cachestr)
         context = {'cachestr': cachestr, 'link': link}
         if self.updated(cachestr):
             context.update(self.create_context_data(cachestr, link, **kwargs))
@@ -75,16 +37,16 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
         if page_size:
             paginator, page, queryset, is_paginated = self.paginate_queryset(queryset, page_size)
             paginator.set_order(self.order)
-            paginator.set_cachekey(self.Filter.get_cachestring(link['link']))
+            paginator.set_cachekey(self._filter.get_cachestring(link['link']))
             context = {
                 'pages': {'current': page.number,
                     'start': page.start_index(),
                     'count': paginator.num_pages,
                     'items': paginator.get_names(),
                 },
+                'head': self.fields,
                 'list': queryset,
             }
-            ln = len(str(context['list']))
         else:
             context = {'pages': {}, 'list': queryset}
         context.update(kwargs)
@@ -96,11 +58,11 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
         return not cache.latest(self.__class__.__name__, cachestr, keys)
 
     def get_filter(self):
-        if not self.listfilter:
-            self.listfilter = AnimeListFilter(
+        if not hasattr(self, '_listfilter'):
+            self._listfilter = self.filter_class(
                 self.request.session.get('filter', None), self.request.user.id)
-        return self.listfilter
-    Filter = property(get_filter)
+        return self._listfilter
+    _filter = property(get_filter)
 
     def get_link(self):
         "Implementation in subclasses"
@@ -109,6 +71,13 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
     def check_parameters(self, request, *args, **kwargs):
         "Implementation in subclasses"
         raise NotImplementedError
+
+    def check_field(self, model, field, message, fn=None):
+        try:
+            model._meta.get_field(field)
+        except (FieldDoesNotExist, TypeError, AttributeError):
+            if not fn or not fn(field):
+                raise Http404(message)
 
     def get(self, request, *args, **kwargs):
         self.check_parameters(request, *args, **kwargs)
@@ -122,7 +91,7 @@ class AnimeAjaxListView(AnimeListView):
 
     def get_context_data(self, **kwargs):
         (link, cachestr) = self.get_link()
-        cachestr = self.Filter.get_cachestring(cachestr)
+        cachestr = self._filter.get_cachestring(cachestr)
         context = {'link': link}
         if self.updated(cachestr):
             context.update(self.create_context_data(cachestr, link, **kwargs))
@@ -168,12 +137,12 @@ class AnimeAjaxListView(AnimeListView):
 
     def ajax_process(self, request, *args, **kwargs):
         self.check_parameters(request, *args, **kwargs)
+        if not hasattr(self, 'fields'):
+            raise NotImplementedError(_("Fields must be defined."))
         self.object_list = self.get_queryset()
         ret = self.get_context_data(object_list=self.object_list)
-        fields = getattr(self, 'fields', None) or \
-            ['air', 'id', 'title', 'episodes', 'release', 'type']
         ret['list'] = [
-                dict([(name, getattr(x, name)) for name in fields]) \
+                dict([(name, getattr(x, name)) for name in self.fields]) \
                 for x in ret['list'] ]
         return ret
 
