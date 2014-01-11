@@ -1,7 +1,6 @@
 {% extends "anime/base.html" %}
 
 {% load cache %}
-{% load url from future %}
 
     {% block title %} - {% if not anime %}Nothing found{% else %}{{ anime.title }}{% endif %}{% endblock %}
     {% block description %}{% if anime %}Name: {{ anime.title }}. Type: {{ anime.type }}{% endif %}{% endblock %}

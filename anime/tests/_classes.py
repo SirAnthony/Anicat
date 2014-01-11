@@ -34,4 +34,4 @@ class CleanTestCase(TestCase):
             check_response(ret, returns)
         except AssertionError, e:
             raise AssertionError('Error in response check. Data: %s, %s\nOriginal message: %s' % (
-                    ret, returns, e.message))
+                    ret, returns, e))

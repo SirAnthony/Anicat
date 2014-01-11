@@ -23,12 +23,15 @@ class HistoryListView(AnimeAjaxListView):
     }
 
     paginate_by = settings.HISTORY_PAGE_LIMIT
+    pages_numeric = True
     template_name = 'anime/history/history.html'
     cache_name = 'history'
     ajax_cache_name = 'ajaxhistory'
-    ADDITIONAL_FIELDS = []
     response_name = 'history'
+    default_order = '-action_date'
     fields = AUDIT_FIELDS
+    ADDITIONAL_FIELDS = []
+
 
     def get_link(self):
         userid = self.kwargs.get('user_id')
@@ -37,7 +40,7 @@ class HistoryListView(AnimeAjaxListView):
             link['model'] = self.model_name
         if self.status is not None:
             link['status'] = self.status
-        if self.order != 'action_date':
+        if self.order != self.default_order:
             link['order'] = self.order
         link_name = reverse('history', kwargs=link)
         cachestr = u'{0}:{1}{2}'.format(self.current_user.is_staff,
@@ -60,7 +63,7 @@ class HistoryListView(AnimeAjaxListView):
         if status and status.upper() not in HISTORY_STATUSES:
             raise Http404(self.error_messages['bad_status'])
 
-        order = _get('order', '-action_date')
+        order = _get('order', self.default_order)
         order_field = order[1:] if order.startswith('-') else order
         self.check_field(self.model, order_field, self.error_messages['bad_order'],
                             lambda o: o in self.ADDITIONAL_FIELDS)

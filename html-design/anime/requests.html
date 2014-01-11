@@ -1,7 +1,6 @@
 {% extends "anime/base.html" %}
 
 {% load cache %}
-{% load url from future %}
 
 {% block customScripts %}<link rel="stylesheet" href="/static/requests.css" />{% endblock %}
 
@@ -34,17 +33,7 @@
         {% endif %}
     </div>
 {% endfor %}
-{% if pages.items.num_pages > 1 %}
-    <div id="pg">
-        {% for page in pages.items.page_range %}
-            {% ifequal pages.current forloop.counter %}
-                <span id="spanl">[{{ page }}]</span>
-            {% else %}
-                <a href="{{ link.link }}{% ifnotequal forloop.counter 1 %}{{forloop.counter}}/{% endifnotequal %}">{{ page }}</a>
-            {% endifequal %}
-        {% endfor %}
-    </div>
-{% endif %}
+    {% include "anime/base/named_pages.html" %}
 {% endcache %}
 {% else %}
     <div>Pool's closed.</div>

@@ -6,8 +6,8 @@
 
 {% block title %}History{% endblock %}
 
-{% block mainlink %}
-{% endblock %}
+{% block filterlink %}{% endblock %}
+{% block filterform %}{% endblock %}
 
 {% block main %}
 {% cache 0 history cachestr %}
@@ -17,7 +17,7 @@
         <p>Nothing to display.</p>
             {% endif %}
         {% else %}
-            {% url 'index' status=link.status user=link.user as link_order %}
+            {% url 'history' status=link.status model=link.model as link_order %}
         <table id="tbl" cellspacing="0" class="tbl">
             {% include "anime/history/head.html" %}
             {% include "anime/history/body.html" %}

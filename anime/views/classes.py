@@ -4,6 +4,7 @@ from django.db.models.fields import FieldDoesNotExist
 from django.http import Http404
 from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.list import BaseListView
+from django.utils.translation import ugettext_lazy as _
 from anime.utils import cache
 from anime.utils.paginator import Paginator
 from anime.views.ajax import ajaxResponse
@@ -38,13 +39,16 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
             paginator, page, queryset, is_paginated = self.paginate_queryset(queryset, page_size)
             paginator.set_order(self.order)
             paginator.set_cachekey(self._filter.get_cachestring(link['link']))
+            pages = range(1, paginator.num_pages + 1)
+            if not getattr(self, 'pages_numeric', False):
+                pages = paginator.get_names()
             context = {
                 'pages': {'current': page.number,
                     'start': page.start_index(),
                     'count': paginator.num_pages,
-                    'items': paginator.get_names(),
+                    'items': pages,
                 },
-                'head': self.fields,
+                'head': getattr(self, 'fields', None),
                 'list': queryset,
             }
         else:

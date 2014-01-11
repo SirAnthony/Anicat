@@ -16,8 +16,11 @@
     <link href="{{ STATIC_URL }}nanoscroller.css" type="text/css" rel="stylesheet" />
     <link href="{% url 'user_css' %}" type="text/css" rel="stylesheet" />
     <script type="text/javascript" src="/jsi18n/"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}scripts/element/element.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}scripts/script.js"></script>
+    <script data-main="{{ STATIC_URL }}scripts/main" src="{{ STATIC_URL }}scripts/require.js"></script>
 {# chrome cannot into it % compress js % #}
-    <script type="text/javascript" src="{{ STATIC_URL }}js/element.js"></script>
+{% comment %}
     <script type="text/javascript" src="{{ STATIC_URL }}script.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}ajax.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}table.js"></script>
@@ -31,122 +34,44 @@
     <script type="text/javascript" src="{{ STATIC_URL }}statistic.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}calendar.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}DateTimeShortcuts.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}scripts/tests.js"></script>
+{% endcomment %}
 {# % endcompress % #}
-    <script type="text/javascript" src="{{ STATIC_URL }}tests.js"></script>
+    {% comment %}
     {% if not user.is_authenticated %}
         <script type="text/javascript" src="{{ STATIC_URL }}userstorage.js"></script>
     {% endif %}
+    {% endcomment %}
     {% block customScripts %}{% endblock %}
 </head>
 <body>
     <div id="header" class="thdtbl">
         <div class="leftmenu">
             {% block mainlink %}
-            <a href="/">Main</a>
-            <span class="delimiter">|</span>
+                <a href="/">Main</a>
+                <span class="delimiter">|</span>
             {% endblock %}
+
             {% block searchlink %}
-            <a href="{% url 'search' %}" rel="nofollow" onclick="searcher.toggle(); return false;" accesskey="s">Search</a>
-            <span class="delimiter">|</span>
+                <a href="{% url 'search' %}" rel="nofollow" onclick="searcher.toggle(); return false;" accesskey="s">Search</a>
+                <span class="delimiter">|</span>
             {% endblock %}
+
             <a href="{% url 'faq' %}">FAQ</a><span class="delimiter">|</span>
-            <a href="{% url 'card' %}" rel="nofollow">Random</a><span class="delimiter">|</span>
-            <a onclick="Filter.toggle(); return false;">Filter⇣</a>
-    {% if user.is_authenticated %}
-            {% block addLink %}
-            <span class="delimiter">|</span>
-            <a href="{% url 'edit_add' %}" rel="nofollow" onclick="add.toggle(); return false;">Add⇣</a>
+            <a href="{% url 'card' %}" rel="nofollow">Random</a>
+
+            {% block filterlink %}
+                <span class="delimiter">|</span>
+                <a onclick="Filter.toggle(); return false;">Filter⇣</a>
             {% endblock %}
-        </div>
-        <div id="usermenu" class="rightmenu">
-            <span class="delimiter">|</span>
-            <span><a href="{% url 'settings' %}" title="User settings">{% username user %}</a></span>
-            <span class="delimiter">|</span>
-            <a href="{% url 'logout' %}" onclick="user.logout(); return false;">Logout</a>
-        </div>
-        <div class="rightmenu">
-            <a href="{% url 'statistics' %}" onclick="statistics.toggle(); return false;">Statistics⇣</a>
-            {% block selectView %}
-            <span class="delimiter">|</span>
-            <div class="select">
-                <select id="show" onChange="setshow();">
-                {# Это можно в какой-нибудь лист ужать #}
-                    <option value="a">All</option>
-                    <option value="0">None</option>
-                    <option value="1">Want</option>
-                    <option value="2">Now</option>
-                    <option value="3">Watched</option>
-                    <option value="4">Dropped</option>
-                    <option value="5">Partially watched</option>
-                </select>
-                <span>Display Mode&nbsp;&nbsp;⇵</span>
-            </div>
-            {% endblock %}
-        </div>
+        {% include "anime/header.html" %}
     </div>
-    {% else %}
-        </div>
-        <div id="usermenu" class="rightmenu">
-            <a href="#" onclick="statistics.toggle(); return false;">Statistics⇣</a>
-            <span class="delimiter">|</span>
-            <a href="{% url 'login' %}" onclick="return user.toggle();">Account</a>
-        </div>
-    </div>
-    <div id="loginform" class="right">
-        {% loginForm %}
-        <dl>
-            <dd>
-                <form method="POST" action="{% url 'login' %}" id="login" onsubmit="return user.login(event);">
-                    <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
-                    {{ LoginForm.username }}
-                    {{ LoginForm.password }}
-                    <input type="submit" value="Login" />
-                </form>
-            </dd>
-            <dt><a id="register-more" class="inurl" onclick="user.more();">More⇣</a></dt>
-            <dd class="hidden"><p id="logininfo" class="error"></p></dd>
-            <div class="clear"></div>
-        </dl>
-        <dl id="logdvmore" class="right hidden">
-            <dd>
-                <a rel="nofollow" href="{% url 'password_reset' %}" class="inurl right">Restore password</a>
-                <p>
-                {% for name in social_auth.backends.openid %}
-                    {% if  name != "openid" %}
-                    <a rel="nofollow" target="_blank" onclick="return user.alterlogin('{% url 'socialauth_begin' name %}');" class="inurl" href="{% url 'socialauth_begin' name %}">{{ name|title }}</a>
-                    {% endif %}
-                {% endfor %}
-                    <a rel="nofollow" onclick="return user.alterlogin('openid');" class="inurl">OpenID</a>
-                </p>
-            </dd>
-            <dt class="inurl">Login with</dt>
-            <dd class="hidden">
-                <form id="login_openid" action="{% url 'socialauth_begin' 'openid' %}" target="Login" method="post" onsubmit="return user.alterlogin('{% url 'socialauth_begin' 'openid' %}');">
-                    <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
-                    <input id="openid_identifier" type="text" value="" name="openid_identifier" />
-                    <input type="submit" value="Login" />
-                </form>
-            </dd>
-            <dd class="hidden"><p id="socialinfo" class="error"></p></dd>
-            <dd>
-                <form method="POST" action="{% url 'registration' %}" id="register" class="register"  onsubmit="return user.register(event);">
-                    <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
-                    {% for field in RegisterForm %}
-                        {{ field }}
-                    {% endfor %}
-                    <input type="submit" class="clear" value="Register" />
-                    <p class="mainerror error">
-                        {{ RegisterForm.non_field_errors }}
-                    </p>
-                </form>
-            </dd>
-            <dt class="inurl">Registration</dt>
-            <dd class="hidden"><p id="registerinfo" class="error"></dd>
-        </dl>
-    </div>
-    {% endif %}
-    {% block statdiv %}<div id="statistic" class="right"></div>{% endblock %}
-    {% block search %}
+
+{% block statdiv %}
+        <div id="statistic" class="right"></div>
+{% endblock %}
+
+{% block search %}
     <div id="srch" class="hidden">
         <form method="POST" action="{% url 'search' %}" id="srchp" onsubmit="searcher.send(1, event); return false;">
             <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
@@ -155,15 +80,23 @@
         </form>
         <div id="srchres"></div>
     </div>
-    {% endblock %}
-    {% block main %}
-    {% endblock %}
-{% cache 0 filter request.session.session_key %}
-    {% filterForm %}
-    {% include "anime/filter.html" %}
-    {% block filter %}
-    {% endblock %}
-{% endcache %}
+{% endblock %}
+
+
+{% block main %}
+{% endblock %}
+
+
+{% block filterform %}
+    {% cache 0 filter request.session.session_key %}
+        {% filterForm %}
+        {% include "anime/filter.html" %}
+        {% block filter %}
+        {% endblock %}
+    {% endcache %}
+{% endblock %}
+
+
 {% cache 0 footer user.is_authenticated %}
     <div class="cont_men" id="menu"></div>
     <div class="cont_men" id="popup">
@@ -189,4 +122,6 @@
     {% endblock %}
 </body>
 {% endcache %}
+
+
 {% endspaceless %}

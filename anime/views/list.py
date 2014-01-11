@@ -20,6 +20,7 @@ class RequestsListView(AnimeListView):
     paginate_by = settings.REQUESTS_PAGE_LIMIT
     template_name = 'anime/requests.html'
     cache_name = 'requests'
+    pages_numeric = True
 
     def get_link(self):
         link = {}
