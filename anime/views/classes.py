@@ -119,11 +119,19 @@ class AnimeAjaxListView(AnimeListView):
             return True
         return not cache.latest(self.__class__.__name__, cachestr, keys={})
 
+    def get(self, request, *args, **kwargs):
+        if self.ajax_call:
+            return self.ajax_error(request, *args, **kwargs)
+        return super(AnimeAjaxListView, self).get(request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
-        if not self.ajax_call:
-            return self.get(request, *args, **kwargs)
-        else:
+        if self.ajax_call:
             return self.ajax(request, *args, **kwargs)
+        return self.get(request, *args, **kwargs)
+
+    @ajaxResponse
+    def ajax_error(self, request, *args, **kwargs):
+        return {'text': _("Only post method allowed.")}
 
     @ajaxResponse
     def ajax(self, request, *args, **kwargs):

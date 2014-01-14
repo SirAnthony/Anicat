@@ -8,9 +8,9 @@ from anime.models import AnimeItem
 from anime.utils.catalog import last_record_pk
 from random import randint
 
+
 @render_to('anime/card.html')
 def card(request, anime_id=0):
-    anime = None
     if not anime_id:
         anime_id = randint(0, last_record_pk(AnimeItem))
         try:
