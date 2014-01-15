@@ -30,7 +30,7 @@ urlpatterns += patterns('',
     # TODO Split regexp
     url(r'^requests/(?:status/(?P<status>\d+)/)?(?:type/(?P<rtype>\d+)/)?(?:(?P<page>\d+)/)?$',
         RequestsListView.as_view(), name='requests'),
-    url(r'^search/(?:(?P<string>[^/]+)/(?:sort/(?P<order>-?\w+)/)?(?:limit/(?P<limit>\d+)/)?(?:(?P<page>\d+)/)?)?$',
+    url(r'^search/(?:(?P<string>.+?)/(?:sort/(?P<order>-?\w+)/)?(?:limit/(?P<limit>\d+)/)?(?:(?P<page>\d+)/)?)?$',
         SearchListView.as_view(), name='search'),
 )
 
