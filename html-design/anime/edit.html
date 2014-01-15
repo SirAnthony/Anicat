@@ -1,14 +1,14 @@
 {% extends "anime/base.html" %}
 
-    {% block addLink %}
-        {% if model != 'anime' or  id and id != '0' %}
+{% block addLink %}
+    {% if model != 'anime' or  id and id != '0' %}
         <span class="delimiter">|</span>
-        <a href="/add/" rel="nofollow" onclick="add.toggle(); return false;">Add</a>
-        {% endif %}
-    {% endblock %}
+        <a href="/add/" rel="nofollow" class="module-add" data-method="toggle">Add</a>
+    {% endif %}
+{% endblock %}
 
-    {% block addForm %}
-        {% if model != 'anime' or  id and id != '0' %}
+{% block addForm %}
+    {% if model != 'anime' or  id and id != '0' %}
         {% if user.is_authenticated %}
         <form id="addform" class="addform cont_men" action="/add/" method="post" enctype="multipart/form-data" onsubmit="return false;">
             <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
@@ -19,37 +19,37 @@
                 {{ field.errors }}
             </div>
             {% endfor %}
-            <input type="submit" class="right" value="Add" onclick="add.sendForm(event); return false;" />
+            <input type="submit" class="right module-add" data-method="sendForm" value="Add"/>
         </form>
         {% endif %}
-        {% endif %}
-    {% endblock %}
-
-    {% block main %}
-    {% if user.is_authenticated %}
-    {% if not form or not form.fields %}
-    {% if text %}
-    <div>{{ text }}</div>
-    {% else %}
-    <div>Bad parameters passed.</div>
     {% endif %}
-    {% else %}
+{% endblock %}
+
+{% block main %}
+    {% if user.is_authenticated %}
+        {% if not form or not form.fields %}
+            {% if text %}
+    <div>{{ text }}</div>
+            {% else %}
+    <div>Bad parameters passed.</div>
+            {% endif %}
+        {% else %}
     {# Костыли, костыли everywhere #}
     <form class="addform{% if form.fields|length < 2 %} addfrmoc{% endif %}" action="" method="post" enctype="multipart/form-data">
         <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
         <div class="mainerror">
             {{ form.non_field_errors }}
         </div>
-        {% for field in form %}
+            {% for field in form %}
         <div {% if forloop.counter0|divisibleby:2 %}class="clear"{% endif %}>
             {{ field.label_tag }}: {{ field }}
             {{ field.errors }}
         </div>
-        {% endfor %}
+            {% endfor %}
         <input type="submit" class="right" value="Save" />
     </form>
-    {% endif %}
+        {% endif %}
     {% else %}
     <div>Pool's closed.</div>
     {% endif %}
-    {% endblock %}
+{% endblock %}

@@ -15,18 +15,18 @@
     <div id="pagecard">
         <div id="imagebun" class="cardcol">
             <div id="cimg">
-                <img src="http://anicat.net/images/{{ anime.id }}/" />
-                {% if user.is_authenticated %}<a href="/edit/image/{{ anime.id }}/" onclick="return edit.rf({{ anime.id }}, 'image', event);" class="right">Submit new</a>{%endif%}
+                <img src="/images/{{ anime.id }}/" />
+                {% if user.is_authenticated %}<a href="/edit/image/{{ anime.id }}/" class="right module-edit" data-method="rf" data-params='[{{ anime.id }}, "image"]'>Submit new</a>{%endif%}
             </div>
             <div>
             {% if user.is_authenticated %}
-                <a href="/edit/bundle/{% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}0{% endif %}/" onclick="return edit.rf({% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}0{% endif %}, 'bundle', event);" class="right">Edit</a>
+                <a href="/edit/bundle/{{ anime.bundle.id|default=0 }}/" class="right module-edit" data-method="rf" data-params='[{{ anime.bundle.id|default=0 }}, "bundle"]'>Edit</a>
             {%endif%}
                 <h4>Bundled with:</h4>
                 <!-- Это все нужно переверстать -->
-                <table class="bundle{% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}0{% endif %}">
+                <table class="bundle{{ anime.bundle.id|default=0 }}">
                     <tr>
-                        <th><input type="hidden" id="currentid_b_{% if anime.bundle.id %}{{ anime.bundle.id }}{% else %}0{% endif %}" name="currentid" value="{{ anime.id }}" /></th>
+                        <th><input type="hidden" id="currentid_b_{{ anime.bundle.id|default=0 }}" name="currentid" value="{{ anime.id }}" /></th>
                     </tr>
                 {% for item in bundle %}
                     <tr>
@@ -42,38 +42,38 @@
         </div>
         <div id="main" class="cardcol">
             <div>
-                {% if user.is_authenticated %}<a href="/edit/name/{{ anime.id }}/" onclick="return edit.rf({{ anime.id }}, 'name', event);" class="right">Edit</a>{%endif%}
+                {% if user.is_authenticated %}<a href="/edit/name/{{ anime.id }}/" class="right module-edit" data-method="rf" data-params='[{{ anime.id }}, "name"]'>Edit</a>{%endif%}
                 <h4>Name:</h4>
                 <div class="name{{ anime.id }}">{% for name in names %}{% if name.title == anime.title %}<i>{{ name.title }}</i>{% else %}{{ name.title }}{% endif %}<br/>{% endfor %}</div>
             </div>
             <div>
-                {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releaseType/" onclick="return edit.rf({{ anime.id }}, 'type', event);" class="right">Edit</a>{%endif%}
+                {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releaseType/" class="right module-edit" data-method="rf" data-params='[{{ anime.id }}, "type"]'>Edit</a>{%endif%}
                 <h4>Type:</h4>
                 <span class="type{{ anime.id }}">{{ anime.type }}</span>
             </div>
             <div>
-                {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/genre/" onclick="return edit.rf({{ anime.id }}, 'genre', event);" class="right">Edit</a>{%endif%}
+                {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/genre/" class="right module-edit" data-method="rf" data-params='[{{ anime.id }}, "genre"]'>Edit</a>{%endif%}
                 <h4>Genre:</h4>
                 <span class="genre{{ anime.id }}">{{ anime.genre.all|join:", " }}</span>
             </div>
             <div>
-                {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/episodesCount/" onclick="return edit.rf({{ anime.id }}, 'episodesCount', event);" class="right">Edit</a>{%endif%}
+                {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/episodesCount/" class="right module-edit" data-method="rf" data-params='[{{ anime.id }}, "episodesCount"]'>Edit</a>{%endif%}
                 <h4>Episodes:</h4>
                 <span class="episodesCount{{ anime.id }}">{{ anime.episodesCount }}</span>
             </div>
             <div>
-                {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/duration/" onclick="return edit.rf({{ anime.id }}, 'duration', event);" class="right">Edit</a>{%endif%}
+                {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/duration/" class="right module-edit" data-method="rf" data-params='[{{ anime.id }}, "duration"]'>Edit</a>{%endif%}
                 <h4>Duration:</h4>
                 <span class="duration{{ anime.id }}">{{ anime.duration }} min.</span>
             </div>
             <div>
-                {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releasedAt,endedAt/" onclick="return edit.rf({{ anime.id }}, 'release', event);" class="right">Edit</a>{%endif%}
+                {% if user.is_authenticated %}<a href="/edit/anime/{{ anime.id }}/releasedAt,endedAt/" class="right module-edit" data-method="rf" data-params='[{{ anime.id }}, "release"]'>Edit</a>{%endif%}
                 <h4>Released:</h4>
                 <span class="release{{ anime.id }}">{{ anime.release }}</span>
             </div>
             {% if links or user.is_authenticated %}
             <div>
-                {% if user.is_authenticated %}<a href="/edit/links/{{ anime.id }}/" onclick="return edit.rf({{ anime.id }}, 'links', event);" class="right">Edit</a>{%endif%}
+                {% if user.is_authenticated %}<a href="/edit/links/{{ anime.id }}/" class="right module-edit" data-method="rf" data-params='[{{ anime.id }}, "links"]'>Edit</a>{%endif%}
                 <h4>Links:</h4>
                 <span class="links{{ anime.id }}">
                 {% for link in links %}
@@ -83,7 +83,7 @@
             </div>
             {% endif %}
             <div>
-                <a rel="nofollow" href="/edit/state/{{ anime.id }}/" onclick="return edit.rf({{ anime.id }}, 'state', event);" class="right">Edit</a>
+                <a rel="nofollow" href="/edit/state/{{ anime.id }}/" class="right module-edit" data-method="rf" data-params='[{{ anime.id }}, "state"]' class="right">Edit</a>
                 <h4>State:</h4>
                 <p class="state{{ anime.id }}">
                     {% if userstatus.state == 3 %}

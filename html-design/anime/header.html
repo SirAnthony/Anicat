@@ -5,7 +5,7 @@
 
             {% block addLink %}
                 <span class="delimiter">|</span>
-                <a href="{% url 'edit_add' %}" rel="nofollow" onclick="add.toggle(); return false;">Add⇣</a>
+                <a href="{% url 'edit_add' %}" rel="nofollow" class="module-add" data-method="toggle">Add⇣</a>
             {% endblock %}
         </div>
 
@@ -13,17 +13,17 @@
             <span class="delimiter">|</span>
             <span><a href="{% url 'settings' %}" title="User settings">{% username user %}</a></span>
             <span class="delimiter">|</span>
-            <a href="{% url 'logout' %}" onclick="user.logout(); return false;">Logout</a>
+            <a href="{% url 'logout' %}" class="module-user" data-method="logout">Logout</a>
         </div>
 
         <div class="rightmenu">
-            <a href="{% url 'statistics' %}" onclick="statistics.toggle(); return false;">Statistics⇣</a>
+            <a href="{% url 'statistics' %}" class="module-statistics" data-method="toggle">Statistics⇣</a>
             {% block selectView %}
             <span class="delimiter">|</span>
             <div class="select">
-                <select id="show" onChange="setshow();">
+                <select id="show" class="module-utils" data-method="view_status" data-action="Change">
                 {# Это можно в какой-нибудь лист ужать #}
-                    <option value="a">All</option>
+                    <option value="-1">All</option>
                     <option value="0">None</option>
                     <option value="1">Want</option>
                     <option value="2">Now</option>
@@ -41,9 +41,9 @@
         </div>
 
         <div id="usermenu" class="rightmenu">
-            <a href="#" onclick="statistics.toggle(); return false;">Statistics⇣</a>
+            <a href="#" class="module-statistics" data-method="toggle">Statistics⇣</a>
             <span class="delimiter">|</span>
-            <a href="{% url 'login' %}" onclick="return user.toggle();">Account</a>
+            <a href="{% url 'login' %}" class="module-user" data-method="toggle">Account</a>
         </div>
 
     </div>
@@ -52,14 +52,14 @@
         {% loginForm %}
         <dl>
             <dd>
-                <form method="POST" action="{% url 'login' %}" id="login" onsubmit="return user.login(event);">
+                <form method="POST" action="{% url 'login' %}" id="login" class="module-user" data-action="submit" data-method="login">
                     <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
                     {{ LoginForm.username }}
                     {{ LoginForm.password }}
                     <input type="submit" value="Login" />
                 </form>
             </dd>
-            <dt><a id="register-more" class="inurl" onclick="user.more();">More⇣</a></dt>
+            <dt><a id="register-more" class="inurl module-user" data-method="more">More⇣</a></dt>
             <dd class="hidden"><p id="logininfo" class="error"></p></dd>
             <div class="clear"></div>
         </dl>
@@ -69,15 +69,15 @@
                 <p>
                 {% for name in social_auth.backends.openid %}
                     {% if  name != "openid" %}
-                    <a rel="nofollow" target="_blank" onclick="return user.alterlogin('{% url 'socialauth_begin' name %}');" class="inurl" href="{% url 'socialauth_begin' name %}">{{ name|title }}</a>
+                    <a rel="nofollow" target="_blank" class="inurl module-user" data-method="alterlogin" data-params='["{% url 'socialauth_begin' name %}"]' href="{% url 'socialauth_begin' name %}">{{ name|title }}</a>
                     {% endif %}
                 {% endfor %}
-                    <a rel="nofollow" onclick="return user.alterlogin('openid');" class="inurl">OpenID</a>
+                    <a rel="nofollow" class="inurl module-user" data-method="alterlogin" data-params='["openid"]'>OpenID</a>
                 </p>
             </dd>
             <dt class="inurl">Login with</dt>
             <dd class="hidden">
-                <form id="login_openid" action="{% url 'socialauth_begin' 'openid' %}" target="Login" method="post" onsubmit="return user.alterlogin('{% url 'socialauth_begin' 'openid' %}');">
+                <form id="login_openid" action="{% url 'socialauth_begin' 'openid' %}" target="Login" method="post" class="module-user" data-action="submit" data-method="alterlogin" data-params='["{% url 'socialauth_begin' 'openid' %}"]'>
                     <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
                     <input id="openid_identifier" type="text" value="" name="openid_identifier" />
                     <input type="submit" value="Login" />
@@ -85,7 +85,7 @@
             </dd>
             <dd class="hidden"><p id="socialinfo" class="error"></p></dd>
             <dd>
-                <form method="POST" action="{% url 'registration' %}" id="register" class="register"  onsubmit="return user.register(event);">
+                <form method="POST" action="{% url 'registration' %}" id="register" class="register module-user" data-action="submit" data-method="register">
                     <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
                     {% for field in RegisterForm %}
                         {{ field }}

@@ -53,7 +53,7 @@
             {% endblock %}
 
             {% block searchlink %}
-                <a href="{% url 'search' %}" rel="nofollow" onclick="searcher.toggle(); return false;" accesskey="s">Search</a>
+                <a href="{% url 'search' %}" rel="nofollow" class="module-search" data-method="toggle" accesskey="s">Search</a>
                 <span class="delimiter">|</span>
             {% endblock %}
 
@@ -62,7 +62,7 @@
 
             {% block filterlink %}
                 <span class="delimiter">|</span>
-                <a onclick="Filter.toggle(); return false;">Filter⇣</a>
+                <a class="module-filter" data-method="toggle">Filter⇣</a>
             {% endblock %}
         {% include "anime/header.html" %}
     </div>
@@ -73,7 +73,7 @@
 
 {% block search %}
     <div id="srch" class="hidden">
-        <form method="POST" action="{% url 'search' %}" id="srchp" onsubmit="searcher.send(1, event); return false;">
+        <form method="POST" action="{% url 'search' %}" id="srchp" class="module-search" data-action="submit" data-method="send" data-params="[1]">
             <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
             <input id="sin" name="string" type="text"/>
             <input type="submit" value="Search" />
@@ -106,8 +106,7 @@
     {% addForm %}
     {% block addForm %}
     {% if user.is_authenticated %}
-    <form id="addform" class="addform cont_men" action="{% url 'edit_add' %}" method="post" enctype="multipart/form-data"
-        onsubmit="return false;">
+    <form id="addform" class="addform cont_men" action="{% url 'edit_add' %}" method="post" enctype="multipart/form-data" onsubmit="return false;">
         <input type="hidden" value="{{ csrf_token }}" name="csrfmiddlewaretoken">
         <div class="mainerror">{{ AddForm.non_field_errors }}</div>
         {% for field in AddForm %}
@@ -116,7 +115,7 @@
             {{ field.errors }}
         </div>
         {% endfor %}
-        <input type="submit" class="right" value="Add" onclick="add.sendForm(event); return false;" />
+        <input type="submit" class="right module-add" data-method="sendForm" value="Add"/>
     </form>
     {% endif %}
     {% endblock %}

@@ -39,7 +39,7 @@
                     <td class="textleft">min.</td>
                     <td class="num">{{ element.custom|default_if_none:0 }}</td>
                     <td class="textleft">min.</td>
-                    <td>{% if forloop.counter < 6 %}<a target="_blank" class="blacklink" href="/user/{{ userid }}/show/{{forloop.counter}}/" onclick="return loadURIHash(this.href);">↪</a>{% endif %}</td>
+                    <td>{% if forloop.counter < 6 %}<a target="_blank" class="blacklink" href="/user/{{ userid }}/show/{{forloop.counter}}/" class="module-utils" data-method="load_href">↪</a>{% endif %}</td>
                 </tr>
             {% endfor %}
             </tbody>

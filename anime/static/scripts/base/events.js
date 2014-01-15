@@ -42,6 +42,37 @@ define(function() {
                 fn.apply(environ, args);
             else
                 this.add(window, 'load', function(){ fn.apply(environ, args); });
+        },
+
+        add_action: function(module, raw_name, object) {
+            var elements = []
+            if(object){
+                elements.push(object);
+            }else{
+                var name = raw_name.split("/").pop();
+                elements = getElementsByClassName('module-' + name);
+            }
+
+            elements.forEach(function(elem){
+                var method = elem.getAttribute("data-method");
+                if(!method)
+                    return;
+                var action = elem.getAttribute("data-action") || 'click';
+                var params = elem.getAttribute("data-params");
+                params = params ? JSON.parse(params) : [];
+                this.add(elem, action, function(event){
+                    if(!event)
+                        event = window.event;
+                    if(module[method].apply(module,
+                            params.concat(event)) === false){
+                        if(event.preventDefault)
+                            event.preventDefault();
+                        else
+                            event.returnValue = false;
+                        return false;
+                    }
+                })
+            }, this)
         }
     };
 });
