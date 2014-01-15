@@ -13,7 +13,8 @@ define(function(){
 		'has': function(ele, cls){
 			if(!ele.className)
 				return;
-			return ele.className.match(new RegExp('(\\s|^)'+cls+'(\\s|$)'));
+			return ele.className.match(isString(cls) ?
+				new RegExp('(\\s|^)'+cls+'(\\s|$)') : cls);
 		},
 
 		'add': function(ele, cls){
@@ -32,7 +33,8 @@ define(function(){
 			node = node || document;
 			tag = tag || '*';
 			var self = this;
-			return filter(function(el){ self.has(el, searchClass); },
+			var re = RegExp('(\\s|^)'+searchClass+'(\\s|$)');
+			return filter(function(el){ self.has(el, re); },
 				node.getElementsByTagName(tag));
 		}
 	};

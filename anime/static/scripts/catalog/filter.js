@@ -44,6 +44,7 @@ define(['base/events', 'base/ajax', 'base/request_processor'],
         toggle: function(){
             toggle(document.getElementById('id_filter_container'));
             this.scroller.reset();
+            return false;
         },
 
         clear: function(){

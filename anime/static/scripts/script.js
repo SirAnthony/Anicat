@@ -25,6 +25,20 @@ if(!Array.prototype.indexOf){
 }
 
 
+if(!Array.prototype.forEach){
+    Array.prototype.forEach = function(fun, thisp){
+        var len = this.length;
+        if (typeof fun != "function")
+            throw new TypeError();
+
+        for (var i = 0; i < len; i++) {
+            if (i in this)
+                fun.call(thisp, this[i], i, this);
+        }
+    };
+}
+
+
 // Internet Explorer
 isIE = (ua.indexOf("msie") != -1 &&  ua.indexOf("webtv") == -1);
 // Internet Explorer < 8
@@ -234,8 +248,12 @@ function range(start, end){
 }
 
 function extend(oobj){
-    var obj = oobj;
-    var type = typeof obj;
+    var obj = oobj.constructor()
+    var type = typeof oobj
+    for(var attr in oobj)
+        if (oobj.hasOwnProperty(attr))
+            obj[attr] = oobj[attr]
+
     if(arguments.length >= 1)
         for(var i = 1; i < arguments.length; i++){
             var arg = arguments[i];
@@ -249,46 +267,4 @@ function extend(oobj){
 }
 
 
-//######################## URI Hash
-function parseHash(string){
-    var re = new RegExp('^/?((search/([^/]+))|((user/(\\d+)/)?show/(\\d+))?)/(sort/(-?\\w+)/)?((\\d+)/?)?');
-    string = string.replace(/^#?/g, '');
-    var match = re.exec(string);
-    if(!match) return;
-    var request = 'list';
-    var ret = {};
-    var processor = require('catalog/list').processor;
-    if(match[2] && match[3]){
-        request = 'search';
-        ret['string'] = match[3];
-        processor = require('catalog/search').processor;
-    }else if(match[4] && !isUndef(match[7])){
-        ret = extend(ret, {'user': match[6], 'status': match[7]});
-    }
-    ret = extend(ret, {'order': match[9], 'page': match[11]});
-    return [request, ret, processor];
-}
-
-function loadURIHash(string){
-    if(document.location.pathname.match(/^\/search\//))
-        return true;
-    if(!document.getElementById('dvid') && !searcher.loaded)
-        return true;
-    if(string)
-        string = string.replace(/http:\/\/[^\/]+/g,'');
-    var link = parseHash(string ? string : document.location.hash);
-    if(!link || !link[0]) return;
-    var ajax = require('base/ajax');
-    ajax.load.apply(ajax, link);
-    return false;
-}
-
-//######################## Display mode
-function setshow(){
-    var mode = document.getElementById('show').value;
-    if(!mode && !isNumber(mode))
-        return;
-    (mode == 'a') ? mode = '/' : mode = '/show/'+mode+'/';
-    loadURIHash(mode);
-}
 

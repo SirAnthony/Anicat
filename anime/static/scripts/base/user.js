@@ -8,9 +8,9 @@
  *
  */
 
-define(['base/storage', 'base/message', 'base/stylesheet', 'base/ajax',
-    'base/request_processor'],
-    function (catalog_storage, message, stylesheet, ajax, RequestProcessor){
+define(['base/storage', 'base/message', 'base/stylesheet',
+        'base/ajax', 'base/request_processor', 'catalog/utils'],
+function (catalog_storage, message, stylesheet, ajax, RequestProcessor, utils){
 
     var _processor = null;
     var _resize_events = [];
@@ -155,7 +155,7 @@ define(['base/storage', 'base/message', 'base/stylesheet', 'base/ajax',
                             statistics.toggle(); return false; }}},
                     {'span': {className: 'delimiter', innerText: '|'}},
                     {'div': {className: 'select'}}, [
-                        {'select': {id: 'show', onchange: function(){setshow();}}},
+                        {'select': {id: 'show', onchange: utils.view_status}},
                         element.addOption(false, {'a': 'All', '0': 'None', '1': 'Want', '2': 'Now',
                                         '3': 'Watched', '4': 'Dropped', '5': 'Partially watched'}),
                         {'span': {innerText: 'Display Mode\xa0\xa0⇵'}},

@@ -9,29 +9,31 @@
  */
 
 
-define(['base/message', 'base/request_processor', 'base/storage'],
-    function(message, RequestProcessor, catalog_storage){
+define(['base/message', 'base/request_processor', 'base/storage',
+        'base/user', 'catalog/utils'],
+function (message, RequestProcessor, catalog_storage, user, utils){
 
-    var self = {
+    return {
         hrs: null,
         stat: null,
-        processor: new RequestProcessor({'stat': function(resp){
-            if(!this.stat)
-                throw Error('Statistics panel not exists.');
-            message.hide();
-            element.removeAllChilds(this.stat);
-            if(!resp.status)
-                element.appendChild(this.stat, [
-                    {'p': {'className': 'error', 'innerText': 'Error:'}},
-                    map(function(er){
-                        return {'p': {'className': 'error', 'innerText': er}};
-                    }, resp.text)
-                ]);
-            else
-                this.load(resp.text);
-        }}, self),
 
         init: function(){
+            this.processor = new RequestProcessor({'stat': function(resp){
+                if(!this.stat)
+                    throw Error('Statistics panel not exists.');
+                message.hide();
+                element.removeAllChilds(this.stat);
+                if(!resp.status)
+                    element.appendChild(this.stat, [
+                        {'p': {'className': 'error', 'innerText': 'Error:'}},
+                        map(function(er){
+                            return {'p': {'className': 'error', 'innerText': er}};
+                        }, resp.text)
+                    ]);
+                else
+                    this.load(resp.text);
+            }}, this)
+
             this.hrs = element.create('div', {id: 'tohrs',
                     className: 'cont_men', style: {position: 'absolute'}});
             this.stat = document.getElementById("statistic");
@@ -86,8 +88,8 @@ define(['base/message', 'base/request_processor', 'base/storage'],
                             (el.name.toLowerCase() != 'total') ? {'a':
                                 {'target': '_blank', 'className': 'blacklink',
                                 'innerText': '↪', 'href': '/user/' +
-                                    + data.userid + '/show/' + counter +'/',
-                                'onclick': function(){ return loadURIHash(this.href); }}
+                                    data.userid + '/show/' + counter +'/',
+                                'onclick': function(){ return utils.loadURI(this.href); }}
                                 } : null
                         ]);
                     }, data.stat)
@@ -100,7 +102,7 @@ define(['base/message', 'base/request_processor', 'base/storage'],
             if(!this.stat)
                 return;
             element.removeAllChilds(this.stat);
-            if(!catalog_storage.enabled()){
+            if(!catalog_storage.enabled){
                 element.appendChild(this.stat, {'p': {'innerText':
                     'Enable local storage to use catalog anonymously.'}});
                 return;
@@ -108,12 +110,12 @@ define(['base/message', 'base/request_processor', 'base/storage'],
 
             var storage = catalog_storage.items('list');
             var items = new Array(0,0,0,0,0,0,0);
-            for(var i in storage){
-                var n = parseInt(storage[i]);
-                if(n < 1 || n > 6) continue;
+            storage.forEach(function(item){
+                var n = parseInt(item);
+                if(n < 1 || n > 6) return;
                 items[n]++;
                 items[6]++;
-            }
+            });
             var counter = -1;
             var statuses = STATUSES;
             statuses.push("total");
@@ -133,7 +135,6 @@ define(['base/message', 'base/request_processor', 'base/storage'],
             ]);
         },
 
-
         getStat: function(){
             if(user.logined)
                 ajax.load('stat', {}, this.processor);
@@ -149,7 +150,5 @@ define(['base/message', 'base/request_processor', 'base/storage'],
             toggle(this.stat);
         }
     };
-
-    return self;
 });
 

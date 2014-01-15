@@ -43,9 +43,11 @@ define(['base/stylesheet', 'base/events'],
         };
 
         this.enable = function(){
-            if(!this.loaded) return;
+            if (!this.loaded)
+                return false;
             this.enabled = true;
             this.addItem('enabled', true);
+            return true;
         };
 
         this.disable = function(){

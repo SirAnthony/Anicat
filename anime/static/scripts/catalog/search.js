@@ -13,23 +13,29 @@ define(['base/message', 'base/events', 'base/ajax', 'base/request_processor',
     'catalog/table'],
 	function(message, events, ajax, RequestProcessor, table){
 
-    var self = {
+    return {
         init: function(){
             this.sobj = document.getElementById('srch');
             this.result = document.getElementById('srchres');
             this.input = document.getElementById('sin'); //это как-то по другому нужно.
             this.loaded = (this.sobj && this.result && this.input);
+            this.processor = new RequestProcessor({ 'search': function(resp){
+                                    this.putResult(resp.text); }}, this);
+
         },
 
         toggle: function(){
-            if(!this.loaded) return;
+            if(!this.loaded)
+                return true;
             if(toggle(this.sobj))
                 this.input.focus();
+            return false;
         },
 
         send: function(page, e){
-            if(!this.loaded) return;
-            if(!page) page = 1;
+            if(!this.loaded)
+                return;
+            page = page || 1;
             if(this.input.value.length < 3){
                 element.removeAllChilds(this.result);
                 element.appendChild(this.result, [{'p': {
@@ -39,6 +45,7 @@ define(['base/message', 'base/events', 'base/ajax', 'base/request_processor',
                 message.toEventPosition(e);
                 this.loadCall({'string': text}, page);
             }
+            return false;
         },
 
         loadCall: function(link, number, event){
@@ -63,9 +70,4 @@ define(['base/message', 'base/events', 'base/ajax', 'base/request_processor',
             }
         }
     };
-
-    self.processor = new RequestProcessor({'search': function(resp){
-                            this.putResult(resp.text); }}, this);
-
-    return self;
 });

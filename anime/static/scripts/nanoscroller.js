@@ -347,7 +347,7 @@ addEvent(window, 'load', function() {
                 _this.nanoscroller = scrollbar = new NanoScroll(_this, options);
             }
             if (settings && isObject(settings)) {
-                extend(scrollbar.options, settings);
+                scrollbar.options = extend(scrollbar.options, settings);
                 if (settings.scrollBottom)
                     return scrollbar.scrollBottom(settings.scrollBottom);
                 if (settings.scrollTop)
