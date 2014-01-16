@@ -108,9 +108,8 @@ function (message, RequestProcessor, catalog_storage, user, utils){
                 return;
             }
 
-            var storage = catalog_storage.items('list');
             var items = new Array(0,0,0,0,0,0,0);
-            storage.forEach(function(item){
+            catalog_storage.values('list').forEach(function(item){
                 var n = parseInt(item);
                 if(n < 1 || n > 6) return;
                 items[n]++;

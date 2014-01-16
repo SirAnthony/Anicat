@@ -1,12 +1,6 @@
 
 from django.conf import settings
-
-try:
-    from django.conf.urls import patterns, url, include
-except ImportError:
-    # for Django version less then 1.4
-    from django.conf.urls.defaults import patterns, url, include
-
+from django.conf.urls import patterns, url, include
 from django.views.generic.base import TemplateView
 
 from anime.forms.User import NotActivePasswordResetForm

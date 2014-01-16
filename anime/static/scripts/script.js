@@ -29,20 +29,22 @@ if(!Array.prototype.forEach){
     Array.prototype.forEach = function(fun, thisp){
         var len = this.length;
         if (typeof fun != "function")
-            throw new TypeError();
+            throw new TypeError()
 
         for (var i = 0; i < len; i++) {
             if (i in this)
-                fun.call(thisp, this[i], i, this);
+                fun.call(thisp, this[i], i, this)
         }
-    };
+    }
 }
 
+if(!NodeList.prototype.forEach)
+    NodeList.prototype.forEach = Array.prototype.forEach
 
 // Internet Explorer
-isIE = (ua.indexOf("msie") != -1 &&  ua.indexOf("webtv") == -1);
+isIE = (ua.indexOf("msie") != -1 &&  ua.indexOf("webtv") == -1 && parseFloat(navigator.appVersion.split("MSIE")[1]));
 // Internet Explorer < 8
-isOldIE = (isIE && parseFloat(navigator.appVersion.split("MSIE")[1]) < 8);
+isOldIE = (isIE && isIE < 8);
 // Opera
 isOpera = (ua.indexOf("opera") != -1);
 /*  // Gecko = Mozilla + Firefox + Netscape
@@ -239,31 +241,33 @@ function filter(callback, array, environ, forcearray){
 }
 
 function range(start, end){
-    var s = [];
+    var s = []
     if(end >= start){
         for(var i=start; i <= end; i++)
-            s.push(i);
+            s.push(i)
     }
-    return s;
+    return s
 }
 
 function extend(oobj){
-    var obj = oobj.constructor()
-    var type = typeof oobj
+    var obj = oobj ? oobj.constructor() : {}
+    var type = typeof obj
     for(var attr in oobj)
         if (oobj.hasOwnProperty(attr))
             obj[attr] = oobj[attr]
 
     if(arguments.length >= 1)
         for(var i = 1; i < arguments.length; i++){
-            var arg = arguments[i];
-            if(!arg) continue;
+            var arg = arguments[i]
+            if(!arg)
+                continue
             if(typeof arg != type)
-                throw new TypeError('Argument type does not match');
+                throw new TypeError('Argument type does not match')
             for(var name in arg)
-                if(arg.hasOwnProperty(name)) obj[name] = arg[name];
+                if(arg.hasOwnProperty(name))
+                    obj[name] = arg[name]
         }
-    return obj;
+    return obj
 }
 
 

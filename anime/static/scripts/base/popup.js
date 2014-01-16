@@ -15,6 +15,10 @@ define(['base/events', 'base/classes', 'base/message'],
     var _pop = null;
 
     var self = {
+        init: function(){
+            this.addToTable()
+        },
+
         pop: function(){
             if(!_pop)
                 _pop = document.getElementById('popup');

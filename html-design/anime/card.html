@@ -20,13 +20,13 @@
             </div>
             <div>
             {% if user.is_authenticated %}
-                <a href="/edit/bundle/{{ anime.bundle.id|default=0 }}/" class="right module-edit" data-method="rf" data-params='[{{ anime.bundle.id|default=0 }}, "bundle"]'>Edit</a>
+                <a href="/edit/bundle/{{ anime.bundle.id|default:0 }}/" class="right module-edit" data-method="rf" data-params='[{{ anime.bundle.id|default:0 }}, "bundle"]'>Edit</a>
             {%endif%}
                 <h4>Bundled with:</h4>
                 <!-- Это все нужно переверстать -->
-                <table class="bundle{{ anime.bundle.id|default=0 }}">
+                <table class="bundle{{ anime.bundle.id|default:0 }}">
                     <tr>
-                        <th><input type="hidden" id="currentid_b_{{ anime.bundle.id|default=0 }}" name="currentid" value="{{ anime.id }}" /></th>
+                        <th><input type="hidden" id="currentid_b_{{ anime.bundle.id|default:0 }}" name="currentid" value="{{ anime.id }}" /></th>
                     </tr>
                 {% for item in bundle %}
                     <tr>

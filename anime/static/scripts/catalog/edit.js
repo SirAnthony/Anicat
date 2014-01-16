@@ -8,11 +8,15 @@
  *
  */
 
-define(['base/events', 'base/message', 'base/ajax', 'base/request_processor',
-    'catalog/statistics'],
-    function (events, message, ajax, RequestProcessor, statistics){
+define([
+    'base/events', 'base/stylesheet', 'base/message', 'base/user',
+    'base/storage', 'base/ajax', 'base/request_processor',
+    'catalog/forms', 'catalog/statistics'
+],
+function (events, stylesheet, message, user, catalog_storage,
+    ajax, RequestProcessor, forms, statistics){
 
-    var self = (function(){
+    return (function(){
 
         this.status_menu_edit = false;
         this.edits = {'name': '/name', 'bundle': '/bundle',
@@ -102,12 +106,12 @@ define(['base/events', 'base/message', 'base/ajax', 'base/request_processor',
             if(!user.logined && formData.model == 'state'){
                 formData.status = true;
                 if(formData.state)
-                formData.text = {'state': formData.state, 'select': (function(x){
-                    var s = {};
-                    for(var i = 0; i < x.childNodes.length; i++)
-                        s[x.childNodes[i].value] = x.childNodes[i].innerText;
-                    return s;})(document.getElementById('id_state'))
-                };
+                    formData.text = {'state': formData.state, 'select': (function(x){
+                        var s = {};
+                        for(var i = 0; i < x.childNodes.length; i++)
+                            s[x.childNodes[i].value] = x.childNodes[i].innerText;
+                        return s;
+                    })(document.getElementById('id_state'))};
                 delete formData.state;
             }
             return formData;
@@ -342,8 +346,7 @@ define(['base/events', 'base/message', 'base/ajax', 'base/request_processor',
             events.add(elem, 'mouseover', this.showEdit);
             events.add(elem, 'mouseout', this.hideEdit);
         };
-    })();
 
-    events.onload(self.init, self);
-    return self;
+        return this
+    })();
 });

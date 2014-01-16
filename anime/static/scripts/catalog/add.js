@@ -26,6 +26,7 @@ define(['base/events', 'base/ajax', 'base/request_processor', 'catalog/autocomp'
             events.add(document.getElementById('id_releaseType'),
                             'change', this.typeChange);
             this.genreHelperInit();
+
         },
 
         typeChange: function(){

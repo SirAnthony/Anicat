@@ -78,6 +78,14 @@ define(['base/stylesheet', 'base/events'],
             this.interact(function(key){ keys.push(key); }, subkey);
         };
 
+        this.values = function(subkey){
+            if(!this.loaded) return;
+            var vals = [];
+            this.interact(function(key, keyname){
+                vals.push(localStorage[keyname]); }, subkey);
+            return vals;
+        }
+
         this.items = function(subkey){
             if(!this.loaded) return;
             var items = {};

@@ -8,21 +8,27 @@
  *
  */
 
-define(['base/events', 'base/ajax', 'base/request_processor'],
-    function(events, ajax, RequestProcessor){
+define([
+    'base/events', 'base/message', 'base/ajax',
+    'base/request_processor', 'catalog/forms', 'catalog/list',
+    'lib/scroller'
+],
+function (events, message, ajax, RequestProcessor, forms, list, nscroll){
 
-    var self = {
+    return {
         init: function(){
-            this.scroller = createScroll(document.getElementById('id_filter_genre_container'));
-            map(function(el){
+            var container = document.getElementById('id_filter_container')
+            this.scroller = new nscroll(document.getElementById('id_filter_genre_container'))
+
+            getElementsByClassName('nano', container).forEach(function(el){
                 element.insert(el.firstChild, {'a':
                     {'innerText': 'Clear', 'className': 'right',
-                    'onclick': function(){ map(function(o){ o.selected = false; },
-                        this.parentNode.getElementsByTagName('option'))}}});
-                }, getElementsByClassName('nano',
-                    document.getElementById("id_filter_container")));
-            this.errorobj = getElementsByClassName('mainerror',
-                            document.getElementById('id_filter_container'))[0];
+                    'onclick': function(){
+                        this.parentNode.getElementsByTagName('option').forEach(
+                            function(o){ o.selected = false; })}}});
+                }, this);
+
+            this.errorobj = getElementsByClassName('mainerror', container)[0];
 
             this.processor = new RequestProcessor({
                 'filter': function(resp){
@@ -49,29 +55,32 @@ define(['base/events', 'base/ajax', 'base/request_processor'],
 
         clear: function(){
             element.removeAllChilds(this.errorobj);
-            map(function(el){
+            getElementsByClassName('filter', document).forEach(function(el){
                 element.downTree(function _f(elm){
                     if(elm.tagName == "INPUT" || elm.tagName == "SELECT"){
-                        if(elm.type == "text") elm.value = "";
+                        if(elm.type == "text")
+                            elm.value = "";
                         else if(elm.type == "select-multiple")
-                            map(function(opt){ opt.selected = false; }, elm.childNodes);
-                        else if(elm.checked) elm.checked = false;
+                            elm.childNodes.forEach(function(opt){
+                                opt.selected = false })
+                        else if(elm.checked)
+                            elm.checked = false
                     }else
                         element.downTree(_f, elm);
-                }, el)}, getElementsByClassName('filter', document));
+                }, el)
+            }, this);
         },
 
         apply: function(){
-
             element.removeAllChilds(this.errorobj);
             var processed = {}
-            map(function(el){
-                var data = getFormData(el);
+            getElementsByClassName('filter', document).forEach(function(el){
+                var data = forms.getData(el);
                 for(var i in data){
                     if(data.hasOwnProperty(i))
                         processed[i] = data[i];
                 }
-            }, getElementsByClassName('filter', document));
+            }, this);
             ajax.load('filter', processed, this.processor);
         },
 
@@ -83,10 +92,5 @@ define(['base/events', 'base/ajax', 'base/request_processor'],
                             className: 'error', innerText: target + ': '+ error[target][e]}), 1);
             }
         }
-    };
-
-    self.errorobj = null;
-    self.processor = null;
-
-    return self;
+    }
 });

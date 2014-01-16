@@ -42,18 +42,16 @@ define(['base/events', 'base/message', 'base/user', 'base/ajax',
         },
 
         hideEdits: function(p){
-            if(!p) return;
-            if(require.defined('catalog/edit')) return;
-            var h = filter(function(ci) { return ci && ci.tagName == "A"; },
-                            getElementsByClassName('right', p));
-            if(!h.length) return;
-            var edit = require('catalog/edit');
-            for(var el=0; el<h.length; el++){
-                var c = h[el];
-                toggle(c, -1);
-                events.add(c.parentNode, 'mouseover', edit.showEdit);
-                events.add(c.parentNode, 'mouseout', edit.hideEdit);
-            }
+            if(!p) return
+            if(!require.defined('catalog/edit')) return;
+            var edit = require('catalog/edit')
+            var h = filter(function(ci) { return ci && ci.tagName == "A" },
+                            getElementsByClassName('right', p))
+            h.forEach(function(c){
+                toggle(c, -1)
+                events.add(c.parentNode, 'mouseover', edit.showEdit)
+                events.add(c.parentNode, 'mouseout', edit.hideEdit)
+            })
         },
 
         create: function(id, res){

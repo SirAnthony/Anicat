@@ -37,6 +37,13 @@ define(function() {
             }
         },
 
+        emit: function(obj, evType, args, environ) {
+            if(!obj)
+                return false;
+            environ = environ || obj
+            obj["on" + evType].apply(environ, args)
+        },
+
         onload: function(fn, environ, args) {
             if(document.readyState === "complete")
                 fn.apply(environ, args);
