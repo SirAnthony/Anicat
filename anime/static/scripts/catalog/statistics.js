@@ -9,9 +9,9 @@
  */
 
 
-define(['base/message', 'base/request_processor', 'base/storage',
+define(['base/events', 'base/message', 'base/ajax', 'base/request_processor', 'base/storage',
         'base/user', 'catalog/utils'],
-function (message, RequestProcessor, catalog_storage, user, utils){
+function (events, message, ajax, RequestProcessor, catalog_storage, user, utils){
 
     return {
         hrs: null,
@@ -147,6 +147,7 @@ function (message, RequestProcessor, catalog_storage, user, utils){
             if(!this.stat.childNodes.length)
                 this.getStat();
             toggle(this.stat);
+            return false;
         }
     };
 });

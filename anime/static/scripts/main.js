@@ -20,15 +20,19 @@ function (events, user, popup, storage, searcher, statistics,
     card, filter, edit, utils) {
 	'use strict';
 
-    var actions = [];
-
-	function add_init(module, name, skip){
-        if (skip)
+	function init_module(module, name, skip){
+        if (skip && (!isFunction(skip) || skip()))
             return;
-        module = module || require(name);
-        if (module.init)
-            events.onload(module.init, module)
-        actions.push([module, name])
+
+        if (module) {
+            if (module.init)
+                module.init()
+            events.add_action(module, name)
+        } else {
+            require([name], function(mod){
+                init_module(mod, name)
+            })
+        }
 	}
 
     events.onload(storage.init, storage);
@@ -40,18 +44,14 @@ function (events, user, popup, storage, searcher, statistics,
         [card, 'catalog/card'],
         [filter, 'catalog/filter'],
         [edit, 'catalog/edit'],
-        [null, 'catalog/add', !user.logined],
+        [null, 'catalog/add', function() { return !user.logined }],
         [popup, 'base/popup'],
         [utils, 'catalog/utils']
     ]
 
-    modules.forEach(function(module){
-        add_init.apply(this, module)
-    })
-
     events.onload(function(){
-        actions.forEach(function(elem){
-            events.add_action.apply(events, elem);
+        modules.forEach(function(elem){
+            init_module.apply(null, elem)
         });
     })
 

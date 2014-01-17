@@ -43,7 +43,7 @@ function (catalog_storage, message, stylesheet, ajax, RequestProcessor, utils){
                 catalog_storage.enable();
             }
             this.loaded = true;
-            _processor = new RequestProcessor({'login': function(resp){
+            this.processor = new RequestProcessor({'login': function(resp){
                     message.hide();
                     if(resp.status){
                         this.loginSuccess(resp.text);
@@ -81,17 +81,17 @@ function (catalog_storage, message, stylesheet, ajax, RequestProcessor, utils){
         },
 
         login: function(e){
-            if(!this.loaded || user.logined) return true;
+            if(!this.loaded || this.logined) return true;
             toggle(document.getElementById('logininfo').parentNode, -1);
             var rform = document.getElementById('login');
             var formData = getFormData(rform);
-            ajax.load('login', formData, processor);
+            ajax.load('login', formData, this.processor);
             message.toEventPosition(e);
             return false;
         },
 
         alterlogin: function(url){
-            if(!this.loaded || user.logined) return true;
+            if(!this.loaded || this.logined) return true;
             if(url == 'openid'){
                 var l = document.getElementById('login_openid').parentNode;
                 toggle(l);
@@ -118,6 +118,7 @@ function (catalog_storage, message, stylesheet, ajax, RequestProcessor, utils){
         logout: function(){
             if(!this.loaded) return;
             this.logined = false;
+            var self = this;
             var div = document.getElementById('usermenu');
             element.removeAllChilds(div);
             while(div.nextSibling)
@@ -125,7 +126,7 @@ function (catalog_storage, message, stylesheet, ajax, RequestProcessor, utils){
             element.appendChild(div, [{'a': {href: '', innerText: 'Account'}}]);
             element.appendChild(div.parentNode, [{'div': {id: 'loginform'}}, [
                                             {'form': {id: 'login', className: 'thdtbl',
-                                                onsubmit: function(){ user.login(); return false;}}}, [
+                                                onsubmit: function(){ this.login(); return false;}}}, [
                                                 {'input': {id: 'id_username', type: 'text', name: 'username'}},
                                                 {'input': {id: 'id_password', type: 'password', name: 'password'}},
                                                 {'input': {type: 'submit', value: 'Login'}},
@@ -136,9 +137,11 @@ function (catalog_storage, message, stylesheet, ajax, RequestProcessor, utils){
 
         loginSuccess: function(text){
             if(!this.loaded) return;
+            var self = this;
             var form = document.getElementById('usermenu');
             var nick = text.name ? encd(text.name) : '%USERNAME%';
             var loginform = document.getElementById('loginform');
+            var statistics = require('catalog/statistics');
             element.insert(loginform, {'div': {'id': 'statistic', 'className': 'right'}});
             element.remove(loginform);
             element.removeAllChilds(form);
@@ -146,7 +149,7 @@ function (catalog_storage, message, stylesheet, ajax, RequestProcessor, utils){
                 {'span': {className: 'delimiter', innerText: '|'}}, {'span': {}}, [
                     {'a': {'href': '/settings/', title: 'User settings', innerText: nick}}],
                 {'span': {className: 'delimiter', innerText: '|'}},
-                {'a': {href: '/logout/', innerText: 'Logout', onclick: function(){user.logout();}}}
+                {'a': {href: '/logout/', innerText: 'Logout', onclick: function(){self.logout();}}}
             ]);
             element.appendChild(form.parentNode, [
                 {'div': {className: 'rightmenu'}}, [

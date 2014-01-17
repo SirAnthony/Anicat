@@ -8,8 +8,11 @@
  *
  */
 
-define(['base/events', 'base/ajax', 'base/request_processor', 'catalog/autocomp'],
-    function add_class(events, ajax, RequestProcessor, Autocomplete){
+define([
+    'base/events', 'base/message', 'base/ajax',
+    'base/request_processor', 'catalog/autocomp'
+],
+function add_class(events, message, ajax, RequestProcessor, Autocomplete){
 
     var genreImport = null;
 
@@ -65,60 +68,65 @@ define(['base/events', 'base/ajax', 'base/request_processor', 'catalog/autocomp'
             genreImport.ajaxProcessor = function(resp){
                 if(!resp.status) return;
                 var opts = this.node.parentNode.nextSibling.options;
-                map(function(elem){ if(elem) elem.selected = false;}, opts);
-                map(function(g){
+                for(var opt in opts)
+                    if(opts[opt])
+                        opts[opt].selected = false
+                resp.text.genre_list.forEach(function(g){
                     for(var o in opts)
                         if(opts[o] && opts[o].innerText == g){
-                            opts[o].selected = true; break; }
-                    }, resp.text.genre_list);
+                            opts[o].selected = true;
+                            break;
+                        }
+                });
                 toggle(this.node.parentNode);
             };
         },
 
         toggle: function(){
-            if(!this.loaded) return;
-            toggle(this.form);
+            if(!this.loaded) return
+            toggle(this.form)
+            return false
         },
 
         createForm: function(){
             if(this.form)
-                return this.form;
-            return false; // Потом как-нибудь напишу
+                return this.form
+            return false // Потом как-нибудь напишу
         },
 
         clearForm: function(){
             if(!this.form)
-                return;
-            element.remove(getElementsByClassName('error', this.form, 'span'));
-            element.remove(getElementsByClassName('s3', this.form, 'span'));
-            return true;
+                return
+            element.remove(getElementsByClassName('error', this.form, 'span'))
+            element.remove(getElementsByClassName('s3', this.form, 'span'))
+            return true
         },
 
         sendForm: function(e){
             if(!this.loaded)
-                return;
+                return
             if(!!(e.clientX | e.clientY))
-                message.toEventPosition(e);
-            this.clearForm();
-            var formData = getFormData(this.form);
-            ajax.load('add', formData, this.processor);
+                message.toEventPosition(e)
+            this.clearForm()
+            var formData = getFormData(this.form)
+            ajax.load('add', formData, this.processor)
         },
 
         processResponse: function(resp){
-            message.hide();
+            message.hide()
             if(!resp.status){
-                this.processError(resp.text);
+                this.processError(resp.text)
             }else{
                 if(this.clearForm()){
                     element.insert(this.form.lastChild, {'span':
-                        {className: 's3', innerText: 'Added'}});
+                        {className: 's3', innerText: 'Added'}})
                     if(isNumber(resp.id)){
                         if(Card.get(resp.id))
-                            window.location.replace('/card/' + resp.id + '/');
+                            window.location.replace('/card/' + resp.id + '/')
                         else
-                            this.toggle();
+                            this.toggle()
                     }else{
-                        window.location.replace('/');
+                        window.location.replace('/')
                     }
                 }
             }
@@ -126,20 +134,20 @@ define(['base/events', 'base/ajax', 'base/request_processor', 'catalog/autocomp'
 
         processError: function(error){
             if(!this.loaded)
-                return;
+                return
             for(var target in error){
-                if(!target) continue;
-                var obj = null;
+                if(!target) continue
+                var obj = null
                 if(target == '__all__'){
-                    obj = element.create('div', {className: 'mainerror'});
-                    element.insert(this.form.firstChild, obj);
+                    obj = element.create('div', {className: 'mainerror'})
+                    element.insert(this.form.firstChild, obj)
                 }else{
-                    obj = document.getElementById('id_'+target);
+                    obj = document.getElementById('id_'+target)
                 }
-                if(!obj) continue;
+                if(!obj) continue
                 for(var e in error[target]){
                     element.insert(obj, element.create('span', {
-                            className: 'error left', innerText: error[target][e]}), 1);
+                        className: 'error left', innerText: error[target][e]}), 1)
                 }
             }
         }
