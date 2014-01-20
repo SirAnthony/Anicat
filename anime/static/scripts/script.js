@@ -142,9 +142,6 @@ var jsonToString = function(obj){
     return obj;
 }
 
-
-
-
 function toggle(elem, force){
     if(elem){
         if((!force && elem.style.display == 'block') || force < 0){

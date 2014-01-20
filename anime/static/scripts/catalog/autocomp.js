@@ -56,18 +56,7 @@ define(['base/events', 'base/classes', 'base/message', 'base/ajax', 'base/reques
         }
 
         this.keyevent = function(event){
-            if(!event) event = window.event
-            var prevent = function(e){
-                if(e.preventDefault)
-                    e.preventDefault()
-                else
-                    e.returnValue = false
-                if(e.stopPropagation)
-                    e.stopPropagation()
-                else
-                    e.cancelBubble = true
-                return false
-            }
+            event = event || window.event
             switch(event.keyCode){
                 case 38: // up
                     if(this.visible()) this.moveSelection(-1)
@@ -89,7 +78,7 @@ define(['base/events', 'base/classes', 'base/message', 'base/ajax', 'base/reques
                         this.opts.delay)
                 break
             }
-            return prevent(event)
+            return events.stop(event)
         }
 
         this.show = function(){

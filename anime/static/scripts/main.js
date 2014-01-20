@@ -3,8 +3,14 @@ require.config({
         base: 'base',
         catalog: 'catalog',
         lib: 'lib',
-        tests: 'tests'
+        tests: 'tests',
+        calendar: 'lib/calendar'
     },
+    shim: {
+        calendar: {
+            exports: 'Calendar'
+        }
+    }
     //urlArgs: "bust=" + (new Date()).getTime()
 });
 
@@ -14,10 +20,11 @@ require([
 	'base/events', 'base/user', 'base/popup',
     'base/storage', 'catalog/search', 'catalog/statistics',
     'catalog/card', 'catalog/filter', 'catalog/edit',
-    'catalog/utils',
+    'catalog/utils', 'catalog/datetime'
 ],
 function (events, user, popup, storage, searcher, statistics,
-    card, filter, edit, utils) {
+          card, filter, edit, utils, datetime) {
+
 	'use strict';
 
 	function init_module(module, name, skip){
@@ -46,7 +53,8 @@ function (events, user, popup, storage, searcher, statistics,
         [edit, 'catalog/edit'],
         [null, 'catalog/add', function() { return !user.logined }],
         [popup, 'base/popup'],
-        [utils, 'catalog/utils']
+        [utils, 'catalog/utils'],
+        [datetime, 'catalog/datetime']
     ]
 
     events.onload(function(){

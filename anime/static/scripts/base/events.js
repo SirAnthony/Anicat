@@ -44,6 +44,19 @@ define(function() {
             obj["on" + evType].apply(environ, args)
         },
 
+        stop: function(event) {
+            event = event || window.event
+            if(event.preventDefault)
+                event.preventDefault();
+            else
+                event.returnValue = false;
+            if(event.stopPropagation)
+                event.stopPropagation();
+            else
+                event.cancelBubble = true;
+            return false;
+        },
+
         onload: function(fn, environ, args) {
             if(document.readyState === "complete")
                 fn.apply(environ, args);
@@ -67,16 +80,12 @@ define(function() {
                 var action = elem.getAttribute("data-action") || 'click';
                 var params = elem.getAttribute("data-params");
                 params = params ? JSON.parse(params) : [];
+                var self = this;
                 this.add(elem, action, function(event){
-                    if(!event)
-                        event = window.event;
+                    event = event || window.event;
                     if(module[method].apply(module,
                             params.concat(event)) === false){
-                        if(event.preventDefault)
-                            event.preventDefault();
-                        else
-                            event.returnValue = false;
-                        return false;
+                        return self.stop(event);
                     }
                 })
             }, this)

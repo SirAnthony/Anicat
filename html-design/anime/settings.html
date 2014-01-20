@@ -2,11 +2,10 @@
 
 {% load animetemplates %}
 {% load cache %}
-{% load url from future %}
 
     {% block customScripts %}
-    <link rel="stylesheet" href="/static/requests.css" />
-    <script type="text/javascript" src="/static/settings.js"></script>
+    <link rel="stylesheet" href="{{ STATIC_URL }}requests.css" />
+    <script type="text/javascript" src="{{ STATIC_URL }}scripts/settings.js"></script>
     {% endblock %}
 
     {% block main %}
@@ -123,7 +122,7 @@
         {% if requestTypes %}
         <div class="right select">
             <select id="requestDisplay">
-                <option value="all" selected="selected">All</option>
+                <option value="-1" selected="selected">All</option>
                 {% for opt in requestTypes %}
                     <option value="{{ opt.0 }}">{{ opt.1 }}</option>
                 {% endfor %}
@@ -133,7 +132,7 @@
         {% endif %}
         <h4>Requests:</h4>
         {% for request in requests %}
-        <div class="request request{{ request.requestType }}">
+        <div class="request" data-request="{{ request.requestType }}">
             <span class="right"><b>Status:</b>{{ request.get_status_display }}</span>
             <span><b>№:</b><a href="{% url 'request_item' request.id %}">{{ request.id }}</a></span>
             <span><b>Type:</b>{{ request.get_requestType_display }}</span>

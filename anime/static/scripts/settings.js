@@ -9,26 +9,17 @@
  */
 
 function hideType(){
-    var sel = document.getElementById("requestDisplay");
-    var selected = element.getSelected(sel);
-    var elements = sel.options;
-    if(sel.options[selected].value == 'all'){
-        var divs = getElementsByClassName('request', sel.parentNode.parentNode, 'div');
-        for(var elem; elem < divs.length; elem++)
-            toggle(divs[elem], 1);
-    }else{
-        selected -= 1;
-        for(var i=0; i<elements.length; i++){
-            var divs = getElementsByClassName('request'+i, sel.parentNode.parentNode, 'div')
-            for(var elem; elem < divs.length; elem++)
-                toggle(divs[elem], (i == selected ? 1 : -1));
-        }
-    }
-
+    var sel = document.getElementById("requestDisplay")
+    var selected = element.getSelected(sel)
+    var value = sel.options[selected].value
+    var divs = getElementsByClassName('request', sel.parentNode.parentNode, 'div')
+    divs.forEach(function(div) {
+        var type = div.getAttribute("data-request")
+        toggle(div, (value < 0 || value == type) ? 1 : -1)
+    })
 }
 
-function settingsInit(){
-    addEvent(document.getElementById("requestDisplay"), 'change', hideType);
-}
-
-addEvent(window, 'load', settingsInit);
+require(['base/events'], function (events){
+    events.onload(events.add, events, [
+            document.getElementById("requestDisplay"), 'change', hideType])
+})

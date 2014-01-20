@@ -29,14 +29,16 @@ var CalendarNamespace = {
 }
 
 // Calendar -- A calendar instance
-function Calendar(inp, div_id, callback) {
+function Calendar(inp, div_id, callback, callback_close) {
     // div_id (string) is the ID of the element in which the calendar will
     //   be displayed
     // callback (string) is the name of a JavaScript function that will be
     //   called with the parameters (year, month, day) when a day in the
     //   calendar is clicked
+    var self = this;
     this.div_id = div_id;
     this.callback = callback;
+    this.dismiss = function () { callback_close.apply(self, arguments) }
     this.input = inp
     this.today = new Date();
     this.currentMonth = this.today.getMonth() + 1;
@@ -44,6 +46,10 @@ function Calendar(inp, div_id, callback) {
 }
 
 Calendar.prototype = {
+    block: function() {
+        return  document.getElementById(this.div_id)
+    },
+
     draw: function(month, year, div_id, callback) { // month = 1-12, year = 1-9999
         var today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -66,6 +72,7 @@ Calendar.prototype = {
         var row;
         var currentDay = 1;
         var currentDate = new Date(year, month-1, currentDay);
+        var self = this;
         for(var i = 0; currentDay <= days; i++){
             currentDate.setDate(currentDay);
             var todayClass = '';
@@ -87,7 +94,7 @@ Calendar.prototype = {
                         {'a': {
                             innerText: currentDay,
                             onclick: (function(callback, year, month, currentDay){
-                                    return function(){ callback(year, month, currentDay); }
+                                    return function(){ callback.call(self, year, month, currentDay); }
                                 })(callback, year, month, currentDay)
                         }}
                     ]

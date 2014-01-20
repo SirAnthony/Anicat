@@ -18,30 +18,7 @@
     <script type="text/javascript" src="/jsi18n/"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}scripts/element/element.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}scripts/script.js"></script>
-    <script data-main="{{ STATIC_URL }}scripts/main" src="{{ STATIC_URL }}scripts/require.js"></script>
-{# chrome cannot into it % compress js % #}
-{% comment %}
-    <script type="text/javascript" src="{{ STATIC_URL }}script.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}ajax.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}table.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}nanoscroller.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}filter.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}forms.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}user.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}ae.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}card.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}app.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}statistic.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}calendar.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}DateTimeShortcuts.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}scripts/tests.js"></script>
-{% endcomment %}
-{# % endcompress % #}
-    {% comment %}
-    {% if not user.is_authenticated %}
-        <script type="text/javascript" src="{{ STATIC_URL }}userstorage.js"></script>
-    {% endif %}
-    {% endcomment %}
+    <script data-main="{{ STATIC_URL }}scripts/main" src="{{ STATIC_URL }}scripts/lib/require.js"></script>
     {% block customScripts %}{% endblock %}
 </head>
 <body>

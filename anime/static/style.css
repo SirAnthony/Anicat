@@ -505,13 +505,13 @@ select.linktype {
 
 .calendarbox {
     border-color: #B0B0B0;
-    background-color: #D4D0C8;
+    background-color: #EAE8DF;
     padding: 5px;
 }
 
 .calendarbox caption {
     width: 100%;
-    margin-left: -30px;
+    display: block;
 }
 
 .calendarbox a, .datetimeshortcuts a {
@@ -520,7 +520,8 @@ select.linktype {
 }
 
 .calendar-shortcuts a, .calendar-shortcuts a:hover {
-    font-size: 11pt;
+    font-size: 10pt;
+    padding: 0 6px;
 }
 
 .calendarbox td {
