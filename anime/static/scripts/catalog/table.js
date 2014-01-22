@@ -8,7 +8,7 @@
  *
  */
 
-define(['base/popup'], function(popup){
+define(['base/popup', 'catalog/utils'], function(popup, utils){
 
     var shortnames = {'type': 'releaseType', 'release': 'releasedAt',
                        'episodes': 'episodesCount'}
@@ -97,16 +97,14 @@ define(['base/popup'], function(popup){
                         {'td': {'id': 'link' + elem.id, className: 'link'}}, [
                             {'a': {className: 'cardurl', 'target': '_blank',
                                 'href': '/card/'+elem.id+'/',
-                                onclick: ( function(id){
-                                            return function(e){return Card.get(id, e)}
-                                        })(elem.id)}}, [
+                                onclick: function(e){
+                                    return Card.get(elem.id, e) }}}, [
                                 {'img': {'src': '/static/arrow.png', 'alt': 'Go'}},
                             ]
                         ],
                         {'td': {'id': 'id' + elem.id, className: 'id',
-                            onclick: ( function(i, j){
-                                            return function(e){ cnt(i, j, e) }
-                                        })('id', elem.id),
+                            onclick: function(e){
+                                return utils.cnt('id', elem.id, e) },
                             innerText: Number(i) + first }},
                         ])
                 rows.push(row)
@@ -144,7 +142,7 @@ define(['base/popup'], function(popup){
 
         cell_default: function(id, name, data){
             return {'td': {'id': name + id, className: name,
-                onclick: function(e){ return cnt(name, id, e) },
+                onclick: function(e){ return utils.cnt(name, id, e) },
                 innerText: encd(data) }}
         },
 

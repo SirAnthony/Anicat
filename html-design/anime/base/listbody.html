@@ -8,11 +8,11 @@
                 <img alt="Go" src="/static/arrow.png">
             </a>
         </td>
-        <td onclick="cnt('id', '{{ title.id }}', event);" id="id{{ title.id }}" class="id">{{ forloop.counter0|add:pages.start }}</td>
-        <td onclick="cnt('title', '{{ title.id }}', event);" id="title{{ title.id }}" class="title">{{ title.title }}</td>
-        <td onclick="cnt('episodes', '{{ title.id }}', event);" id="episodes{{ title.id }}" class="episodes">{% if title.count %}{{ title.count }}/{% endif %}{{ title.episodesCount }}</td>
-        <td onclick="cnt('release', '{{ title.id }}', event);" id="release{{ title.id }}" class="release">{{ title.release }}</td>
-        <td onclick="cnt('type', '{{ title.id }}', event);" id="type{{ title.id }}" class="type">{{ title.type }}</td>
+        <td id="id{{ title.id }}" class="id module-utils" data-method="cnt" data-params='["id", {{ title.id }}]'>{{ forloop.counter0|add:pages.start }}</td>
+        <td id="title{{ title.id }}" class="title module-utils" data-method="cnt" data-params='["title", {{ title.id }}]'>{{ title.title }}</td>
+        <td id="episodes{{ title.id }}" class="episodes module-utils" data-method="cnt" data-params='["episodes", {{ title.id }}]'>{% if title.count %}{{ title.count }}/{% endif %}{{ title.episodesCount }}</td>
+        <td id="release{{ title.id }}" class="release module-utils" data-method="cnt" data-params='["release", {{ title.id }}]'>{{ title.release }}</td>
+        <td id="type{{ title.id }}" class="type module-utils" data-method="cnt" data-params='["type", {{ title.id }}]'>{{ title.type }}</td>
         {% if link.status %}
         <td id="changed{{title.id}}" class="changed">{{ title.changed|date:"d.m.Y" }}</td>
             {% if link.status == 3 %}

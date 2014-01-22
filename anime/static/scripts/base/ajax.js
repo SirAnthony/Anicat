@@ -15,87 +15,87 @@ define(['base/cookies', 'base/request_processor'],
 
     function AjaxClass(){
 
-        var defaultProcessor = new RequestProcessor({});
-        this.url = '/ajax/';
+        var defaultProcessor = new RequestProcessor({})
+        this.url = '/ajax/'
 
         //################# Вызов аяксового обьекта.
         this.loadXMLDoc = function(url, qry, processor){
 
             if(!isHash(processor) || !isFunction(processor.process))
-                processor = defaultProcessor;
+                processor = defaultProcessor
 
-            var xmlHttp = null;
+            var xmlHttp = null
             if(window.XMLHttpRequest){
                 try{
-                    xmlHttp = new XMLHttpRequest();
+                    xmlHttp = new XMLHttpRequest()
                 }catch(e){}
             }else if(window.ActiveXObject){
                 try{
-                    xmlHttp = new ActiveXObject('Msxml2.XMLHTTP');
+                    xmlHttp = new ActiveXObject('Msxml2.XMLHTTP')
                 }catch(e){
                     try{
-                        xmlHttp = new ActiveXObject('Microsoft.XMLHTTP');
+                        xmlHttp = new ActiveXObject('Microsoft.XMLHTTP')
                     }catch(e){}
                 }
             }
-            processor.setRequest();
 
-            var data = makeRequest(url, qry);
+            processor.setRequest()
+            var data = makeRequest(url, qry)
 
             if(data.request){
                 if (xmlHttp){
-                    xmlHttp.open("POST", this.url + url + '/', true);
-                    xmlHttp.onreadystatechange = processor.process;
-                    xmlHttp.setRequestHeader("Content-type", "multipart/form-data; boundary=" + data.boundary);
-                    xmlHttp.send(data.request);
+                    xmlHttp.open("POST", this.url + url + '/', true)
+                    xmlHttp.onreadystatechange = processor.process
+                    xmlHttp.setRequestHeader("Content-type",
+                            "multipart/form-data; boundary=" + data.boundary)
+                    xmlHttp.send(data.request)
                 }
             }
-        };
+        }
 
         var makeRequest = function(url, qry){
-            var request = '';
+            var request = ''
 
             if(!(/^http:.*/.test(url) || /^https:.*/.test(url)))
-                qry['csrfmiddlewaretoken'] = cookies.get('csrftoken');
+                qry['csrfmiddlewaretoken'] = cookies.get('csrftoken')
 
-            var boundary = '-----------' + parseInt(Math.random()*1000000000000);
+            var boundary = '-----------' + parseInt(Math.random()*1000000000000)
 
             var makePostData = function(name, value){
-                var crlf = '\r\n';
-                var s = '--' + boundary + crlf;
-                s += 'Content-Disposition: form-data; name="' + name + '"';
+                var crlf = '\r\n'
+                var s = '--' + boundary + crlf
+                s += 'Content-Disposition: form-data; name="' + name + '"'
                 // isFile
                 if(value !== null && typeof value == "object" &&
                         'lastModifiedDate' in value && 'name' in value){
-                    throw Error('This is not supported yet. Use static uploading.');
-                    //~ s += '; filename="' + value.name + '"' + crlf;
-                    //~ s += 'Content-Type: application/octet-stream' + crlf;
-                    //~ var reader = new FileReader();
-                    //~ reader.readAsBinaryString(value);
-                    //~ s += crlf + reader.result + crlf;
+                    s += '; filename="' + value.name + '"' + crlf
+                    s += 'Content-Type: application/octet-stream' + crlf
+                    var reader = new FileReader()
+                    reader.readAsBinaryString(value)
+                    s += crlf + reader.result + crlf
                 }else{
-                    s += crlf + crlf + (!isString(value) ? jsonToString(value) : value) + crlf;
+                    s += crlf + crlf + (!isString(value) ? jsonToString(value) : value) + crlf
                 }
-                return s;
-            };
+                return s
+            }
 
             for(var item in qry){
-                if(!item || !qry[item]) continue;
-                if(isArray(qry[item])){
-                    for(var i=0; i<qry[item].length; i++)
-                        request += makePostData(item, qry[item][i]);
-                }else{
-                    request += makePostData(item, qry[item]);
-                }
+                if(!item || !qry[item])
+                    continue
+                if(isArray(qry[item]))
+                    request += map(function(itm) {
+                        return makePostData(item, itm) }).join('')
+                else
+                    request += makePostData(item, qry[item])
             }
-            request += '--' + boundary + '--';
+            request += '--' + boundary + '--'
 
-            return {'request': request, 'boundary': boundary};
-        };
+            return {'request': request, 'boundary': boundary}
+        }
     }
 
-    var ajax = new AjaxClass();
-    AjaxClass.prototype.load = ajax.loadXMLDoc;
+    var ajax = new AjaxClass()
+    AjaxClass.prototype.load = ajax.loadXMLDoc
 
-    return ajax;
-});
+    return ajax
+})

@@ -14,6 +14,7 @@ require.config({
     //urlArgs: "bust=" + (new Date()).getTime()
 });
 
+var DEBUG = true
 
 // Start the main app logic.
 require([
@@ -54,14 +55,13 @@ function (events, user, popup, storage, searcher, statistics,
         [null, 'catalog/add', function() { return !user.logined }],
         [popup, 'base/popup'],
         [utils, 'catalog/utils'],
-        [datetime, 'catalog/datetime']
+        [datetime, 'catalog/datetime'],
+        [null, 'tests/tests', function() { return !DEBUG }],
     ]
 
     events.onload(function(){
-        modules.forEach(function(elem){
-            init_module.apply(null, elem)
-        });
+        modules.forEach(function(elem){ init_module.apply(null, elem) })
     })
 
-    events.onload(utils.loadURI);
+    events.onload(utils.loadURI)
 });

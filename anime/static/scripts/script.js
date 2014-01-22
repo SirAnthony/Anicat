@@ -160,45 +160,6 @@ function visible(elem){
     return false;
 }
 
-//################# Get menu with info
-
-function cnt(tag, num, e){
-
-    if(!e) var e = window.event;
-    e.cancelBubble = true;
-    if(e.stopPropagation) e.stopPropagation();
-    message.toEventPosition(e);
-    var qw = {'id': num}
-    switch (tag){
-        case 'title':
-            qw['field'] = ['name', 'genre', 'links'];
-        break;
-        case 'episodes':
-            qw['field'] = ['bundle', 'duration'];
-        break;
-        case 'id':
-            edit.status_menu_edit = true; //Fuuu
-            return edit.rf(num, 'state', e);
-        break;
-        default:
-            qw['field'] = tag;
-    }
-    ajax.load('get', qw, new RequestProcessor({
-        'get': function(resp){
-        message.create();
-        for(var i in resp.text.order){
-            var curname = resp.text.order[i];
-            if(!curname || !resp.text[curname]) continue;
-            var current = resp.text[curname];
-            message.addTree(element.create('label', { 'for': curname + resp.id,
-                            innerText: capitalise(curname) + ':'}));
-            message.addTree(forms.getField(curname, resp.id, current));
-        }
-        message.show();
-        }}));
-
-}
-
 
 // Additional functions
 

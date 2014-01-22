@@ -8,135 +8,151 @@
  *
  */
 
- define(['base/request_processor', 'tests/status', 'tests/Tests'],
-    function(RequestProcessor, StatusManager, Tests){
+ define(['base/events', 'base/request_processor', 'tests/status'],
+    function(events, RequestProcessor, StatusManager){
 
     function TestRunner(tests, prepare, wait){
 
-        this.timer = null;
-        this.timeout = 1000;
-        this.stack = [];
-        this.tests = tests;
-        this.prepare = {};
-        this.results = [];
-        this.waitBefore = wait;
+        this.timer = null
+        this.timeout = 1000
+        this.stack = []
+        this.tests = tests
+        this.prepare = {}
+        this.results = []
+        this.waitBefore = wait
 
         var onclick_call = function(_this){
-            return function(e){
-                e.stopPropagation && e.stopPropagation();
-                e.cancelBubble = true;
-                _this.process.call(_this);
-            };
-        };
+            if(!_this.callback.condition)
+                return false
+            var params = _this.callback.target
+            events.add(params[0], params[1], function(e){
+                events.stop(e)
+                _this.process.call(_this)
+                events.remove(params[0], params[1], arguments.callee)
+            })
+            return true
+        }
 
+        var wraps = 0
+        var old_proto = RequestProcessor.prototype._catch
+        this.wrap_request = function(){
+            wraps++
+            var _runner = this
+            RequestProcessor.prototype._catch = function(e){
+                _runner.results.push(['Ajax', false, e.toString()])
+                if (!(--wraps))
+                    RequestProcessor.prototype._catch = old_proto
+            }
+        }
 
-        this.ajax_call = function(){
-            var _runner = this;
-            return function(e){
-                _runner.results.push(['Ajax', false, e.toString()]);
-                RequestProcessor.prototype._catch = function(){ };
-            };
-        };
+        if(tests._init){
+            this._setup = tests._init
+            tests._init = undefined
+        }
 
         for(var t in prepare){
             if(!isArray(prepare[t]))
-                continue;
+                continue
             this.prepare[t] = filter((function(tests){
                 return function(el){
                     if(isNumber(el) || tests[el] || prepare[el])
-                        return true;
+                        return true
                     else
-                        throw Error('Test ' + e + 'not found in ' + tests + '.');
-                };
-            })(this.tests), prepare[t]);
+                        throw Error('Test ' + e + 'not found in ' + tests + '.')
+                }
+            })(this.tests), prepare[t])
         }
 
+        this.setup = function(name, callback) {
+            this._callback = callback
+            try {
+                if(this._setup)
+                    this._setup()
+                return true
+            } catch(e) {
+                this.results.push([name, false, 'Setup phase:' + e.toString()])
+            }
+            return false
+        }
+
+        this.teardown = function() { }
 
         this.run = function(name){
-            var test = null;
+            var tests = {}
             if(name)
-                test = this.tests[name];
+                tests[name] = this.tests[name]
             else
-                test = this.tests;
-            var pn = this.prepare[name];
-            if(pn){
-                for(var pname in pn)
-                    this.run(pn[pname]);
+                tests = this.tests
+            for (var testname in tests){
+                var test = tests[testname]
+                var prepare = this.prepare[testname] || []
+                prepare.forEach(this.run, this)
+                if(isFunction(test) || isNumber(test))
+                    this.stack.push([name, test])
+                if(!this.waitBefore || !onclick_call(this))
+                    this.nextTimer()
             }
-            if(isFunction(test) || isNumber(test))
-                this.stack.push([name, test]);
-            if(this.waitBefore && Tests.break_after && Tests.continue_bt)
-                Tests.continue_bt.onclick = onclick_call(this);
-            else
-                this.nextTimer();
-        };
+        }
 
         this.nextTimer = function(timeout){
-            var _this = this;
-            this.timer = setTimeout(function(){ _this.process.call(_this); },
-                (isNumber(timeout) ? timeout : this.timeout));
-        };
+            var _this = this
+            this.timer = setTimeout(function(){ _this.process.call(_this) },
+                (isNumber(timeout) ? timeout : this.timeout))
+        }
 
         this.process = function(){
-            clearTimeout(this.timer);
-            this.timer = null;
+            clearTimeout(this.timer)
+            this.timer = null
             if(StatusManager.status > 0)
-                return this.nextTimer(func);
+                return this.nextTimer(func)
             if(StatusManager.status < 0)
-                return;
-            var func = this.stack.shift();
+                return
+            var func = this.stack.shift()
             if(!func)
-                return;
+                return
             if(isArray(func) && isFunction(func[1]))
-                StatusManager.take();
+                StatusManager.take()
                 try{
-                    RequestProcessor.prototype._catch = this.ajax_call();
-                    func[1].call(this);
-                    if(!Tests.ajax_calls.length){
-                        // Return old prototype if not needed;
-                        RequestProcessor.prototype._catch = function(){};
-                    }
-                    this.results.push([func[0], true]);
+                    this.wrap_request()
+                    func[1].call(this)
+                    this.results.push([func[0], true])
                 }catch(e){
-                    this.results.push([func[0], false, e.toString()]);
+                    this.results.push([func[0], false, e.toString()])
                 }
-                StatusManager.put();
+                StatusManager.put()
             if(this.stack.length){
-                if(Tests.break_after && Tests.continue_bt)
-                    Tests.continue_bt.onclick = onclick_call(this);
-                else
-                    this.nextTimer(func);
+                if(!onclick_call(this))
+                    this.nextTimer(func)
             }else{
-                this.printResults();
-                StatusManager.put();
+                this.printResults()
+                StatusManager.put()
             }
-        };
+        }
 
         this.printResults = function(){
-            var resdiv = document.getElementById('TestResults');
+            var resdiv = document.getElementById('TestResults')
             if(!resdiv){
                 resdiv = element.create('div', {'id': 'TestResults',
                     'style': {'position': 'absolute', 'bottom': 0,
                     'right': 0, 'width': '400px', 'background': '#FFF',
                     'border': '2px solid #b0b0b0', 'borderRadius': '3px',
-                    'padding': '2px 5px'}});
-                element.appendChild(document.body, resdiv);
+                    'padding': '2px 5px'}})
+                element.appendChild(document.body, resdiv)
             }
-            for(var i = 0; i < this.results.length; i++){
-                var result = this.results[i];
+            this.resultss.forEach(function(result) {
                 var resp = element.create('p', {'style': {'borderRadius': '5px',
                     'background': (result[1] ? '#CCFFCC' : '#FF0000'),
                     'padding': '0px 10px', 'margin': '2px 0px'}},
                     [{'span': {'innerText': result[0] + ':', 'style': {'marginRight': '10px'}}},
-                     {'span': {'innerText': (result[1] ? 'Done' : 'Failed')}}]);
+                     {'span': {'innerText': (result[1] ? 'Done' : 'Failed')}}])
                 if(!result[1])
                     element.appendChild(resp, {'span': {'innerText': result[2],
-                    'style': {'display': 'block'}}});
-                element.appendChild(resdiv, resp);
-            }
-        };
+                    'style': {'display': 'block'}}})
+                element.appendChild(resdiv, resp)
+            })
+        }
 
     }
 
-    return TestRunner;
-});
+    return TestRunner
+})
