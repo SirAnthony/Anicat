@@ -31,7 +31,11 @@ define(['tests/runner'], function (TestRunner){
         },
         'id_send': function(){
             var state = document.getElementById('id_state')
-            state.options[2].selected = true
+            var selected = element.getSelected(state)
+            var new_sel = selected
+            while(new_sel == selected)
+                new_sel = Math.floor((Math.random() * state.options.length) + 1);
+            state.options[new_sel].selected = true
             state.onchange()
         },
     }, {'id_send': ['id'],

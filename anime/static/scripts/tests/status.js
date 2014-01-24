@@ -9,32 +9,39 @@
  */
 
  define(['base/events'], function(events){
-    this.statuses = {'done': -1, 'ready': 0, 'running': 1};
-    this.status = this.statuses.ready;
-    this.sinput = null;
 
-    this.init = function(){
-		this.sinput = document.getElementById('test_status');
-        if(!this.sinput){
-            this.sinput = element.create('input', {'id': 'test_status', 'type': 'text'});
-            element.appendChild(document.body, this.sinput);
+    var _statuses = {'done': -1, 'ready': 0, 'running': 1}
+    var _sinput = null
+    var _status = _statuses.ready
+
+    return {
+        statuses: _statuses,
+
+        init: function(){
+            _sinput = _sinput || document.getElementById('test_status')
+            if(!_sinput){
+                _sinput = element.create('input', {'id': 'test_status', 'type': 'text'})
+                element.appendChild(document.body, _sinput)
+            }
+            this.display()
+        },
+
+        status: function(){
+            return _status
+        },
+
+        take: function(){
+            _status++
+            this.display()
+        },
+
+        put: function(){
+            _status--
+            this.display()
+        },
+
+        display: function(){
+            _sinput.value = _status
         }
-        this.display();
-    };
-
-    this.take = function(){
-        this.status++;
-        this.display();
-    };
-
-    this.put = function(){
-        this.status--;
-        this.display();
-    };
-
-    this.display = function(){
-        this.sinput.value = this.status;
-    };
-
-    events.onload(this.init, this);
-});
+    }
+})

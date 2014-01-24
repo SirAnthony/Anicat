@@ -84,7 +84,7 @@ define(['base/cookies', 'base/request_processor'],
                     continue
                 if(isArray(qry[item]))
                     request += map(function(itm) {
-                        return makePostData(item, itm) }).join('')
+                        return makePostData(item, itm) }, qry[item]).join('')
                 else
                     request += makePostData(item, qry[item])
             }

@@ -8,17 +8,26 @@
  *
  */
 
-define(['base/events', 'base/ajax', 'base/request_processor'],
-function(events, ajax, RequestProcessor){
+define(['base/events', 'base/ajax', 'base/request_processor', 'tests/status'],
+function(events, ajax, RequestProcessor, StatusManager){
 
-    ajax_calls = new Array()
-    break_after = true // false
-    avaliable_tests = ['add', 'card', 'cnt', 'filter', 'main',
+    var ajax_calls = new Array()
+    var break_after = false // true
+    var avaliable_tests = ['add', 'card', 'cnt', 'filter', 'main',
                        'search', 'statistics', 'user']
+    var test_re = new RegExp('^#test/(\\w+)/(?:(\\w+)/?)?')
 
     return {
         init: function(){
             var self = this
+            this.tests = {}
+            avaliable_tests.forEach(function(testname){
+                if (this.tests[testname])
+                    console.log('Multiple tests with name ' + testname + 'loaded')
+                require(['tests/units/' + testname], function(module){
+                    self.tests[testname] = module })
+            }, this)
+
             if(break_after){
                 this.continue_bt = document.getElementById('test_c_bt')
                 if(!this.continue_bt){
@@ -31,22 +40,22 @@ function(events, ajax, RequestProcessor){
                     self.from_url()
                     events.remove(this, 'click', arguments.callee)
                 })
+            } else {
+                var timeout = setTimeout(function(){
+                    clearTimeout(timeout)
+                    if (self.tests.length < avaliable_tests.length5)
+                        timeout = setTimeout(arguments.callee, 1000)
+                    else
+                        events.onload(self.from_url, self)
+                }, 1000)
             }
-
-            this.tests = {}
-            avaliable_tests.forEach(function(testname){
-                if (self.tests[testname])
-                    console.log('Multiple tests with name ' + testname + 'loaded')
-                require(['tests/units/' + testname], function(module){
-                    self.tests[testname] = module })
-            })
         },
 
         from_url: function(){
-            var testre = document.location.hash.match(/^#test\/(\w+)(\/(\w+))?/)
+            var testre = document.location.hash.match(test_re)
             if(!testre)
                 return
-            this.start(testre[1], testre[3])
+            this.start(testre[1], testre[2])
         },
 
         start: function(testname, subtest) {
@@ -54,7 +63,7 @@ function(events, ajax, RequestProcessor){
                 return
 
             // Redefine ajax.load to setup status to running when called
-            ajax.prototype.load = function(url, qry, processor){
+            ajax.constructor.prototype.load = function(url, qry, processor){
                 ajax_calls.push([this, url, qry, processor])
                 StatusManager.take()
                 ajax.loadXMLDoc.call(ajax, url, qry, processor)
@@ -62,13 +71,16 @@ function(events, ajax, RequestProcessor){
 
             // Define postprocessor for requests
             RequestProcessor.prototype._parsed = function(){
-                StatusManager.put()
-                if(!ajax_calls.pop())
-                    StatusManager.take() // Parser was called without server call
+                var call = ajax_calls.pop()
+                if(call){ // Parser was called with server call
+                    console.log(call)
+                    StatusManager.put()
+                }
+
             }
 
             var callback = {
-                'condition': break_after && this.continue_bt,
+                'condition': this.continue_bt && break_after,
                 'target': [this.continue_bt, 'click']
             }
 
@@ -76,7 +88,7 @@ function(events, ajax, RequestProcessor){
             if(test && test.run){
                 if (test.setup(testname, callback))
                     test.run(subtest)
-                test.teaddown()
+                test.teardown()
             }
         }
     }

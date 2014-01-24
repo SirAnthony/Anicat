@@ -164,6 +164,8 @@ function visible(elem){
 // Additional functions
 
 function map(callback, array, environ, forcearray){
+    if(!array)
+        return new TypeError("No input object");
     if(!isFunction(callback))
         throw new TypeError(callback + " is not a function");
     var ret;
