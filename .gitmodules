@@ -1,3 +1,6 @@
 [submodule "anime/static/scripts/element"]
 	path = anime/static/scripts/element
 	url = git://github.com/SirAnthony/element.js.git
+[submodule "anime/static/scripts/lib/mocha"]
+	path = anime/static/scripts/lib/mocha
+	url = https://github.com/visionmedia/mocha.git

@@ -9,6 +9,16 @@
  */
 
 define(function() {
+    var load_timer = null
+    var load_stack = []
+
+    function timeout_check() {
+        load_timer = null
+        var stack = load_stack
+        load_stack = []
+        stack.forEach(function(func) { func[0].apply(func[1], func[2]) })
+    }
+
     return {
 
         add: function(obj, evType, fn){
@@ -59,9 +69,13 @@ define(function() {
 
         onload: function(fn, environ, args) {
             if(document.readyState === "complete")
-                fn.apply(environ, args);
+                load_stack.push([fn, environ, args])
             else
                 this.add(window, 'load', function(){ fn.apply(environ, args); });
+
+            // Run everything in the next frame, not now
+            if (load_stack.length > 0 && !load_timer)
+                load_timer = setTimeout(timeout_check, 300)
         },
 
         add_action: function(module, raw_name, object) {

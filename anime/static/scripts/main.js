@@ -56,12 +56,14 @@ function (events, user, popup, storage, searcher, statistics,
         [popup, 'base/popup'],
         [utils, 'catalog/utils'],
         [datetime, 'catalog/datetime'],
-        [null, 'tests/tests', function() { return !DEBUG }],
+        //[null, 'tests/tests', function() { return !DEBUG }],
+        [null, 'tests/mocha', function() { return !DEBUG }]
     ]
 
     events.onload(function(){
         modules.forEach(function(elem){ init_module.apply(null, elem) })
     })
 
-    events.onload(utils.loadURI)
+    if (!DEBUG)
+        events.onload(utils.loadURI)
 });

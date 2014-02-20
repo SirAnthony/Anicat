@@ -16,16 +16,19 @@ function(events, ajax, RequestProcessor, StatusManager){
     var avaliable_tests = ['add', 'card', 'cnt', 'filter', 'main',
                        'search', 'statistics', 'user']
     var test_re = new RegExp('^#test/(\\w+)/(?:(\\w+)/?)?')
+    var tests_fullpath = map(function(name) {
+                        return 'tests/units/' + name }, avaliable_tests)
 
     return {
         init: function(){
             var self = this
             this.tests = {}
             avaliable_tests.forEach(function(testname){
-                if (this.tests[testname])
+                if(this.tests[testname])
                     console.log('Multiple tests with name ' + testname + 'loaded')
-                require(['tests/units/' + testname], function(module){
-                    self.tests[testname] = module })
+                require(tests_fullpath, function(){
+                    for(var i = 0; i < arguments.length; ++i)
+                        self.tests[avaliable_tests[i]] = arguments[i] })
             }, this)
 
             if(break_after){
@@ -41,13 +44,7 @@ function(events, ajax, RequestProcessor, StatusManager){
                     events.remove(this, 'click', arguments.callee)
                 })
             } else {
-                var timeout = setTimeout(function(){
-                    clearTimeout(timeout)
-                    if (self.tests.length < avaliable_tests.length5)
-                        timeout = setTimeout(arguments.callee, 1000)
-                    else
-                        events.onload(self.from_url, self)
-                }, 1000)
+                events.onload(self.from_url, self)
             }
         },
 

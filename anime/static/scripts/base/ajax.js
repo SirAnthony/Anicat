@@ -21,7 +21,10 @@ define(['base/cookies', 'base/request_processor'],
         //################# Вызов аяксового обьекта.
         this.loadXMLDoc = function(url, qry, processor){
 
-            if(!isHash(processor) || !isFunction(processor.process))
+            if(!(processor instanceof RequestProcessor))
+                processor = new RequestProcessor(processor)
+
+            if (!isFunction(processor.process))
                 processor = defaultProcessor
 
             var xmlHttp = null

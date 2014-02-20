@@ -35,7 +35,7 @@ function (events, message, list, searcher, ajax, RequestProcessor, forms, edit){
             default:
                 qw['field'] = tag
         }
-        ajax.load('get', qw, new RequestProcessor({
+        ajax.load('get', qw, {
             'get': function(resp){
                 message.create();
                 resp.text.order.forEach(function(curname) {
@@ -47,7 +47,7 @@ function (events, message, list, searcher, ajax, RequestProcessor, forms, edit){
                     message.addTree(forms.getField(curname, resp.id, current))
                 })
                 message.show()
-            }}))
+            }})
     }
 
 
