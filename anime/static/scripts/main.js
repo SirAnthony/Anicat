@@ -56,7 +56,6 @@ function (events, user, popup, storage, searcher, statistics,
         [popup, 'base/popup'],
         [utils, 'catalog/utils'],
         [datetime, 'catalog/datetime'],
-        //[null, 'tests/tests', function() { return !DEBUG }],
         [null, 'tests/mocha', function() { return !DEBUG }]
     ]
 

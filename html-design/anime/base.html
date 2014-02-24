@@ -19,7 +19,7 @@
     <script type="text/javascript" src="{{ STATIC_URL }}scripts/element/element.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}scripts/lib/mocha/mocha.js"></script>
     <script data-main="{{ STATIC_URL }}scripts/main" src="{{ STATIC_URL }}scripts/lib/require.js"></script>
-    <script src="{{ STATIC_URL }}scripts/lib/blanket.min.js" data-cover-adapter="{{ STATIC_URL }}scripts/lib/mocha-blanket.js" data-cover-only="//.*/" data-cover-never="['lib','element','jsi18n/','tests']" data-cover-reporter="{{ STATIC_URL }}scripts/lib/blanket_newtab.js"></script>
+    <!-- <script src="{{ STATIC_URL }}scripts/lib/blanket.min.js" data-cover-adapter="{{ STATIC_URL }}scripts/lib/mocha-blanket.js" data-cover-only="//.*/" data-cover-never="['lib','element','jsi18n/','tests']" data-cover-reporter="{{ STATIC_URL }}scripts/lib/blanket_newtab.js"></script> -->
     <script type="text/javascript" src="/jsi18n/"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}scripts/script.js" data-cover></script>
     {% block customScripts %}{% endblock %}

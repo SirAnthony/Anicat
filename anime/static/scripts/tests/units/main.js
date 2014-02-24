@@ -8,19 +8,31 @@
  *
  */
 
-define(['tests/runner'], function (TestRunner){
-	return new TestRunner({
-        'page': function(){
-            var pager = document.getElementById('pg')
-            pager.getElementsByTagName('a')[0].click()
-        },
-        'sort': function(){
-            var th = getElementsByClassName('episodes', document, 'th')[0]
-            th.firstChild.click()
-        },
-        'rsort': function(){
-            var th = getElementsByClassName('episodes', document, 'th')[0]
-            th.firstChild.click()
-        }
-    }, {'rsort': ['sort'], 'all': ['rsort', 'page', 'sort']}, true)
+define(['tests/utils'], function (utils){
+
+    return describe('card', function() {
+
+        afterEach(utils.processor_setter())
+
+        describe('page', function() {
+            utils.it(function() {
+                var pager = document.getElementById('pg')
+                pager.getElementsByTagName('a')[0].click()
+            })
+        })
+
+        describe('sort', function() {
+            utils.it(function() {
+                var th = getElementsByClassName('episodes', document, 'th')[0]
+                th.firstChild.click()
+            })
+        })
+
+        describe('rsort', function(){
+            utils.it(function() {
+                var th = getElementsByClassName('episodes', document, 'th')[0]
+                th.firstChild.click()
+            })
+        })
+    })
 })

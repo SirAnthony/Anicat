@@ -44,15 +44,6 @@
                 blanket.onTestDone(test.parent.tests.length, test.state === 'passed');
             });
 
-            element.appendChild(document.body, [{'div': {'id': 'urinal', 'style':
-                {'position': 'absolute', 'top': '30px', 'right': '0px' }}}, [
-                {'input': {'type': 'button', 'value': 'Tests',
-                    'onclick': function() { toggle(this.nextSibling) }}},
-                {'div': {'id': 'mocha', 'style': {'background': '#fff', 'margin':
-                '0px', 'border': 'solid 1px #ccc'}}},
-                {'div': {'id': 'messages'}}, {'div': {'id': 'fixtures'}},
-                ]])
-
             // NOTE: this is an instance of BlanketReporter
             OriginalReporter.apply(this, arguments);
         };
