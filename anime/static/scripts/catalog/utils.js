@@ -9,10 +9,8 @@
  */
 
 define([
-    'base/events', 'base/message', 'catalog/list',
-    'catalog/search', 'base/ajax', 'base/request_processor',
-    'catalog/forms'],
-function (events, message, list, searcher, ajax, RequestProcessor, forms, edit){
+    'base/events', 'base/message', 'catalog/list', 'base/ajax', 'catalog/forms'],
+function (events, message, list, ajax, forms, edit){
 
     //################# Get menu with info
     function field_content(tag, num, event){
@@ -73,24 +71,21 @@ function (events, message, list, searcher, ajax, RequestProcessor, forms, edit){
         var match = hash_re.exec(string)
         if(!match)
             return
-        var request = 'list'
-        var ret = {}
-        var processor = list.processor
+        var table = list.table
+        var ret = {'order': match[4], 'page': match[5]}
         if(match[1]){
-            request = 'search'
             ret['string'] = match[1]
-            processor = searcher.processor
         }else if(match[2] && !isUndef(match[3])){
+            table = list.search
             ret = extend(ret, {'user': match[2], 'status': match[3]})
         }
-        var aret = extend(ret, {'order': match[4], 'page': match[5]})
-        return [request, aret, processor]
+        return [table.link, ret, table.processor]
     }
 
     function loadURIHash(string){
         if(disabled())
             return true
-        if(!document.getElementById('dvid') && !searcher.loaded)
+        if(!document.getElementById('dvid') && !list.search.loaded)
             return true
         var link = parseURIHash(string || document.location.hash)
         if(!link || !link[0])
@@ -110,7 +105,6 @@ function (events, message, list, searcher, ajax, RequestProcessor, forms, edit){
             return;
         loadURIHash(mode < 0 ? '/' : '/show/' + mode + '/');
     }
-
 
 
     return {

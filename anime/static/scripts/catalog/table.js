@@ -38,7 +38,7 @@ define(['base/popup', 'catalog/utils'], function(popup, utils){
                         {'thead': extend({className: 'thdtbl'}, attrs.head)},
                         this.buildHeader(data.head, data.link, calls.head),
                         {'tbody': attrs.body},
-                        this.buildContent(data.list, data.pages.start)
+                        this.buildContent(data.list, data.head, data.pages.start)
                     ], this.buildPages(data, attrs.pages, calls.pages)
                 ])
             }else{
@@ -57,10 +57,8 @@ define(['base/popup', 'catalog/utils'], function(popup, utils){
         },
 
         getHeaderField: function(name, link, callback){
-            var func = this['header_'+name];
-            if(!func)
-                func = this.header_default;
-            return func.call(this, name, link, callback);
+            var func = this['header_'+name] || this.header_default
+            return func.call(this, name, link, callback)
         },
 
         header_air: function(name, link, callback) {
@@ -89,33 +87,16 @@ define(['base/popup', 'catalog/utils'], function(popup, utils){
         },
 
 
-        buildContent: function(data, first){
+        buildContent: function(data, head, first){
             var rows = new Array()
             data.forEach(function(elem, i){
                 var row = element.create('tr',
-                    {className: (elem.air ? 'air a' : 'r') + elem.id}, [
-                        {'td': {'id': 'link' + elem.id, className: 'link'}}, [
-                            {'a': {className: 'cardurl', 'target': '_blank',
-                                'href': '/card/'+elem.id+'/',
-                                onclick: function(e){
-                                    return Card.get(elem.id, e) }}}, [
-                                {'img': {'src': '/static/arrow.png', 'alt': 'Go'}},
-                            ]
-                        ],
-                        {'td': {'id': 'id' + elem.id, className: 'id',
-                            onclick: function(e){
-                                return utils.cnt('id', elem.id, e) },
-                            innerText: Number(i) + first }},
-                        ])
+                    {className: (elem.air ? 'air a' : 'r') + elem.id})
+                head.forEach(function(column){
+                    element.appendChild(row, this.getCell(elem.id, column,
+                        column == 'id' ? Number(i) + first : elem[column]))
+                }, this)
                 rows.push(row)
-                for(var column in elem){
-                    if(column == 'air' || column == 'id') continue
-                    var cell = this['cell_'+column]
-                    if(!cell)
-                        cell = this.cell_default
-                    element.appendChild(row,
-                            cell.call(this, elem.id, column, elem[column]))
-                }
             }, this)
             return rows
         },
@@ -124,20 +105,23 @@ define(['base/popup', 'catalog/utils'], function(popup, utils){
             var pages = data.pages
             if(!pages || !pages.items)
                 return []
-            var pnum = 0
-            var pg = map(function (page){
-                pnum++
-                if(pages.current == pnum){
-                    return element.create('span', {className: 'spanl', innerText: '[' + page + ']'})
-                }else{
-                    var href = data.link.link + pnum + '/'
-                    return element.create('a', {innerText: page,
-                        'onclick': function(e){ return callback.func.call(
-                                callback.scope, data.link, pnum, e)
-                            }, 'href': href })
-                }
+            var pg = map(function (page, num){
+                return this.getPage(page, data.link, num + 1, pages.current, callback)
             }, pages.items, this)
             return element.create('div', attrs, pg)
+        },
+
+        getPage: function(page, link, num, current, callback) {
+            if (num == current)
+                return {'span': {className: 'spanl', innerText: '[' + page + ']'}}
+            return {'a': {innerText: page, onclick: function(e){
+                    return callback.func.call(callback.scope, link, num, e)
+                }, 'href': link.link + num + '/' }}
+        },
+
+        getCell: function(id, name, data){
+            var cell = this['cell_'+name] || this.cell_default
+            return cell.call(this, id, name, data)
         },
 
         cell_default: function(id, name, data){
@@ -145,6 +129,21 @@ define(['base/popup', 'catalog/utils'], function(popup, utils){
                 onclick: function(e){ return utils.cnt(name, id, e) },
                 innerText: encd(data) }}
         },
+
+        cell_air: function(id, name, data){
+            return element.create('td', {'id': 'link' + id, className: 'link'}, [
+                    {'a': {className: 'cardurl', 'target': '_blank',
+                    'href': '/card/' + id + '/',
+                    onclick: function(e){ return Card.get(id, e) }}}, [
+                        {'img': {'src': '/static/arrow.png', 'alt': 'Go'}}]])
+        },
+
+        cell_id: function(id, name, data){
+            return {'td': {'id': 'id' + id, className: 'id',
+                    onclick: function(e){ return utils.cnt('id', id, e) },
+                    innerText: data }}
+        },
+
 
         cell_title: function(id, name, data){
             var c = this.cell_default(id, name, data)

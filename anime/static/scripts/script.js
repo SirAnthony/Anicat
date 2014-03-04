@@ -172,11 +172,11 @@ function map(callback, array, environ, forcearray){
     if(!forcearray && isHash(array) && !isNodeList(array)){
         ret = new Object();
         for(var k in array)
-            ret[k] = callback.call(environ, array[k]);
+            ret[k] = callback.call(environ, array[k], k);
     }else{
         ret = new Array();
         for(var i = 0; i < array.length; i++)
-            ret.push(callback.call(environ, array[i]));
+            ret.push(callback.call(environ, array[i], i));
     }
     return ret;
 }

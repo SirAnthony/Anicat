@@ -11,8 +11,9 @@
 define(['base/events'], function(events){
 
 	var tests = []
-	var avaliable_tests = ['cnt', 'main'] // ['add', 'card', 'cnt', 'filter',
-			//'search', 'statistics', 'user']
+	var avaliable_tests = ['cnt', 'main', 'search']
+		// ['add', 'card', 'cnt', 'filter',
+		//, 'statistics', 'user']
 	var tests_fullpath = map(function(name) {
 				return 'tests/units/' + name }, avaliable_tests)
 

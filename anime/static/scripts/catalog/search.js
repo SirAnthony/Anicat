@@ -9,65 +9,6 @@
  */
 
 //######################## Search
-define(['base/message', 'base/events', 'base/ajax', 'base/request_processor',
-    'catalog/table'],
-	function(message, events, ajax, RequestProcessor, table){
-
-    return {
-        init: function(){
-            this.sobj = document.getElementById('srch');
-            this.result = document.getElementById('srchres');
-            this.input = document.getElementById('sin'); //это как-то по другому нужно.
-            this.loaded = (this.sobj && this.result && this.input);
-            this.processor = new RequestProcessor({ 'search': function(resp){
-                                    this.putResult(resp.text); }}, this);
-
-        },
-
-        toggle: function(){
-            if(!this.loaded)
-                return true;
-            if(toggle(this.sobj))
-                this.input.focus();
-            return false;
-        },
-
-        send: function(page, e){
-            if(!this.loaded)
-                return;
-            page = page || 1;
-            if(this.input.value.length < 3){
-                element.removeAllChilds(this.result);
-                element.appendChild(this.result, [{'p': {
-                    innerText: 'Query must consist of at least 3 characters.'}}]);
-            }else{
-                var text = this.input.value.toLowerCase();
-                message.toEventPosition(e);
-                this.loadCall({'string': text}, page);
-            }
-            return false;
-        },
-
-        loadCall: function(link, number, event){
-            ajax.load('search', extend(link, {'page': number,
-                    'link': undefined}), this.processor);
-            return false;
-        },
-
-        putResult: function(rs){
-            if(!this.loaded) return;
-            message.hide();
-            element.removeAllChilds(this.result);
-            if(!rs.list.length){
-               element.appendChild(this.result, [{'p': {innerText: 'Nothing found.'}}]);
-            }else{
-                var page = (rs.pages.current > 1) ? rs.pages.current + '/' : '';
-                document.location.hash = rs.link.link + page;
-                toggle(this.sobj, true);
-                table.build(this.result, {'table': {'id': 'srchtbl'},
-                    'pages': {'id': 'srchpg'}}, rs,
-                    {'pages': {'func': this.loadCall, 'scope': this}});
-            }
-        }
-    };
+define(['catalog/list'], function(list){
+    return list.search
 });

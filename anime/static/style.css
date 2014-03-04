@@ -5,7 +5,7 @@ body {
     font-size: 12pt;
     padding: 0px;
     font-family: "times new roman", serif;
-    margin-top: 0px;
+    margin: 0px 8px !important;
     background: #FFF;
     line-height: 27px;
 }
@@ -153,7 +153,7 @@ a:hover{
     border: none;
 }
 
-#tbl td, #tbl th, #srchtbl td{
+.tbl td, .tbl th{
     position: relative;
     text-align: center;
     width: 190px;

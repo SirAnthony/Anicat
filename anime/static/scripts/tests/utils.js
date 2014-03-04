@@ -8,7 +8,7 @@
  *
  */
 
-define(['base/request_processor'], function (RequestProcessor){
+define(['base/request_processor', 'lib/should.min'], function (RequestProcessor, should){
 
 	function set_processor(done, func){
 		RequestProcessor.prototype._parsed = function() {
@@ -34,6 +34,7 @@ define(['base/request_processor'], function (RequestProcessor){
 	}
 
 	return {
+		should: should,
 		it: mocha_it,
 		set_processor: set_processor,
 		processor_setter: processor_setter

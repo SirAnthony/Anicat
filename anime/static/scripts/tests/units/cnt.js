@@ -46,7 +46,7 @@ define(['tests/utils'], function (utils){
 		})
 
 		describe('release', function() {
-            utils.it(function() {
+			utils.it(function() {
 				getElementsByClassName('release', document, 'td')[0].click()
 			})
 		})
@@ -59,8 +59,8 @@ define(['tests/utils'], function (utils){
 
 		describe('id_send', function() {
 			utils.it(function() {
-                    getElementsByClassName('id', document, 'td')[0].click()
-                }, function() {
+					getElementsByClassName('id', document, 'td')[0].click()
+				}, function() {
 					var state = document.getElementById('id_state')
 					var selected = element.getSelected(state)
 					var new_sel = selected
