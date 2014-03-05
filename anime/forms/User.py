@@ -1,15 +1,12 @@
 
 from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import UNUSABLE_PASSWORD_PREFIX
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.core.exceptions import ValidationError
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from anime.utils.misc import username_for_email, generate_password, mail
-
-#Since 17254
-#from django.contrib.auth.hashers import UNUSABLE_PASSWORD
-UNUSABLE_PASSWORD = '!'
 
 
 class UserCreationFormMail(forms.ModelForm):
@@ -73,7 +70,7 @@ class NotActivePasswordResetForm(PasswordResetForm):
         self.users_cache = User.objects.filter(email__iexact=email)
         if not len(self.users_cache):
             raise forms.ValidationError(self.error_messages['unknown'])
-        if any((user.password == UNUSABLE_PASSWORD)
+        if any((user.password == UNUSABLE_PASSWORD_PREFIX)
                 for user in self.users_cache):
             raise forms.ValidationError(self.error_messages['unusable'])
         return email
@@ -91,5 +88,4 @@ class NotActiveAuthenticationForm(AuthenticationForm):
             self.user_cache = authenticate(username=username, password=password)
             if self.user_cache is None:
                 raise ValidationError(self.error_messages['wrong'])
-        self.check_for_test_cookie()
         return self.cleaned_data

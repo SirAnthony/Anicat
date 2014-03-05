@@ -13,10 +13,7 @@ class Paginator(paginator.Paginator):
         "Returns the total number of objects, across all pages."
         if self._count is None:
             try:
-                if getattr(self, 'order', None):
-                    self._count = self.object_list.values(self.order).count()
-                else:
-                    self._count = self.object_list.count()
+                self._count = self.object_list.count()
             except (AttributeError, TypeError):
                 # AttributeError if object_list has no count() method.
                 # TypeError if object_list.count() requires arguments
@@ -49,6 +46,12 @@ class Paginator(paginator.Paginator):
                     cache.set('Pages:%s' % cachekey, names)
             self.names = names
         return self.names
+
+    def get_numbers(self):
+        return range(1, self.num_pages + 1)
+
+    def get_pages(self, numeric):
+        return self.get_names() if not numeric else self.get_numbers()
 
     def iternames(self):
         length = self.name_length

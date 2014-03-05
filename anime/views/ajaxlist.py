@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -5,11 +6,9 @@ from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 from hashlib import sha1
 
-from anime.models import AnimeItem, UserStatusBundle, USER_STATUS
-from anime.utils import cache
+from anime.models import AnimeItem, USER_STATUS
 from anime.utils.catalog import latest_status
 from anime.views.classes import AnimeAjaxListView
-from anime.views.ajax import ajaxResponse
 
 
 class IndexListView(AnimeAjaxListView):
@@ -28,7 +27,6 @@ class IndexListView(AnimeAjaxListView):
     ADDITIONAL_FIELDS = ['rating', '-rating', 'changed', '-changed']
 
     def get_link(self):
-        userid = self.kwargs.get('user_id')
         link = {}
         if self.status is not None:
             if self.user != self.current_user:

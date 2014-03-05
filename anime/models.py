@@ -172,7 +172,7 @@ class AnimeItem(models.Model):
     endedKnown = models.SmallIntegerField(blank=True, default=0)
     bundle = models.ForeignKey('AnimeBundle',
             related_name='animeitems', null=True, blank=True)
-    air = models.BooleanField()
+    air = models.BooleanField(default=False)
     audit_log = AuditLog()
 
     class Meta:

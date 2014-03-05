@@ -1,5 +1,4 @@
-
-import urllib
+# -*- coding: utf-8 -*-
 from django.db.models.fields import FieldDoesNotExist
 from django.http import Http404
 from django.views.generic.base import TemplateResponseMixin
@@ -16,6 +15,8 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
     http_method_names = ['get']
     paginator_class = Paginator
     filter_class = AnimeListFilter
+    pages_numeric = False
+    object_list = None
 
     def get_queryset(self):
         queryset = super(AnimeListView, self).get_queryset()
@@ -32,16 +33,14 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
         return context
 
     def create_context_data(self, cachestr, link, **kwargs):
-        queryset = kwargs.pop('object_list')
+        queryset = kwargs.pop('object_list', self.object_list)
         page_size = self.get_paginate_by(queryset)
         paginator = None
         if page_size:
             paginator, page, queryset, is_paginated = self.paginate_queryset(queryset, page_size)
             paginator.set_order(self.order)
             paginator.set_cachekey(self._filter.get_cachestring(link['link']))
-            pages = range(1, paginator.num_pages + 1)
-            if not getattr(self, 'pages_numeric', False):
-                pages = paginator.get_names()
+            pages = paginator.get_pages(self.pages_numeric)
             context = {
                 'pages': {'current': page.number,
                     'start': page.start_index(),

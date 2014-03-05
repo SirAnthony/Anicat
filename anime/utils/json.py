@@ -1,6 +1,6 @@
 
 import datetime
-from django.utils import simplejson
+import simplejson
 from django.utils.encoding import smart_unicode, force_unicode
 from django.utils.functional import Promise
 from anime.models import DATE_FORMATS
@@ -62,5 +62,5 @@ class JSONFunctionEncoder(simplejson.JSONEncoder):
     def default(self, o):
         if isinstance(o, JSONFunction):
             return o.toJSON()
-        return JSONEncoder.default(self, o)
+        return simplejson.JSONEncoder.default(self, o)
 

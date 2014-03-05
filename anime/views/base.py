@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 import anime.core.base as coreMethods
 from annoying.decorators import render_to
 from django.core.urlresolvers import reverse

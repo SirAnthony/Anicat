@@ -245,14 +245,14 @@ class FormsUserTests(TestCase):
         self.assertEquals(last_record_pk(User), c+1)
 
     def test_NotActivePasswordResetForm(self):
-        from anime.forms.User import NotActivePasswordResetForm, UNUSABLE_PASSWORD
+        from anime.forms.User import NotActivePasswordResetForm, UNUSABLE_PASSWORD_PREFIX
         f = NotActivePasswordResetForm({'email': User.objects.get(id=1).email})
         self.assertEquals(f.is_valid(), True)
         f = NotActivePasswordResetForm({'email': 'b@bb.bb'})
         self.assertEquals(f.is_valid(), False)
         self.assertEquals(f.errors['email'][0], f.error_messages['unknown'])
         u = User.objects.get(id=1)
-        u.password = UNUSABLE_PASSWORD
+        u.password = UNUSABLE_PASSWORD_PREFIX
         u.save()
         f = NotActivePasswordResetForm({'email': u.email})
         self.assertEquals(f.is_valid(), False)

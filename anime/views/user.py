@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 import anime.core.user as userMethods
 
 from django.contrib import auth

@@ -1,15 +1,12 @@
-
-from annoying.decorators import render_to
+# -*- coding: utf-8 -*-
 from audit_log.models.managers import ACTION_TYPES
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 
-from anime.models import (AnimeItem, HISTORY_MODELS,
-                            AUDIT_FIELDS, AUDIT_MODEL_FIELDS)
+from anime.models import (HISTORY_MODELS, AUDIT_FIELDS, AUDIT_MODEL_FIELDS)
 from anime.views.classes import AnimeAjaxListView
-from anime.views.ajax import ajaxResponse
 
 
 HISTORY_STATUSES = dict(ACTION_TYPES)
@@ -34,7 +31,6 @@ class HistoryListView(AnimeAjaxListView):
 
 
     def get_link(self):
-        userid = self.kwargs.get('user_id')
         link = {}
         if self.model_name != 'anime':
             link['model'] = self.model_name

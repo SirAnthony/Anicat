@@ -167,7 +167,7 @@ class AnimeNameForm(DynamicModelForm):
 class AnimeLinksForm(DynamicModelForm):
 
     class Meta:
-        exclude = ('anime')
+        exclude = ('anime',)
 
     def __init__(self, data=None, *args, **kwargs):
         super(AnimeLinksForm, self).__init__(data, *args, **kwargs)
