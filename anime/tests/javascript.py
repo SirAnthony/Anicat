@@ -1,18 +1,21 @@
 
 from anime.tests._classes import FIXTURES_MAP
-from anime.tests._functions import create_user, login
+from anime.tests._functions import create_user
 from anime.utils import cache
 from datetime import datetime
 from django.test import LiveServerTestCase
 from django.conf import settings
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from urllib2 import URLError
 import os
+import signal
 import subprocess
 import socket
 import time
 
-def wait_for_selenium(port, timeout=60):
+
+def wait_for_selenium(port, timeout=15):
     """Blocks until the specified port is connectable."""
 
     def is_connectable(port):
@@ -37,6 +40,7 @@ def wait_for_selenium(port, timeout=60):
 class JSTests(LiveServerTestCase):
 
     test_delay = 2
+    enabled = True
 
     @classmethod
     def setUpClass(cls):
@@ -44,6 +48,7 @@ class JSTests(LiveServerTestCase):
             cls.selenium_server = subprocess.Popen(('java', '-jar', settings.SELENIUM_SERVER_PATH))
             if not wait_for_selenium(4444):
                 cls.selenium_server.kill()
+                cls.enabled = False
                 raise AssertionError("Selenium server does not respond.")
 
         driver = getattr(webdriver, settings.SELENIUM_DRIVER, None)
@@ -54,24 +59,30 @@ class JSTests(LiveServerTestCase):
             else:
                 capability = getattr(webdriver.DesiredCapabilities, settings.SELENIUM_CAPABILITY, None)
                 assert capability, 'settings.SELENIUM_CAPABILITY: capability does not exist'
-            cls.driver = driver('http://%s:%d/wd/hub' % (settings.SELENIUM_HOST, settings.SELENIUM_PORT), capability)
+            try:
+                cls.driver = driver('http://%s:%d/wd/hub' % (settings.SELENIUM_HOST, settings.SELENIUM_PORT), capability)
+            except URLError:
+                cls.driver = None
+                cls.enabled = False
         else:
             cls.driver = driver(settings.SELENIUM_CHROME_DRIVER)
         super(JSTests, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
-        cls.driver.quit()
+        if cls.driver:
+            cls.driver.quit()
         if settings.SELENIUM_LOCAL:
-            self.selenium_server.send_signal(signal.SIGINT)
-            if self.selenium_server.poll() is None:
-                self.selenium_server.kill()
-                self.selenium_server.wait()
+            cls.selenium_server.send_signal(signal.SIGINT)
+            if cls.selenium_server.poll() is None:
+                cls.selenium_server.kill()
+                cls.selenium_server.wait()
         super(JSTests, cls).tearDownClass()
 
     @create_user()
     def setUp(self):
-        pass
+        if not self.enabled:
+            self.skipTest("No selenium")
 
     def tearDown(self, fixture_names=[]):
         for key in ['38e442f57cd588f5e52f1484b1bc67c480df31ae',

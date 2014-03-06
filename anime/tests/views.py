@@ -472,6 +472,6 @@ class HistoryViewsTest(TestCase):
         u = User.objects.get(id=1)
         u.is_staff = True
         u.save()
-        self.assertEquals(self.client.get('/history/add/').status_code, 200)
+        self.assertEquals(self.client.get('/history/').status_code, 200)
         self.client.logout()
-        self.assertEquals(self.client.get('/history/add/').status_code, 200)
+        self.assertEquals(self.client.get('/history/').status_code, 200)

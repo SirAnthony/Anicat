@@ -75,7 +75,7 @@ def check_response(response, origin, *args, **kwargs):
                     # Field may be absent if value is None
                     if item is not None and not isinstance(origin, apiTypes.NoneableDict) and \
                        not isinstance(item, apiTypes.Noneable):
-                        raise AssertionError('%s not match original: %s;\nKey: %s, item: %s' % (response, origin, key, item))
+                        raise AssertionError('%s\nnot match original:\n%s;\nKey: %s, item: %s' % (response, origin, key, item))
             return
 
     if isinstance(origin, basestring):

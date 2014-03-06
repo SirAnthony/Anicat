@@ -39,7 +39,7 @@ class PureRequestForm(ReadOnlyModelForm, RequestForm):
 
     def clean_status(self):
         if self.instance.requestType == 1 and self.instance.status > 0:
-            if 'status' in self._get_changed_data():
+            if 'status' in self.changed_data:
                 raise ValidationError(self.error_messages['notchangable'])
         return self.cleaned_data['status']
 
