@@ -9,9 +9,9 @@ from anime.api import types as apiTypes
 from anime.core import explorer
 from anime.forms.json import FormSerializer as FS
 from anime.models import AnimeItem
-from anime.tests._classes import CleanTestCase as TestCase
-from anime.tests._functions import (fake_request, create_user, login,
-                                    check_response)
+from anime.tests._classes import (CleanTestCase as TestCase,
+                                  FastFixtureCase as FixtureTestCase)
+from anime.tests._functions import (fake_request, create_user, check_response)
 from anime.utils import cache
 
 
@@ -41,7 +41,7 @@ class UserTest(TestCase):
         from anime.tests._functions import user, passwd
         from anime.forms.User import NotActiveAuthenticationForm as Form
         r = HttpRequest()
-        r.user = u = User.objects.get(id=1)
+        r.user = User.objects.get(id=1)
         self.assertEquals(userMethods.login(r),
             {'text': userMethods.ERROR_MESSAGES['login']['logined']})
         r.user = AnonymousUser()
@@ -57,7 +57,7 @@ class UserTest(TestCase):
     def test_register(self):
         from anime.forms.User import UserCreationFormMail as Form
         r = HttpRequest()
-        r.user = u = User.objects.get(id=1)
+        r.user = User.objects.get(id=1)
         self.assertEquals(userMethods.register(r),
             {'text': userMethods.ERROR_MESSAGES['register']['registred']})
         r.user = AnonymousUser()
@@ -102,7 +102,7 @@ class UserTest(TestCase):
         from django.core.files.uploadedfile import SimpleUploadedFile
         from anime.forms.Error import UploadMalListForm
         r = HttpRequest()
-        r.user = u = User.objects.get(id=1)
+        r.user = User.objects.get(id=1)
         filename = os_join(settings.MEDIA_ROOT, 'test', '1px.png')
         with open(filename, 'r') as fl:
             r.FILES={'file': SimpleUploadedFile(filename, fl.read())}
@@ -132,7 +132,7 @@ class UserTest(TestCase):
 
 
 
-class UserDBTest(TestCase):
+class UserDBTest(FixtureTestCase):
 
     fixtures = ['2trash.json']
 
@@ -181,7 +181,7 @@ class UserDBTest(TestCase):
         self.assertEquals(userMethods.get_styles(u), styles)
 
 
-class UserRequestTest(TestCase):
+class UserRequestTest(FixtureTestCase):
 
     fixtures = ['requests.json']
 
@@ -193,7 +193,7 @@ class UserRequestTest(TestCase):
         self.assertEquals(userMethods.get_requests(u, 'new_field'), {})
 
 
-class ExplorerTest(TestCase):
+class ExplorerTest(FixtureTestCase):
 
     fixtures = ['2trash.json']
 
@@ -257,7 +257,7 @@ class ExplorerTest(TestCase):
             'select': dict(USER_STATUS), 'completed': 1, 'all': 114})
 
 
-class BaseTest(TestCase):
+class BaseTest(FixtureTestCase):
 
     fixtures = ['2trash.json']
 

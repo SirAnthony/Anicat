@@ -43,6 +43,7 @@ urlpatterns += patterns('anime.views.history',
 
 # User
 urlpatterns += patterns('anime.views.user',
+    url(r'^css/$', 'generate_css', name='user_css'),
     url(r'^login/$', 'login', name='login'),
     url(r'^login/error/$', 'social_error', name='social_error'),
     (r'^login/done/$', TemplateView.as_view(template_name='anime/user/social-done.html')),
@@ -51,7 +52,6 @@ urlpatterns += patterns('anime.views.user',
     url(r'^settings/$', 'settings', name='settings'),
     url(r'^stat/(?:(?P<user_id>\d+)/)?$', 'statistics', name='statistics'),
     url(r'^stat/export/?$', 'statistics_export', name='statistics_export'),
-    url(r'^css/$', 'generate_css', name='user_css'),
 )
 
 # Password functions

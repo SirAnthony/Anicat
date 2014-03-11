@@ -16,7 +16,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 DEPLOY = False
 
-TEST_RUNNER = "code_coverage.CoveragedRunner"
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner' #"code_coverage.CoveragedRunner"
 COVERAGE_REPORT_PATH = os.path.join(OUR_ROOT, 'coverage report')
 
 ADMINS = (
@@ -153,7 +153,7 @@ INSTALLED_APPS = (
     'anime',
     'debug_toolbar',
     'django_extensions',
-
+    'django_nose',
 )
 
 #~ COMPRESS_ENABLED = True
@@ -215,6 +215,14 @@ CACHES = {
         'TIMEOUT': 90000
     }
 }
+
+NOSE_ARGS = [
+    '--cover-package=anime',
+    '--cover-erase',
+    '--cover-html',
+    '--nologcapture',
+    '--cover-html-dir={0}'.format(COVERAGE_REPORT_PATH),
+]
 
 INDEX_PAGE_LIMIT = 100
 REQUESTS_PAGE_LIMIT = 30

@@ -59,7 +59,6 @@ class CacheTest(TestCase):
         self.assertEquals(type(cache.update_named_cache(names_list)), datetime)
 
     def test_update_cache(self):
-        name = 'a'
         self.assertEquals(type(cache.update_cache(Genre)), datetime)
 
     def test_update_cache_on_save(self):
@@ -154,6 +153,8 @@ class PaginatorTest(TestCase):
     pg = paginator.Paginator(AnimeItem.objects.all(), 1)
 
     def tearDown(self):
+        cache.delete('Pages:a')
+        cache.delete('Pages:b')
         cache.delete('Pages:c')
         super(PaginatorTest, self).tearDown()
 
@@ -170,7 +171,10 @@ class PaginatorTest(TestCase):
 
     def test_get_names(self):
         self.pg.set_order('-id')
-        self.pg.set_cachekey('c')
+        self.pg.set_cachekey('b')
+        self.assertEquals(self.pg.get_names(), [u'2 - 2', u'1 - 1'])
+        self.pg.set_order('air')
+        self.pg.set_cachekey('a')
         self.assertEquals(self.pg.get_names(), [u'2 - 2', u'1 - 1'])
 
     def test_iternames(self):

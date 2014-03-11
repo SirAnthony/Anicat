@@ -2,7 +2,6 @@
 from audit_log.models.managers import ACTION_TYPES
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 
 from anime.models import (HISTORY_MODELS, AUDIT_FIELDS, AUDIT_MODEL_FIELDS)
@@ -16,7 +15,9 @@ class HistoryListView(AnimeAjaxListView):
     error_messages = {
         'bad_order': _('Bad order.'),
         'bad_model': _('Bad model.'),
+        'bad_fields': _('Bad fields.'),
         'bad_status': _('Bad status.'),
+        'bad_page': _('Bad page.'),
     }
 
     paginate_by = settings.HISTORY_PAGE_LIMIT
@@ -28,7 +29,13 @@ class HistoryListView(AnimeAjaxListView):
     default_order = '-action_date'
     fields = AUDIT_FIELDS
     ADDITIONAL_FIELDS = []
-
+    parameters = [
+        ('model', 'anime', 'bad_model'),
+        ('fields', AUDIT_FIELDS, 'bad_fields'),
+        ('status', None, 'bad_status'),
+        ('order', default_order, 'bad_order'),
+        ('page', 1, 'bad_page'),
+    ]
 
     def get_link(self):
         link = {}
@@ -44,31 +51,22 @@ class HistoryListView(AnimeAjaxListView):
         link['link'] = link_name
         return link, cachestr
 
-    def check_parameters(self, request, **kwargs):
-        _get = lambda val, default=None: \
-                kwargs.get(val) or request.POST.get(val) or default
-
-        model = _get('model', 'anime')
+    def check_model(self, request, model):
         if not model in HISTORY_MODELS:
-            raise Http404(self.error_messages['bad_model'])
-        self.model = HISTORY_MODELS[model].audit_log.model
+            raise ValueError
+        return HISTORY_MODELS[model].audit_log.model
 
-        self.fields = AUDIT_FIELDS + AUDIT_MODEL_FIELDS[model] + ('locked',)
+    def check_fields(self, request, fields):
+        return AUDIT_FIELDS + AUDIT_MODEL_FIELDS[self.model] + ('locked',)
 
-        status = _get('status')
+    def check_status(self, request, status):
         if status and status.upper() not in HISTORY_STATUSES:
-            raise Http404(self.error_messages['bad_status'])
+            raise ValueError
+        return status
 
-        order = _get('order', self.default_order)
-        order_field = order[1:] if order.startswith('-') else order
-        self.check_field(self.model, order_field, self.error_messages['bad_order'],
-                            lambda o: o in self.ADDITIONAL_FIELDS)
-
-        self.model_name = model
+    def check_parameters(self, request, **kwargs):
+        super(HistoryListView, self).check_parameters(request, **kwargs)
         self.current_user = request.user
-        self.order = order
-        self.status = status
-        self.page = _get('page', 1)
         self.kwargs['page'] = self.page
 
     def get_queryset(self):

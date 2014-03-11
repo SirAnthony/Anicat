@@ -15,7 +15,7 @@ import socket
 import time
 
 
-def wait_for_selenium(port, timeout=15):
+def wait_for_selenium(port, timeout=5):
     """Blocks until the specified port is connectable."""
 
     def is_connectable(port):

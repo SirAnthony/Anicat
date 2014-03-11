@@ -1,5 +1,6 @@
 
 from django.test import TestCase
+from django_nose import FastFixtureTestCase
 from anime.tests._functions import check_response
 from anime.utils import cache
 
@@ -18,8 +19,7 @@ FIXTURES_MAP = {
     },
 }
 
-
-class CleanTestCase(TestCase):
+class CleanTest(object):
 
     def tearDown(self, fixture_names=[]):
         fixtures = fixture_names or getattr(self, 'fixtures', [])
@@ -35,3 +35,18 @@ class CleanTestCase(TestCase):
         except AssertionError, e:
             raise AssertionError('Error in response check. Data: %s, %s\nOriginal message: %s' % (
                     ret, returns, e))
+
+
+class FFTC(FastFixtureTestCase):
+    def tearDown(self, fixture_names=[]):
+        super(FFTC, self).tearDown()
+
+class TC(TestCase):
+    def tearDown(self, fixture_names=[]):
+        super(TC, self).tearDown()
+
+class FastFixtureCase(FFTC, CleanTest):
+    pass
+
+class CleanTestCase(TC, CleanTest):
+    pass

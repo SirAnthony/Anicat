@@ -8,8 +8,8 @@
         {% for header in head %}
             <td>
             {% ifequal header 'action_user' %}
-                {% if user.is_staff %}
-                    <a href="{% url 'statistics' row.action_user_id %}/">{{ row.action_user|username }}</a>
+                {% if user.is_staff and row.action_user_id %}
+                    <a href="{% url 'statistics' user_id=row.action_user_id %}">{{ row.action_user|username }}</a>
                 {% else %}
                     *
                 {% endif %}

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 from hashlib import sha1
 
-from anime.models import AnimeItem, USER_STATUS
+from anime.models import AnimeItem
 from anime.utils.catalog import latest_status
 from anime.views.classes import AnimeAjaxListView
 
@@ -14,7 +13,9 @@ from anime.views.classes import AnimeAjaxListView
 class IndexListView(AnimeAjaxListView):
     error_messages = {
         'bad_user': _('User does not exist.'),
+        'bad_status': _('Bad status.'),
         'bad_order': _('Bad order.'),
+        'bad_page': _('Bad page.'),
     }
 
     model = AnimeItem
@@ -25,6 +26,12 @@ class IndexListView(AnimeAjaxListView):
     response_name = 'list'
     fields = ['air', 'id', 'title', 'episodes', 'release', 'type']
     ADDITIONAL_FIELDS = ['rating', '-rating', 'changed', '-changed']
+    parameters = [
+        ('user', None, 'bad_user'),
+        ('status', None, 'bad_status'),
+        ('order', 'title', 'bad_order'),
+        ('page', 1, 'bad_page')
+    ]
 
     def get_link(self):
         link = {}
@@ -42,37 +49,12 @@ class IndexListView(AnimeAjaxListView):
         link['link'] = link_name
         return link, cachestr
 
+    def check_additional(self, field):
+        return self.status and field in self.ADDITIONAL_FIELDS
+
     def check_parameters(self, request, **kwargs):
-        _get = lambda val, default=None: \
-                kwargs.get(val) or request.POST.get(val) or default
-
-        user = _get('user')
-        if user is None or int(user) == request.user.id:
-            user = request.user
-        else:
-            try:
-                user = User.objects.get(id=user)
-            except User.DoesNotExist:
-                raise Http404(self.error_messages['bad_user'])
-
-        try:
-            status = int(_get('status'))
-            USER_STATUS[status]
-            if not user.is_authenticated():
-                raise Exception
-        except:
-            status = None
-
-        order = _get('order', 'title')
-        order_field = order[1:] if order.startswith('-') else order
-        self.check_field(AnimeItem, order_field, self.error_messages['bad_order'],
-                            lambda o: status and o in self.ADDITIONAL_FIELDS)
-
-        self.user = user
+        super(IndexListView, self).check_parameters(request, **kwargs)
         self.current_user = request.user
-        self.order = order
-        self.status = status
-        self.page = _get('page', 1)
         self.kwargs['page'] = self.page
 
     def get_queryset(self):
@@ -110,6 +92,7 @@ class SearchListView(AnimeAjaxListView):
         'bad_order': _('Bad order.'),
         'bad_limit': _('Limit parameter is invalid.'),
         'cache_error': _('Cache error occured. Try again.'),
+        'bad_page': _('Bad page.'),
     }
 
     model = AnimeItem
@@ -119,6 +102,14 @@ class SearchListView(AnimeAjaxListView):
     ajax_cache_name = 'ajaxsearch'
     response_name = 'search'
     fields = ['air', 'id', 'title', 'episodes', 'release', 'type']
+    trusted_fields = ['episodes', 'genre_name', 'type', 'release']
+    parameters = [
+        ('string', '', 'empty'),
+        ('order', 'title', 'bad_order'),
+        ('fields', fields, 'bad_fields'),
+        ('limit', settings.SEARCH_PAGE_LIMIT, 'bad_limit'),
+        ('page', 1, 'bad_page')
+    ]
 
     def get_link(self):
         # FIXME: rewrite this
@@ -132,7 +123,7 @@ class SearchListView(AnimeAjaxListView):
         if self.paginate_by != settings.SEARCH_PAGE_LIMIT:
             link['limit'] = self.paginate_by
         hashed_link_name = reverse('search', kwargs=link)
-        cachestr = '%s%s' % (hashed_link_name, self.page)
+        cachestr = u'{0}{1}'.format(hashed_link_name, self.page)
         if self.fields:
             cachestr = sha1(cachestr + str(self.fields)).hexdigest()
         if string:
@@ -142,42 +133,23 @@ class SearchListView(AnimeAjaxListView):
             link['link'] = hashed_link_name
         return link, cachestr
 
-    def check_parameters(self, request, **kwargs):
-        _get = lambda val, default=None: \
-            kwargs.get(val) or request.POST.get(val) or default
-
-        errors = self.error_messages
-
-        try:
-            string = _get('string', '')
-            if request.method == 'GET':
-                string = string.replace('+', ' ')
-            string = string.strip()
-            if not string:
-                raise AttributeError
-        except AttributeError:
-            raise Http404(errors['empty'])
-
+    def check_fields(self, request, fields):
         fields = request.POST.getlist('fields') or self.fields
-        for f in fields:
-            if f not in ['episodes', 'genre_name', 'type', 'release']:
-                self.check_field(self.model, f, errors['bad_fields'])
+        tfields = self.trusted_fields
+        for field in fields:
+            if field not in tfields:
+                self.check_field(self.model, field)
+        return fields
 
-        order = _get('order', 'title')
-        order_field = order[1:] if order.startswith('-') else order
-        self.check_field(AnimeItem, order_field, errors['bad_order'])
+    def check_limit(self, request, limit):
+        limit = int(limit)
+        if not 3 < limit < settings.SEARCH_PAGE_LIMIT:
+            limit = settings.SEARCH_PAGE_LIMIT
+        return limit
 
-        try:
-            self.paginate_by = int(_get('limit', settings.SEARCH_PAGE_LIMIT))
-            if not 3 < self.paginate_by < settings.SEARCH_PAGE_LIMIT:
-                self.paginate_by = settings.SEARCH_PAGE_LIMIT
-        except:
-            raise Http404(errors['bad_limit'])
-
-        self.string = string
-        self.fields = fields
-        self.order = order
-        self.page = _get('page', 1)
+    def check_parameters(self, request, **kwargs):
+        super(SearchListView, self).check_parameters(request, **kwargs)
+        self.paginate_by = self.limit
         self.kwargs['page'] = self.page
 
     def get_queryset(self):

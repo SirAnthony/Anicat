@@ -21,14 +21,14 @@ from anime.tests.javascript import JSLightTests, JSHardTests
 #from anime import api
 #api.to_file('API')
 
-__test__= {
-    'forms': forms,
-    'edit': edit,
-    'views': views,
-    'core': core,
-    'utils': utils,
-    'templatetags': templatetags,
-    'models': models,
-    'orphans': orphans,
-    'javascript': javascript,
-}
+# __test__= {
+#     'forms': forms,
+#     'edit': edit,
+#     'views': views,
+#     'core': core,
+#     'utils': utils,
+#     'templatetags': templatetags,
+#     'models': models,
+#     'orphans': orphans,
+#     'javascript': javascript,
+# }

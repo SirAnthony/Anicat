@@ -2,11 +2,9 @@
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.db.models import Q
-from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 
 from anime.models import AnimeRequest, REQUEST_TYPE, REQUEST_STATUS
-
 from anime.views.classes import AnimeListView
 
 
@@ -21,6 +19,11 @@ class RequestsListView(AnimeListView):
     template_name = 'anime/requests.html'
     cache_name = 'requests'
     pages_numeric = True
+    parameters = [
+        ('status', None, 'bad_status'),
+        ('rtype', None, 'bad_type'),
+        ('page', 1, 'bad_page'),
+    ]
 
     def get_link(self):
         link = {}
@@ -33,22 +36,19 @@ class RequestsListView(AnimeListView):
         link['link'] = link_name
         return link, cachestr
 
-    def check_parameters(self, request, status=None, rtype=None, page=0):
-        try:
-            if status is not None:
-                REQUEST_STATUS[int(status)]
-        except:
-            raise Http404(self.error_messages['bad_status'])
-        try:
-            if rtype is not None:
-                REQUEST_TYPE[int(rtype)]
-        except:
-            raise Http404(self.error_messages['bad_type'])
+    def check_status(self, request, status):
+        if status is not None:
+            REQUEST_STATUS[int(status)]
+        return status
 
-        self.status = status
-        self.rtype = rtype
+    def check_rtype(self, request, rtype):
+        if rtype is not None:
+            REQUEST_TYPE[int(rtype)]
+        return rtype
+
+    def check_parameters(self, request, **kwargs):
+        super(RequestsListView, self).check_parameters(request, **kwargs)
         self.order = '-id'
-        self.page = page or self.request.GET.get('page') or 1
 
     def get_queryset(self):
         qs = super(RequestsListView, self).get_queryset()

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.db.models.fields import FieldDoesNotExist
+
 from django.http import Http404
 from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.list import BaseListView
@@ -8,15 +8,18 @@ from anime.utils import cache
 from anime.utils.paginator import Paginator
 from anime.views.ajax import ajaxResponse
 from anime.views.filter import AnimeListFilter
+from anime.views.parameters import ParametrizedView
 
 
-class AnimeListView(TemplateResponseMixin, BaseListView):
+class AnimeListView(TemplateResponseMixin, BaseListView, ParametrizedView):
 
     http_method_names = ['get']
     paginator_class = Paginator
     filter_class = AnimeListFilter
     pages_numeric = False
     object_list = None
+    parameters = []
+    error_messages = {}
 
     def get_queryset(self):
         queryset = super(AnimeListView, self).get_queryset()
@@ -70,17 +73,6 @@ class AnimeListView(TemplateResponseMixin, BaseListView):
     def get_link(self):
         "Implementation in subclasses"
         raise NotImplementedError
-
-    def check_parameters(self, request, *args, **kwargs):
-        "Implementation in subclasses"
-        raise NotImplementedError
-
-    def check_field(self, model, field, message, fn=None):
-        try:
-            model._meta.get_field(field)
-        except (FieldDoesNotExist, TypeError, AttributeError):
-            if not fn or not fn(field):
-                raise Http404(message)
 
     def get(self, request, *args, **kwargs):
         self.check_parameters(request, *args, **kwargs)
