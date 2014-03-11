@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 from django.contrib.auth.models import User
 from django.db.models.fields import FieldDoesNotExist
 from django.http import Http404
@@ -8,6 +8,9 @@ from anime.models import USER_STATUS
 class ParametrizedView(object):
 
     parameters = []
+    required_parameters = []
+    # Description for api generator
+    parameters_api = {}
 
     def check_field(self, model, field, fn=None):
         try:

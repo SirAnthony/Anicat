@@ -11,11 +11,11 @@ Search:
     Optional `fields` argument can be passed to retrive only certain fields in response.
     Request target: /ajax/search/
     Request params:
-        fields: list or nothing. Default: All item fields,
-        order: unicode or nothing. Default: title,
+        fields: list or nothing. Default: ['air', 'id', 'title', 'episodes', 'release', 'type'],
+        order: str or nothing. Default: title,
         limit: int or nothing. Default: 20,
-        page: int or nothing,
-        string: unicode
+        page: int or nothing. Default: 1,
+        string: str
     Response object:
         status: True,
         text: 
@@ -45,7 +45,7 @@ List:
     Request target: /ajax/list/
     Request params:
         status: int or nothing. Default: All statuses,
-        order: unicode or nothing. Default: title,
+        order: str or nothing. Default: title,
         page: int or nothing. Default: 1,
         user: int or nothing. Default: Current user
     Response object:

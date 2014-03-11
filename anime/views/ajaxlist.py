@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 from hashlib import sha1
 
@@ -32,6 +31,10 @@ class IndexListView(AnimeAjaxListView):
         ('order', 'title', 'bad_order'),
         ('page', 1, 'bad_page')
     ]
+    parameters_api = {
+        'user': (int, 'Current user'),
+        'status': (int, 'All statuses'),
+    }
 
     def get_link(self):
         link = {}
@@ -103,6 +106,7 @@ class SearchListView(AnimeAjaxListView):
     response_name = 'search'
     fields = ['air', 'id', 'title', 'episodes', 'release', 'type']
     trusted_fields = ['episodes', 'genre_name', 'type', 'release']
+    required_parameters = ['string']
     parameters = [
         ('string', '', 'empty'),
         ('order', 'title', 'bad_order'),

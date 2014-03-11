@@ -1,11 +1,9 @@
-
+# -*- coding: utf-8 -*-
 import datetime
 from anime.models import ANIME_TYPES, USER_STATUS, LINKS_TYPES
 from anime.api.types import (data_to_string, Comment, Noneable,
-            NoneableDict, CallableDict, FuzzyList, Field,
-            CatalogGetTypes )
-from anime.api.forms import from_form
-from django.conf import settings
+            NoneableDict, FuzzyList, Field, CatalogGetTypes )
+from anime.api.forms import from_form, from_view
 
 __all__ = ['Filter', 'Register', 'Login', 'Add', 'Get', 'Search',
            'List', 'Forms', 'Statistics', 'Set', 'out', 'to_file']
@@ -95,13 +93,7 @@ class List(Base):
     """Get main list as JSON-object."""
 
     link = 'list/'
-
-    params = {
-        'user': Noneable(int, 'Current user'),
-        'status': Noneable(int, 'All statuses'),
-        'order': Noneable(unicode, 'title'),
-        'page': Noneable(int, 1)
-    }
+    params = from_view('anime.views.ajaxlist.IndexListView')
 
     returns = {
         'response': 'list',
@@ -242,14 +234,7 @@ class Search(Base):
     Optional `fields` argument can be passed to retrive only certain fields in response."""
 
     link = 'search/'
-
-    params = {
-        'string': unicode,
-        'order': Noneable(unicode, 'title'),
-        'page': Noneable(int, 0),
-        'limit': Noneable(int, settings.SEARCH_PAGE_LIMIT),
-        'fields': Noneable(list, 'All item fields')
-    }
+    params = from_view('anime.views.ajaxlist.SearchListView')
 
     returns = {
         'response': 'search',
@@ -426,7 +411,7 @@ def to_file(filename):
     with open(filename, 'w') as fl:
         fl.write(u"""API reference.
 Notes:
-    Ajax requests must be sent to /ajax/$target.
+    Ajax requests must be POST, sent to /ajax/$target.
     Response is a json structure with 3 mandatory fields:
         response - string, type of response,
         status - bool, result of request process,

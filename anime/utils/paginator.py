@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 from django.core import paginator
 from django.core.cache import cache
 from django.db.models.query import QuerySet

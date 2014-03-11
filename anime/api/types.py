@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 import datetime
 from anime.models import USER_STATUS, LINKS_TYPES
 from anime.utils.misc import is_iterator

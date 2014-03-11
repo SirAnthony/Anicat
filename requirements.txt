@@ -1,8 +1,8 @@
-Django>=1.5
-coverage
+Django>=1.6
 annoying
 debug-toolbar
 django-extensions
 south
 django-social-auth
+django-nose
 git+github.com/SirAnthony/django-audit-log#
