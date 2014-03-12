@@ -363,7 +363,8 @@ class ClassesViewsTest(TestCase):
         v.get_link = self.blank
         v.check_parameters = self.blank
         self.assertEquals(v.get_context_data(object_list=None),
-                {'list': None, 'link': '', 'pages': {}, 'cachestr': BLANK_CACHESTR})
+                {'list': None, 'head': None, 'link': '', 'pages': {},
+                'cachestr': BLANK_CACHESTR})
 
     #~ def test_filter(self):
         #~ pass

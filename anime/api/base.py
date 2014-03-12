@@ -7,12 +7,12 @@ class ApiBase(object):
     link_prefix = '/ajax/'
     link = ''
     response = 'error'
-    params = {}
-    returns = {}
-    returns_noarg = {}
-    error = {}
 
     def __init__(self, prefix=''):
+        for attr in ['params', 'returns', 'returns_noarg', 'error']:
+            if not getattr(self, attr, None):
+                setattr(self, attr, {})
+
         if prefix:
             self.link_prefix = prefix
         view = getattr(self, 'view', None)

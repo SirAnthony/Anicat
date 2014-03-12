@@ -88,7 +88,8 @@ class AnimeAjaxListView(AnimeListView):
 
     def api_returns(self):
         return {
-            'head': FuzzyList(getattr(self, 'fields', [])),
+            'head': FuzzyList(map(lambda x: type(x),
+                        getattr(self, 'fields', []))),
             'list': list,
             'pages': NoneableDict({
                 'current': int,

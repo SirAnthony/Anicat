@@ -56,6 +56,13 @@ def create_cachestr(link='', link_data={}, page=1, data={}):
 def hexdigest(string):
     return sha1(string.encode('utf-8')).hexdigest()
 
+errors = {
+    'match': '{0}\nnot match original:\n{1}',
+    'type': '{0}\ntype ({1}) not match original type:\n{2}',
+    'dict': '{0}\nnot match original:\n{1};\nKey: {2}, item: {3}',
+    'element': '{0}\nnot match original:\n{1}.\nItem {3} not found',
+}
+
 def check_response(response, origin, *args, **kwargs):
 
     if origin is None:
@@ -63,7 +70,7 @@ def check_response(response, origin, *args, **kwargs):
 
     if isinstance(origin, dict):
         if not isinstance(response, dict):
-            raise AssertionError('%s not match original type: %s' % (response, origin))
+            raise AssertionError(errors['type'].format(response, type(response), origin))
         #elif not isinstance(origin, apiTypes.NoneableDict) and \
         #        len(origin.keys()) != len(response.keys()):
         #    raise AssertionError('%s fields count differs from %s' % (response, origin))
@@ -75,36 +82,36 @@ def check_response(response, origin, *args, **kwargs):
                     # Field may be absent if value is None
                     if item is not None and not isinstance(origin, apiTypes.NoneableDict) and \
                        not isinstance(item, apiTypes.Noneable):
-                        raise AssertionError('%s\nnot match original:\n%s;\nKey: %s, item: %s' % (response, origin, key, item))
+                        raise AssertionError(errors['dict'].format(response, origin, key, item))
             return
 
     if isinstance(origin, basestring):
         if not isinstance(response, basestring):
             raise AssertionError('%s is not string. Type does not match: %s' % (response, origin))
         elif not origin == response:
-            raise AssertionError('%s not match original: %s' % (response, origin))
+            raise AssertionError(errors['match'].format(response, origin))
         return
 
     if is_iterator(origin):
         if not is_iterator(response):
-            raise AssertionError('%s not match original type: %s' % (response, origin))
+            raise AssertionError(errors['type'].format(response, type(response), origin))
         if isinstance(origin, apiTypes.FuzzyList):
             origin.set_count(len(response))
         for i in range(0, len(origin)):
             try:
                 check_response(response[i], origin[i], *args, **kwargs)
             except IndexError:
-                raise AssertionError('%s not match original: %s. Item %s not found' % (response, origin, origin[i]))
+                raise AssertionError(errors['element'].format(response, origin, origin[i]))
             except Exception, e:
                 raise e
         return
 
     if isinstance(origin, bool):
         if not isinstance(response, bool):
-            raise AssertionError('%s not match original type: %s' % (response, origin))
+            raise AssertionError(errors['type'].format(response, type(response), origin))
         else:
             if not response == origin:
-                raise AssertionError('%s not match original: %s' % (response, origin))
+                raise AssertionError(errors['match'].format(response, origin))
         return
 
     if isinstance(origin, apiTypes.Noneable):
@@ -114,10 +121,11 @@ def check_response(response, origin, *args, **kwargs):
 
     if isinstance(origin, type):
         if not type(response) == origin:
-            if origin is datetime.date and type(response) is unicode: #rewrite
-                return
+            if isinstance(response, basestring):
+                if filter(lambda x: origin is x, [str, unicode, datetime.date]):
+                    return
             if origin != unicode or type(response) not in (str, bool, int, float, long, complex):
-                raise AssertionError('%s type (%s) not match original type: %s' % (response, type(response), origin))
+                raise AssertionError(errors['type'].format(response, type(response), origin))
         return
 
     if callable(origin):

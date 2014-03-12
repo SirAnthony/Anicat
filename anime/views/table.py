@@ -23,8 +23,8 @@ class IndexListView(AnimeAjaxListView):
     cache_name = 'mainTable'
     ajax_cache_name = 'ajaxlist'
     response_name = 'list'
-    fields = ['air', 'id', 'title', 'episodes', 'release', 'type']
-    ADDITIONAL_FIELDS = ['rating', '-rating', 'changed', '-changed']
+    fields = [u'air', u'id', u'title', u'episodes', u'release', u'type']
+    ADDITIONAL_FIELDS = [u'rating', u'-rating', u'changed', u'-changed']
     parameters = [
         ('user', None, 'bad_user'),
         ('status', None, 'bad_status'),
