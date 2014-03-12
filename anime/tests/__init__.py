@@ -15,7 +15,7 @@ from anime.tests.templatetags import AnimeFiltersTest, AnimeTemplatesTest
 from anime.tests.models import ( ModelsTest, ModelsAnimeFixturesTest,
             ModelsRequestsFixturesTest )
 from anime.tests.orphans import UploadTest
-from anime.tests.javascript import JSLightTests, JSHardTests
+# from anime.tests.javascript import JSLightTests, JSHardTests
 #import * - bad
 
 #from anime import api

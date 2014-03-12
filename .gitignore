@@ -4,4 +4,5 @@
 coverage report/
 audit_log
 settings_secrets.py
+test_database.sqlite
 ./static/

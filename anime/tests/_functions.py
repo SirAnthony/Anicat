@@ -8,7 +8,7 @@ from hashlib import sha1
 
 from anime.utils.misc import is_iterator
 from anime.api import types as apiTypes
-from anime.api import classes as apiClasses
+from anime.api.base import ApiBase
 
 request_factory = RequestFactory()
 
@@ -126,7 +126,7 @@ def check_response(response, origin, *args, **kwargs):
 
 def fill_params(sample, data={}):
 
-    if isinstance(sample, apiClasses.Base):
+    if isinstance(sample, ApiBase):
         return fill_params(sample.get_params(), data)
 
     if isinstance(sample, apiTypes.Field):

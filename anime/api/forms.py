@@ -17,7 +17,7 @@ def from_form(form):
     return fields
 
 
-def from_view(view):
+def params_from_view(view):
     if isinstance(view, basestring):
         (path, name) = view.rsplit('.', 1)
         view = getattr(__import__(path, globals(), {}, [name]), name)
@@ -29,3 +29,10 @@ def from_view(view):
             t = Noneable(t, desc[1] if desc else default)
         fields[name] = t
     return fields
+
+def returns_from_view(view_cls):
+    if isinstance(view_cls, basestring):
+        (path, name) = view_cls.rsplit('.', 1)
+        view_cls = getattr(__import__(path, globals(), {}, [name]), name)
+    view = view_cls()
+    return view.api_returns()

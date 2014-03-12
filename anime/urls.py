@@ -4,9 +4,9 @@ from django.conf.urls import patterns, url, include
 from django.views.generic.base import TemplateView
 
 from anime.forms.User import NotActivePasswordResetForm
-from anime.views.list import RequestsListView
-from anime.views.ajaxlist import IndexListView, SearchListView
 from anime.views.history import HistoryListView
+from anime.views.request import RequestsListView
+from anime.views.table import IndexListView, SearchListView
 
 
 # General

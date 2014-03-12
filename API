@@ -1,6 +1,6 @@
 API reference.
 Notes:
-    Ajax requests must be sent to /ajax/$target.
+    Ajax requests must be POST, sent to /ajax/$target.
     Response is a json structure with 3 mandatory fields:
         response - string, type of response,
         status - bool, result of request process,
@@ -11,28 +11,29 @@ Search:
     Optional `fields` argument can be passed to retrive only certain fields in response.
     Request target: /ajax/search/
     Request params:
-        fields: list or nothing. Default: ['air', 'id', 'title', 'episodes', 'release', 'type'],
-        order: str or nothing. Default: title,
-        limit: int or nothing. Default: 20,
-        page: int or nothing. Default: 1,
-        string: str
+        text:
+            fields: list or nothing. Default: ['air', 'id', 'title', 'episodes', 'release', 'type'],
+            page: int or nothing. Default: 1,
+            limit: int or nothing. Default: 20,
+            string: str,
+            order: str or nothing. Default: title
     Response object:
         status: True,
-        text: 
-            count: int,
-            list: [
+        text:
+            head: [
                 This list may have variable items count. All items have the same structure
-                The fields is differs depends on `fields` parameter. Default:
-                    title: unicode,
-                    air: bool,
-                    episodes: int,
-                    release: unicode,
-                    type: unicode,
-                    id: int
+                "air"
+                "id"
+                "title"
+                "episodes"
+                "release"
+                "type"
                 ],
-            pages: 
+            list: list,
+            pages:
                 current: int,
                 start: int,
+                count: int,
                 items: list,
         response: "search"
     Error object:
@@ -44,14 +45,30 @@ List:
     Get main list as JSON-object.
     Request target: /ajax/list/
     Request params:
-        status: int or nothing. Default: All statuses,
-        order: str or nothing. Default: title,
-        page: int or nothing. Default: 1,
-        user: int or nothing. Default: Current user
+        text:
+            status: int or nothing. Default: All statuses,
+            page: int or nothing. Default: 1,
+            user: int or nothing. Default: Current user,
+            order: str or nothing. Default: title
     Response object:
         status: True,
-        text: dict,
-        response: "list"
+        text:
+            head: [
+                This list may have variable items count. All items have the same structure
+                "air"
+                "id"
+                "title"
+                "episodes"
+                "release"
+                "type"
+                ],
+            list: list,
+            pages:
+                current: int,
+                start: int,
+                count: int,
+                items: list,
+        response: "search"
     Error object:
         status: False,
         text: list,
@@ -65,14 +82,14 @@ Get:
         id: int
     Response object:
         status: True,
-        text: 
-            This dictionary may have one or many keys/values from bellow. Order of fields in "order" named list: 
+        text:
+            This dictionary may have one or many keys/values from bellow. Order of fields in "order" named list:
                 episodesCount: int,
                 name: [
                     This list may have variable items count. All items have the same structure
                     unicode
                     ],
-                links: 
+                links:
                     ANN: [
                         This list may have variable items count. All items have the same structure
                         unicode
@@ -99,7 +116,7 @@ Get:
                         ],
                 title: unicode,
                 duration: int,
-                bundle: 
+                bundle:
                     bundles: [
                         This list may have variable items count. All items have the same structure
                             id: int,
@@ -108,9 +125,9 @@ Get:
                     id: int,
                 air: bool,
                 genre: unicode,
-                state: 
+                state:
                     state: int,
-                    select: 
+                    select:
                         1: "Want",
                         0: "None",
                         3: "Done",
@@ -121,8 +138,8 @@ Get:
                 order: tuple,
                 type: unicode,
                 id: int,
-        response: "get",
-        id: int
+        id: int,
+        response: "get"
     Error object:
         No global errors for the get rerquest.
         All fields errors in response `text` parameter.
@@ -135,7 +152,7 @@ Statistics:
         user_id: int or nothing
     Response object:
         status: True,
-        text: 
+        text:
             stat: [
                     count: int,
                     anime__duration: int or nothing,
@@ -168,7 +185,23 @@ Filter:
         genre: list
     Response object:
         status: True,
-        response: "filter"
+        text:
+            head: [
+                This list may have variable items count. All items have the same structure
+                "air"
+                "id"
+                "title"
+                "episodes"
+                "release"
+                "type"
+                ],
+            list: list,
+            pages:
+                current: int,
+                start: int,
+                count: int,
+                items: list,
+        response: "search"
     Error object:
         status: False,
         text: dict,
@@ -182,7 +215,7 @@ Login:
         password: unicode
     Response object:
         status: True,
-        text: 
+        text:
             name: unicode,
         response: "login"
     Error object:
@@ -200,6 +233,8 @@ Forms:
     Response object:
         status: True,
         field: unicode or nothing,
+        model: unicode,
+        id: int,
         form: [
             This data is serialised form fields list. Field types:
                 bundle: [
@@ -207,7 +242,7 @@ Forms:
                     {'input': {'id': 'id_Bundle 1', 'name': 'Bundle 1', 'value': unicode or nothing, 'label': Bundle 1}}
                     ],
                 state: {'select': {'name': 'state', 'choices': [(0, u'None'), (1, u'Want'), (2, u'Now'), (3, u'Done'), (4, u'Dropped'), (5, u'Partially watched')], 'id': 'id_state', 'value': int or nothing, 'label': State}},
-                anime: 
+                anime:
                     releasedAt: {'input': {'id': 'id_releasedAt', 'name': 'releasedAt', 'value': date or nothing, 'label': Released}},
                     episodesCount: {'input': {'id': 'id_episodesCount', 'name': 'episodesCount', 'value': int or nothing, 'label': EpisodesCount}},
                     endedAt: {'input': {'id': 'id_endedAt', 'name': 'endedAt', 'value': date or nothing, 'label': Ended}},
@@ -223,10 +258,7 @@ Forms:
                     {'input': {'id': 'id_Name 0', 'name': 'Name 0', 'value': unicode or nothing, 'label': Name 0}}
                     {'input': {'id': 'id_Name 1', 'name': 'Name 1', 'value': unicode or nothing, 'label': Name 1}}
                     ]
-            ],
-        model: unicode,
-        id: int,
-        response: "form"
+            ]
     Error object:
         status: False,
         text: unicode,
@@ -261,8 +293,8 @@ Add:
         air: {'input': {'id': 'id_air', 'name': 'air', 'value': bool or nothing, 'label': Air}}
     Response object:
         status: True,
-        response: "add",
-        id: int
+        id: int,
+        response: "add"
     Error object:
         status: False,
         text: dict,

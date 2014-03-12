@@ -10,6 +10,8 @@ from anime.views.ajax import ajaxResponse
 from anime.views.filter import AnimeListFilter
 from anime.views.parameters import ParametrizedView
 
+from anime.api.types import NoneableDict, FuzzyList
+
 
 class AnimeListView(TemplateResponseMixin, BaseListView, ParametrizedView):
 
@@ -39,22 +41,22 @@ class AnimeListView(TemplateResponseMixin, BaseListView, ParametrizedView):
         queryset = kwargs.pop('object_list', self.object_list)
         page_size = self.get_paginate_by(queryset)
         paginator = None
+        context = {
+            'head': getattr(self, 'fields', None),
+            'list': queryset,
+            'pages': {}
+        }
         if page_size:
             paginator, page, queryset, is_paginated = self.paginate_queryset(queryset, page_size)
             paginator.set_order(self.order)
             paginator.set_cachekey(self._filter.get_cachestring(link['link']))
             pages = paginator.get_pages(self.pages_numeric)
-            context = {
-                'pages': {'current': page.number,
-                    'start': page.start_index(),
-                    'count': paginator.num_pages,
-                    'items': pages,
-                },
-                'head': getattr(self, 'fields', None),
-                'list': queryset,
-            }
-        else:
-            context = {'pages': {}, 'list': queryset}
+            context['pages'].update({
+                'current': page.number,
+                'start': page.start_index(),
+                'count': paginator.num_pages,
+                'items': pages,
+            })
         context.update(kwargs)
         return context
 
@@ -83,6 +85,18 @@ class AnimeAjaxListView(AnimeListView):
 
     http_method_names = ['get', 'post']
     ajax_call = False
+
+    def api_returns(self):
+        return {
+            'head': FuzzyList(getattr(self, 'fields', [])),
+            'list': list,
+            'pages': NoneableDict({
+                'current': int,
+                'start': int,
+                'count': int,
+                'items': list,
+            })
+        }
 
     def get_context_data(self, **kwargs):
         (link, cachestr) = self.get_link()

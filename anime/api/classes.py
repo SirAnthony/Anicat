@@ -1,124 +1,53 @@
 # -*- coding: utf-8 -*-
 import datetime
 from anime.models import ANIME_TYPES, USER_STATUS, LINKS_TYPES
-from anime.api.types import (data_to_string, Comment, Noneable,
-            NoneableDict, FuzzyList, Field, CatalogGetTypes )
-from anime.api.forms import from_form, from_view
+from anime.api.base import ApiBase
+from anime.api.types import (Comment, Noneable, NoneableDict,
+                             Field, CatalogGetTypes )
+from anime.api.forms import from_form
 
 __all__ = ['Filter', 'Register', 'Login', 'Add', 'Get', 'Search',
            'List', 'Forms', 'Statistics', 'Set', 'out', 'to_file']
 
 
-class Base(object):
-
-    link_prefix = '/ajax/'
-    link = ''
-    params = {}
-    returns = {}
-    returns_noarg = {}
-    error = {}
-
-    def __init__(self, prefix=''):
-        if prefix:
-            self.link_prefix = prefix
-        for t, v in ((self.returns, True), (self.error, False)):
-            if type(t) is dict:
-                t.setdefault('status', v)
-
-    @classmethod
-    def __str__(cls):
-        c = cls()
-        return str(c.__unicode__())
-
-    def __unicode__(self):
-        name = self.__class__.__name__
-        desc = getattr(self, '__doc__', None) or 'No description.'
-        link = self.get_link()
-        params = data_to_string(self.string_params(), 2)
-        response = data_to_string(self.string_returns(), 2)
-        error = data_to_string(self.error, 2)
-        noarg = ''
-        if self.returns_noarg:
-            noarg = """
-    Response without arguments:
-{0}""".format(data_to_string(self.returns_noarg, 2))
-        return u"""{name}:
-    {desc}
-    Request target: {link}
-    Request params:
-{params}{noarg}
-    Response object:
-{response}
-    Error object:
-{error}
-""".format(**locals())
-
-    def get_link(self):
-        return self.link_prefix + self.link
-
-    def string_params(self):
-        return self.get_params()
-
-    def get_params(self):
-        return self.params.copy()
-
-    def string_returns(self):
-        return self.get_returns()
-
-    def get_returns(self):
-        return self.returns.copy()
-
-    def get_returns_noarg(self):
-        return self.returns_noarg.copy()
-
-
-class Filter(Base):
+class Filter(ApiBase):
     """Apply filter to site output."""
 
     link = 'filter/'
+    response = 'filter'
 
     params = from_form('anime.forms.Error.FilterForm')
 
-    returns = {
-        'response': 'filter',
-    }
-
     error = {
-        'response': 'filter',
         'text': dict
     }
 
 
-class List(Base):
+class List(ApiBase):
     """Get main list as JSON-object."""
 
     link = 'list/'
-    params = from_view('anime.views.ajaxlist.IndexListView')
-
-    returns = {
-        'response': 'list',
-        'text': dict,
-    }
+    response = 'list'
+    view = 'anime.views.table.IndexListView'
 
     error = {
-        'response': 'list',
         'text': list
     }
 
 
 
-class Statistics(Base):
+class Statistics(ApiBase):
     """User statisics.
     Returns statistics for curren user if `user_id` is not set."""
 
     link = 'stat/'
+    response = 'stat'
 
     params = {
         'user_id': Noneable(int)
     }
 
     returns = {
-        'response': 'stat',
         'text': {
             'stat': [{
                 'count': int,
@@ -133,13 +62,12 @@ class Statistics(Base):
     }
 
     error = {
-        'response': 'stat',
         'text': list
     }
 
 
 
-class Register(Base):
+class Register(ApiBase):
     """Register new account."""
 
     link = 'register/'
@@ -149,9 +77,9 @@ class Register(Base):
     }
 
     returns = {
-        "status": True,
-        "response": "login",
-        "text": {"name": unicode}
+        'status': True,
+        'response': 'login',
+        'text': {'name': unicode}
     }
 
     error = {
@@ -161,34 +89,32 @@ class Register(Base):
     }
 
 
-class Login(Base):
+class Login(ApiBase):
     """Login to site."""
 
     link = 'login/'
-
+    response = 'login'
     params = from_form('anime.forms.User.NotActiveAuthenticationForm')
 
     returns = {
-        "response": "login",
-        "text": {"name": unicode}
+        'text': {'name': unicode}
     }
 
     error = {
-        'response': 'login',
         'text': dict,
     }
 
 
-class Add(Base):
+class Add(ApiBase):
     """Add new record.
     This is a `form` field. It returns form if requested without parameters."""
 
     link = 'add/'
+    response = 'add'
 
     params = from_form('anime.forms.ModelError.AnimeForm')
 
     returns = {
-        'response': 'add',
         'id': int,
     }
 
@@ -204,15 +130,15 @@ class Add(Base):
     }
 
     error = {
-        'response': 'add',
         'text': dict,
     }
 
 
-class Get(Base):
+class Get(ApiBase):
     """Get certain field for record."""
 
     link = 'get/'
+    response = 'get'
 
     params = {
         'field': tuple,
@@ -220,7 +146,6 @@ class Get(Base):
     }
 
     returns = {
-        'response': 'get',
         'id': int,
         'text': CatalogGetTypes()
     }
@@ -229,48 +154,25 @@ class Get(Base):
         All fields errors in response `text` parameter.""")
 
 
-class Search(Base):
+class Search(ApiBase):
     """Search in database.
     Optional `fields` argument can be passed to retrive only certain fields in response."""
 
     link = 'search/'
-    params = from_view('anime.views.ajaxlist.SearchListView')
-
-    returns = {
-        'response': 'search',
-        'text': {
-            'count': int,
-            #FIXME: it different due to fields.
-            'list': FuzzyList([
-                Comment("The fields is differs depends on `fields` parameter. Default:"),
-                {
-                    'id': int,
-                    'title': unicode,
-                    'type': unicode,
-                    'episodes': int,
-                    'release': unicode,
-                    'air': bool,
-            },]),
-            'pages': {
-                'current': int,
-                'start': int,
-                'items': list,
-            }
-        }
-    }
-
+    response = 'search'
+    view = 'anime.views.table.SearchListView'
     error = {
-        'response': 'search',
         'text': list,
     }
 
 
-class Forms(Base):
+class Forms(ApiBase):
     """This API call returns JSON-serialized form for field."""
 
     api_keys = ['state', 'anime', 'links', 'bundle', 'name']
 
     link = 'form/'
+    response = 'form'
 
     params = {
         'id': int,
@@ -279,7 +181,6 @@ class Forms(Base):
     }
 
     returns = NoneableDict({
-        'response': 'form',
         'status': True,
         'id': int,
         'model': unicode,
@@ -308,7 +209,6 @@ class Forms(Base):
     }
 
     error = {
-        'response': 'form',
         'status': False,
         'model': unicode,
         'field': Noneable(unicode),
