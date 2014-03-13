@@ -37,16 +37,12 @@ class CleanTest(object):
                     ret, returns, e))
 
 
-class FFTC(FastFixtureTestCase):
+class FastFixtureCase(CleanTest, FastFixtureTestCase):
     def tearDown(self, fixture_names=[]):
-        super(FFTC, self).tearDown()
+        CleanTest.tearDown(self, fixture_names)
+        FastFixtureTestCase.tearDown(self)
 
-class TC(TestCase):
+class CleanTestCase(CleanTest, TestCase):
     def tearDown(self, fixture_names=[]):
-        super(TC, self).tearDown()
-
-class FastFixtureCase(FFTC, CleanTest):
-    pass
-
-class CleanTestCase(TC, CleanTest):
-    pass
+        CleanTest.tearDown(self, fixture_names)
+        TestCase.tearDown(self)

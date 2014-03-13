@@ -16,6 +16,10 @@ class ApiBase(object):
         if prefix:
             self.link_prefix = prefix
         view = getattr(self, 'view', None)
+        if isinstance(view, basestring):
+            (view_path, view_name) = view.rsplit('.', 1)
+            self.view = view = getattr(
+                __import__(view_path, globals(), {}, [view_name]), view_name)
         if view:
             self.params['text'] = params_from_view(view)
             self.returns['text'] = returns_from_view(view)
@@ -24,6 +28,15 @@ class ApiBase(object):
                 t.setdefault('status', v)
                 t.setdefault('response', self.response)
 
+    def get_cachestr(self, request, args):
+        if not hasattr(self, 'view') or not isinstance(args, dict):
+            return ''
+        instance = self.view()
+        setattr(instance, 'kwargs', {})
+        setattr(instance, 'request', request)
+        instance.check_parameters(instance.request, **args)
+        link = instance.get_link()
+        return instance.get_cachestr(link)
 
     @classmethod
     def __str__(cls):

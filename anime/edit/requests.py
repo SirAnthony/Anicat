@@ -1,7 +1,5 @@
 
-from django.core.cache import cache
-from django.utils.translation import ugettext_lazy as _
-from anime.edit.default import EditError, EditableDefault
+from anime.edit.default import EditableDefault
 from anime.edit.animebased import EditableAnimeBased
 
 
@@ -29,6 +27,3 @@ class Image(Request, EditableAnimeBased):
         obj = self.obj = form.instance
         self.retid = obj.id
         super(Image, self).save(form, obj)
-
-
-

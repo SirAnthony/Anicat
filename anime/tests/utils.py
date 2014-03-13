@@ -106,7 +106,7 @@ class CatalogTest(TestCase):
         settings.DATABASES['default']['ENGINE'] = olddb
 
 
-class ConfitTest(TestCase):
+class ConfigTest(TestCase):
 
     #lol, why?
     def test_random_string(self):

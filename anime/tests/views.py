@@ -16,12 +16,12 @@ from anime.utils.catalog import last_record_pk
 
 
 BLANK_CACHESTR = create_cachestr()
-#'bf21a9e8fbc5a3846fb05b4fa0859e0917b2202f'
 
 
 class AjaxTest(TestCase):
 
     fixtures = ['2trash.json']
+    caches = None
 
     def send_request(self, link, params, returns):
         response = self.client.post(link, params)
@@ -31,20 +31,16 @@ class AjaxTest(TestCase):
 
     @create_user()
     def setUp(self):
+        self.caches = []
         pass
 
     def tearDown(self):
-        searchkey = '38e442f57cd588f5e52f1484b1bc67c480df31ae'
-        cache.delete('ajaxsearch:%s' % searchkey)
-        invalidate_key('search', searchkey)
-        for key in ['47585a4c37e8f7c9845f97099debf576fe46fb92',
-                    '66811e1a68035d2514733b54be7e9fc7e98d5a2e',
-                    '4c2730ba7c3198ec39fadb22988623e2be0dd908',
-                    '8ccbb6ff42daa120dd76e2beec460b282d8ed746']:
+        for key in self.caches:
             invalidate_key('mainTable', key)
             cache.delete('ajaxlist:%s' % key)
             invalidate_key('search', key)
             cache.delete('ajaxsearch:%s' % key)
+            cache.delete('Pages:%s' % key)
         cache.delete('Stat:1')
         super(AjaxTest, self).tearDown()
 
@@ -79,6 +75,7 @@ class AjaxTest(TestCase):
     def test_search(self):
         a = api.Search()
         link = a.get_link()
+        self.caches.extend(a.get_cachestr(fake_request(), {'string': 'b', 'order': 'releasedAt', 'limit': 40, 'page': 1}))
         self.send_request(link, {'string': 'b', 'order': 'releasedAt', 'limit': 40, 'page': 1}, a.returns)
         self.send_request(link, {'string': 'b', 'order': 'releasedAt', 'limit': 40, 'page': 1}, a.returns)
         self.send_request(link, {'string': 'b', 'limit': 'd', 'page': 'f'}, a.error)
@@ -89,6 +86,7 @@ class AjaxTest(TestCase):
     def test_index(self):
         a = api.List()
         link = a.get_link()
+        self.caches.extend(a.get_cachestr(fake_request(), {}))
         self.send_request(link, {}, a.returns)
         self.send_request(link, {'order': 'd'}, a.error)
 
@@ -140,6 +138,9 @@ class AjaxTest(TestCase):
         self.send_request(link, {'releaseType': 1, 'genre': [2, 3],
         'state': 1, 'episodesCount_0': 25, 'episodesCount_2': True,
         'duration_0': 25, 'duration_1': '__gt', 'releasedAt_0': '2.02.2010'}, a.get_returns())
+        aindex = api.List()
+        self.caches.extend(aindex.get_cachestr(
+                fake_request(_session=self.client.session), {}))
         self.client.get(reverse('index'))
         self.send_request(link, {}, a.get_returns())
 
@@ -423,7 +424,7 @@ class AjaxListViewsTest(TestCase):
         super(AjaxListViewsTest, self).tearDown()
 
     def test_SearchListView(self):
-        from anime.views.ajaxlist import SearchListView
+        from anime.views.table import SearchListView
         s = SearchListView()
         s.kwargs = {}
         s.string = None
@@ -453,9 +454,6 @@ class AjaxListViewsTest(TestCase):
                 'string': 'f', 'order': 'releasedAt'})).status_code, 200)
         self.assertEquals(self.client.post(reverse('search', kwargs={
                 'string': ' '})).status_code, 404)
-
-    #~ def test_IndexListView(self):
-        #~ pass
 
 
 

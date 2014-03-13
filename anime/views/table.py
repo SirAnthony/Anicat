@@ -23,8 +23,8 @@ class IndexListView(AnimeAjaxListView):
     cache_name = 'mainTable'
     ajax_cache_name = 'ajaxlist'
     response_name = 'list'
-    fields = [u'air', u'id', u'title', u'episodes', u'release', u'type']
-    ADDITIONAL_FIELDS = [u'rating', u'-rating', u'changed', u'-changed']
+    fields = ['air', 'id', 'title', 'episodes', 'release', 'type']
+    ADDITIONAL_FIELDS = ['rating', '-rating', 'changed', '-changed']
     parameters = [
         ('user', None, 'bad_user'),
         ('status', None, 'bad_status'),
@@ -45,12 +45,14 @@ class IndexListView(AnimeAjaxListView):
         if self.order != self.model._meta.ordering[0]:
             link['order'] = self.order
         link_name = reverse('index', kwargs=link)
-        if self.status is not None:
-            cachestr = u'{0}:{1}{2}'.format(self.user.id, link_name, self.page)
-        else:
-            cachestr = u'{0}{1}'.format(link_name, self.page)
         link['link'] = link_name
-        return link, cachestr
+        return link
+
+    def get_cachestr(self, link):
+        cachestr = link['link']
+        if self.status is not None:
+            cachestr = u'{0}:{1}'.format(self.user.id, cachestr)
+        return self.apply_filter(cachestr, self.page)
 
     def check_additional(self, field):
         return self.status and field in self.ADDITIONAL_FIELDS
@@ -116,32 +118,33 @@ class SearchListView(AnimeAjaxListView):
     ]
 
     def get_link(self):
-        # FIXME: rewrite this
         link = {}
-        string = None
         if self.string is not None:
-            string = self.string
-            link['string'] = sha1(string.encode('utf-8')).hexdigest()
+            link['string'] = self.string
         if self.order != u'title':
             link['order'] = self.order
         if self.paginate_by != settings.SEARCH_PAGE_LIMIT:
             link['limit'] = self.paginate_by
-        hashed_link_name = reverse('search', kwargs=link)
-        cachestr = u'{0}{1}'.format(hashed_link_name, self.page)
-        if self.fields:
-            cachestr = sha1(cachestr + str(self.fields)).hexdigest()
+        link['link'] = reverse('search', kwargs=link)
+        return link
+
+    def get_cachestr(self, link):
+        string = link.get('string')
+        cachestr = link['link']
         if string:
+            link['string'] = sha1(string.encode('utf-8')).hexdigest()
+            link_string = link.pop('link')
+            cachestr = reverse('search', kwargs=link)
             link['string'] = string
-            link['link'] = reverse('search', kwargs=link)
-        else:
-            link['link'] = hashed_link_name
-        return link, cachestr
+            link['link'] = link_string
+        cachestr = sha1(cachestr + str(self.fields)).hexdigest()
+        return self.apply_filter(cachestr, self.page)
 
     def check_fields(self, request, fields):
         fields = request.POST.getlist('fields') or self.fields
-        tfields = self.trusted_fields
+        trusted = self.trusted_fields
         for field in fields:
-            if field not in tfields:
+            if field not in trusted:
                 self.check_field(self.model, field)
         return fields
 

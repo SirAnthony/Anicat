@@ -6,13 +6,12 @@ import mimetypes
 import xml.dom.minidom as xmlp
 
 from datetime import datetime
-from django.core.cache import cache
 from django.conf import settings
 from django.db.models import Q
 
-from anime.models import AnimeLink, AnimeName, UserStatusBundle, USER_STATUS
+from anime.models import AnimeLink, AnimeName, UserStatusBundle
+from anime.utils import cache
 from anime.utils.cache import invalidate_key
-
 
 
 MAL_STATUS = [
@@ -187,11 +186,11 @@ def addToCache(user, anime_list):
             anime_list[key] = p
     lastload = {'list': anime_list, 'date': datetime.now()}
     invalidate_key('malList', user.id)
-    cache.set('MalList:%s' % user.id, lastload)
+    cache.cset('MalList:%s' % user.id, lastload)
 
 
 def passFile(file, user, rewrite=True):
-    cache.set('MalList:%s' % user.id,
+    cache.cset('MalList:%s' % user.id,
             {'list': {'updated': 1}, 'date': datetime.now()}, 1800)
     filename = os.path.join(settings.MEDIA_ROOT, str(file.size) + file.name)
     if os.path.exists(filename):

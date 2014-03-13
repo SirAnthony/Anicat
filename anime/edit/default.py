@@ -1,13 +1,13 @@
 
 from datetime import datetime
 from django.conf import settings
-from django.core.cache import cache
 from django.db.models.fields import FieldDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 
 from anime.core.explorer import FieldExplorer, GetError
 from anime.forms.create import createFormFromModel
 from anime.models import AnimeItem, EDIT_MODELS
+from anime.utils import cache
 
 
 class EditError(Exception):

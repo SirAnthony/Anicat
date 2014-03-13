@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.core import paginator
-from django.core.cache import cache
 from django.db.models.query import QuerySet
+from anime.utils import cache
+
 
 class Paginator(paginator.Paginator):
 
@@ -43,7 +44,7 @@ class Paginator(paginator.Paginator):
             if not names:
                 names = list(self.iternames())
                 if cachekey is not None:
-                    cache.set('Pages:%s' % cachekey, names)
+                    cache.cset('Pages:%s' % cachekey, names)
             self.names = names
         return self.names
 

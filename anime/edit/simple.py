@@ -1,8 +1,7 @@
 
-from django.core.cache import cache
+from anime.utils import cache
 from django.utils.translation import ugettext_lazy as _
 
-from anime.core.explorer import FieldExplorer, GetError
 from anime.edit.default import EditableDefault, EditError
 from anime.models import AnimeItem, USER_STATUS
 

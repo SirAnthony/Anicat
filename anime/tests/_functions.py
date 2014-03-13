@@ -1,8 +1,10 @@
 import datetime
 
+from django.conf import settings
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
+from django.utils.importlib import import_module
 
 from hashlib import sha1
 
@@ -23,6 +25,7 @@ def login(u=None, pwd=None):
             params = {'username': u or user, 'password': pwd or passwd}
             self.assertEquals(self.client.post('/login/', params).status_code, 302)
             f(self, *args, **kwargs)
+        d_login.__name__ = f.__name__
         return d_login
     return wrap
 
@@ -44,7 +47,12 @@ def fake_request(*args, **kwargs):
         args = ['']
     request = request_factory.post(*args, **kwargs)
     request.user = user
-    request.session = {}
+    engine = import_module(settings.SESSION_ENGINE)
+    session = kwargs.pop('_session', None)
+    if not session:
+        session_key = None
+        session = engine.SessionStore(session_key)
+    request.session = session
     return request
 
 def create_cachestr(link='', link_data={}, page=1, data={}):

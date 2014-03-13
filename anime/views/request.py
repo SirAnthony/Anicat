@@ -31,10 +31,11 @@ class RequestsListView(AnimeListView):
             link['status'] = self.status
         if self.rtype is not None:
             link['rtype'] = self.rtype
-        link_name = reverse('requests', kwargs=link)
-        cachestr = '%s%s' % (link_name, self.page)
-        link['link'] = link_name
-        return link, cachestr
+        link['link'] = reverse('requests', kwargs=link)
+        return link
+
+    def get_cachestr(self, link):
+        return self.apply_filter(link['link'], self.page)
 
     def check_status(self, request, status):
         if status is not None:

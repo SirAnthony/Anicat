@@ -3,7 +3,7 @@ import hashlib
 from datetime import datetime
 from django.core.cache import cache
 from django.utils.http import urlquote
-from anime.models import ( AnimeBundle, AnimeItem, AnimeName,
+from anime.models import ( AnimeItem, AnimeName,
                         UserStatusBundle, AnimeRequest, HISTORY_MODELS)
 from anime.utils.misc import is_iterator
 
@@ -25,6 +25,9 @@ get = cache.get
 cset = cache.set
 delete = cache.delete
 
+# def cset(string, *args, **kwargs):
+#     print string
+#     cache.set(string, *args, **kwargs)
 
 def latest(t, cachestr, keys={}):
     '''Return True if date is greater than last_change
@@ -79,7 +82,7 @@ def get_named_cache(name):
 def update_named_cache(name):
     date = datetime.now()
     if type(name) in (list, tuple):
-        c = cache.set_many(dict([(x, date) for x in name]), 0)
+        cache.set_many(dict([(x, date) for x in name]), 0)
     else:
         cset(name, date, 0)
     return date

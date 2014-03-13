@@ -28,16 +28,16 @@ class AnimeListView(TemplateResponseMixin, BaseListView, ParametrizedView):
         return self._filter.get_queryset(queryset)
 
     def get_context_data(self, **kwargs):
-        (link, cachestr) = self.get_link()
-        cachestr = self._filter.get_cachestring(cachestr)
+        link = self.get_link()
+        cachestr, pcachestr = self.get_cachestr(link)
         context = {'cachestr': cachestr, 'link': link}
         if self.updated(cachestr):
-            context.update(self.create_context_data(cachestr, link, **kwargs))
+            context.update(self.create_context_data(pcachestr, link, **kwargs))
             cache.update_named_cache(cachestr)
             cache.clean_cache(self.cache_name, cachestr)
         return context
 
-    def create_context_data(self, cachestr, link, **kwargs):
+    def create_context_data(self, pages_cachestr, link, **kwargs):
         queryset = kwargs.pop('object_list', self.object_list)
         page_size = self.get_paginate_by(queryset)
         paginator = None
@@ -49,7 +49,7 @@ class AnimeListView(TemplateResponseMixin, BaseListView, ParametrizedView):
         if page_size:
             paginator, page, queryset, is_paginated = self.paginate_queryset(queryset, page_size)
             paginator.set_order(self.order)
-            paginator.set_cachekey(self._filter.get_cachestring(link['link']))
+            paginator.set_cachekey(pages_cachestr)
             pages = paginator.get_pages(self.pages_numeric)
             context['pages'].update({
                 'current': page.number,
@@ -72,7 +72,15 @@ class AnimeListView(TemplateResponseMixin, BaseListView, ParametrizedView):
         return self._listfilter
     _filter = property(get_filter)
 
+    def apply_filter(self, cachestr, page):
+        cachestr = self._filter.get_cachestring(cachestr)
+        return cachestr, '{0}{1}'.format(cachestr, page)
+
     def get_link(self):
+        "Implementation in subclasses"
+        raise NotImplementedError
+
+    def get_cachestr(self, link):
         "Implementation in subclasses"
         raise NotImplementedError
 
@@ -100,11 +108,11 @@ class AnimeAjaxListView(AnimeListView):
         }
 
     def get_context_data(self, **kwargs):
-        (link, cachestr) = self.get_link()
-        cachestr = self._filter.get_cachestring(cachestr)
+        link = self.get_link()
+        cachestr, pcachestr = self.get_cachestr(link)
         context = {'link': link}
         if self.updated(cachestr):
-            context.update(self.create_context_data(cachestr, link, **kwargs))
+            context.update(self.create_context_data(pcachestr, link, **kwargs))
             cache.clean_cache(self.cache_name, cachestr)
             if not self.ajax_call:
                 cache.update_named_cache(cachestr)

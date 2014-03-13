@@ -45,11 +45,12 @@ class HistoryListView(AnimeAjaxListView):
             link['status'] = self.status
         if self.order != self.default_order:
             link['order'] = self.order
-        link_name = reverse('history', kwargs=link)
-        cachestr = u'{0}:{1}{2}'.format(self.current_user.is_staff,
-                                            link_name, self.page)
-        link['link'] = link_name
-        return link, cachestr
+        link['link'] = reverse('history', kwargs=link)
+        return link
+
+    def get_cachestr(self, link):
+        cachestr = u'{0}:{1}'.format(self.current_user.is_staff, link['link'])
+        return self.apply_filter(cachestr, self.page)
 
     def check_model(self, request, model):
         if not model in HISTORY_MODELS:
