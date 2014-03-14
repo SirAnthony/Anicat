@@ -34,9 +34,6 @@ class RequestsListView(AnimeListView):
         link['link'] = reverse('requests', kwargs=link)
         return link
 
-    def get_cachestr(self, link):
-        return self.apply_filter(link['link'], self.page)
-
     def check_status(self, request, status):
         if status is not None:
             REQUEST_STATUS[int(status)]

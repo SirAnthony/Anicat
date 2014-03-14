@@ -74,15 +74,14 @@ class AnimeListView(TemplateResponseMixin, BaseListView, ParametrizedView):
 
     def apply_filter(self, cachestr, page):
         cachestr = self._filter.get_cachestring(cachestr)
-        return cachestr, '{0}{1}'.format(cachestr, page)
+        return '{0}{1}'.format(cachestr, page), cachestr
 
     def get_link(self):
         "Implementation in subclasses"
         raise NotImplementedError
 
     def get_cachestr(self, link):
-        "Implementation in subclasses"
-        raise NotImplementedError
+        return self.apply_filter(link.get('link', ''), getattr(self, 'page', 1))
 
     def get(self, request, *args, **kwargs):
         self.check_parameters(request, *args, **kwargs)

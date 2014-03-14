@@ -17,7 +17,7 @@
 # from anime.tests.orphans import UploadTest
 # from anime.tests.javascript import JSLightTests, JSHardTests
 
-from anime.tests.views import AjaxTest
+from anime.tests.views import ListViewsTest
 
 #import * - bad
 

@@ -35,12 +35,6 @@ class AjaxTest(TestCase):
         pass
 
     def tearDown(self):
-        for key in self.caches:
-            invalidate_key('mainTable', key)
-            cache.delete('ajaxlist:%s' % key)
-            invalidate_key('search', key)
-            cache.delete('ajaxsearch:%s' % key)
-            cache.delete('Pages:%s' % key)
         cache.delete('Stat:1')
         super(AjaxTest, self).tearDown()
 
@@ -164,12 +158,12 @@ class UserViewsTest(TestCase):
 
     def tearDown(self):
         cache.delete('Stat:1')
+        cache.delete('lastuserbundle:1')
         cache.delete('lastuserbundle:2')
         cache.delete('statusexportdata:1')
         cache.delete('userCss:1')
-        key = '66811e1a68035d2514733b54be7e9fc7e98d5a2e',
-        invalidate_key('mainTable', key)
-        cache.delete('ajaxlist:%s' % key)
+        a = api.List()
+        self.caches = a.get_cachestr(fake_request(_session=self.client.session), {})
         super(UserViewsTest, self).tearDown()
 
     @login()
@@ -223,6 +217,8 @@ class EditViewsTest(TestCase):
         pass
 
     def tearDown(self):
+        cache.delete('card:1')
+        cache.delete('card:3')
         super(EditViewsTest, self).tearDown(self.fixtures + ['requests.json'])
 
     @login()
@@ -263,22 +259,27 @@ class EditViewsRequestsTest(TestCase):
 
     @create_user()
     def setUp(self):
-        pass
+        self.caches = []
 
     def tearDown(self):
-        # FIXME: This string obtained by watching of cache calls.
-        # TODO: Reverse this and make it dinamic
-        for cname in ['e5cfc2c10ac18b2f0befdbb54f0e23247fdc333e',
-                      'dfc48f25b896dd05ae8caed9f05280464100f0e3']:
-            invalidate_key('requests', cname)
-            cache.delete(cname)
         super(EditViewsRequestsTest, self).tearDown()
 
     @login()
     def test_requests_page(self):
+        # add caches
+        from anime.views.request import RequestsListView
+        from anime.api.base import ApiBase
+        a = ApiBase()
+        ApiBase.view = RequestsListView
+
         self.assertEquals(self.client.get(reverse('requests')).status_code, 200)
+        self.caches.extend(a.get_cachestr(fake_request(_session=self.client.session), {}))
+
         self.assertEquals(self.client.get(reverse('requests',
                 kwargs={'status': 1, 'rtype': 1, 'page': 1})).status_code, 200)
+        self.caches.extend(a.get_cachestr(fake_request(_session=self.client.session),
+                        {'status': 1, 'rtype': 1, 'page': 1}))
+
         self.assertEquals(self.client.get(reverse('requests', kwargs={
                             'status': 900})).status_code, 404)
         self.assertEquals(self.client.get(reverse('requests', kwargs={
@@ -328,13 +329,12 @@ class BaseViewsNoFixturesTest(TestCase):
 class ClassesViewsTest(TestCase):
 
     def tearDown(self):
-        cache.delete(BLANK_CACHESTR)
-        cache.delete('listtest:%s' % BLANK_CACHESTR)
-        cache.delete('ajaxtest:%s' % BLANK_CACHESTR)
+        self.caches = [BLANK_CACHESTR]
+        cache.delete(':{0}'.format(BLANK_CACHESTR))
         super(ClassesViewsTest, self).tearDown(['2trash.json'])
 
-    def blank(*args, **kwargs):
-        return '', ''
+    def link(*args, **kwargs):
+        return {}
 
     def test_AnimeListView(self):
         from anime.views.classes import AnimeListView
@@ -342,12 +342,11 @@ class ClassesViewsTest(TestCase):
         v.cache_name = 'listtest'
         v.request = fake_request()
         self.assertRaises(NotImplementedError, v.get_link)
-        self.assertRaises(NotImplementedError, v.check_parameters, None)
-        v.get_link = self.blank
-        v.check_parameters = self.blank
+        v.get_link = self.link
         v.cache_name = ''
         self.assertEquals(v.get_context_data(object_list=None),
-                {'list': None, 'link': '', 'pages': {}, 'cachestr': BLANK_CACHESTR})
+                {'list': None, 'head': None, 'link': {}, 'pages': {},
+                'cachestr': BLANK_CACHESTR})
 
     def test_AnimeAjaxListView(self):
         from anime.views.classes import AnimeAjaxListView
@@ -358,13 +357,12 @@ class ClassesViewsTest(TestCase):
         self.assertRaises(NotImplementedError, v.post, None)
         v.cache_name = ''
         v.ajax_cache_name = ''
-        cache.delete(':')
         self.assertEquals(v.updated(''), True)
         v.ajax_call = False
-        v.get_link = self.blank
-        v.check_parameters = self.blank
+        v.get_link = self.link
+        v.check_parameters = self.link
         self.assertEquals(v.get_context_data(object_list=None),
-                {'list': None, 'head': None, 'link': '', 'pages': {},
+                {'list': None, 'head': None, 'link': {}, 'pages': {},
                 'cachestr': BLANK_CACHESTR})
 
     #~ def test_filter(self):
@@ -375,24 +373,34 @@ class ListViewsTest(TestCase):
 
     fixtures = ['2trash.json']
 
+    def setUp(self):
+        self.caches = []
+
     def tearDown(self):
-        for cname in ['66811e1a68035d2514733b54be7e9fc7e98d5a2e',
-                      '78a6a1ecae85ccea08dc9390082d2f570f743c9f',
-                      '517cd1330ed1f76505e1f948bcb86557e4e9d451',
-                      '8c78f52585d20cfc2eaca1329c371e8ea5782a3e']:
-            invalidate_key('mainTable', cname)
-            cache.delete('ajaxlist:%s' % cname)
+        # for cname in ['66811e1a68035d2514733b54be7e9fc7e98d5a2e',
+        #               '78a6a1ecae85ccea08dc9390082d2f570f743c9f',
+        #               '517cd1330ed1f76505e1f948bcb86557e4e9d451',
+        #               '8c78f52585d20cfc2eaca1329c371e8ea5782a3e']:
+        #     invalidate_key('mainTable', cname)
+        #     cache.delete('ajaxlist:%s' % cname)
         cache.delete('lastuserbundle:1')
         cache.delete('lastuserbundle:2')
+        cache.delete('userstatus:1:0')
         super(ListViewsTest, self).tearDown()
 
     @create_user()
     @create_user('2')
     @login()
     def test_IndexListView(self):
+        a = api.List()
+        self.caches.extend(a.get_cachestr(fake_request(_session=self.client.session), {}))
         self.assertEquals(self.client.get(reverse('index')).status_code, 200)
+        self.caches.extend(a.get_cachestr(fake_request(_session=self.client.session), {
+                'status': 0, 'order': 'releasedAt'}))
         self.assertEquals(self.client.get(reverse('index', kwargs={
                 'status': 0, 'order': 'releasedAt'})).status_code, 200)
+        self.caches.extend(a.get_cachestr(fake_request(_session=self.client.session), {
+                'user': 2, 'status': 1}))
         self.assertEquals(self.client.get(reverse('index', kwargs={
                 'user': 2, 'status': 1})).status_code, 200)
         self.assertEquals(self.client.get(reverse('index', kwargs={
@@ -402,14 +410,18 @@ class ListViewsTest(TestCase):
         self.client.logout()
         self.assertEquals(self.client.get(reverse('index', kwargs={
                             'status': 0})).status_code, 200)
+        self.caches.extend(a.get_cachestr(fake_request(_session=self.client.session), {
+                            'status': 0}))
 
     @create_user()
     def test_IndexListView_cache(self):
-        cache.delete('userstatus:1:0')
+        a = api.List()
         self.assertEquals(self.client.get(reverse('index', kwargs={
                 'user': 1, 'status': 0})).status_code, 200)
         self.assertEquals(self.client.get(reverse('index', kwargs={
                 'user': 1, 'status': 0})).status_code, 200)
+        self.caches.extend(a.get_cachestr(fake_request(_session=self.client.session), {
+                'user': 1, 'status': 0}))
 
 
 class AjaxListViewsTest(TestCase):

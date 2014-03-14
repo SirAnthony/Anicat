@@ -3,6 +3,7 @@ from django.test import TestCase
 from django_nose import FastFixtureTestCase
 from anime.tests._functions import check_response
 from anime.utils import cache
+from anime.utils.cache import invalidate_key
 
 
 FIXTURES_MAP = {
@@ -28,6 +29,20 @@ class CleanTest(object):
                 for i in range(1, v+1):
                     cache.delete('{0}:{1}'.format(k, i))
                 cache.delete(k)
+        caches = getattr(self, 'caches', None)
+        if caches:
+            for key in caches:
+                invalidate_key('mainTable', key)
+                invalidate_key('search', key)
+                invalidate_key('requests', key)
+                cache.delete('ajaxlist:%s' % key)
+                cache.delete('ajaxsearch:%s' % key)
+                cache.delete('Pages:%s' % key)
+                cache.delete(key)
+        invalidate_key('footer', True)
+        invalidate_key('footer', False)
+        session = self.client.session.get('session_key')
+        invalidate_key('filter', session)
 
     def check_response(self, ret, returns):
         try:

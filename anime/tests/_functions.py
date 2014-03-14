@@ -37,6 +37,7 @@ def create_user(u=None, e=None, p=None, lng=False):
             us.date_joined = datetime.date.today() - datetime.timedelta(20)
             us.save()
             f(self, *args, **kwargs)
+        d_create.__name__ = f.__name__
         return d_create
     return wrap
 
@@ -57,9 +58,9 @@ def fake_request(*args, **kwargs):
 
 def create_cachestr(link='', link_data={}, page=1, data={}):
     if link:
-        link = "{0}{1}".format(reverse(link, kwargs=link_data), page)
-    string = link + str(data)
-    return sha1(string).hexdigest()
+        link = reverse(link, kwargs=link_data)
+    string = "{0}{1}".format(link, str(data))
+    return sha1(string).hexdigest() + str(page)
 
 def hexdigest(string):
     return sha1(string.encode('utf-8')).hexdigest()
