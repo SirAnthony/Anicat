@@ -1,0 +1,324 @@
+API reference.
+Notes:
+    Ajax requests must be POST, sent to /api/$target.
+    Response is a json structure with 3 mandatory fields:
+        response - string, type of response,
+        status - bool, result of request process,
+        data - different, body of response.
+
+Search:
+    Search in database.
+    Optional `fields` argument can be passed to retrive only certain fields in response.
+    Request target: /api/search/
+    Request params:
+        data:
+            fields: list or nothing. Default: ['air', 'id', 'title', 'episodes', 'release', 'type'],
+            page: int or nothing. Default: 1,
+            limit: int or nothing. Default: 20,
+            string: str,
+            order: str or nothing. Default: title
+    Response object:
+        status: True,
+        data:
+            head: [
+                This list may have variable items count. All items have the same structure
+                "air"
+                "id"
+                "title"
+                "episodes"
+                "release"
+                "type"
+                ],
+            list: list,
+            pages:
+                current: int,
+                start: int,
+                count: int,
+                items: list,
+        response: "search"
+    Error object:
+        status: False,
+        data: list,
+        response: "search"
+
+List:
+    Get main list as JSON-object.
+    Request target: /api/list/
+    Request params:
+        data:
+            status: int or nothing. Default: All statuses,
+            page: int or nothing. Default: 1,
+            user: int or nothing. Default: Current user,
+            order: str or nothing. Default: title
+    Response object:
+        status: True,
+        data:
+            head: [
+                This list may have variable items count. All items have the same structure
+                "air"
+                "id"
+                "title"
+                "episodes"
+                "release"
+                "type"
+                ],
+            list: list,
+            pages:
+                current: int,
+                start: int,
+                count: int,
+                items: list,
+        response: "search"
+    Error object:
+        status: False,
+        data: list,
+        response: "list"
+
+Get:
+    Get certain field for record.
+    Request target: /api/get/
+    Request params:
+        field: tuple,
+        id: int
+    Response object:
+        status: True,
+        data:
+            This dictionary may have one or many keys/values from bellow. Order of fields in "order" named list:
+                episodesCount: int,
+                name: [
+                    This list may have variable items count. All items have the same structure
+                    unicode
+                    ],
+                links:
+                    ANN: [
+                        This list may have variable items count. All items have the same structure
+                        unicode
+                        ],
+                    Wikipedia: [
+                        This list may have variable items count. All items have the same structure
+                        unicode
+                        ],
+                    AniDB: [
+                        This list may have variable items count. All items have the same structure
+                        unicode
+                        ],
+                    MAL: [
+                        This list may have variable items count. All items have the same structure
+                        unicode
+                        ],
+                    Other: [
+                        This list may have variable items count. All items have the same structure
+                        unicode
+                        ],
+                    Official page: [
+                        This list may have variable items count. All items have the same structure
+                        unicode
+                        ],
+                title: unicode,
+                duration: int,
+                bundle:
+                    bundles: [
+                        This list may have variable items count. All items have the same structure
+                            id: int,
+                            title: unicode
+                        ],
+                    id: int,
+                air: bool,
+                genre: unicode,
+                state:
+                    state: int,
+                    select:
+                        1: "Want",
+                        0: "None",
+                        3: "Done",
+                        2: "Now",
+                        5: "Partially watched",
+                        4: "Dropped",
+                release: unicode,
+                order: tuple,
+                type: unicode,
+                id: int,
+        id: int,
+        response: "get"
+    Error object:
+        No global errors for the get rerquest.
+        All fields errors in response `data` parameter.
+
+Statistics:
+    User statisics.
+    Returns statistics for curren user if `user_id` is not set.
+    Request target: /api/stat/
+    Request params:
+        user_id: int or nothing
+    Response object:
+        status: True,
+        data:
+            stat: [
+                    count: int,
+                    anime__duration: int or nothing,
+                    full: int or nothing,
+                    name: unicode,
+                    anime__episodesCount: int or nothing,
+                    custom: int or nothing
+                ],
+            userid: int,
+        response: "stat"
+    Error object:
+        status: False,
+        data: list,
+        response: "stat"
+
+Filter:
+    Apply filter to site output.
+    Request target: /api/filter/
+    Request params:
+        releasedAt: datetime or unicode,
+        endedAt: datetime or unicode,
+        episodesCount_1: int or nothing,
+        episodesCount_0: int,
+        episodesCount_2: bool or nothing,
+        releaseType: list,
+        state: list,
+        duration_2: bool or nothing,
+        duration_1: int or nothing,
+        duration_0: int,
+        genre: list
+    Response object:
+        status: True,
+        data:
+            head: [
+                This list may have variable items count. All items have the same structure
+                "air"
+                "id"
+                "title"
+                "episodes"
+                "release"
+                "type"
+                ],
+            list: list,
+            pages:
+                current: int,
+                start: int,
+                count: int,
+                items: list,
+        response: "search"
+    Error object:
+        status: False,
+        data: dict,
+        response: "filter"
+
+Login:
+    Login to site.
+    Request target: /api/login/
+    Request params:
+        username: unicode,
+        password: unicode
+    Response object:
+        status: True,
+        data:
+            name: unicode,
+        response: "login"
+    Error object:
+        status: False,
+        data: dict,
+        response: "login"
+
+Forms:
+    This API call returns JSON-serialized form for field.
+    Request target: /api/form/
+    Request params:
+        field: unicode or nothing,
+        model: unicode,
+        id: int
+    Response object:
+        status: True,
+        field: unicode or nothing,
+        model: unicode,
+        id: int,
+        form: [
+            This data is serialised form fields list. Field types:
+                bundle: [
+                    {'input': {'id': 'id_Bundle 0', 'name': 'Bundle 0', 'value': unicode or nothing, 'label': Bundle 0}}
+                    {'input': {'id': 'id_Bundle 1', 'name': 'Bundle 1', 'value': unicode or nothing, 'label': Bundle 1}}
+                    ],
+                state: {'select': {'name': 'state', 'choices': [(0, u'None'), (1, u'Want'), (2, u'Now'), (3, u'Done'), (4, u'Dropped'), (5, u'Partially watched')], 'id': 'id_state', 'value': int or nothing, 'label': State}},
+                anime:
+                    releasedAt: {'input': {'id': 'id_releasedAt', 'name': 'releasedAt', 'value': date or nothing, 'label': Released}},
+                    episodesCount: {'input': {'id': 'id_episodesCount', 'name': 'episodesCount', 'value': int or nothing, 'label': EpisodesCount}},
+                    endedAt: {'input': {'id': 'id_endedAt', 'name': 'endedAt', 'value': date or nothing, 'label': Ended}},
+                    title: {'input': {'id': 'id_title', 'name': 'title', 'value': unicode or nothing, 'label': Title}},
+                    releaseType: {'select': {'name': 'releaseType', 'choices': [(0, u'TV'), (1, u'Movie'), (2, u'OAV'), (3, u'TV-Sp'), (4, u'SMovie'), (5, u'ONA'), (6, u'AMV'), (7, u'Other')], 'id': 'id_releaseType', 'value': int or nothing, 'label': ReleaseType}},
+                    air: {'input': {'id': 'id_air', 'name': 'air', 'value': unicode or nothing, 'label': Air}},
+                    duration: {'input': {'id': 'id_duration', 'name': 'duration', 'value': int or nothing, 'label': Duration}},
+                links: [
+                    {'input': {'id': 'id_Link 0', 'name': 'Link 0', 'value': unicode or nothing, 'label': Link 0}}
+                    {'select': {'name': 'Link type 0', 'choices': [(0, u'Auto'), (1, u'AniDB'), (2, u'ANN'), (3, u'MAL'), (4, u'Wikipedia'), (6, u'Official page'), (15, u'Other')], 'id': 'id_Link type 0', 'value': int or nothing, 'label': Link type 0}}
+                    ],
+                name: [
+                    {'input': {'id': 'id_Name 0', 'name': 'Name 0', 'value': unicode or nothing, 'label': Name 0}}
+                    {'input': {'id': 'id_Name 1', 'name': 'Name 1', 'value': unicode or nothing, 'label': Name 1}}
+                    ]
+            ]
+    Error object:
+        status: False,
+        data: unicode,
+        id: unicode,
+        field: unicode or nothing,
+        model: unicode,
+        response: "form"
+
+Add:
+    Add new record.
+    This is a `form` field. It returns form if requested without parameters.
+    Request target: /api/add/
+    Request params:
+        releasedAt: datetime or unicode,
+        genre: list,
+        episodesCount: int,
+        endedAt: datetime or unicode,
+        title: unicode,
+        duration: int,
+        releaseType: int
+    Response without arguments:
+        releasedAt: {'input': {'id': 'id_releasedAt', 'name': 'releasedAt', 'value': date or nothing, 'label': ReleasedAt}},
+        genre: [
+            {'input': {'id': 'id_genre', 'name': 'genre', 'value': int or nothing, 'label': Genre}}
+            {'input': {'id': 'id_genre', 'name': 'genre', 'value': int or nothing, 'label': Genre}}
+            ],
+        episodesCount: {'input': {'id': 'id_episodesCount', 'name': 'episodesCount', 'value': int or nothing, 'label': EpisodesCount}},
+        endedAt: {'input': {'id': 'id_endedAt', 'name': 'endedAt', 'value': date or nothing, 'label': EndedAt}},
+        title: {'input': {'id': 'id_title', 'name': 'title', 'value': unicode or nothing, 'label': Title}},
+        duration: {'input': {'id': 'id_duration', 'name': 'duration', 'value': int or nothing, 'label': Duration}},
+        releaseType: {'select': {'name': 'releaseType', 'choices': [(0, u'TV'), (1, u'Movie'), (2, u'OAV'), (3, u'TV-Sp'), (4, u'SMovie'), (5, u'ONA'), (6, u'AMV'), (7, u'Other')], 'id': 'id_releaseType', 'value': int or nothing, 'label': ReleaseType}},
+        air: {'input': {'id': 'id_air', 'name': 'air', 'value': bool or nothing, 'label': Air}}
+    Response object:
+        status: True,
+        id: int,
+        response: "add"
+    Error object:
+        status: False,
+        data: dict,
+        response: "add"
+
+Set:
+    Change field.
+    Request target: /api/set/
+    Request params:
+        field: unicode or nothing,
+        model: unicode,
+        id: int
+    Response object:
+        status: True,
+        field: unicode or nothing,
+        data: dict,
+        model: unicode,
+        id: int,
+        response: "edit"
+    Error object:
+        status: False,
+        data: dict,
+        id: int,
+        field: unicode or nothing,
+        model: unicode,
+        response: "form"
+

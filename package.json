@@ -1,0 +1,24 @@
+{
+  "name": "anicat",
+  "version": "4.0.0",
+  "description": "Anime catatlog",
+  "main": "catalog/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SirAnthony/Anicat.git"
+  },
+  "author": "Sir Anthony",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/SirAnthony/Anicat/issues"
+  },
+  "homepage": "https://github.com/SirAnthony/Anicat#readme",
+  "dependencies": {
+    "express": "^4.13.3",
+    "mongodb": "^2.0.49",
+    "nunjucks": "^2.2.0"
+  }
+}
