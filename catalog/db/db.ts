@@ -25,19 +25,6 @@ function promise(db, method){
     };
 }
 
-
-E.find_one = function(db, selector, sort){
-    selector = selector||{};
-    var opt = {sort: sort};
-    return promise(db, 'findOne', [selector, opt]);
-    return new Promise((res, rej) => {
-        console.debug('mongodb.findOne '+db.name+' '+
-            JSON.stringify(selector));
-        mongodb.findOne(selector, opt,
-            check_err('findOne', db, rej, res));
-    });
-};
-
 E.find_all = function(db, selector, opt){
     selector = selector||{};
     opt = opt||{};
@@ -56,19 +43,17 @@ E.find_all = function(db, selector, opt){
     };
 };
 
-E.save = function(db, obj){
-    return new Promise((res, rej) => {
-        db.collection.save(obj,
-            check_err('save', db, rej, res, obj));
-    };
+E.find_one = function(db, selector, sort){
+    selector = selector||{};
+    var opt = {sort: sort};
+    return promise(db, 'findOne', selector, opt);
 };
 
+E.save = function(db, obj){
+    return promise(db, 'save', obj); };
+
 E.insert = function(db, obj){
-    return new Promise((res, rej) => {
-        db.collection.insert(obj,
-            check_err('insert', db, rej, res, obj));
-    };
-};
+    return promise(db, 'insert', obj); };
 
 E.connect = function(conn, db_name, collection){
     var timeout = 90000;
