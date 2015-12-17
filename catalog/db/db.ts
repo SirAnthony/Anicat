@@ -1,4 +1,4 @@
-import * from mongodb
+import * as mongodb from mongodb
 
 var env = process.env;
 export var E = {};
